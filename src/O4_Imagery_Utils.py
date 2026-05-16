@@ -1,4 +1,5 @@
 import ast
+from dataclasses import dataclass
 import importlib
 import io
 import os
@@ -90,6 +91,270 @@ combined_providers_dict: dict[str, Any] = {}
 local_combined_providers_dict: dict[str, Any] = {}
 extents_dict: dict[str, dict[str, Any]] = {"global": {"dir": None, "code": "global"}}
 color_filters_dict: dict[str, Any] = {"none": []}
+
+
+################################################################################
+@dataclass(frozen=True)
+class ProviderFieldSchema:
+    value_type: str
+    allowed_values: tuple[str, ...] = ()
+    alias_for: str | None = None
+
+
+@dataclass(frozen=True)
+class ProviderValidationIssue:
+    provider_code: str
+    source_path: Path
+    field: str
+    message: str
+    line_number: int | None = None
+    is_error: bool = True
+
+    def __str__(self):
+        location = str(self.source_path)
+        if self.line_number is not None:
+            location += f":{self.line_number}"
+        level = "error" if self.is_error else "warning"
+        return (
+            f"{location}: provider {self.provider_code}: {level}: "
+            f"{self.field}: {self.message}"
+        )
+
+
+PROVIDER_DEFINITION_FORMAT = "legacy .lay key=value"
+PROVIDER_FIELD_SCHEMA = {
+    "request_type": ProviderFieldSchema(
+        "enum", allowed_values=("wms", "wmts", "tms", "local_tms")
+    ),
+    "grid_type": ProviderFieldSchema("enum", allowed_values=("webmercator",)),
+    "fake_headers": ProviderFieldSchema("headers"),
+    "epsg_code": ProviderFieldSchema("epsg"),
+    "in_GUI": ProviderFieldSchema("bool"),
+    "image_type": ProviderFieldSchema("string"),
+    "url_prefix": ProviderFieldSchema("string"),
+    "url_template": ProviderFieldSchema("string"),
+    "layers": ProviderFieldSchema("string"),
+    "wms_size": ProviderFieldSchema("size"),
+    "tile_size": ProviderFieldSchema("size"),
+    "wms_version": ProviderFieldSchema("version"),
+    "wmts_version": ProviderFieldSchema("version"),
+    "top_left_corner": ProviderFieldSchema("float-pair"),
+    "scaledenominator": ProviderFieldSchema("float-list"),
+    "tilematrixset": ProviderFieldSchema("string"),
+    "resolutions": ProviderFieldSchema("float-list"),
+    "max_threads": ProviderFieldSchema("int"),
+    "max_zl": ProviderFieldSchema("int"),
+    "extent": ProviderFieldSchema("string"),
+    "color_filters": ProviderFieldSchema("color-filters"),
+    "color_filter": ProviderFieldSchema("color-filters", alias_for="color_filters"),
+    "imagery_dir": ProviderFieldSchema(
+        "enum", allowed_values=("grouped", "normal", "code")
+    ),
+}
+
+
+def _provider_issue(
+    provider_code,
+    source_path,
+    field,
+    message,
+    line_number=None,
+    is_error=True,
+):
+    return ProviderValidationIssue(
+        provider_code=provider_code,
+        source_path=Path(source_path),
+        field=field,
+        message=message,
+        line_number=line_number,
+        is_error=is_error,
+    )
+
+
+def _print_provider_issues(issues):
+    for issue in issues:
+        UI.vprint(0, str(issue))
+
+
+def _strip_provider_comment(line):
+    line = line.strip()
+    if not line:
+        return ""
+    if "#" in line:
+        if line.startswith("#"):
+            return ""
+        line = line.split("#", 1)[0].strip()
+    return line
+
+
+def _read_provider_key_values(provider_code, source_path):
+    raw_provider = {}
+    issues = []
+    with open(source_path, "r", encoding="utf-8") as f:
+        for line_number, raw_line in enumerate(f, start=1):
+            line = _strip_provider_comment(raw_line)
+            if not line:
+                continue
+            if "=" not in line:
+                issues.append(
+                    _provider_issue(
+                        provider_code,
+                        source_path,
+                        "line",
+                        "expected key=value syntax",
+                        line_number,
+                    )
+                )
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip()
+            schema = PROVIDER_FIELD_SCHEMA.get(key)
+            if schema is None:
+                issues.append(
+                    _provider_issue(
+                        provider_code,
+                        source_path,
+                        key,
+                        f"unknown field for {PROVIDER_DEFINITION_FORMAT} provider definition",
+                        line_number,
+                    )
+                )
+                continue
+            normalized_key = schema.alias_for or key
+            if normalized_key in raw_provider:
+                issues.append(
+                    _provider_issue(
+                        provider_code,
+                        source_path,
+                        normalized_key,
+                        "duplicate field",
+                        line_number,
+                    )
+                )
+                continue
+            raw_provider[normalized_key] = value
+    return raw_provider, issues
+
+
+def _parse_provider_epsg(value):
+    epsg_code = int(value)
+    try:
+        GEO.record_epsg(epsg_code)
+    except Exception:
+        # HACK for Slovenia
+        if epsg_code == 102060:
+            GEO.record_epsg(3912)
+        else:
+            raise
+    return value
+
+
+def _parse_provider_size(value):
+    parsed_value = int(value)
+    if parsed_value < 100 or parsed_value > 10000:
+        raise ValueError("must be between 100 and 10000")
+    return parsed_value
+
+
+def _parse_provider_version(value):
+    if len(value.split(".")) < 2:
+        raise ValueError("must include at least major and minor version numbers")
+    return value
+
+
+def _parse_provider_float_pair(value):
+    return [numpy.array([float(x) for x in value.split()]) for _ in range(40)]
+
+
+def _parse_provider_float_list(value):
+    return numpy.array([float(x) for x in value.split()])
+
+
+def _parse_provider_field(provider_code, source_path, key, value):
+    schema = PROVIDER_FIELD_SCHEMA[key]
+    if schema.value_type == "enum":
+        if value not in schema.allowed_values:
+            allowed = ", ".join(schema.allowed_values)
+            raise ValueError(f"must be one of: {allowed}")
+        return value
+    if schema.value_type == "headers":
+        return parse_provider_fake_headers(value)
+    if schema.value_type == "epsg":
+        return _parse_provider_epsg(value)
+    if schema.value_type == "bool":
+        return parse_provider_bool(value)
+    if schema.value_type == "size":
+        return _parse_provider_size(value)
+    if schema.value_type == "version":
+        return _parse_provider_version(value)
+    if schema.value_type == "float-pair":
+        return _parse_provider_float_pair(value)
+    if schema.value_type == "float-list":
+        return _parse_provider_float_list(value)
+    if schema.value_type == "int":
+        return int(value)
+    if schema.value_type == "color-filters":
+        if value not in color_filters_dict:
+            raise ValueError("unknown color filter; load Filters/*.flt first")
+        return value
+    return value
+
+
+def parse_provider_definition(provider_code, source_path):
+    raw_provider, issues = _read_provider_key_values(provider_code, source_path)
+    provider = {}
+    for key, value in raw_provider.items():
+        try:
+            provider[key] = _parse_provider_field(
+                provider_code, source_path, key, value
+            )
+        except (SyntaxError, ValueError, TypeError) as exc:
+            issues.append(
+                _provider_issue(
+                    provider_code,
+                    source_path,
+                    key,
+                    str(exc),
+                )
+            )
+        except Exception as exc:
+            issues.append(
+                _provider_issue(
+                    provider_code,
+                    source_path,
+                    key,
+                    f"could not validate field: {exc}",
+                )
+            )
+
+    if "request_type" not in provider and provider.get("grid_type") != "webmercator":
+        issues.append(
+            _provider_issue(
+                provider_code,
+                source_path,
+                "request_type",
+                "missing request_type or grid_type=webmercator",
+            )
+        )
+    return provider, issues
+
+
+def iter_provider_definition_paths(provider_dir=None):
+    provider_root = Path(provider_dir or FNAMES.Provider_dir)
+    for dir_path in sorted(provider_root.iterdir()):
+        if not dir_path.is_dir():
+            continue
+        yield from sorted(dir_path.glob("*.lay"))
+
+
+def validate_provider_definitions(provider_dir=None):
+    issues = []
+    for provider_path in iter_provider_definition_paths(provider_dir):
+        provider_code = provider_path.stem
+        _, provider_issues = parse_provider_definition(provider_code, provider_path)
+        issues.extend(provider_issues)
+    return issues
 
 
 ################################################################################
@@ -212,6 +477,7 @@ def initialize_extents_dict():
 
 ################################################################################
 def initialize_color_filters_dict():
+    color_filters_dict.setdefault("none", [])
     for file_name in os.listdir(FNAMES.Filter_dir):
         if "." not in file_name or file_name.split(".")[-1] != "flt":
             continue
@@ -247,268 +513,110 @@ def initialize_color_filters_dict():
 
 ################################################################################
 def initialize_providers_dict():
-    for dir_name in os.listdir(FNAMES.Provider_dir):
-        if not os.path.isdir(os.path.join(FNAMES.Provider_dir, dir_name)):
-            continue
-        for file_name in os.listdir(os.path.join(FNAMES.Provider_dir, dir_name)):
-            if "." not in file_name or file_name.split(".")[-1] != "lay":
-                continue
-            provider_code = file_name.split(".")[0]
-            provider = {}
-            with open(os.path.join(FNAMES.Provider_dir, dir_name, file_name), "r") as f:
-                provider_lines = f.readlines()
-            valid_provider = True
-            for line in provider_lines:
-                line = line.strip()
-                if "#" in line:
-                    if line[0] == "#":
-                        continue
-                    else:
-                        line = line.split("#")[0]
-                if "=" not in line:
-                    continue
-                items = line.split("=")
-                key = items[0].strip()
-                value = "=".join(items[1:]).strip()
-                provider[key] = value
-                # structuring data
-                if key == "request_type" and value not in [
-                    "wms",
-                    "wmts",
-                    "tms",
-                    "local_tms",
-                ]:
-                    UI.vprint(
-                        0,
-                        "Unknown request_type field for provider",
-                        provider_code,
-                        ":",
-                        value,
+    for provider_path in iter_provider_definition_paths():
+        provider_code = provider_path.stem
+        dir_name = provider_path.parent.name
+        file_name = provider_path.name
+        provider, provider_issues = parse_provider_definition(
+            provider_code, provider_path
+        )
+        _print_provider_issues(provider_issues)
+        valid_provider = not any(issue.is_error for issue in provider_issues)
+        if ("request_type" in provider) and (provider["request_type"] == "wmts"):
+            try:
+                tilematrixsets = read_tilematrixsets(
+                    os.path.join(
+                        FNAMES.Provider_dir,
+                        dir_name,
+                        "capabilities_" + provider_code + ".xml",
                     )
-                    valid_provider = False
-                if key == "grid_type" and value not in ["webmercator"]:
-                    UI.vprint(
-                        0,
-                        "Unknown grid_type field for provider",
-                        provider_code,
-                        ":",
-                        value,
-                    )
-                    valid_provider = False
-                elif key == "fake_headers":
-                    try:
-                        provider[key] = parse_provider_fake_headers(value)
-                    except (SyntaxError, ValueError):
-                        print(
-                            "Definition of fake headers for provider",
-                            provider_code,
-                            "not valid.",
-                        )
-                        valid_provider = False
-                elif key == "epsg_code":
-                    try:
-                        GEO.record_epsg(int(value))
-                    except:
-                        # HACK for Slovenia
-                        if int(value) == 102060:
-                            GEO.record_epsg(3912)
-                        else:
-                            UI.vprint(
-                                0,
-                                "Error in epsg code for provider",
-                                provider_code,
-                            )
-                            valid_provider = False
-                elif key == "in_GUI":
-                    try:
-                        provider["in_GUI"] = parse_provider_bool(value)
-                    except (SyntaxError, ValueError):
-                        UI.vprint(0, "Error in GUI status for provider", provider_code)
-                        provider["in_GUI"] = True
-                elif key == "image_type":
-                    pass
-                elif key == "url_prefix":
-                    pass
-                elif key == "url_template":
-                    pass
-                elif key == "layers":
-                    pass
-                elif key in ["wms_size", "tile_size"]:
-                    try:
-                        provider[key] = int(value)
-                        if provider[key] < 100 or provider[key] > 10000:
-                            print(
-                                "Wm(t)s size for provider ",
-                                provider_code,
-                                "seems off limits, provider skipped.",
-                            )
-                    except:
-                        print(
-                            "Error in reading wms size for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
-                elif key in ["wms_version", "wmts_version"]:
-                    if len(value.split(".")) < 2:
-                        print(
-                            "Error in reading wms version for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
-                elif key == "top_left_corner":
-                    try:
-                        provider[key] = [
-                            numpy.array([float(x) for x in value.split()])
-                            for _ in range(40)
-                        ]
-                    except:
-                        print(
-                            "Error in reading top left corner for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
-                elif key == "scaledenominator":
-                    try:
-                        provider[key] = numpy.array([float(x) for x in value.split()])
-                    except:
-                        print(
-                            "Error in reading scaledenominator for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
-                elif key == "tilematrixset":
-                    pass
-                elif key == "resolutions":
-                    try:
-                        provider[key] = numpy.array([float(x) for x in value.split()])
-                    except:
-                        print(
-                            "Error in reading resolutions for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
-                elif key == "max_threads":
-                    try:
-                        provider[key] = int(value)
-                    except:
-                        pass
-                elif key == "extent":
-                    pass
-                elif key == "color_filters":
-                    if value not in color_filters_dict:
-                        print(
-                            "Error in reading color_filter for provider",
-                            provider_code,
-                            ". Assuming none.",
-                        )
-                        provider[key] = "none"
-                elif key == "imagery_dir":
-                    if value not in ("grouped", "normal", "code"):
-                        print(
-                            "Error in reading imagery_dir for provider",
-                            provider_code,
-                            ". Assuming grouped.",
-                        )
-                        provider[key] = "grouped"
-            if ("request_type" in provider) and (provider["request_type"] == "wmts"):
+                )
+            except:
                 try:
                     tilematrixsets = read_tilematrixsets(
                         os.path.join(
                             FNAMES.Provider_dir,
                             dir_name,
-                            "capabilities_" + provider_code + ".xml",
+                            "capabilities.xml",
                         )
                     )
                 except:
-                    try:
-                        tilematrixsets = read_tilematrixsets(
-                            os.path.join(
-                                FNAMES.Provider_dir,
-                                dir_name,
-                                "capabilities.xml",
-                            )
-                        )
-                    except:
-                        print(
-                            "Error in reading capabilities for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
-                if valid_provider:
-                    try:
-                        tms_found = False
-                        for tilematrixset in tilematrixsets:
-                            if tilematrixset["identifier"] == provider["tilematrixset"]:
-                                provider["tilematrixset"] = tilematrixset
-                                tms_found = True
-                                break
-                        if tms_found:
-                            provider["scaledenominator"] = numpy.array(
-                                [
-                                    float(x["ScaleDenominator"])
-                                    for x in provider["tilematrixset"]["tilematrices"]
-                                ]
-                            )
-                            provider["top_left_corner"] = [
-                                [float(x) for x in y["TopLeftCorner"].split()]
-                                for y in provider["tilematrixset"]["tilematrices"]
-                            ]
-                        else:
-                            print("no tilematrixset found")
-                            valid_provider = False
-                    except:
-                        print(
-                            "Error in reading capabilities for provider",
-                            provider_code,
-                        )
-                        valid_provider = False
+                    print(
+                        "Error in reading capabilities for provider",
+                        provider_code,
+                    )
+                    valid_provider = False
             if valid_provider:
-                provider["code"] = provider_code
-                provider["directory"] = dir_name
-                if "in_GUI" not in provider:
-                    provider["in_GUI"] = True
-                if "image_type" not in provider:
-                    provider["image_type"] = "jpeg"
-                if "extent" not in provider:
-                    provider["extent"] = "global"
-                if "color_filters" not in provider:
-                    provider["color_filters"] = "none"
-                if "imagery_dir" not in provider:
-                    provider["imagery_dir"] = "grouped"
-                if "scaledenominator" in provider:
-                    units_per_pix = (
-                        0.00028
-                        if provider["epsg_code"] not in ["4326"]
-                        else 2.5152827955e-09
+                try:
+                    tms_found = False
+                    for tilematrixset in tilematrixsets:
+                        if tilematrixset["identifier"] == provider["tilematrixset"]:
+                            provider["tilematrixset"] = tilematrixset
+                            tms_found = True
+                            break
+                    if tms_found:
+                        provider["scaledenominator"] = numpy.array(
+                            [
+                                float(x["ScaleDenominator"])
+                                for x in provider["tilematrixset"]["tilematrices"]
+                            ]
+                        )
+                        provider["top_left_corner"] = [
+                            [float(x) for x in y["TopLeftCorner"].split()]
+                            for y in provider["tilematrixset"]["tilematrices"]
+                        ]
+                    else:
+                        print("no tilematrixset found")
+                        valid_provider = False
+                except:
+                    print(
+                        "Error in reading capabilities for provider",
+                        provider_code,
                     )
-                    provider["resolutions"] = (
-                        units_per_pix * provider["scaledenominator"]
-                    )
-                if ("grid_type" in provider) and provider["grid_type"] == "webmercator":
-                    provider["request_type"] = "tms"
-                    provider["tile_size"] = 256
-                    provider["epsg_code"] = "3857"
-                    provider["top_left_corner"] = [
-                        [-20037508.34, 20037508.34] for i in range(0, 21)
-                    ]
-                    provider["resolutions"] = numpy.array(
-                        [20037508.34 / (128 * 2**i) for i in range(0, 21)]
-                    )
-                if "request_type" not in provider:
-                    UI.vprint(
-                        0,
-                        "Error in reading provider definition ",
-                        "file for",
-                        file_name,
-                    )
-                else:
-                    providers_dict[provider_code] = provider
-            else:
+                    valid_provider = False
+        if valid_provider:
+            provider["code"] = provider_code
+            provider["directory"] = dir_name
+            if "in_GUI" not in provider:
+                provider["in_GUI"] = True
+            if "image_type" not in provider:
+                provider["image_type"] = "jpeg"
+            if "extent" not in provider:
+                provider["extent"] = "global"
+            if "color_filters" not in provider:
+                provider["color_filters"] = "none"
+            if "imagery_dir" not in provider:
+                provider["imagery_dir"] = "grouped"
+            if "scaledenominator" in provider:
+                units_per_pix = (
+                    2.5152827955e-09 if provider["epsg_code"] == 4326 else 0.00028
+                )
+                provider["resolutions"] = units_per_pix * provider["scaledenominator"]
+            if ("grid_type" in provider) and provider["grid_type"] == "webmercator":
+                provider["request_type"] = "tms"
+                provider["tile_size"] = 256
+                provider["epsg_code"] = "3857"
+                provider["top_left_corner"] = [
+                    [-20037508.34, 20037508.34] for i in range(0, 21)
+                ]
+                provider["resolutions"] = numpy.array(
+                    [20037508.34 / (128 * 2**i) for i in range(0, 21)]
+                )
+            if "request_type" not in provider:
                 UI.vprint(
                     0,
-                    "Error in reading provider definition file for",
+                    "Error in reading provider definition ",
+                    "file for",
                     file_name,
                 )
+            else:
+                providers_dict[provider_code] = provider
+        else:
+            UI.vprint(
+                0,
+                "Error in reading provider definition file for",
+                file_name,
+            )
 
 
 ################################################################################

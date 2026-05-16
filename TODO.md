@@ -2,11 +2,17 @@
 
 Each TODO below is intended to become one GitHub Issue (GHI). Numbers are execution-priority order and may be renumbered when dependencies change. Keep issue bodies scoped, actionable, independently mergeable, and aligned with the current repo policy: Python 3.13+, `uv`, `ruff`, `ty`, `unittest`, and LLVM/Clang.
 
+GitHub issue numbers are references only; they are not expected to match TODO
+numbers. Some completed TODOs were captured retroactively after the work was
+already done, so their GHI numbers are out of sequence.
+
 ## Phase 0: Baseline Foundation
 
 ### TODO-001: Add Linux CI Baseline
 
 Status: Done
+
+GitHub Issue: #1
 
 Create a GitHub Actions workflow for pushes and pull requests.
 
@@ -26,6 +32,8 @@ Suggested labels: `ci`, `quality`, `quick-win`
 
 Status: Done
 
+GitHub Issue: #20
+
 Add modern project tooling configuration.
 
 Acceptance criteria:
@@ -44,6 +52,8 @@ Suggested labels: `tooling`, `dependencies`, `quick-win`
 
 Status: Done
 
+GitHub Issue: #2
+
 Add deterministic `unittest` coverage for low-risk helpers.
 
 Acceptance criteria:
@@ -60,6 +70,8 @@ Suggested labels: `tests`, `quality`, `quick-win`
 ### TODO-004: Add Windows and macOS CI Jobs
 
 Status: Done
+
+GitHub Issue: #21
 
 Extend CI beyond Linux for the target platforms.
 
@@ -78,6 +90,8 @@ Suggested labels: `ci`, `windows`, `macos`
 
 Status: Done
 
+GitHub Issue: #22
+
 Create contributor-facing setup documentation that matches the modern toolchain.
 
 Acceptance criteria:
@@ -93,6 +107,8 @@ Suggested labels: `documentation`, `onboarding`, `development`
 ### TODO-006: Add Application Startup Smoke Tests
 
 Status: Done
+
+GitHub Issue: #23
 
 Add lightweight startup checks that avoid GUI and external service dependencies.
 
@@ -110,6 +126,8 @@ Suggested labels: `tests`, `startup`, `quality`
 
 Status: Done
 
+GitHub Issue: #24
+
 Replace provider parsing `eval` calls with safe parsing and explicit validation.
 
 Acceptance criteria:
@@ -123,6 +141,10 @@ Suggested labels: `security`, `providers`, `quick-win`
 
 ### TODO-008: Modernize Provider Definitions
 
+Status: Done
+
+GitHub Issue: #25
+
 Move provider metadata toward schema-backed structured definitions.
 
 Acceptance criteria:
@@ -135,7 +157,34 @@ Acceptance criteria:
 
 Suggested labels: `providers`, `schema`, `reliability`
 
+### TODO-008-1: Migrate Provider Definitions to JSON and Evaluate Pydantic
+
+Status: Planned
+
+GitHub Issue: #3
+
+Move provider source files from the legacy `.lay` key/value format to JSON and
+decide whether Pydantic should own provider validation.
+
+Acceptance criteria:
+
+- Converts checked-in provider definitions from `.lay` to `.json`.
+- Preserves provider codes, directories, runtime defaults, and downstream
+  `providers_dict` behavior.
+- Represents booleans, integers, float arrays, and header dictionaries as native
+  JSON values.
+- Evaluates adding Pydantic as a runtime or development dependency for provider
+  models, JSON Schema generation, strict validation, and diagnostics.
+- If Pydantic is adopted, adds typed provider models and generated schema docs.
+- If Pydantic is not adopted, documents why stdlib validation remains preferable.
+- Adds tests for converted provider definitions and invalid JSON cases.
+- Removes or archives the legacy `.lay` parser only after JSON parity is proven.
+
+Suggested labels: `providers`, `schema`, `dependencies`
+
 ### TODO-009: Replace Common Bare Exception Handlers
+
+GitHub Issue: #4
 
 Replace high-impact bare `except:` blocks with specific exception handling.
 
@@ -153,6 +202,8 @@ Suggested labels: `reliability`, `diagnostics`, `quick-win`
 
 ### TODO-010: Centralize Subprocess Execution
 
+GitHub Issue: #5
+
 Create a shared helper for external tool execution.
 
 Acceptance criteria:
@@ -167,6 +218,8 @@ Suggested labels: `subprocess`, `diagnostics`, `refactor`
 
 ### TODO-011: Centralize Logging Behavior
 
+GitHub Issue: #6
+
 Introduce a logging abstraction that can replace scattered output paths over time.
 
 Acceptance criteria:
@@ -180,6 +233,8 @@ Acceptance criteria:
 Suggested labels: `logging`, `diagnostics`, `refactor`
 
 ### TODO-012: Improve Network and Imagery Failure Reporting
+
+GitHub Issue: #7
 
 Make imagery download failures easier to diagnose without excessive noise.
 
@@ -197,6 +252,8 @@ Suggested labels: `imagery`, `network`, `diagnostics`
 
 ### TODO-013: Enforce XP12 Water Tech and Purge Legacy Flags
 
+GitHub Issue: #8
+
 Remove backward-compatible water rendering states to prevent accidental legacy compilation.
 
 Acceptance criteria:
@@ -211,6 +268,8 @@ Suggested labels: `xp12max`, `mesh`, `breaking-change`
 
 ### TODO-014: Require Valid Bathymetry Inputs for Physical Water Meshes
 
+GitHub Issue: #9
+
 Make XP12 3D bathymetry requirements explicit before deeper mesh rewrites.
 
 Acceptance criteria:
@@ -224,6 +283,8 @@ Suggested labels: `xp12max`, `mesh`, `validation`
 
 ### TODO-015: Rewrite Alpha Masking for Logarithmic BC3 Blending
 
+GitHub Issue: #10
+
 Overhaul coastline transitions by mapping distance fields to progressive logarithmic alpha curves.
 
 Acceptance criteria:
@@ -236,6 +297,8 @@ Acceptance criteria:
 Suggested labels: `xp12max`, `textures`, `masks`
 
 ### TODO-016: Integrate Automated sRGB Histogram Color Normalization
+
+GitHub Issue: #11
 
 Neutralize mismatched imagery tile boundaries before texture compression.
 
@@ -251,6 +314,8 @@ Suggested labels: `xp12max`, `imagery`, `color-pipeline`
 
 ### TODO-017: Develop Non-Destructive DSF Header Splicing Loop
 
+GitHub Issue: #12
+
 Build a data bridge using `DSFTool` to inherit native X-Plane 12 features into custom ortho tile headers.
 
 Acceptance criteria:
@@ -264,6 +329,8 @@ Acceptance criteria:
 Suggested labels: `xp12max`, `dsf-bridge`, `seasons`
 
 ### TODO-018: Deploy Multi-Threaded Texture Encoder Backend
+
+GitHub Issue: #13
 
 Remove serial texturing bottlenecks before adding GPU-specific backends.
 
@@ -281,6 +348,8 @@ Suggested labels: `xp12max`, `performance`, `gpu`
 
 ### TODO-019: Separate GUI, CLI, and Core Build Logic
 
+GitHub Issue: #14
+
 Begin separating presentation, command-line parsing, and build orchestration.
 
 Acceptance criteria:
@@ -293,6 +362,8 @@ Acceptance criteria:
 Suggested labels: `architecture`, `refactor`, `long-term`
 
 ### TODO-020: Reduce Global Mutable State
+
+GitHub Issue: #15
 
 Gradually replace global state with explicit context and result objects.
 
@@ -307,6 +378,8 @@ Suggested labels: `architecture`, `state`, `refactor`
 
 ### TODO-021: Minimize Import-Time Side Effects
 
+GitHub Issue: #16
+
 Move side effects out of module import paths and into explicit initialization functions.
 
 Acceptance criteria:
@@ -319,6 +392,8 @@ Acceptance criteria:
 Suggested labels: `imports`, `tests`, `refactor`
 
 ### TODO-022: Execute Headless CLI Transition
+
+GitHub Issue: #17
 
 Expose a pure, headless CLI engine for batch automation.
 
@@ -335,6 +410,8 @@ Suggested labels: `breakaway`, `architecture`, `headless`
 
 ### TODO-023: Add or Verify Repository Metadata
 
+GitHub Issue: #18
+
 Add standard repository metadata and community files.
 
 Acceptance criteria:
@@ -349,6 +426,8 @@ Acceptance criteria:
 Suggested labels: `repository-health`, `documentation`
 
 ### TODO-024: Publish Release Guidance
+
+GitHub Issue: #19
 
 Document the release process for PyInstaller onedir bundles.
 
