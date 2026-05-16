@@ -83,6 +83,14 @@ The specific changes in this forked version:
 
 For installation instructions, refer to the [Installation page](https://github.com/shred86/Ortho4XP/wiki/Installation) in the [Wiki](https://github.com/shred86/Ortho4XP/wiki).
 
+## Development
+
+Run the deterministic unit test suite with:
+
+```bash
+python -m unittest discover -s tests
+```
+
 ## Support
 
 Troubleshooting steps for some issues are provided in the [Wiki FAQ](https://github.com/shred86/Ortho4XP/wiki/FAQ). For additional support or questions, refer to the [Ortho4XP forum](https://forums.x-plane.org/index.php?/forums/forum/322-ortho4xp/) at [X-Plane.org](https://forums.x-plane.org).

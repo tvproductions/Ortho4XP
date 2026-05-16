@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            gdal-bin \
+            libgdal-dev \
+            libspatialindex-dev \
+            ninja-build \
+            python3-tk
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install ruff
+
+      - name: Python syntax smoke test
+        run: python -m compileall -q Ortho4XP.py src
+
+      - name: Python import smoke test
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+
+          sys.path.append(os.path.abspath("src"))
+
+          import O4_File_Names  # noqa: F401
+          import O4_Geo_Utils  # noqa: F401
+          import O4_Imagery_Utils  # noqa: F401
+
+          print("Core imports succeeded.")
+          PY
+
+      - name: CLI startup smoke test
+        run: python Ortho4XP.py --help
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests
+
+      - name: Ruff lint
+        run: ruff check --output-format=github --select E9,F63,F7,F82 Ortho4XP.py src
+
+      - name: Build Triangle4XP with LLVM
+        env:
+          CC: clang
+        run: |
+          cmake -S Utils -B Utils/build/ci-linux -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build Utils/build/ci-linux --target Triangle4XP
+          test -x Utils/build/ci-linux/Triangle4XP
