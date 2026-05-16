@@ -1,0 +1,45 @@
+[project]
+name = "ortho4xp"
+version = "1.4"
+description = "Scenery generation tool for X-Plane."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "numpy==2.4.4",
+  "pillow==12.2.0",
+  "pyproj==3.7.2",
+  "requests==2.33.1",
+  "Rtree==1.4.1",
+  "shapely==2.1.2",
+  "scikit-fmm==2025.6.23",
+  "gdal==3.12.3; platform_system == 'Darwin'",
+  "gdal==3.12.2; platform_system == 'Windows'",
+  "gdal==3.9.0; platform_system == 'Linux'",
+]
+
+[dependency-groups]
+dev = [
+  "ruff",
+  "ty",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.uv.sources]
+gdal = [
+  { path = "Utils/win/gdal-3.12.2-cp313-cp313-win_amd64.whl", marker = "platform_system == 'Windows'" },
+]
+scikit-fmm = [
+  { path = "Utils/win/scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl", marker = "platform_system == 'Windows'" },
+]

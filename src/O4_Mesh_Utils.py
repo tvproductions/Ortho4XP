@@ -36,22 +36,22 @@ else:
 community_server = False
 if os.path.exists(FNAMES.resource_path("community_server.txt")):
     try:
-        f = open(FNAMES.resource_path("community_server.txt"), "r")
-        for line in f.readlines():
-            line = line.strip()
-            if not line:
-                continue
-            if "#" in line:
-                if line[0] == "#":
+        with open(FNAMES.resource_path("community_server.txt"), "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
                     continue
-                else:
-                    line = line.split("#")[0].strip()
-            if not line:
-                continue
-            community_server = True
-            community_prefix = line
-            break
-    except:
+                if "#" in line:
+                    if line[0] == "#":
+                        continue
+                    else:
+                        line = line.split("#")[0].strip()
+                if not line:
+                    continue
+                community_server = True
+                community_prefix = line
+                break
+    except OSError:
         pass
 
 
@@ -84,8 +84,7 @@ def community_mesh(tile):
                     "e",
                     "-y",
                     "-o" + tile.build_dir,
-                    FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon)
-                    + ".7z",
+                    FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon) + ".7z",
                 ],
                 env=UI.subprocess_env(),
             ):
@@ -93,27 +92,22 @@ def community_mesh(tile):
                     "\nERROR: Could not extract community_mesh from archive."
                 )
                 return 0
-            os.remove(
-                FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon) + ".7z"
-            )
+            os.remove(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon) + ".7z")
             UI.timings_and_bottom_line(timer)
             return 1
         elif "[40" in str(r):
             UI.exit_message_and_bottom_line(
-                "\nSORRY: Community server does not propose that mesh: "
-                + str(r)
+                "\nSORRY: Community server does not propose that mesh: " + str(r)
             )
             return 0
         elif "[50" in str(r):
             UI.exit_message_and_bottom_line(
-                "\nSORRY: Community server seems to be down or struggling: "
-                + str(r)
+                "\nSORRY: Community server seems to be down or struggling: " + str(r)
             )
             return 0
         else:
             UI.exit_message_and_bottom_line(
-                "\nSORRY: Community server seems to be down or struggling: "
-                + str(r)
+                "\nSORRY: Community server seems to be down or struggling: " + str(r)
             )
             return 0
     except Exception as e:
@@ -134,9 +128,7 @@ def is_in_region(lat, lon, latmin, latmax, lonmin, lonmax):
 ##############################################################################
 def build_curv_tol_weight_map(tile, weight_array):
     if tile.apt_curv_tol != tile.curvature_tol and tile.apt_curv_tol > 0:
-        UI.vprint(
-            1, "-> Modifying curv_tol weight map according to runway locations."
-        )
+        UI.vprint(1, "-> Modifying curv_tol weight map according to runway locations.")
         try:
             f = open(FNAMES.apt_file(tile), "rb")
             dico_airports = pickle.load(f)
@@ -171,9 +163,7 @@ def build_curv_tol_weight_map(tile, weight_array):
         custom_coastline_dir = FNAMES.custom_coastline_dir(tile.lat, tile.lon)
         if os.path.isfile(custom_coastline):
             UI.vprint(1, "    * User defined custom coastline data detected.")
-            sea_layer.update_dicosm(
-                custom_coastline, input_tags=None, target_tags=None
-            )
+            sea_layer.update_dicosm(custom_coastline, input_tags=None, target_tags=None)
         elif os.path.isdir(custom_coastline_dir):
             UI.vprint(
                 1,
@@ -215,9 +205,7 @@ def build_curv_tol_weight_map(tile, weight_array):
             colmax = min(round((lonp - tile.lon + x_shift) * 1000), 1000)
             rowmax = min(round((tile.lat + 1 - latp + y_shift) * 1000), 1000)
             rowmin = max(round((tile.lat + 1 - latp - y_shift) * 1000), 0)
-            weight_array[
-                rowmin : rowmax + 1, colmin : colmax + 1
-            ] = numpy.maximum(
+            weight_array[rowmin : rowmax + 1, colmin : colmax + 1] = numpy.maximum(
                 weight_array[rowmin : rowmax + 1, colmin : colmax + 1],
                 tile.curvature_tol / tile.coast_curv_tol,
             )
@@ -238,9 +226,7 @@ def post_process_nodes_altitudes(tile):
     vertices = numpy.zeros(6 * nbr_pt)
     UI.vprint(1, "-> Loading of the mesh computed by Triangle4XP.")
     for i in range(0, nbr_pt):
-        vertices[6 * i : 6 * i + 6] = [
-            float(x) for x in f_node.readline().split()[1:7]
-        ]
+        vertices[6 * i : 6 * i + 6] = [float(x) for x in f_node.readline().split()[1:7]]
     end_line_f_node = f_node.readline()
     f_node.close()
     UI.vprint(1, "-> Post processing of altitudes according to vector data")
@@ -261,19 +247,14 @@ def post_process_nodes_altitudes(tile):
             interp_alt_tris.add((v1, v2, v3))
         elif attr & dico_attributes["SEA"]:
             sea_tris.add((v1, v2, v3))
-        elif (
-            attr & dico_attributes["WATER"]
-            or attr & dico_attributes["SEA_EQUIV"]
-        ):
+        elif attr & dico_attributes["WATER"] or attr & dico_attributes["SEA_EQUIV"]:
             water_tris.add((v1, v2, v3))
     if tile.water_smoothing:
         UI.vprint(1, "   Smoothing inland water.")
         for j in range(tile.water_smoothing):
             for v1, v2, v3 in water_tris:
                 zmean = (
-                    vertices[6 * v1 + 2]
-                    + vertices[6 * v2 + 2]
-                    + vertices[6 * v3 + 2]
+                    vertices[6 * v1 + 2] + vertices[6 * v2 + 2] + vertices[6 * v3 + 2]
                 ) / 3
                 vertices[6 * v1 + 2] = zmean
                 vertices[6 * v2 + 2] = zmean
@@ -286,9 +267,7 @@ def post_process_nodes_altitudes(tile):
             vertices[6 * v3 + 2] = 0
         elif tile.sea_smoothing_mode == "mean":
             zmean = (
-                vertices[6 * v1 + 2]
-                + vertices[6 * v2 + 2]
-                + vertices[6 * v3 + 2]
+                vertices[6 * v1 + 2] + vertices[6 * v2 + 2] + vertices[6 * v3 + 2]
             ) / 3
             vertices[6 * v1 + 2] = zmean
             vertices[6 * v2 + 2] = zmean
@@ -315,9 +294,7 @@ def post_process_nodes_altitudes(tile):
         f_node.write(
             str(i + 1)
             + " "
-            + " ".join(
-                ("{:.15f}".format(x) for x in vertices[6 * i : 6 * i + 6])
-            )
+            + " ".join(("{:.15f}".format(x) for x in vertices[6 * i : 6 * i + 6]))
             + "\n"
         )
     f_node.write(end_line_f_node)
@@ -372,21 +349,13 @@ def write_mesh_file(tile, vertices):
 ################################################################################
 # Build a textured .obj wavefront over the extent of an orthogrid cell
 ################################################################################
-def extract_mesh_to_obj(
-    mesh_file, til_x_left, til_y_top, zoomlevel, provider_code
-):
+def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_code):
     UI.red_flag = False
     timer = time.time()
     (latmax, lonmin) = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
-    (latmin, lonmax) = GEO.gtile_to_wgs84(
-        til_x_left + 16, til_y_top + 16, zoomlevel
-    )
-    obj_file_name = FNAMES.obj_file(
-        til_x_left, til_y_top, zoomlevel, provider_code
-    )
-    mtl_file_name = FNAMES.mtl_file(
-        til_x_left, til_y_top, zoomlevel, provider_code
-    )
+    (latmin, lonmax) = GEO.gtile_to_wgs84(til_x_left + 16, til_y_top + 16, zoomlevel)
+    obj_file_name = FNAMES.obj_file(til_x_left, til_y_top, zoomlevel, provider_code)
+    mtl_file_name = FNAMES.mtl_file(til_x_left, til_y_top, zoomlevel, provider_code)
     f_mesh = open(mesh_file, "r")
     for i in range(4):
         f_mesh.readline()
@@ -394,15 +363,11 @@ def extract_mesh_to_obj(
     UI.vprint(1, "    Reading nodes...")
     pt_in = numpy.zeros(5 * nbr_pt_in, "float")
     for i in range(nbr_pt_in):
-        pt_in[5 * i : 5 * i + 3] = [
-            float(x) for x in f_mesh.readline().split()[:3]
-        ]
+        pt_in[5 * i : 5 * i + 3] = [float(x) for x in f_mesh.readline().split()[:3]]
     for i in range(3):
         f_mesh.readline()
     for i in range(nbr_pt_in):
-        pt_in[5 * i + 3 : 5 * i + 5] = [
-            float(x) for x in f_mesh.readline().split()[:2]
-        ]
+        pt_in[5 * i + 3 : 5 * i + 5] = [float(x) for x in f_mesh.readline().split()[:2]]
     for i in range(0, 2):  # skip 2 lines
         f_mesh.readline()
     if UI.red_flag:
@@ -517,7 +482,7 @@ def extract_mesh_to_obj(
             + str(two)
             + " "
             + str(three)
-+ "/"
+            + "/"
             + str(three)
             + "/"
             + str(three)
@@ -543,12 +508,10 @@ def extract_mesh_to_obj(
 def build_mesh(tile):
     if UI.is_working:
         return 0
-    UI.is_working = 1
+    UI.is_working = True
     UI.red_flag = False
     VECT.scalx = cos((tile.lat + 0.5) * pi / 180)
-    UI.logprint(
-        "Step 2 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting."
-    )
+    UI.logprint("Step 2 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
         0,
         "\nStep 2 : Building mesh for tile "
@@ -579,13 +542,8 @@ def build_mesh(tile):
             source = (
                 (";" in tile.custom_dem) and tile.custom_dem.split(";")[0]
             ) or tile.custom_dem
-            tile.dem = DEM.DEM(
-                tile.lat, tile.lon, source, fill_nodata, info_only=True
-            )
-            if (
-                not os.path.getsize(alt_file)
-                == 4 * tile.dem.nxdem * tile.dem.nydem
-            ):
+            tile.dem = DEM.DEM(tile.lat, tile.lon, source, fill_nodata, info_only=True)
+            if not os.path.getsize(alt_file) == 4 * tile.dem.nxdem * tile.dem.nydem:
                 UI.exit_message_and_bottom_line(
                     "\nERROR: Cached raster elevation does not match the ",
                     "current custom DEM specs.\n       You must run Step 1 ",
@@ -602,16 +560,14 @@ def build_mesh(tile):
     else:
         try:
             source = (
-                (";" in tile.custom_dem)
-                and tile.custom_dem.split(";")[tile.iterate]
+                (";" in tile.custom_dem) and tile.custom_dem.split(";")[tile.iterate]
             ) or tile.custom_dem
             tile.dem = DEM.DEM(
                 tile.lat, tile.lon, source, fill_nodata=False, info_only=True
             )
             if (
                 not os.path.isfile(alt_file)
-                or not os.path.getsize(alt_file)
-                == 4 * tile.dem.nxdem * tile.dem.nydem
+                or not os.path.getsize(alt_file) == 4 * tile.dem.nxdem * tile.dem.nydem
             ):
                 tile.dem = DEM.DEM(
                     tile.lat,
@@ -652,8 +608,13 @@ def build_mesh(tile):
 
     limit_tris = "S" + str(max_steiner)
     Tri_option = (
-        "-pq" + "{:.9g}".format(tile.min_angle) + do_refine + 
-        "uYB" + tri_verbosity + output_poly + limit_tris
+        "-pq"
+        + "{:.9g}".format(tile.min_angle)
+        + do_refine
+        + "uYB"
+        + tri_verbosity
+        + output_poly
+        + limit_tris
     )
 
     weight_array = numpy.ones((1001, 1001), dtype=numpy.float32)
@@ -692,6 +653,7 @@ def build_mesh(tile):
     fingers_crossed = subprocess.Popen(
         mesh_cmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
     )
+    assert fingers_crossed.stdout is not None
     while True:
         line = fingers_crossed.stdout.readline()
         if not line:
@@ -727,6 +689,7 @@ def build_mesh(tile):
             fingers_crossed = subprocess.Popen(
                 mesh_cmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
             )
+            assert fingers_crossed.stdout is not None
             while True:
                 line = fingers_crossed.stdout.readline()
                 if not line:
@@ -792,9 +755,7 @@ def build_mesh(tile):
             pass
 
     UI.timings_and_bottom_line(timer)
-    UI.logprint(
-        "Step 2 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit."
-    )
+    UI.logprint("Step 2 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")
     return 1
 
 
@@ -802,7 +763,7 @@ def build_mesh(tile):
 def sort_mesh(tile):
     if UI.is_working:
         return 0
-    UI.is_working = 1
+    UI.is_working = True
     UI.red_flag = False
     mesh_file = FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon)
     if not os.path.isfile(mesh_file):
@@ -818,6 +779,7 @@ def sort_mesh(tile):
     moulinette = subprocess.Popen(
         sort_mesh_cmd_list, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
     )
+    assert moulinette.stdout is not None
     while True:
         line = moulinette.stdout.readline()
         if not line:
@@ -847,6 +809,7 @@ def triangulate(name, path_to_Ortho4XP_dir):
     fingers_crossed = subprocess.Popen(
         mesh_cmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
     )
+    assert fingers_crossed.stdout is not None
     while True:
         line = fingers_crossed.stdout.readline()
         if not line:
@@ -862,51 +825,49 @@ def triangulate(name, path_to_Ortho4XP_dir):
 
 ##############################################################################
 def read_mesh_file(mesh_file):
-    
-    f = open(mesh_file,"r")
+
+    f = open(mesh_file, "r")
     mesh_version = float(f.readline().strip().split()[-1])
-    
-    # skip 3 lines 
-    for i in range(3):
-        f.readline()
-    
-    nbr_nodes = int(f.readline())
-    node_coords = numpy.zeros(5 * nbr_nodes)
-    
-    # read positions
-    for i in range(nbr_nodes):
-        node_coords[5 * i : 5 * i + 3] = [
-            float(x) for x in f.readline().split()[:3]
-        ]
-    # altitutes are encoded in .mesh files with a 100000 scaling factor
-    node_coords[2::5] *= 100000
-    
+
     # skip 3 lines
     for i in range(3):
         f.readline()
-    
+
+    nbr_nodes = int(f.readline())
+    node_coords = numpy.zeros(5 * nbr_nodes)
+
+    # read positions
+    for i in range(nbr_nodes):
+        node_coords[5 * i : 5 * i + 3] = [float(x) for x in f.readline().split()[:3]]
+    # altitutes are encoded in .mesh files with a 100000 scaling factor
+    node_coords[2::5] *= 100000
+
+    # skip 3 lines
+    for i in range(3):
+        f.readline()
+
     # read normals
     for i in range(nbr_nodes):
         node_coords[5 * i + 3 : 5 * i + 5] = [
             float(x) for x in f.readline().split()[:2]
         ]
-    
+
     # skip 2 lines
-    for i in range(0, 2): 
+    for i in range(0, 2):
         f.readline()
 
     # read nbr of tris
-    nbr_tris = int(f.readline())      
+    nbr_tris = int(f.readline())
 
-    tri_idx  = numpy.zeros(3 * nbr_tris, dtype = numpy.uint32)
-    tri_types = numpy.zeros(nbr_tris, dtype = numpy.uint32)
+    tri_idx = numpy.zeros(3 * nbr_tris, dtype=numpy.uint32)
+    tri_types = numpy.zeros(nbr_tris, dtype=numpy.uint32)
     for i in range(nbr_tris):
-        (n1, n2, n3, t) = [
-            int(x) - 1 for x in f.readline().split()[:4]
-        ]
-        tri_idx[3 * i: 3 * i + 3] = (n1, n2, n3)
+        (n1, n2, n3, t) = [int(x) - 1 for x in f.readline().split()[:4]]
+        tri_idx[3 * i : 3 * i + 3] = (n1, n2, n3)
         tri_types[i] = t + 1
     f.close()
 
     return (mesh_version, nbr_nodes, node_coords, nbr_tris, tri_idx, tri_types)
+
+
 ##############################################################################

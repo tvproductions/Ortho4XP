@@ -2,22 +2,30 @@
 import sys
 import os
 
-Ortho4XP_dir = '..' if getattr(sys, 'frozen', False) else '.'
+Ortho4XP_dir = ".." if getattr(sys, "frozen", False) else "."
+cmd_line = "USAGE: Ortho4XP.py lat lon imagery zl (won't read a tile config)\n  OR:  Ortho4XP.py lat lon (with existing tile config file)"
 
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+if __name__ == "__main__" and len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
+    print(cmd_line)
+    sys.exit(0)
+
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     _proj_data_path = os.path.join(sys._MEIPASS, "pyproj", "proj_dir", "share", "proj")
     _lib_path = os.path.join(sys._MEIPASS, "_internal")
     os.environ["PROJ_DATA"] = _proj_data_path
-    os.environ["DYLD_LIBRARY_PATH"] = _lib_path + ":" + os.environ.get("DYLD_LIBRARY_PATH", "")
+    os.environ["DYLD_LIBRARY_PATH"] = (
+        _lib_path + ":" + os.environ.get("DYLD_LIBRARY_PATH", "")
+    )
 
 from pyproj import datadir
 
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     datadir.set_data_dir(_proj_data_path)
 
-sys.path.append(os.path.join(Ortho4XP_dir, 'src'))
+sys.path.append(os.path.join(Ortho4XP_dir, "src"))
 
 import O4_File_Names as FNAMES
+
 sys.path.append(FNAMES.Provider_dir)
 import O4_Imagery_Utils as IMG
 import O4_Vector_Map as VMAP
@@ -27,22 +35,40 @@ import O4_Tile_Utils as TILE
 import O4_GUI_Utils as GUI
 import O4_Config_Utils as CFG  # CFG imported last because it can modify other modules variables
 
-cmd_line = "USAGE: Ortho4XP.py lat lon imagery zl (won't read a tile config)\n  OR:  Ortho4XP.py lat lon (with existing tile config file)"
+runtime_dirs = (
+    FNAMES.Preview_dir,
+    FNAMES.Provider_dir,
+    FNAMES.Extent_dir,
+    FNAMES.Filter_dir,
+    FNAMES.OSM_dir,
+    FNAMES.Mask_dir,
+    FNAMES.Imagery_dir,
+    FNAMES.Elevation_dir,
+    FNAMES.Geotiff_dir,
+    FNAMES.Patch_dir,
+    FNAMES.Tile_dir,
+    FNAMES.Tmp_dir,
+)
 
-if __name__ == '__main__':
-    if not os.path.isdir(FNAMES.Utils_dir):
-        print("Missing ", FNAMES.Utils_dir, "directory, check your install. Exiting.")
-        sys.exit()
-    for directory in (FNAMES.Preview_dir, FNAMES.Provider_dir, FNAMES.Extent_dir, FNAMES.Filter_dir, FNAMES.OSM_dir,
-                      FNAMES.Mask_dir, FNAMES.Imagery_dir, FNAMES.Elevation_dir, FNAMES.Geotiff_dir, FNAMES.Patch_dir,
-                      FNAMES.Tile_dir, FNAMES.Tmp_dir):
+
+def ensure_runtime_dirs(utils_dir=FNAMES.Utils_dir, directories=runtime_dirs):
+    if not os.path.isdir(utils_dir):
+        print("Missing ", utils_dir, "directory, check your install. Exiting.")
+        return False
+    for directory in directories:
         if not os.path.isdir(directory):
             try:
                 os.makedirs(directory)
                 print("Creating missing directory", directory)
-            except:
+            except OSError:
                 print("Could not create required directory", directory, ". Exit.")
-                sys.exit()
+                return False
+    return True
+
+
+if __name__ == "__main__":
+    if not ensure_runtime_dirs():
+        sys.exit()
     IMG.initialize_extents_dict()
     IMG.initialize_color_filters_dict()
     IMG.initialize_providers_dict()
@@ -53,27 +79,31 @@ if __name__ == '__main__':
         print("Bon vol!")
     else:  # sequel is only concerned with command line
         if len(sys.argv) < 3:
-            print(cmd_line); sys.exit()
+            print(cmd_line)
+            sys.exit()
         try:
             lat = int(sys.argv[1])
             lon = int(sys.argv[2])
         except:
-            print(cmd_line); sys.exit()
+            print(cmd_line)
+            sys.exit()
         if len(sys.argv) == 3:
             try:
-                tile = CFG.Tile(lat, lon, '')
+                tile = CFG.Tile(lat, lon, "")
             except Exception as e:
                 print(e)
-                print("ERROR: could not read tile config file."); sys.exit()
+                print("ERROR: could not read tile config file.")
+                sys.exit()
         else:
             try:
                 provider_code = sys.argv[3]
                 zoomlevel = int(sys.argv[4])
-                tile = CFG.Tile(lat, lon, '')
-                tile.default_website = provider_code
-                tile.default_zl = zoomlevel
+                tile = CFG.Tile(lat, lon, "")
+                setattr(tile, "default_website", provider_code)
+                setattr(tile, "default_zl", zoomlevel)
             except:
-                print(cmd_line); sys.exit()
+                print(cmd_line)
+                sys.exit()
         try:
             VMAP.build_poly_file(tile)
             MESH.build_mesh(tile)

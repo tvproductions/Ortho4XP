@@ -1,0 +1,46 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "llvm-release",
+      "displayName": "LLVM Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/llvm-release",
+      "toolchainFile": "${sourceDir}/toolchains/llvm-native.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "llvm-debug",
+      "displayName": "LLVM Debug",
+      "inherits": "llvm-release",
+      "binaryDir": "${sourceDir}/build/llvm-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "llvm-release",
+      "configurePreset": "llvm-release",
+      "targets": [
+        "Triangle4XP"
+      ]
+    },
+    {
+      "name": "llvm-debug",
+      "configurePreset": "llvm-debug",
+      "targets": [
+        "Triangle4XP"
+      ]
+    }
+  ]
+}

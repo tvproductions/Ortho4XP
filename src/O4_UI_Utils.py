@@ -1,15 +1,16 @@
 import os
 import sys
 import time
+from typing import Any
 
 import O4_File_Names as FNAMES
 
-verbosity = 1
-red_flag = False
-is_working = False
-cleaning_level = 1
-gui = None
-log = True
+verbosity: int = 1
+red_flag: bool = False
+is_working: bool = False
+cleaning_level: int = 1
+gui: Any | None = None
+log: bool = True
 
 
 ################################################################################
@@ -38,12 +39,7 @@ def vprint(min_verbosity, *args):
 def logprint(*args):
     try:
         f = open(FNAMES.resource_path("Ortho4XP.log"), "a")
-        f.write(
-            time.strftime("%c")
-            + " | "
-            + " ".join([str(x) for x in args])
-            + "\n"
-        )
+        f.write(time.strftime("%c") + " | " + " ".join([str(x) for x in args]) + "\n")
         f.close()
     except:
         pass
@@ -59,9 +55,7 @@ def lvprint(min_verbosity, *args):
 
 ################################################################################
 def bug_report(*args):
-    logprint(
-        "An internal error occured. Please file a bug with lat/lon and cfg"
-    )
+    logprint("An internal error occured. Please file a bug with lat/lon and cfg")
     if args:
         logprint(*args)
 

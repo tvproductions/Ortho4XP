@@ -1,0 +1,16 @@
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  portability-*,
+  clang-analyzer-core.*,
+  clang-analyzer-deadcode.*,
+  clang-analyzer-security.ArrayBound,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-macro-parentheses,
+  -bugprone-narrowing-conversions,
+  -performance-no-int-to-ptr
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
+SystemHeaders: false

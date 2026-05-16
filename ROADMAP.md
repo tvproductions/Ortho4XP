@@ -9,6 +9,8 @@ This roadmap captures suggested improvements for the Ortho4XP codebase. Ortho4XP
 - Add automated validation for core geospatial, imagery, configuration, and native-tool workflows.
 - Improve diagnostics for users when external tools, imagery providers, or network services fail.
 - Reduce security and maintainability risks in provider parsing and broad exception handling.
+- **XP12 Engine Exploitation:** Native integration with physical 3D bathymetry, dynamic seasons, micro-soundscapes, and advanced lighting shaders by discarding legacy backward-compatibility paths.
+- **Hardware Maxxing:** Decouple from legacy single-threaded x86 binaries; route texture processing and geometry math through modern multi-core CPUs and discrete GPU hardware platforms (CUDA/Vulkan).
 
 ## Quick Wins
 
@@ -28,7 +30,7 @@ Start with Linux CI, then expand to Windows and macOS because Ortho4XP ships pla
 
 ### 2. Add a test suite
 
-Introduce `pytest` and a `tests/` directory. Focus first on deterministic logic that does not require network access, X-Plane, GDAL binaries, or imagery providers.
+Introduce a `unittest`-based `tests/` directory. Focus first on deterministic logic that does not require network access, X-Plane, GDAL binaries, or imagery providers.
 
 Good first test targets:
 
@@ -42,9 +44,11 @@ Good first test targets:
 
 Add modern Python project tooling configuration for:
 
-- Supported Python version range.
+- Supported Python 3.13+ version range.
+- `uv` dependency and environment management.
 - Ruff linting/formatting.
-- Pytest configuration.
+- `ty` type checking.
+- `unittest` discovery.
 - Optional development dependencies.
 
 This does not require fully packaging the application immediately, but it gives contributors a standard development entry point.
@@ -72,9 +76,12 @@ Examples:
 
 This will make user bug reports and support issues easier to diagnose.
 
+### 6. Eliminate Legacy Mesh Fallbacks & Hardcode 3D Bathymetry
+Remove all legacy X-Plane 11 water mapping mechanics (`water_tech = "XP11"` or `"XP11 + bathy"`). Rewrite the core mesh engine inside `src/O4_Mesh_Utils.py` to exclusively output X-Plane 12 physical 3D waterbed vector meshes. Intercept the triangulation loop to force strict validation against native elevation profiles; if the dataset fails to yield physical sub-surface bathymetric layer data, throw a hard compilation exception instead of defaulting to a flat, opaque terrain block. This ensures the simulator's native wave amplitude and light attenuation physics execute flawlessly.
+
 ## Medium-Term Improvements
 
-### 6. Centralize subprocess execution
+### 7. Centralize subprocess execution
 
 Ortho4XP calls several external tools, including:
 
@@ -96,7 +103,7 @@ Create a shared subprocess helper that:
 
 This would improve diagnostics for mesh generation, texture conversion, and packaging failures.
 
-### 7. Centralize logging
+### 8. Centralize logging
 
 The codebase currently mixes `print`, `UI.vprint`, `UI.lvprint`, `UI.logprint`, and silent exception handling.
 
@@ -108,7 +115,7 @@ A logging abstraction should support:
 - Verbosity levels.
 - Structured error reporting for batch builds.
 
-### 8. Add platform-specific CI jobs
+### 9. Add platform-specific CI jobs
 
 After the first Linux workflow is stable, add Windows and macOS CI to validate:
 
@@ -118,9 +125,9 @@ After the first Linux workflow is stable, add Windows and macOS CI to validate:
 - PyInstaller-related imports and paths.
 - GDAL-related installation assumptions.
 
-### 9. Improve dependency management
+### 10. Improve dependency management
 
-The project pins platform-specific dependencies in `requirements.txt`, including GDAL variants. Add documentation and validation around:
+The project pins platform-specific dependencies in `pyproject.toml` and `uv.lock`, including GDAL variants. Add documentation and validation around:
 
 - Supported Python versions.
 - Platform-specific GDAL installation requirements.
@@ -129,7 +136,7 @@ The project pins platform-specific dependencies in `requirements.txt`, including
 
 Consider separate constraint files per platform if one file becomes difficult to maintain.
 
-### 10. Add smoke tests for application startup
+### 11. Add smoke tests for application startup
 
 Add lightweight tests that verify:
 
@@ -139,9 +146,12 @@ Add lightweight tests that verify:
 - CLI argument validation works.
 - Required resource directories are detected cleanly.
 
+### 12. Native BC3 (DXT5) Coastal Alpha Texture Blending
+Overhaul mask generation inside `src/O4_Mask_Utils.py` to completely eliminate harsh, opaque coastline imagery thresholds. Replace the legacy linear falloff equations within the distance field matrices (`distance_masks_too`) with a smooth, progressive logarithmic alpha gradient. Force the texture compilation pipeline to encode water boundary sheets strictly using BC3 (DXT5) texture compression profiles with explicit alpha channel preservation, allowing X-Plane 12's native subsurface light scattering and dynamic deep-water shader to blend fluidly over shallow reef or sandbar orthophotos.
+
 ## Larger Refactors
 
-### 11. Separate GUI, CLI, and core build logic
+### 13. Separate GUI, CLI, and core build logic
 
 The current entry point and modules mix GUI state, CLI behavior, global flags, and build orchestration.
 
@@ -152,7 +162,7 @@ Long-term improvements:
 - Move tile build steps into a core library/API.
 - Make build steps callable and testable independently.
 
-### 12. Reduce global mutable state
+### 14. Reduce global mutable state
 
 Several modules rely on global state, such as provider dictionaries, UI flags, red/working flags, and imagery state.
 
@@ -163,7 +173,7 @@ Refactor gradually toward:
 - Dependency injection for paths, logging, and network clients.
 - Structured build results instead of global flags.
 
-### 13. Make import-time behavior minimal
+### 15. Make import-time behavior minimal
 
 Some modules perform platform detection, path setup, provider loading, or user-visible printing during import.
 
@@ -173,7 +183,7 @@ Move import-time side effects into explicit initialization functions so that:
 - Packaging behavior is easier to reason about.
 - Errors can be reported through consistent logging.
 
-### 14. Modernize provider definitions
+### 16. Modernize provider definitions
 
 Provider files are central to imagery handling. Improvements could include:
 
@@ -183,7 +193,7 @@ Provider files are central to imagery handling. Improvements could include:
 - Optional migration to TOML, JSON, or YAML.
 - Tests for known provider definitions.
 
-### 15. Improve error reporting for network and imagery failures
+### 17. Improve error reporting for network and imagery failures
 
 Imagery downloads depend on external servers and can fail due to 403, 404, 5xx, throttling, corrupt images, or provider changes.
 
@@ -194,9 +204,18 @@ Improve reporting by:
 - Summarizing failed textures at the end of a tile or batch build.
 - Making retry limits configurable and documented.
 
+### 18. Non-Destructive DSF Header Splicing (The Data Bridge)
+Refactor Step 4 (`build_dsf`) inside `src/Ortho4XP_v140.py` or the Ypsos pipeline orchestrator to stop emitting sterile, featureless terrain arrays. Implement a programmatic Python `subprocess` loop that uses the X-Plane SDK `DSFTool` to disassemble the default global scenery `.dsf` for the active coordinates into a temporary text string pool. Build a strict token parser block to extract native X-Plane 12 data vectors—specifically `ATTR_season` multi-raster configurations, localized regional autogen vegetation rules, airport terminal acoustic layers (`sound`), and runway surface friction variables—and prepend/stitch them natively back into the head of the custom ortho `.dsf` string array right before final binary packing.
+
+### 19. Automated sRGB Histogram & Color Normalization Pipeline
+Neutralize the "patchwork quilt" effect caused by stitching adjacent textures from varying imagery providers or differing satellite capture angles. Integrate an image-processing correction loop using OpenCV (`cv2`) or Pillow directly into the tile retrieval worker pipeline inside `src/O4_Imagery_Utils.py`. The function must extract the mean luminance and RGB color distributions from the edge pixels of a previously processed tile quadrant and apply an automated sRGB gamma transformation curve to newly downloaded sheets, flattening extreme exposure steps and neutralizing color drift prior to `.dds` baking.
+
+### 20. GPU-Accelerated Texture Encoding Engine
+Bypass legacy, single-threaded external CPU texturing binaries. Completely decouple texture tile sheet splitting and conversion paths inside `src/O4_Tile_Utils.py` from legacy single-threaded external executables (like serial `nvcompress` calls). Utilize Python's built-in `concurrent.futures` module to orchestrate massive parallel processing batches across host hardware threads, and implement direct hardware-accelerated wrapper configurations to offload the raw raster triangulation and format conversion tasks straight to discrete graphics processors (CUDA/Vulkan backends).
+
 ## Repository Health
 
-### 16. Add or verify project metadata
+### 21. Add or verify project metadata
 
 Recommended files and settings:
 
@@ -207,7 +226,7 @@ Recommended files and settings:
 - Pull request template.
 - GitHub topics such as `x-plane`, `scenery`, `orthophoto`, `gis`, and `flight-simulator`.
 
-### 17. Document development setup
+### 22. Document development setup
 
 Add a development section to `README.md` or a dedicated `CONTRIBUTING.md` covering:
 
@@ -219,7 +238,7 @@ Add a development section to `README.md` or a dedicated `CONTRIBUTING.md` coveri
 - Running lint/format checks.
 - Running the app from source.
 
-### 18. Publish release guidance
+### 23. Publish release guidance
 
 If this fork distributes packaged builds, document:
 
@@ -229,15 +248,20 @@ If this fork distributes packaged builds, document:
 - How packaged dependencies differ from source dependencies.
 - How to verify a release before publishing.
 
+### 24. Full Standalone Decoupling (Breakaway Playbook)
+
+In the event of upstream stagnation, completely sever backward compatibility ties. Purge all legacy UI widgets, deprecated X-Plane 11 formatting forks, and flat-water legacy codeblocks. Transition the core architecture to a headless, scriptable engine driven entirely by structured configuration files (JSON/TOML), allowing for automated, high-throughput batch tile compilation without graphical user interface overhead.
+
 ## Suggested First Pull Requests
 
 1. Add a basic GitHub Actions CI workflow for Linux.
-2. Add `pyproject.toml` with Ruff and Pytest configuration.
+2. Add `pyproject.toml` with uv, Ruff, ty, and unittest configuration.
 3. Add initial unit tests for path helpers, provider parsing, and coordinate conversions.
 4. Replace `eval` in provider parsing with safe parsing.
 5. Improve subprocess error messages for mesh generation and texture conversion.
 6. Replace the most common bare `except:` blocks in high-traffic modules.
 7. Add development setup documentation.
+8. Enforce Global `water_tech = 'XP12'` and Purge Legacy Flags.
 
 ## Success Metrics
 
@@ -250,3 +274,5 @@ The roadmap is working if:
 - Core utility functions have unit test coverage.
 - Native utility build or availability is validated automatically.
 - Cross-platform behavior is checked regularly in CI.
+- Pristine coastal transitions are generated natively with dynamic water shaders.
+- High-fidelity ortho layers maintain native dynamic winter/spring seasonal shifts.

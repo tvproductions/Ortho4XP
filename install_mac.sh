@@ -21,16 +21,10 @@ echo "Setting up Ortho4XP...."
 echo " "
 
 # Install software dependencies from brew
-brew install python python-tk spatialindex p7zip proj gdal
+brew install python@3.13 python-tk@3.13 spatialindex p7zip proj gdal uv
 
-# Create a Python virtual environment
-python3 -m venv venv
-
-# Activate the Python virtual environment
-source venv/bin/activate
-
-# Install Python dependencies
-pip install -r requirements.txt
+# Create and sync the Python environment
+uv sync --dev
 
 # Allow macOS to run required tools
 xattr -dr com.apple.quarantine ./Utils/mac/*

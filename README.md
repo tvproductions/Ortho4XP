@@ -85,11 +85,31 @@ For installation instructions, refer to the [Installation page](https://github.c
 
 ## Development
 
+Contributor setup and validation details are in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Create and sync the development environment with:
+
+```bash
+uv sync --dev
+```
+
+The repository pins local development to Python 3.13 through `.python-version`.
+
 Run the deterministic unit test suite with:
 
 ```bash
-python -m unittest discover -s tests
+uv run python -m unittest discover -s tests
 ```
+
+Build the native `Triangle4XP` helper with the LLVM/Clang preset:
+
+```bash
+clang-tidy --verify-config
+cmake --preset llvm-release -S Utils
+cmake --build Utils/build/llvm-release --target Triangle4XP
+```
+
+Continuous integration runs the Python checks and `Triangle4XP` LLVM/Clang build on Ubuntu, x64 Windows, and Apple Silicon macOS GitHub-hosted runners. The Windows job uses GitHub's standard x64 runner because the hosted Windows 11 runner is arm64, while this repository currently ships `win_amd64` dependency wheels.
 
 ## Support
 

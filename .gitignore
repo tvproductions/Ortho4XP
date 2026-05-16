@@ -11,8 +11,10 @@ Previews/
 Extents/Auto
 tmp/
 Tiles/
+.venv/
 venv*/
 **/Ortho4XP.log
+Ortho4XP.cfg
 **/__pycache__
 **/Thumbs.db
 **/*.bak

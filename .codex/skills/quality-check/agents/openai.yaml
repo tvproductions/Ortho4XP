@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quality Check"
+  short_description: "Run Ortho4XP's full quality gate."
+  default_prompt: "Run quality checks for the current Ortho4XP changes."

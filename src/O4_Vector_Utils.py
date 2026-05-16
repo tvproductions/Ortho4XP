@@ -12,8 +12,8 @@ import O4_Geo_Utils as GEO
 # the interval [0,1] for maximal floating point precision), we need to introduce
 # a metric for that purpose. We assume the base coordinates are orthogonal and
 # simple potentially have different scales.
-scalx = 1
-scaly = 1
+scalx: float = 1
+scaly: float = 1
 # These parameters are meant to be updated at runtime by the program, typically
 # with scaly=1 and scalx=cos(lat*pi/180).
 
@@ -38,9 +38,9 @@ scaly = 1
 # MultiLineStrings or MultiPolygons as defined in the SHAPELY Python module by
 # Sean Gillies.
 
+
 ################################################################################
 class Vector_Map:
-
     dico_attributes = {
         "DUMMY": 0,
         "WATER": 1,
@@ -135,10 +135,10 @@ class Vector_Map:
             # check for encroachment, slightly different than intersection, see
             # the details below in the function definition
             coeffs = self.are_encroached(
-                numpy.array(self.nodes_dico[id0], dtype = float),
-                numpy.array(self.nodes_dico[id1], dtype = float),
-                numpy.array(self.nodes_dico[id2], dtype = float),
-                numpy.array(self.nodes_dico[id3], dtype = float),
+                numpy.array(self.nodes_dico[id0], dtype=float),
+                numpy.array(self.nodes_dico[id1], dtype=float),
+                numpy.array(self.nodes_dico[id2], dtype=float),
+                numpy.array(self.nodes_dico[id3], dtype=float),
             )
             # coeffs=[]
             if not coeffs:
@@ -153,9 +153,9 @@ class Vector_Map:
                         1
                     ] + alpha * self.nodes_dico[id1][1]
                     # ! important to rely on the old id2 id3 for the z value !
-                    c_z = (1 - beta) * self.data_nodes[
-                        id2
-                    ] + beta * self.data_nodes[id3]
+                    c_z = (1 - beta) * self.data_nodes[id2] + beta * self.data_nodes[
+                        id3
+                    ]
                     c_id = self.insert_node(c_x, c_y, c_z)
                     # destroy old edge
                     del self.dico_edges[(id2, id3)]
@@ -173,9 +173,7 @@ class Vector_Map:
                 id_list.append(c_id)
             else:  # parallel encroachment
                 (alpha0, alpha1, beta0, beta1) = coeffs
-                ordered_data = sorted(
-                    zip((beta0, beta1, 0, 1), (id0, id1, id2, id3))
-                )
+                ordered_data = sorted(zip((beta0, beta1, 0, 1), (id0, id1, id2, id3)))
                 for i in range(1, 3):
                     if ordered_data[i][0] > 0 and ordered_data[i][0] < 1:
                         # destroy old edge
@@ -290,7 +288,9 @@ class Vector_Map:
                 )
                 and (alpha, beta)
             )
-        elif abs(ab[0] * ac[1] - ab[1] * ac[0]) > eps * numpy.linalg.norm(ab) * numpy.linalg.norm(ac):
+        elif abs(ab[0] * ac[1] - ab[1] * ac[0]) > eps * numpy.linalg.norm(
+            ab
+        ) * numpy.linalg.norm(ac):
             # ad and bc are parallel but not colinear
             return False
         else:
@@ -304,7 +304,7 @@ class Vector_Map:
                 and (alpha0 < oneminuseps or alpha1 < oneminuseps)
                 and (alpha0, alpha1, beta0, beta1)
             )
-    
+
     def are_encroached_old(self, a, b, c, d):
         # A crucial one !
         # returns False if the only mutual points of the closed segments a->b
@@ -350,12 +350,14 @@ class Vector_Map:
         else:
             g_idx = numpy.argmax(abs(a - b))
             d_idx = numpy.argmax(abs(c - d))
-            alpha0, alpha1 = (a - c)[g_idx] / (a - b)[g_idx], (a - d)[g_idx] / (
-                a - b
-            )[g_idx]
-            beta0, beta1 = (c - a)[d_idx] / (c - d)[d_idx], (c - b)[d_idx] / (
-                c - d
-            )[d_idx]
+            alpha0, alpha1 = (
+                (a - c)[g_idx] / (a - b)[g_idx],
+                (a - d)[g_idx] / (a - b)[g_idx],
+            )
+            beta0, beta1 = (
+                (c - a)[d_idx] / (c - d)[d_idx],
+                (c - b)[d_idx] / (c - d)[d_idx],
+            )
             return (
                 (alpha0 > 0 or alpha1 > 0)
                 and (alpha0 < 1 or alpha1 < 1)
@@ -408,9 +410,7 @@ class Vector_Map:
                     if refine:
                         way = refine_way(way, refine)
                     alti_way = pol_to_alt(way).reshape((len(way), 1))
-                    self.insert_way(
-                        numpy.hstack([way, alti_way]), marker, check
-                    )
+                    self.insert_way(numpy.hstack([way, alti_way]), marker, check)
                 try:
                     if marker in self.seeds:
                         self.seeds[marker].append(
@@ -487,21 +487,19 @@ class Vector_Map:
                 nodes_dico_new[idx_new] = key_new
                 data_nodes_new[idx_new] = self.data_nodes[self.dico_nodes[key]]
             dico_old_to_new[self.dico_nodes[key]] = idx_new
-        for (id0, id1) in self.dico_edges:
+        for id0, id1 in self.dico_edges:
             (id0n, id1n) = (dico_old_to_new[id0], dico_old_to_new[id1])
             if id0n == id1n:
                 continue
             if (id0n, id1n) in dico_edges_new:
                 eid = dico_edges_new[(id0n, id1n)]
                 data_edges_new[eid] = (
-                    data_edges_new[eid]
-                    | self.data_edges[self.dico_edges[(id0, id1)]]
+                    data_edges_new[eid] | self.data_edges[self.dico_edges[(id0, id1)]]
                 )  # bitwise add new marker if necessary
             elif (id1n, id0n) in dico_edges_new:
                 eid = dico_edges_new[(id1n, id0n)]
                 data_edges_new[eid] = (
-                    data_edges_new[eid]
-                    | self.data_edges[self.dico_edges[(id0, id1)]]
+                    data_edges_new[eid] | self.data_edges[self.dico_edges[(id0, id1)]]
                 )  # bitwise add new marker if necessary
             else:
                 dico_edges_new[(id0n, id1n)] = next_edge_id
@@ -581,10 +579,7 @@ class Vector_Map:
         idx = 1
         for hole in self.holes:
             f.write(
-                str(idx)
-                + " "
-                + " ".join(["{:.15f}".format(h) for h in hole])
-                + "\n"
+                str(idx) + " " + " ".join(["{:.15f}".format(h) for h in hole]) + "\n"
             )
             idx += 1
         total_seeds = numpy.sum([len(self.seeds[key]) for key in self.seeds])
@@ -631,16 +626,12 @@ def split_polygon(input_pol, max_size, count=0):
         # subpols2 = input_pol.intersection(geometry.box(xmin,ycut,xmax,ymax))
     tmp_val = []
     for subpol in (
-        subpols1
-        if isinstance(subpols1, geometry.GeometryCollection)
-        else [subpols1]
+        subpols1 if isinstance(subpols1, geometry.GeometryCollection) else [subpols1]
     ):
         if isinstance(subpol, (geometry.Polygon, geometry.MultiPolygon)):
             tmp_val.extend(split_polygon(subpol, max_size, count + 1))
     for subpol in (
-        subpols2
-        if isinstance(subpols2, geometry.GeometryCollection)
-        else [subpols2]
+        subpols2 if isinstance(subpols2, geometry.GeometryCollection) else [subpols2]
     ):
         if isinstance(subpol, (geometry.Polygon, geometry.MultiPolygon)):
             tmp_val.extend(split_polygon(subpol, max_size, count + 1))
@@ -679,9 +670,7 @@ def MultiPolygon_to_Indexed_Polygons(multipol, merge_overlappings=True):
             idx_pol.delete(polid, dico_pol[polid].bounds)
             dico_pol.pop(polid, None)
         for pol in (
-            merged_pols.geoms
-            if "Multi" in merged_pols.geom_type
-            else [merged_pols]
+            merged_pols.geoms if "Multi" in merged_pols.geom_type else [merged_pols]
         ):
             assert isinstance(pol, geometry.Polygon)
             for subpol in [pol]:  # in split_polygon(merged_pols,10):
@@ -718,9 +707,7 @@ def MultiPolygon_to_Indexed_Polygons(multipol, merge_overlappings=True):
             done += 1
             continue
         if not pol.is_valid:
-            UI.logprint(
-                "Invalid polygon detected at", list(pol.exterior.coords)[0]
-            )
+            UI.logprint("Invalid polygon detected at", list(pol.exterior.coords)[0])
             done += 1
             continue
         if merge_overlappings:
@@ -736,9 +723,7 @@ def MultiPolygon_to_Indexed_Polygons(multipol, merge_overlappings=True):
 
 
 ################################################################################
-def cut_to_tile(
-    input_geometry, xmin=0, xmax=1, ymin=0, ymax=1, strictly_inside=False
-):
+def cut_to_tile(input_geometry, xmin=0, xmax=1, ymin=0, ymax=1, strictly_inside=False):
     if not strictly_inside:
         return input_geometry.intersection(
             geometry.Polygon(
@@ -800,8 +785,11 @@ def ensure_MultiLineString(input_geometry):
     elif input_geometry.geom_type in ["LineString", "LinearRing"]:
         return geometry.MultiLineString([input_geometry])
     elif "Collection" in input_geometry.geom_type:
-        valid_lines = [line for line in input_geometry.geoms
-                        if line.geom_type in ["LineString", "LinearRing"]]
+        valid_lines = [
+            line
+            for line in input_geometry.geoms
+            if line.geom_type in ["LineString", "LinearRing"]
+        ]
         return geometry.MultiLineString(valid_lines or [])
     else:
         return geometry.MultiLineString()
@@ -888,9 +876,7 @@ def coastline_to_MultiPolygon(coastline, lat, lon, custom_source=False):
             tmp = list(line.coords)
             if (
                 numpy.min(
-                    numpy.abs(
-                        [tmp[0][0] - int(tmp[0][0]), tmp[0][1] - int(tmp[0][1])]
-                    )
+                    numpy.abs([tmp[0][0] - int(tmp[0][0]), tmp[0][1] - int(tmp[0][1])])
                 )
                 > 0.00001
             ):
@@ -958,16 +944,11 @@ def coastline_to_MultiPolygon(coastline, lat, lon, custom_source=False):
                 return geometry.MultiPolygon()
     if not bdpolys:  # and islands:
         bdpolys.append([(0, 0), (0, 1), (1, 1), (1, 0)])
-    outpol = ops.unary_union(
-        [geometry.Polygon(bdpoly).buffer(0) for bdpoly in bdpolys]
-    )
+    outpol = ops.unary_union([geometry.Polygon(bdpoly).buffer(0) for bdpoly in bdpolys])
     inpol = ensure_MultiPolygon(
         cut_to_tile(
             ops.unary_union(
-                [
-                    geometry.Polygon(loop).buffer(0)
-                    for loop in islands + interior_seas
-                ]
+                [geometry.Polygon(loop).buffer(0) for loop in islands + interior_seas]
             )
         )
     )
@@ -978,9 +959,9 @@ def coastline_to_MultiPolygon(coastline, lat, lon, custom_source=False):
 def bd_coord(pt):
     # distance along the boundary of the unit square in cw direction starting
     # from (0,0)
-    return geometry.LineString(
-        [(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]
-    ).project(geometry.Point(pt))
+    return geometry.LineString([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]).project(
+        geometry.Point(pt)
+    )
 
 
 ################################################################################
@@ -998,9 +979,7 @@ def bd_point(coord):
 def length_in_meters(way_or_geometry):
     if isinstance(way_or_geometry, numpy.ndarray):
         return (
-            affinity.scale(
-                geometry.LineString(way_or_geometry), scalx, 1
-            ).length
+            affinity.scale(geometry.LineString(way_or_geometry), scalx, 1).length
             * GEO.lat_to_m
         )
     else:
@@ -1026,9 +1005,7 @@ def improved_buffer(
     simplify_length *= GEO.m_to_lat
     if show_progress:
         UI.progress_bar(1, 0)
-    input_geometry = affinity.affine_transform(
-        input_geometry, [scalx, 0, 0, 1, 0, 0]
-    )
+    input_geometry = affinity.affine_transform(input_geometry, [scalx, 0, 0, 1, 0, 0])
     output_geometry = input_geometry.buffer(
         buffer_width + separation_width,
         join_style=2,
@@ -1078,9 +1055,7 @@ def weighted_normals(way, side="left"):  # normalized in the given metric
     tg = tg / (1e-6 + numpy.linalg.norm(tg, axis=1)).reshape(N - 1, 1)
     tg = numpy.vstack([tg, tg[-1]])
     if N > 2:
-        scale = 1e-6 + numpy.linalg.norm(tg[1:-1] + tg[:-2], axis=1).reshape(
-            N - 2, 1
-        )
+        scale = 1e-6 + numpy.linalg.norm(tg[1:-1] + tg[:-2], axis=1).reshape(N - 2, 1)
         tg[1:-1] = (tg[1:-1] + tg[:-2]) / (scale)
         if (way[0] == way[-1]).all():
             scale = 1e-6 + numpy.linalg.norm(tg[0] + tg[-1])
@@ -1112,11 +1087,7 @@ def refine_way(way, max_length):  # max_length assumed in meter
     for i in range(len(way) - 1):
         new_way.append(way[i])
         ins = int(
-            sqrt(
-                numpy.sum(
-                    (way[i] - way[i + 1]) ** 2 * numpy.array([[scalx ** 2, 1]])
-                )
-            )
+            sqrt(numpy.sum((way[i] - way[i + 1]) ** 2 * numpy.array([[scalx**2, 1]])))
             * GEO.lat_to_m
             // max_length
         )
@@ -1138,8 +1109,8 @@ def refine_way(way, max_length):  # max_length assumed in meter
 ################################################################################
 def projcoords(way, A, B):
     return numpy.sum(
-        (way - A) * (B - A) * numpy.array([scalx ** 2, 1]), axis=1
-    ) / numpy.sum((B - A) * (B - A) * numpy.array([scalx ** 2, 1]))
+        (way - A) * (B - A) * numpy.array([scalx**2, 1]), axis=1
+    ) / numpy.sum((B - A) * (B - A) * numpy.array([scalx**2, 1]))
 
 
 ################################################################################
@@ -1158,15 +1129,13 @@ def point_to_segment_distance(way, A, B):
                     - (
                         A
                         + numpy.outer(
-                            numpy.maximum(
-                                numpy.minimum(1, projcoords(way, A, B)), 0
-                            ),
+                            numpy.maximum(numpy.minimum(1, projcoords(way, A, B)), 0),
                             (B - A),
                         )
                     )
                 )
                 ** 2
-                * numpy.array([scalx ** 2, 1]),
+                * numpy.array([scalx**2, 1]),
                 axis=1,
             )
         )
@@ -1197,9 +1166,7 @@ def least_square_fit_altitude_along_way(way, steps, dem, weights=False):
         )
     else:
         w = (
-            numpy.maximum(
-                numpy.arange(steps + 1), steps - numpy.arange(steps + 1)
-            )
+            numpy.maximum(numpy.arange(steps + 1), steps - numpy.arange(steps + 1))
             + steps // 2
         ) ** 2
         return (
@@ -1242,6 +1209,7 @@ def least_square_fit_altitude_along_way(way, steps, dem, weights=False):
 #             scipy.interpolate.splrep(numpy.arange(steps + 1) / steps, tmp, w=w),
 #         )
 
+
 ################################################################################
 def weighted_alt(node, alt_idx, alt_dico, dem):
     eps1 = 0.003
@@ -1255,9 +1223,7 @@ def weighted_alt(node, alt_idx, alt_dico, dem):
         dist = pt.distance(linestring) * GEO.lat_to_m
         weight = numpy.exp(-dist / (2 * width))
         alti += (
-            numpy.polyval(
-                leastsquarefit, linestring.project(pt, normalized=True)
-            )
+            numpy.polyval(leastsquarefit, linestring.project(pt, normalized=True))
             * weight
         )
         # alti+=scipy.interpolate.splev(linestring.project(
@@ -1353,11 +1319,9 @@ def point_in_polygon(point, polygon):
     elif change in [-3, 3]:
         winding_nbr += (-1) * change / 3
     elif change in [-2, 2]:
-        if (polygon[2 * len(quadrants) - 2] - point[0]) * (
-            polygon[1] - point[1]
-        ) - (polygon[2 * len(quadrants) - 1] - point[1]) * (
-            polygon[0] - point[0]
-        ) >= 0:
+        if (polygon[2 * len(quadrants) - 2] - point[0]) * (polygon[1] - point[1]) - (
+            polygon[2 * len(quadrants) - 1] - point[1]
+        ) * (polygon[0] - point[0]) >= 0:
             winding_nbr += 2
         else:
             winding_nbr += -2
