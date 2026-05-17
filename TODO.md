@@ -182,6 +182,30 @@ Acceptance criteria:
 
 Suggested labels: `providers`, `schema`, `dependencies`
 
+### TODO-008-2: Add Complexity and Maintainability Quality Gates
+
+Status: Done
+
+GitHub Issue: #26 (closed)
+
+Add gzkit-style code quality gates for Python complexity and maintainability
+without introducing a gzkit runtime dependency.
+
+Acceptance criteria:
+
+- Evaluates Xenon/Radon for cyclomatic complexity and maintainability reporting.
+- Adds any accepted tool as a development dependency only.
+- Defines initial thresholds that are realistic for the legacy Ortho4XP codebase.
+- Runs the gate on changed Python files first, with a documented path to expand
+  coverage.
+- Integrates the gate into repo-local quality-check and repo-hygiene
+  skills/scripts.
+- Documents local commands in `AGENTS.md` and contributor docs.
+- Adds tests or fixtures around any wrapper script behavior.
+- Does not add a gzkit dependency.
+
+Suggested labels: `quality`, `dependencies`
+
 ### TODO-009: Replace Common Bare Exception Handlers
 
 GitHub Issue: #4

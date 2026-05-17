@@ -19,6 +19,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "cohesion>=1.0,<2.0",
+  "lizard>=1.17,<2.0",
+  "radon>=6.0,<7.0",
   "ruff",
   "ty",
 ]

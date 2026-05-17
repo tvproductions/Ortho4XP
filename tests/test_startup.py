@@ -32,6 +32,13 @@ class StartupSmokeTests(unittest.TestCase):
                     module = importlib.import_module(module_name)
                 self.assertIsNotNone(module)
 
+    def test_custom_url_provider_module_loads_without_warning(self):
+        with contextlib.redirect_stdout(io.StringIO()) as stdout:
+            imagery = importlib.import_module("O4_Imagery_Utils")
+
+        self.assertTrue(imagery.has_URL)
+        self.assertNotIn("O4_Custom_URL.py contains invalid code", stdout.getvalue())
+
     def test_provider_dictionaries_initialize(self):
         imagery = importlib.import_module("O4_Imagery_Utils")
 

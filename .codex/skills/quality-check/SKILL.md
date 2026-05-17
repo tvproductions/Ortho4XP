@@ -11,48 +11,30 @@ Run one coherent quality gate for Ortho4XP changes. Collect deterministic eviden
 
 ## Workflow
 
-1. Inspect the workspace:
+1. Run the full quality check:
 
    ```powershell
-   git status --short --branch
-   git diff --stat
-   git diff --cached --stat
-   git diff --name-only --diff-filter=ACMRTUXB HEAD -- "*.py"
+   uv run python .codex/skills/quality-check/scripts/quality_check.py
    ```
 
-2. Run the Python baseline:
+2. Refresh the complexity baseline only after intentionally accepting the current legacy envelope:
 
    ```powershell
-   uv run python -m unittest discover -s tests
-   uv run ruff check Ortho4XP.py src tests
-   uv run ty check tests src/O4_Geo_Utils.py src/O4_File_Names.py
+   uv run python .codex/skills/quality-check/scripts/quality_check.py --complexity-only --scope all --write-complexity-baseline
    ```
 
-3. For changed Python files, also run:
+3. For Python-only iteration, run:
 
    ```powershell
-   uv run ruff format --check <changed-python-files>
-   uv run ty check <changed-python-files>
-   ```
-
-4. For docs, workflow, or config changes, run:
-
-   ```powershell
-   git diff --check
-   ```
-
-5. For native C/CMake changes, run:
-
-   ```powershell
-   clang-tidy --verify-config
-   cmake --preset llvm-release -S Utils
-   cmake --build Utils/build/llvm-release --target Triangle4XP
+   uv run python .codex/skills/quality-check/scripts/quality_check.py --skip-native
    ```
 
 ## Rules
 
 - Use `uv`, Ruff, ty, and `unittest`; do not introduce alternate test runners or dependency managers.
-- Format only changed Python files unless the user explicitly asks for repo-wide formatting.
+- The full quality check runs repo-wide Ruff lint, Ruff format checks for changed Python files and skill scripts, ty baseline, changed-file ty, unittest, whitespace checks, Radon/Lizard/Cohesion complexity checks, and LLVM/CMake native checks.
+- Complexity thresholds live in `complexity-thresholds.json`; accepted legacy findings live in `complexity-baseline.json`.
+- Complexity regressions fail the quality check when a finding becomes worse than baseline or a new block-level finding appears.
 - Do not copy build outputs into bundled platform tool directories unless the user is intentionally refreshing release tools.
 - Report skipped checks clearly with the reason.
 

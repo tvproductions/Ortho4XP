@@ -242,6 +242,20 @@ def scan_forbidden_patterns() -> None:
         raise SystemExit("Forbidden legacy pattern found. See rg output above.")
 
 
+def run_complexity_quality(scope: str) -> None:
+    run(
+        [
+            "uv",
+            "run",
+            "python",
+            ".codex/skills/quality-check/scripts/quality_check.py",
+            "--complexity-only",
+            "--scope",
+            scope,
+        ]
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run Ortho4XP hygiene checks.")
     parser.add_argument(
@@ -265,6 +279,7 @@ def main() -> int:
     run(["uv", "run", "ruff", "format", "--check", *format_check_targets(changed)])
     if changed:
         run(["uv", "run", "ty", "check", *changed])
+    run_complexity_quality("all" if full else "changed")
 
     if full:
         native = changed_native_files()

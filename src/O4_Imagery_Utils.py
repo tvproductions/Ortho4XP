@@ -1,6 +1,7 @@
 import ast
 from dataclasses import dataclass
 import importlib
+import importlib.util
 import io
 import os
 import queue
@@ -33,14 +34,19 @@ try:
     URL = importlib.import_module("O4_Custom_URL")
 
     has_URL = True
-except:
+except Exception:
     try:
-        # module loaded from a subdirectory of Extent for extent creation
-        sys.path.append(os.path.join("../../Providers"))
-        URL = importlib.import_module("O4_Custom_URL")
-
+        provider_url_path = Path(FNAMES.Provider_dir) / "O4_Custom_URL.py"
+        spec = importlib.util.spec_from_file_location(
+            "O4_Custom_URL", provider_url_path
+        )
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Could not load {provider_url_path}")
+        URL = importlib.util.module_from_spec(spec)
+        sys.modules["O4_Custom_URL"] = URL
+        spec.loader.exec_module(URL)
         has_URL = True
-    except:
+    except Exception:
         print(
             "ERROR: Providers/O4_Custom_URL.py contains invalid code.",
             "The corresponding providers won't probably work.",
