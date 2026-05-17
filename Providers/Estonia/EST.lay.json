@@ -1,0 +1,31 @@
+{
+  "request_type": "tms",
+  "epsg_code": 3301,
+  "top_left_corner": [
+    -211000.0,
+    5732000.0
+  ],
+  "resolutions": [
+    6000.0,
+    3000.0,
+    1500.0,
+    750.0,
+    375.0,
+    187.5,
+    93.75,
+    46.875,
+    23.4375,
+    11.71875,
+    5.859375,
+    2.9296875,
+    1.46484375,
+    0.732421875,
+    0.3662109375,
+    0.18310546875
+  ],
+  "tile_size": 256,
+  "url_template": "https://pump.reach-u.com/delfi-orto/{zoom}/{x}/{|y|}",
+  "max_threads": 16,
+  "imagery_dir": "code",
+  "in_GUI": false
+}

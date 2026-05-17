@@ -159,16 +159,20 @@ Suggested labels: `providers`, `schema`, `reliability`
 
 ### TODO-008-1: Migrate Provider Definitions to JSON and Evaluate Pydantic
 
-Status: Planned
+Status: Done
 
-GitHub Issue: #3
+GitHub Issue: #3 (closed)
 
 Move provider source files from the legacy `.lay` key/value format to JSON and
 decide whether Pydantic should own provider validation.
 
+Completed by adopting Pydantic v2 as a runtime dependency, converting checked-in
+provider definitions to JSON, committing generated JSON Schema documentation,
+and removing the legacy `.lay` runtime parser.
+
 Acceptance criteria:
 
-- Converts checked-in provider definitions from `.lay` to `.json`.
+- Converts checked-in provider definitions from `.lay` to `.lay.json`.
 - Preserves provider codes, directories, runtime defaults, and downstream
   `providers_dict` behavior.
 - Represents booleans, integers, float arrays, and header dictionaries as native
@@ -205,6 +209,72 @@ Acceptance criteria:
 - Does not add a gzkit dependency.
 
 Suggested labels: `quality`, `dependencies`
+
+### TODO-008-3: Extend Pydantic to Configuration and Source Data
+
+Status: Done
+
+GitHub Issue: #27 (closed)
+
+Apply the provider-model pattern to the remaining structured inputs that still
+depend on ad hoc parsing, `exec`, or loosely typed dictionaries, and move all
+repo-owned structured source data to JSON.
+
+Completed by adding Pydantic models for source data and config values,
+renaming provider JSON files to `<name>.lay.json`, converting extents, filters,
+and combined providers to double-extension JSON, generating schemas, and adding
+loader/config compatibility tests.
+
+Acceptance criteria:
+
+- Defines Pydantic models for global and tile configuration values currently
+  described by `O4_Cfg_Vars.py`.
+- Replaces config-file value coercion and assignment paths in
+  `O4_Config_Utils.py` with validated model updates, without breaking existing
+  `Ortho4XP.cfg` or per-tile `.cfg` files.
+- Models custom zoom zone entries so `zone_list` parsing no longer needs
+  compatibility `exec` paths.
+- Migrates remaining repo-owned structured source formats to JSON, including
+  extent `.ext`, color filter `.flt`, and combined provider `.comb` data.
+- Preserves legacy format provenance with double-extension JSON filenames, such
+  as `<name>.ext.json`, `<name>.flt.json`, `<name>.lay.json`, and
+  `<name>.comb.json`, while the runtime loader reads JSON only for repo-owned
+  source data.
+- Verifies the recently migrated provider `.lay` data remains JSON-backed and
+  does not reintroduce `.lay` parsing.
+- Generates schema documentation for every JSON-backed structured source format.
+- Adds `unittest` coverage for valid files, malformed files, type errors,
+  unknown fields, JSON migration parity, and legacy user-config compatibility
+  behavior.
+
+Suggested labels: `schema`, `config`, `reliability`
+
+### TODO-008-04: Consolidate Native Triangle Sources
+
+Status: Done
+
+GitHub Issue: #28 (closed)
+
+Consolidate the native Triangle source surface after confirming Python only
+binds to the built `Triangle4XP` and `triangle` executables.
+
+Completed by removing the unbound `Triangle4XP_v130.c` historical source,
+keeping `Triangle4XP.c` and `triangle.c` as CMake-built native targets,
+documenting the runtime relationship in `Utils/src/README.md`, and preserving
+repo-scope native quality checks against the CMake compile database.
+
+Acceptance criteria:
+
+- Removes the unbound `Triangle4XP_v130` source from active repo/build
+  surfaces unless a current runtime requirement is found.
+- Keeps the production `Triangle4XP` and generic `triangle` native utilities
+  buildable through CMake.
+- Documents the remaining native source files and their runtime relationship to
+  Python.
+- Keeps `quality-check` running against the repo native build graph.
+- Verifies with the full repository quality check.
+
+Suggested labels: `native`, `quality`, `cleanup`
 
 ### TODO-009: Replace Common Bare Exception Handlers
 

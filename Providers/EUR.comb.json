@@ -1,0 +1,170 @@
+[
+  {
+    "layer_code": "GeoPunt2012",
+    "extent_code": "Vlanderen",
+    "color_code": "none",
+    "priority": "high"
+  },
+  {
+    "layer_code": "FIN",
+    "extent_code": "Finland",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CH_ZH",
+    "extent_code": "Zurich",
+    "color_code": "none",
+    "priority": "high"
+  },
+  {
+    "layer_code": "CH_VS",
+    "extent_code": "Valais",
+    "color_code": "none",
+    "priority": "high"
+  },
+  {
+    "layer_code": "NIB",
+    "extent_code": "Norway",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "SE2",
+    "extent_code": "Sweden",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "DK",
+    "extent_code": "Denmark",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "Arc@",
+    "extent_code": "Ireland",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "Arc@",
+    "extent_code": "UK",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "DOP40",
+    "extent_code": "Germany",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "PL",
+    "extent_code": "Poland",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CZ",
+    "extent_code": "Czechia",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CZ",
+    "extent_code": "Slovakia",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "NL",
+    "extent_code": "Netherlands",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "BE_Fr",
+    "extent_code": "Wallonie",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "Lux",
+    "extent_code": "Luxembourg",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "FRorth",
+    "extent_code": "France",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CH",
+    "extent_code": "Switzerland",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "OST",
+    "extent_code": "Austria",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "HU",
+    "extent_code": "Hungary",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "PCN06",
+    "extent_code": "Italy",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "SLO",
+    "extent_code": "Slovenia",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CRO_2016",
+    "extent_code": "CRO_2016",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CRO_2017",
+    "extent_code": "CRO_2017",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "CRO_2011",
+    "extent_code": "CRO_add2011",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "SP",
+    "extent_code": "Spain",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "Arc@",
+    "extent_code": "Andorra",
+    "color_code": "none",
+    "priority": "medium"
+  },
+  {
+    "layer_code": "Arc@",
+    "extent_code": "Portugal",
+    "color_code": "none",
+    "priority": "medium"
+  }
+]

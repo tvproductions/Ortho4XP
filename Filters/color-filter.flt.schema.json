@@ -1,0 +1,30 @@
+{
+  "$defs": {
+    "ColorFilterStep": {
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "title": "Operation",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Parameters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operation"
+      ],
+      "title": "ColorFilterStep",
+      "type": "object"
+    }
+  },
+  "items": {
+    "$ref": "#/$defs/ColorFilterStep"
+  },
+  "title": "ColorFilterDefinition",
+  "type": "array"
+}

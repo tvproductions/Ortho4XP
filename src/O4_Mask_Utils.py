@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import time
@@ -969,34 +970,9 @@ if __name__ == "__main__":
         name, pixel_size, grid_size_or_bbox
     )
     print("Mask size : ", mask_im.size, "pixels.")
-    buffer = ""
-    try:
-        f = open(name + ".ext", "r")
-        for line in f.readlines():
-            if ("#" not in line) or query:
-                continue
-            if "Initially" not in line:
-                buffer += "# Initially c" + line[3:]
-            else:
-                buffer += line
-        f.close()
-    except:
-        pass
-    buffer += "# Created with : " + " ".join(sys.argv) + "\n"
-    buffer += (
-        "mask_bounds="
-        + str(xmin)
-        + ","
-        + str(ymin)
-        + ","
-        + str(xmax)
-        + ","
-        + str(ymax)
-        + "\n"
-    )
-    f = open(name + ".ext", "w")
-    f.write(buffer)
-    f.close()
+    with open(name + ".ext.json", "w", encoding="utf-8") as f:
+        json.dump({"mask_bounds": [xmin, ymin, xmax, ymax]}, f, indent=2)
+        f.write("\n")
     if buffer_width:
         UI.vprint(1, "Buffer of the mask...")
         mask_im = mask_im.filter(ImageFilter.GaussianBlur(buffer_width / 4))

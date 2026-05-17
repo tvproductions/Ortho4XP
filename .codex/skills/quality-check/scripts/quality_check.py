@@ -31,6 +31,18 @@ FORMAT_BASELINE = [
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
 ]
+XENON_MAX_ABSOLUTE = "C"
+XENON_MAX_MODULES = "C"
+XENON_MAX_AVERAGE = "C"
+XENON_QUALITY_TARGETS = [
+    ".codex/skills/quality-check/scripts/quality_check.py",
+    ".codex/skills/repo-hygiene/scripts/hygiene.py",
+    "src/O4_Config_Models.py",
+    "src/O4_Source_Data_Models.py",
+    "tests/test_config_models.py",
+    "tests/test_provider_parsing.py",
+    "tests/test_quality_check.py",
+]
 NATIVE_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
 NATIVE_PATHS = ["Utils/src"]
 LLVM_TOOL_DIRS = [
@@ -139,6 +151,10 @@ def complexity_targets(scope: str) -> list[str]:
 
 def format_check_targets(changed: list[str]) -> list[str]:
     return existing_paths(list(dict.fromkeys([*changed, *FORMAT_BASELINE])))
+
+
+def xenon_quality_targets() -> list[str]:
+    return existing_paths(XENON_QUALITY_TARGETS)
 
 
 def load_thresholds(path: Path = THRESHOLDS_PATH) -> dict[str, dict[str, float | str]]:
@@ -464,6 +480,7 @@ def print_complexity_summary(
 def run_complexity_gate(scope: str, *, write: bool = False) -> None:
     targets = complexity_targets(scope)
     print(f"Complexity scope: {scope} ({len(targets)} files)")
+    run_xenon_gate(xenon_quality_targets())
     thresholds = load_thresholds()
     findings = measure_complexity(targets, thresholds)
     if write:
@@ -474,6 +491,28 @@ def run_complexity_gate(scope: str, *, write: bool = False) -> None:
     print_complexity_summary(findings, regressions)
     if regressions:
         raise SystemExit(1)
+
+
+def run_xenon_gate(paths: list[str]) -> None:
+    targets = existing_paths(paths)
+    if not targets:
+        print("No Python files for Xenon.")
+        return
+    run(
+        [
+            "uv",
+            "run",
+            "xenon",
+            "--no-assert",
+            "--max-absolute",
+            XENON_MAX_ABSOLUTE,
+            "--max-modules",
+            XENON_MAX_MODULES,
+            "--max-average",
+            XENON_MAX_AVERAGE,
+            *targets,
+        ]
+    )
 
 
 def resolve_tool(name: str) -> str:
@@ -488,48 +527,76 @@ def resolve_tool(name: str) -> str:
     raise SystemExit(f"Required LLVM tool not found: {name}")
 
 
-def changed_native_files() -> list[str]:
-    pathspecs = [f"*{extension}" for extension in sorted(NATIVE_EXTENSIONS)]
-    changed = capture_lines(
-        [
-            "git",
-            "diff",
-            "--name-only",
-            "--diff-filter=ACMRTUXB",
-            "HEAD",
-            "--",
-            *pathspecs,
-        ]
-    )
-    untracked = capture_lines(
-        ["git", "ls-files", "--others", "--exclude-standard", "--", *pathspecs]
-    )
-    native_paths = [
-        path
-        for path in dict.fromkeys([*changed, *untracked])
-        if Path(path).suffix.lower() in NATIVE_EXTENSIONS
-        and any(
-            path.startswith(f"{prefix}/") or path.startswith(f"{prefix}\\")
-            for prefix in NATIVE_PATHS
-        )
-    ]
-    return native_paths
+def native_source_files() -> list[str]:
+    paths: list[str] = []
+    for base in existing_paths(NATIVE_PATHS):
+        for item in (ROOT / base).rglob("*"):
+            if item.is_file() and item.suffix.lower() in NATIVE_EXTENSIONS:
+                paths.append(item.relative_to(ROOT).as_posix())
+    return sorted(dict.fromkeys(paths))
+
+
+def compile_database_files(path: Path) -> set[str]:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        raise ValueError("compile_commands.json must be a list")
+    files: set[str] = set()
+    for entry in raw:
+        if not isinstance(entry, dict) or "file" not in entry:
+            continue
+        files.add(normalize_path(str(entry["file"])))
+    return files
+
+
+def native_files_in_compile_database(
+    native: list[str], compiled_files: set[str]
+) -> tuple[list[str], list[str]]:
+    compiled_native: list[str] = []
+    missing: list[str] = []
+    for path in native:
+        if path in compiled_files:
+            compiled_native.append(path)
+        else:
+            missing.append(path)
+    return compiled_native, missing
+
+
+def run_clang_tidy_for_native(
+    clang_tidy: str, compile_db: Path, paths: list[str]
+) -> None:
+    for path in paths:
+        run_native_command([clang_tidy, "-p", str(compile_db.parent), "--quiet", path])
+
+
+def report_native_compile_database_coverage(
+    compiled_native: list[str], missing: list[str]
+) -> None:
+    if missing:
+        print("Native files not in CMake compile database:")
+        for path in missing:
+            print(f"  {path}")
+    if not compiled_native:
+        print("No repo native C/C++ files are present in the compile database.")
 
 
 def run_native_checks() -> None:
     clang_tidy = resolve_tool("clang-tidy")
-    run([clang_tidy, "--verify-config"])
-    run(["cmake", "--fresh", "--preset", "llvm-release", "-S", "Utils"])
-    native = changed_native_files()
+    run_native_command([clang_tidy, "--verify-config"])
+    run_native_command(["cmake", "--fresh", "--preset", "llvm-release", "-S", "Utils"])
     compile_db = ROOT / "Utils" / "build" / "llvm-release" / "compile_commands.json"
+    native = native_source_files()
     if native and compile_db.exists():
-        for path in native:
-            run([clang_tidy, "-p", str(compile_db.parent), "--quiet", path])
+        compiled_files = compile_database_files(compile_db)
+        compiled_native, missing = native_files_in_compile_database(
+            native, compiled_files
+        )
+        run_clang_tidy_for_native(clang_tidy, compile_db, compiled_native)
+        report_native_compile_database_coverage(compiled_native, missing)
     elif not native:
-        print("No changed native C/C++ files for clang-tidy.")
+        print("No repo native C/C++ files for clang-tidy.")
     else:
-        print("No compile database yet; skipping changed-file clang-tidy.")
-    run(["cmake", "--build", "Utils/build/llvm-release", "--target", "Triangle4XP"])
+        print("No compile database yet; skipping repo native clang-tidy.")
+    run_native_command(["cmake", "--build", "Utils/build/llvm-release"])
 
 
 def run_full_quality(*, skip_native: bool = False) -> None:
@@ -581,6 +648,25 @@ def main() -> int:
 
     run_full_quality(skip_native=args.skip_native)
     return 0
+
+
+def print_completed_output(proc: subprocess.CompletedProcess[str]) -> None:
+    if proc.stdout:
+        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
+    if proc.stderr:
+        end = "" if proc.stderr.endswith("\n") else "\n"
+        print(proc.stderr, file=sys.stderr, end=end)
+
+
+def run_native_command(args: list[str]) -> subprocess.CompletedProcess[str]:
+    print("+ " + " ".join(args))
+    proc = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+    if proc.returncode:
+        print_completed_output(proc)
+        raise subprocess.CalledProcessError(
+            proc.returncode, args, proc.stdout, proc.stderr
+        )
+    return proc
 
 
 if __name__ == "__main__":

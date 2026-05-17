@@ -1,0 +1,29 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "zones": {
+      "items": {
+        "anyOf": [
+          {
+            "items": {},
+            "type": "array"
+          },
+          {
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {},
+              {},
+              {}
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "title": "Zones",
+      "type": "array"
+    }
+  },
+  "title": "ZoneListDefinition",
+  "type": "object"
+}

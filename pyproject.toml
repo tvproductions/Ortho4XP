@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
   "numpy==2.4.4",
   "pillow==12.2.0",
+  "pydantic>=2,<3",
   "pyproj==3.7.2",
   "requests==2.33.1",
   "Rtree==1.4.1",
@@ -24,6 +25,7 @@ dev = [
   "radon>=6.0,<7.0",
   "ruff",
   "ty",
+  "xenon>=0.9,<1.0",
 ]
 
 [tool.uv]

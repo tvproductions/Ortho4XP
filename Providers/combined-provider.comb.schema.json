@@ -1,0 +1,44 @@
+{
+  "$defs": {
+    "CombinedProviderLayer": {
+      "additionalProperties": false,
+      "properties": {
+        "layer_code": {
+          "title": "Layer Code",
+          "type": "string"
+        },
+        "extent_code": {
+          "title": "Extent Code",
+          "type": "string"
+        },
+        "color_code": {
+          "title": "Color Code",
+          "type": "string"
+        },
+        "priority": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "mask"
+          ],
+          "title": "Priority",
+          "type": "string"
+        }
+      },
+      "required": [
+        "layer_code",
+        "extent_code",
+        "color_code",
+        "priority"
+      ],
+      "title": "CombinedProviderLayer",
+      "type": "object"
+    }
+  },
+  "items": {
+    "$ref": "#/$defs/CombinedProviderLayer"
+  },
+  "title": "CombinedProviderDefinition",
+  "type": "array"
+}

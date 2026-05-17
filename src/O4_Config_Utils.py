@@ -4,12 +4,20 @@ import ast
 import logging
 import os
 from math import ceil
+from typing import Any, cast
 
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import E, N, S, W, filedialog, messagebox
 
 import O4_Cfg_Vars as CFG
+from O4_Config_Models import (
+    coerce_config_value,
+    config_default,
+    parse_legacy_config_literal,
+    parse_legacy_zone_append,
+    validate_config_registry,
+)
 import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
@@ -40,6 +48,11 @@ from O4_Cfg_Vars import (
     list_vector_vars,
 )
 
+cfg_app_vars = cast(dict[str, dict[str, Any]], cfg_app_vars)
+cfg_tile_vars = cast(dict[str, dict[str, Any]], cfg_tile_vars)
+cfg_global_tile_vars = cast(dict[str, dict[str, Any]], cfg_global_tile_vars)
+cfg_vars = cast(dict[str, dict[str, Any]], cfg_vars)
+
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
 handler = logging.StreamHandler()
@@ -49,43 +62,71 @@ global_cfg_file = FNAMES.resource_path("Ortho4XP.cfg")
 global_cfg_bak_file = FNAMES.resource_path("Ortho4XP.cfg.bak")
 
 
+validate_config_registry(cfg_vars)
+
+
+def _config_target(var: str):
+    module_name = cast(str | None, cfg_vars[var].get("module"))
+    if module_name:
+        return globals()[module_name], var
+    return globals(), var
+
+
+def _get_config_value(var: str):
+    target, name = _config_target(var)
+    if isinstance(target, dict):
+        return target[name]
+    return getattr(target, name)
+
+
+def _set_config_value(var: str, value) -> None:
+    target, name = _config_target(var)
+    if isinstance(target, dict):
+        target[name] = value
+    else:
+        setattr(target, name, value)
+
+
+def _coerce_config_value(var: str, value):
+    return coerce_config_value(var, value, cfg_vars)
+
+
+def _config_hint(registry: dict[str, dict[str, Any]], item: str) -> str:
+    return str(registry[item]["hint"])
+
+
+def _config_choice_values(registry: dict[str, dict[str, Any]], item: str) -> list[str]:
+    if registry[item]["type"] == bool:
+        return ["True", "False"]
+    return [str(x) for x in cast(list[Any] | tuple[Any, ...], registry[item]["values"])]
+
+
 def set_global_variables(var: str, value: str) -> None:
     """
     Set global Python variables for the application.
-    
+
     :param str var: variable name
     :param str value: value for variable
     :returns: None
     """
     # There are no global_* variables for the app config settings so skip them
     if var.startswith(global_prefix):
-        var_without_global = var[len(global_prefix):]
+        var_without_global = var[len(global_prefix) :]
         if var_without_global in cfg_app_vars:
             return
-    target = (
-        cfg_vars[var]["module"] + "." + var
-        if "module" in cfg_vars[var]
-        else "globals()['" + var + "']"
-        )
-    if cfg_vars[var]["type"] in (bool, list):
-        cmd = target + "=" + value
-    else:
-        cmd = target + "=cfg_vars['" + var + "']['type'](value)"
-    exec(cmd)
+    _set_config_value(var, _coerce_config_value(var, value))
+
 
 def config_compatibility(value) -> str:
     """
     Check for compatibility with config files from version <= 1.20.
-    
+
     :param str value: value to check
     :returns: value in format based on cfg_vars
     :return type: str
     """
-    if value and value[0] in ('"', "'"):
-        value = value[1:]
-    if value and value[-1] in ('"', "'"):
-        value = value[:-1]
-    return value
+    return parse_legacy_config_literal(value)
+
 
 ################################################################################
 # Initialization to default values
@@ -94,12 +135,7 @@ def config_compatibility(value) -> str:
 # they are defined in a different module and overriden when the config is loaded (below)
 # hence the reason this module is loaded last in O4_GUI_Utils.py
 for var in cfg_vars:
-    target = (
-        cfg_vars[var]["module"] + "." + var
-        if "module" in cfg_vars[var]
-        else var
-    )
-    exec(target + "=cfg_vars['" + var + "']['default']")
+    _set_config_value(var, config_default(cfg_vars[var]))
 
 ################################################################################
 # Update from Global Ortho4XP.cfg
@@ -141,6 +177,7 @@ except Exception as e:
 ################################################################################
 class Tile:
     """Class for building tiles."""
+
     def __init__(self, lat, lon, custom_build_dir):
 
         self.lat = lat
@@ -154,7 +191,7 @@ class Tile:
         self.build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
         self.dem = None
         for var in list_tile_vars:
-            exec("self." + var + "=" + var)
+            setattr(self, var, globals()[var])
 
     def make_dirs(self):
         if os.path.isdir(self.build_dir):
@@ -184,7 +221,7 @@ class Tile:
 
         :params str config_file: path to config file; unknown use case
         :params bool use_global: force use of global config file
-        
+
         :returns: 1 if successful, 0 if not
         :return type: int
         """
@@ -197,7 +234,6 @@ class Tile:
                 config_file = global_cfg_file
 
                 if not os.path.isfile(config_file):
-                    
                     UI.lvprint(
                         0,
                         "CFG error: No tile or global config file found.",
@@ -216,23 +252,15 @@ class Tile:
                     (var, value) = line.split("=", 1)
                     # compatibility with config files from version <= 1.20
                     value = config_compatibility(value)
-                    if cfg_vars[var]["type"] in (bool, list):
-                        cmd = "self." + var + "=" + value
-                    else:
-                        cmd = (
-                            "self."
-                            + var
-                            + "=cfg_vars['"
-                            + var
-                            + "']['type'](value)"
-                        )
-                    exec(cmd)
+                    setattr(self, var, _coerce_config_value(var, value))
                 except Exception as e:
                     # compatibility with zone_list config files from
                     # version <= 1.20
                     if "zone_list.append" in line:
                         try:
-                            exec("self." + line)
+                            zone = parse_legacy_zone_append(line)
+                            if zone is not None:
+                                getattr(self, "zone_list").append(zone)
                         except:
                             pass
                     else:
@@ -248,12 +276,12 @@ class Tile:
             )
             return 0
 
-    def write_to_config(self, config_file = None):
+    def write_to_config(self, config_file=None):
         """
         Create tile config file from class variables.
 
         :params str config_file: path to config file; unknown use case
-        
+
         :returns: 1 if successful, 0 if not
         :return type: int
         """
@@ -286,7 +314,7 @@ class Tile:
                 if var == "zone_list":
                     f.write(var + "=" + str(tile_zones) + "\n")
                 else:
-                    f.write(var + "=" + str(eval("self." + var)) + "\n")
+                    f.write(var + "=" + str(getattr(self, var)) + "\n")
             f.close()
             return 1
         except Exception as e:
@@ -301,9 +329,11 @@ class Tile:
 
 ################################################################################
 
+
 ################################################################################
 class Ortho4XP_Config(tk.Toplevel):
     """Ortho4XP configuration window."""
+
     def __init__(self, parent):
 
         tk.Toplevel.__init__(self)
@@ -329,7 +359,9 @@ class Ortho4XP_Config(tk.Toplevel):
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(row=0, column=0, sticky=N + S + W + E)
         # Fixes issue where sometimes tab content is not displayed until mouse is moved
-        self.notebook.bind('<<NotebookTabChanged>>', lambda event: self.update_idletasks())
+        self.notebook.bind(
+            "<<NotebookTabChanged>>", lambda event: self.update_idletasks()
+        )
 
         # Create frames for each tab
         self.tile_config_frame = tk.Frame(self.notebook, bg="light green")
@@ -364,7 +396,7 @@ class Ortho4XP_Config(tk.Toplevel):
         """Update the tile configuration status message and widget states."""
         if self.parent.tile_cfg_exists.get():
             self.tile_cfg_msg.set(
-                f"Tile configuration loaded for " \
+                f"Tile configuration loaded for "
                 f"{self.parent.lat.get()} {self.parent.lon.get()}"
             )
             state = "normal"
@@ -378,12 +410,12 @@ class Ortho4XP_Config(tk.Toplevel):
             self.btn_write_tile_cfg.config(state=state)
         else:
             self.tile_cfg_msg.set(
-                f"No tile configuration for " \
-                f"{self.parent.lat.get()}{self.parent.lon.get()}. " \
+                f"No tile configuration for "
+                f"{self.parent.lat.get()}{self.parent.lon.get()}. "
                 f"Using global configuration settings."
             )
             state = "disabled"
-            for _, value in self.tile_entry_.items():                
+            for _, value in self.tile_entry_.items():
                 value.config(state=state)
 
             self.btn_tile_dem.config(state=state)
@@ -400,8 +432,12 @@ class Ortho4XP_Config(tk.Toplevel):
         main_frame = tk.Frame(frame, border=4, bg="light green")
         frame_status = tk.Frame(main_frame, border=0, padx=5, pady=0, bg="light green")
         frame_cfg = tk.Frame(main_frame, border=0, padx=5, pady=0, bg="light green")
-        frame_dem = tk.Frame(frame_cfg, border=0, padx=0, pady=self.pady, bg="light green")
-        frame_lastbtn = tk.Frame(main_frame, border=0, padx=5, pady=self.pady, bg="light green")
+        frame_dem = tk.Frame(
+            frame_cfg, border=0, padx=0, pady=self.pady, bg="light green"
+        )
+        frame_lastbtn = tk.Frame(
+            main_frame, border=0, padx=5, pady=self.pady, bg="light green"
+        )
         # Allow widgets to shrink and expand with window resize
         frame_status.columnconfigure(0, weight=0)
         frame_status.rowconfigure(0, weight=0)
@@ -431,13 +467,13 @@ class Ortho4XP_Config(tk.Toplevel):
 
         tk.Label(
             frame_status,
-            textvariable=self.tile_cfg_msg,   
+            textvariable=self.tile_cfg_msg,
             bg="light green",
             fg="black",
             font="TKFixedFont 15",
         ).grid(row=0, column=0, pady=0, sticky=N + S + W + E)
 
-        for (title, sub_list) in (
+        for title, sub_list in (
             ("Vector data", list_vector_vars),
             ("Mesh", list_mesh_vars),
             ("Masks", list_mask_vars),
@@ -458,7 +494,7 @@ class Ortho4XP_Config(tk.Toplevel):
             )
             row = 2
             for item in sub_list:
-                text = (
+                text = str(
                     item
                     if "short_name" not in cfg_tile_vars[item]
                     else cfg_tile_vars[item]["short_name"]
@@ -468,17 +504,14 @@ class Ortho4XP_Config(tk.Toplevel):
                     text=text,
                     takefocus=False,
                     command=lambda item=item: self.popup(
-                        item, cfg_tile_vars[item]["hint"]
+                        item, _config_hint(cfg_tile_vars, item)
                     ),
-                ).grid(
-                    row=row, column=col, padx=2, pady=2, sticky=E + W + N + S
-                )
-                if cfg_tile_vars[item]["type"] == bool or "values" in cfg_tile_vars[item]:
-                    values = (
-                        [True, False]
-                        if cfg_tile_vars[item]["type"] == bool
-                        else [str(x) for x in cfg_tile_vars[item]["values"]]
-                    )
+                ).grid(row=row, column=col, padx=2, pady=2, sticky=E + W + N + S)
+                if (
+                    cfg_tile_vars[item]["type"] == bool
+                    or "values" in cfg_tile_vars[item]
+                ):
+                    values = _config_choice_values(cfg_tile_vars, item)
                     self.tile_entry_[item] = ttk.Combobox(
                         frame_cfg,
                         values=values,
@@ -503,9 +536,7 @@ class Ortho4XP_Config(tk.Toplevel):
             col += 2
         row = next_row
 
-        frame_dem.grid(
-            row=row, column=0, columnspan=6, sticky=N + S + W + E
-        )
+        frame_dem.grid(row=row, column=0, columnspan=6, sticky=N + S + W + E)
 
         item = "custom_dem"
 
@@ -513,7 +544,9 @@ class Ortho4XP_Config(tk.Toplevel):
             frame_dem,
             text=item,
             takefocus=False,
-            command=lambda item=item: self.popup(item, cfg_tile_vars[item]["hint"]),
+            command=lambda item=item: self.popup(
+                item, _config_hint(cfg_tile_vars, item)
+            ),
         ).grid(row=0, column=0, padx=2, pady=2, sticky=E + W)
 
         values = DEM.available_sources[1::2]
@@ -544,10 +577,12 @@ class Ortho4XP_Config(tk.Toplevel):
             frame_cfg,
             text=item,
             takefocus=False,
-            command=lambda item=item: self.popup(item, cfg_tile_vars[item]["hint"]),
+            command=lambda item=item: self.popup(
+                item, _config_hint(cfg_tile_vars, item)
+            ),
         ).grid(row=row, column=6, padx=2, pady=2, sticky=E + W)
 
-        values = [True, False]
+        values = ["True", "False"]
 
         self.tile_entry_[item] = ttk.Combobox(
             frame_cfg,
@@ -597,7 +632,7 @@ class Ortho4XP_Config(tk.Toplevel):
             row=0, column=4, padx=5, pady=self.pady, sticky=N + S + E + W
         )
 
-        self.btn_exit =ttk.Button(
+        self.btn_exit = ttk.Button(
             frame_lastbtn, text="Exit", command=self.close_window
         )
         self.btn_exit.grid(
@@ -610,9 +645,15 @@ class Ortho4XP_Config(tk.Toplevel):
         frame.columnconfigure(0, weight=1)
 
         main_frame = tk.Frame(frame, border=4, bg="light green")
-        frame_cfg = tk.Frame(main_frame, border=0, padx=5, pady=self.pady, bg="light green")
-        frame_dem = tk.Frame(frame_cfg, border=0, padx=0, pady=self.pady, bg="light green")
-        frame_lastbtn = tk.Frame(main_frame, border=0, padx=5, pady=self.pady, bg="light green")
+        frame_cfg = tk.Frame(
+            main_frame, border=0, padx=5, pady=self.pady, bg="light green"
+        )
+        frame_dem = tk.Frame(
+            frame_cfg, border=0, padx=0, pady=self.pady, bg="light green"
+        )
+        frame_lastbtn = tk.Frame(
+            main_frame, border=0, padx=5, pady=self.pady, bg="light green"
+        )
 
         for j in range(8):
             frame_cfg.columnconfigure(j, weight=1)
@@ -637,7 +678,7 @@ class Ortho4XP_Config(tk.Toplevel):
         col = 0
         next_row = 0
 
-        for (title, sub_list) in (
+        for title, sub_list in (
             ("Vector data", list_global_vector_vars),
             ("Mesh", list_global_mesh_vars),
             ("Masks", list_global_mask_vars),
@@ -658,7 +699,7 @@ class Ortho4XP_Config(tk.Toplevel):
             )
             row = 1
             for item in sub_list:
-                text = (
+                text = str(
                     item
                     if "short_name" not in cfg_global_tile_vars[item]
                     else cfg_global_tile_vars[item]["short_name"]
@@ -669,17 +710,14 @@ class Ortho4XP_Config(tk.Toplevel):
                     text=text,
                     takefocus=False,
                     command=lambda item=item: self.popup(
-                        item, cfg_global_tile_vars[item]["hint"]
+                        item, _config_hint(cfg_global_tile_vars, item)
                     ),
-                ).grid(
-                    row=row, column=col, padx=2, pady=2, sticky=E + W + N + S
-                )
-                if cfg_global_tile_vars[item]["type"] == bool or "values" in cfg_global_tile_vars[item]:
-                    values = (
-                        [True, False]
-                        if cfg_global_tile_vars[item]["type"] == bool
-                        else [str(x) for x in cfg_global_tile_vars[item]["values"]]
-                    )
+                ).grid(row=row, column=col, padx=2, pady=2, sticky=E + W + N + S)
+                if (
+                    cfg_global_tile_vars[item]["type"] == bool
+                    or "values" in cfg_global_tile_vars[item]
+                ):
+                    values = _config_choice_values(cfg_global_tile_vars, item)
                     self.global_entry_[item] = ttk.Combobox(
                         frame_cfg,
                         values=values,
@@ -705,9 +743,7 @@ class Ortho4XP_Config(tk.Toplevel):
 
         row = next_row
 
-        frame_dem.grid(
-            row=row, column=0, columnspan=6, sticky=N + S + W + E
-        )
+        frame_dem.grid(row=row, column=0, columnspan=6, sticky=N + S + W + E)
 
         text = "custom_dem"
         item = "global_custom_dem"
@@ -716,7 +752,9 @@ class Ortho4XP_Config(tk.Toplevel):
             frame_dem,
             text=text,
             takefocus=False,
-            command=lambda item=item: self.popup(item, cfg_global_tile_vars[item]["hint"]),
+            command=lambda item=item: self.popup(
+                item, _config_hint(cfg_global_tile_vars, item)
+            ),
         ).grid(row=0, column=0, padx=2, pady=2, sticky=E + W)
 
         values = DEM.available_sources[1::2]
@@ -738,7 +776,9 @@ class Ortho4XP_Config(tk.Toplevel):
             style="Flat.TButton",
         )
         self.btn_global_dem.grid(row=0, column=2, padx=2, pady=0, sticky=W)
-        self.btn_global_dem.bind("<Shift-ButtonPress-1>", lambda event: self.add_dem(global_config=True))
+        self.btn_global_dem.bind(
+            "<Shift-ButtonPress-1>", lambda event: self.add_dem(global_config=True)
+        )
 
         text = "fill_nodata"
         item = "global_fill_nodata"
@@ -747,10 +787,12 @@ class Ortho4XP_Config(tk.Toplevel):
             frame_cfg,
             text=text,
             takefocus=False,
-            command=lambda item=item: self.popup(item, cfg_global_tile_vars[item]["hint"]),
+            command=lambda item=item: self.popup(
+                item, _config_hint(cfg_global_tile_vars, item)
+            ),
         ).grid(row=row, column=6, padx=2, pady=2, sticky=E + W)
 
-        values = [True, False]
+        values = ["True", "False"]
 
         self.global_entry_[item] = ttk.Combobox(
             frame_cfg,
@@ -791,7 +833,7 @@ class Ortho4XP_Config(tk.Toplevel):
             row=0, column=4, padx=5, pady=self.pady, sticky=N + S + E + W
         )
 
-        self.btn_exit =ttk.Button(
+        self.btn_exit = ttk.Button(
             frame_lastbtn, text="Exit", command=self.close_window
         )
         self.btn_exit.grid(
@@ -804,8 +846,12 @@ class Ortho4XP_Config(tk.Toplevel):
         frame.columnconfigure(0, weight=1)
 
         main_frame = tk.Frame(frame, border=4, bg="light green")
-        frame_cfg = tk.Frame(main_frame, border=0, padx=5, pady=self.pady, bg="light green")
-        frame_lastbtn = tk.Frame(main_frame, border=0, padx=5, pady=self.pady, bg="light green")
+        frame_cfg = tk.Frame(
+            main_frame, border=0, padx=5, pady=self.pady, bg="light green"
+        )
+        frame_lastbtn = tk.Frame(
+            main_frame, border=0, padx=5, pady=self.pady, bg="light green"
+        )
 
         for j in range(8):
             frame_cfg.columnconfigure(j, weight=1)
@@ -837,7 +883,7 @@ class Ortho4XP_Config(tk.Toplevel):
         for item in gui_app_vars_short:
             col = 2 * (j // l)
             row = this_row + j % l
-            text = (
+            text = str(
                 item
                 if "short_name" not in cfg_app_vars[item]
                 else cfg_app_vars[item]["short_name"]
@@ -847,14 +893,14 @@ class Ortho4XP_Config(tk.Toplevel):
                 text=text,
                 takefocus=False,
                 command=lambda item=item: self.popup(
-                    item, cfg_app_vars[item]["hint"]
+                    item, _config_hint(cfg_app_vars, item)
                 ),
             ).grid(row=row, column=col, padx=2, pady=2, sticky=E + W + N + S)
             if cfg_app_vars[item]["type"] == bool or "values" in cfg_app_vars[item]:
                 values = (
                     ["True", "False"]
                     if cfg_app_vars[item]["type"] == bool
-                    else [str(x) for x in cfg_app_vars[item]["values"]]
+                    else _config_choice_values(cfg_app_vars, item)
                 )
                 self.app_entry_[item] = ttk.Combobox(
                     frame_cfg,
@@ -885,7 +931,7 @@ class Ortho4XP_Config(tk.Toplevel):
                 text=item,
                 takefocus=False,
                 command=lambda item=item: self.popup(
-                    item, cfg_vars[item]["hint"]
+                    item, _config_hint(cfg_vars, item)
                 ),
             ).grid(row=row, column=0, padx=2, pady=2, sticky=E + W + N + S)
 
@@ -950,14 +996,9 @@ class Ortho4XP_Config(tk.Toplevel):
     def load_interface_from_variables(self) -> None:
         """Load the configuration interface values for all tabs."""
         for var in list_cfg_vars:
-            target = (
-                cfg_vars[var]["module"] + "." + var
-                if "module" in cfg_vars[var]
-                else "globals()['" + var + "']"
-            )
-            self.v_[var].set(str(eval(target)))
+            self.v_[var].set(str(_get_config_value(var)))
 
-    def reset_tile_cfg(self) -> None:
+    def reset_tile_cfg(self) -> int | None:
         """Reset tile settings to global tile settings."""
         try:
             (lat, lon) = self.parent.get_lat_lon()
@@ -975,7 +1016,9 @@ class Ortho4XP_Config(tk.Toplevel):
             if lat in _zone_list and lon in _zone_list:
                 tile_zones.append(zone)
         if tile_zones:
-            response = messagebox.askyesnocancel("Confirmation", "Save tile zones?", parent=self)
+            response = messagebox.askyesnocancel(
+                "Confirmation", "Save tile zones?", parent=self
+            )
             if response is None:
                 return
             # Remove the current tile zones from global zone_list
@@ -1002,8 +1045,9 @@ class Ortho4XP_Config(tk.Toplevel):
             self.v_[var].set(self.v_[_global_var].get())
         UI.vprint(1, "Tile settings reset to global tile settings.")
 
-    def load_backup_tile_cfg(self) -> None:
+    def load_backup_tile_cfg(self) -> int | None:
         """Load backup tile configuration settings."""
+        zone_list = []
         try:
             (lat, lon) = self.parent.get_lat_lon()
         except:
@@ -1034,19 +1078,23 @@ class Ortho4XP_Config(tk.Toplevel):
                 # compatibility with zone_list config files from version <= 1.20
                 if "zone_list.append" in line:
                     try:
-                        exec(line)
+                        zone = parse_legacy_zone_append(line)
+                        if zone is not None:
+                            zone_list.append(zone)
                     except Exception as e:
                         print(e)
                         pass
                 else:
                     UI.vprint(2, e)
                     pass
+        if zone_list and not self.v_["zone_list"].get():
+            self.v_["zone_list"].set(str(zone_list))
         # Apply changes to update global variables
         self.apply_changes("tile")
         UI.vprint(0, f"Backup configuration loaded for tile at {lat} {lon}")
         f.close()
 
-    def load_tile_cfg(self) -> None:
+    def load_tile_cfg(self) -> int | None:
         """Load tile configuration settings for active tile."""
         zone_list = []
         try:
@@ -1083,7 +1131,9 @@ class Ortho4XP_Config(tk.Toplevel):
                 # compatibility with zone_list config files from version <= 1.20
                 if "zone_list.append" in line:
                     try:
-                        exec(line)
+                        zone = parse_legacy_zone_append(line)
+                        if zone is not None:
+                            zone_list.append(zone)
                     except Exception as e:
                         print(e)
                         pass
@@ -1098,7 +1148,7 @@ class Ortho4XP_Config(tk.Toplevel):
         UI.vprint(0, f"Configuration loaded for tile at {lat} {lon}")
         f.close()
 
-    def write_tile_cfg(self) -> None:
+    def write_tile_cfg(self) -> int | None:
         """Save tile configuration settings for active tile."""
         try:
             (lat, lon) = self.parent.get_lat_lon()
@@ -1138,7 +1188,9 @@ class Ortho4XP_Config(tk.Toplevel):
                 _zone_list = set(_zone_list)
                 if lat in _zone_list and lon in _zone_list:
                     tile_zones.append(zone)
-                    _LOGGER.debug("Zones saved for tile at %s %s: %s", lat, lon, tile_zones)
+                    _LOGGER.debug(
+                        "Zones saved for tile at %s %s: %s", lat, lon, tile_zones
+                    )
             for var in list_tile_vars:
                 if var == "zone_list":
                     f.write(var + "=" + str(tile_zones) + "\n")
@@ -1188,7 +1240,7 @@ class Ortho4XP_Config(tk.Toplevel):
         self.apply_changes("global")
         try:
             # Make a copy of the existing global config file
-            if (os.path.exists(global_cfg_file)):
+            if os.path.exists(global_cfg_file):
                 os.replace(global_cfg_file, global_cfg_bak_file)
             # Get current GUI global tile settings as a dict
             # Remove global prefix since the cfg file doesn't use it
@@ -1203,7 +1255,7 @@ class Ortho4XP_Config(tk.Toplevel):
             # Update existing file with current app settings
             config_file.update(current_config)
             # Write to new configuration file
-            with open(global_cfg_file, 'w') as file:
+            with open(global_cfg_file, "w") as file:
                 for key, value in config_file.items():
                     file.write(f"{key}={value}\n")
             # Load the tile config since it now exists
@@ -1242,7 +1294,9 @@ class Ortho4XP_Config(tk.Toplevel):
                 self.apply_changes("tile")
                 UI.vprint(0, f"Backup configuration loaded for application settings.")
         except FileNotFoundError:
-            messagebox.showinfo("Not found", "No backup application configuration found.")
+            messagebox.showinfo(
+                "Not found", "No backup application configuration found."
+            )
             return
 
     def write_app_cfg(self) -> None:
@@ -1257,7 +1311,7 @@ class Ortho4XP_Config(tk.Toplevel):
         for var in list_app_vars:
             current_config[var] = self.v_[var].get()
         try:
-            if (os.path.exists(global_cfg_file)):
+            if os.path.exists(global_cfg_file):
                 # Make a backup of the existing global config file
                 os.replace(global_cfg_file, global_cfg_bak_file)
                 # Get settings in existing config file returned as a dict
@@ -1288,38 +1342,17 @@ class Ortho4XP_Config(tk.Toplevel):
 
         if tab == "global":
             for var in list_global_tile_vars:
-                target = "globals()['" + var + "']"
                 try:
-                    if cfg_global_tile_vars[var]["type"] in (bool, list):
-                        value = self.v_[var].get()
-                        cmd = target + "=" + value
-                    else:
-                        value = cfg_global_tile_vars[var]["type"](self.v_[var].get())
-                        cmd = (
-                            target
-                            + "=cfg_global_tile_vars['"
-                            + var
-                            + "']['type'](self.v_['"
-                            + var
-                            + "'].get())"
-                        )
-                    exec(cmd)
-                except:
-                    exec(
-                        target
-                        + "=cfg_global_tile_vars['"
-                        + var
-                        + "']['type'](cfg_global_tile_vars['"
-                        + var
-                        + "']['default'])"
+                    globals()[var] = coerce_config_value(
+                        var, self.v_[var].get(), cfg_global_tile_vars
                     )
-                    if tab == "app":
-                        self.v_[var].set(str(cfg_global_tile_vars[var]["default"]))
+                except:
+                    globals()[var] = config_default(cfg_global_tile_vars[var])
                     errors.append(var)
             if errors:
                 error_text = (
-                    "The following variables had wrong type\nand were reset " + 
-                    "to their default value!\n\n* "
+                    "The following variables had wrong type\nand were reset "
+                    + "to their default value!\n\n* "
                     + "\n* ".join(errors)
                 )
                 self.popup("ERROR", error_text)
@@ -1340,51 +1373,23 @@ class Ortho4XP_Config(tk.Toplevel):
                 if var == "zone_list":
                     continue
                 try:
-                    target = (
-                        cfg_vars[var]["module"] + "." + var
-                        if "module" in cfg_vars[var]
-                        else "globals()['" + var + "']"
+                    _set_config_value(
+                        var, _coerce_config_value(var, self.v_[var].get())
                     )
-                    if cfg_vars[var]["type"] in (bool, list):
-                        value = self.v_[var].get()
-                        cmd = target + "=" + value
-                    else:
-                        value = cfg_vars[var]["type"](self.v_[var].get())
-                        cmd = (
-                            target
-                            + "=cfg_vars['"
-                            + var
-                            + "']['type'](self.v_['"
-                            + var
-                            + "'].get())"
-                        )
-                    exec(cmd)
                 except:
-                    target = (
-                        cfg_vars[var]["module"] + "." + var
-                        if "module" in cfg_vars[var]
-                        else "globals()['" + var + "']"
-                    )
-                    exec(
-                        target
-                        + "=cfg_vars['"
-                        + var
-                        + "']['type'](cfg_vars['"
-                        + var
-                        + "']['default'])"
-                    )
+                    _set_config_value(var, config_default(cfg_vars[var]))
                     if tab == "app":
                         self.v_[var].set(str(cfg_vars[var]["default"]))
                     errors.append(var)
             if errors:
                 error_text = (
-                    "The following variables had wrong type\nand were reset " + 
-                    "to their default value!\n\n* "
+                    "The following variables had wrong type\nand were reset "
+                    + "to their default value!\n\n* "
                     + "\n* ".join(errors)
                 )
                 self.popup("ERROR", error_text)
 
-    def check_unsaved_changes(self, select_tile=False) -> str:
+    def check_unsaved_changes(self, select_tile=False) -> str | None:
         """
         Check for unsaved changes and prompt user to save.
 
@@ -1452,7 +1457,9 @@ class Ortho4XP_Config(tk.Toplevel):
                                 1,
                                 f"Setting {_var} is missing from config, setting default value: {tab_value}",
                             )
-                        file_value = self.set_value_type(_var, file_dict.get(_var, tab_value))
+                        file_value = self.set_value_type(
+                            _var, file_dict.get(_var, tab_value)
+                        )
 
                         if file_value != tab_value:
                             _LOGGER.debug(
@@ -1485,7 +1492,9 @@ class Ortho4XP_Config(tk.Toplevel):
                                 1,
                                 f"Setting {_var} is missing from config, setting default value: {tab_value}",
                             )
-                        file_value = self.set_value_type(_var, file_dict.get(_var, tab_value))
+                        file_value = self.set_value_type(
+                            _var, file_dict.get(_var, tab_value)
+                        )
 
                         if file_value != tab_value:
                             _LOGGER.debug(
@@ -1504,7 +1513,9 @@ class Ortho4XP_Config(tk.Toplevel):
                                 1,
                                 f"Setting {var} is missing from config, setting default value: {tab_value}",
                             )
-                        file_value = self.set_value_type(var, file_dict.get(var, tab_value))
+                        file_value = self.set_value_type(
+                            var, file_dict.get(var, tab_value)
+                        )
 
                         if file_value != tab_value:
                             _LOGGER.debug(
@@ -1551,21 +1562,16 @@ class Ortho4XP_Config(tk.Toplevel):
         """
         Return string based on type in cfg_vars except ints which
         will be returned as floats since this is used for comparing values.
-        
+
         :param str value: value to be converted.
         :return: value in type based on cfg_vars
         """
         # Using floats for both int and float since we're going to compare them
         if cfg_vars[var]["type"] == int or cfg_vars[var]["type"] == float:
-            return float(value)
-        if cfg_vars[var]["type"] == bool:
-            return ast.literal_eval(value)
-        if cfg_vars[var]["type"] == str:
-            return str(value)
-        if cfg_vars[var]["type"] == list:
-            return ast.literal_eval(value)
+            return float(coerce_config_value(var, value, cfg_vars))
+        return coerce_config_value(var, value, cfg_vars)
 
-    def dict_to_cfg(self, file:str, cfg_dict: dict) -> None:
+    def dict_to_cfg(self, file: str, cfg_dict: dict) -> None:
         """
         Convert dictionary to key=value format and write to file.
 
@@ -1573,9 +1579,9 @@ class Ortho4XP_Config(tk.Toplevel):
         :param dict cfg_dict: dictionary to write to file
         :return: None
         """
-        with open(file, 'w') as file:
+        with open(file, "w") as config_file:
             for key, value in cfg_dict.items():
-                file.write(f"{key}={value}\n")
+                config_file.write(f"{key}={value}\n")
 
     def cfg_to_dict(self, file: str) -> dict:
         """
@@ -1585,11 +1591,11 @@ class Ortho4XP_Config(tk.Toplevel):
         :return: dict
         """
         config_dict = {}
-        with open(file, 'r') as file:
-            for line in file:
+        with open(file, "r") as config_file:
+            for line in config_file:
                 line = line.strip()
-                if line and '=' in line:
-                    key, value = line.split('=', 1)
+                if line and "=" in line:
+                    key, value = line.split("=", 1)
                     config_dict[key.strip()] = value.strip()
         return config_dict
 
@@ -1640,7 +1646,7 @@ class Ortho4XP_Config(tk.Toplevel):
     def popup(self, header: str, input_text: str) -> None:
         """
         Popup window for hints.
-        
+
         :param str header: top line of the body of the popup window
         :param str input_text: body of the popup window
         :return: None
@@ -1650,12 +1656,20 @@ class Ortho4XP_Config(tk.Toplevel):
         self.popupwindow.configure(background="light gray")
 
         ttk.Label(
-            self.popupwindow, text=header, anchor=W, font=("TkBoldFont", 14), background="light gray"
+            self.popupwindow,
+            text=header,
+            anchor=W,
+            font=("TkBoldFont", 14),
+            background="light gray",
         ).pack(side="top", fill="x", padx=5, pady=3)
         ttk.Label(
-            self.popupwindow, text=input_text, wraplength=600, anchor=W, background="light gray"
+            self.popupwindow,
+            text=input_text,
+            wraplength=600,
+            anchor=W,
+            background="light gray",
         ).pack(side="top", fill="x", padx=5, pady=0)
-        ttk.Button(
-            self.popupwindow, text="Ok", command=self.popupwindow.destroy
-        ).pack(pady=5)
+        ttk.Button(self.popupwindow, text="Ok", command=self.popupwindow.destroy).pack(
+            pady=5
+        )
         return

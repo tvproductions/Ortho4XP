@@ -1,0 +1,15 @@
+{
+  "request_type": "tms",
+  "grid_type": "webmercator",
+  "url_template": "https://wmts100.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{zoom}/{x}/{y}.jpeg",
+  "fake_headers": {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0",
+    "Accept": "*/*",
+    "Connection": "keep-alive",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://map.geo.admin.ch",
+    "Origin": "https://map.geo.admin.ch"
+  },
+  "imagery_dir": "code",
+  "in_GUI": true
+}

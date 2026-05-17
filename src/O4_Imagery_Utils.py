@@ -1,8 +1,8 @@
-import ast
 from dataclasses import dataclass
 import importlib
 import importlib.util
 import io
+import json
 import os
 import queue
 import random
@@ -22,9 +22,17 @@ import O4_Geo_Utils as GEO
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
+from O4_Source_Data_Models import (
+    ColorFilterDefinition,
+    CombinedProviderDefinition,
+    ExtentDefinition,
+    ProviderDefinition,
+    source_code_from_path,
+)
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
 from O4_Parallel_Utils import parallel_execute
+from pydantic import ValidationError
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
 
@@ -101,13 +109,6 @@ color_filters_dict: dict[str, Any] = {"none": []}
 
 ################################################################################
 @dataclass(frozen=True)
-class ProviderFieldSchema:
-    value_type: str
-    allowed_values: tuple[str, ...] = ()
-    alias_for: str | None = None
-
-
-@dataclass(frozen=True)
 class ProviderValidationIssue:
     provider_code: str
     source_path: Path
@@ -115,6 +116,7 @@ class ProviderValidationIssue:
     message: str
     line_number: int | None = None
     is_error: bool = True
+    source_kind: str = "provider"
 
     def __str__(self):
         location = str(self.source_path)
@@ -122,41 +124,12 @@ class ProviderValidationIssue:
             location += f":{self.line_number}"
         level = "error" if self.is_error else "warning"
         return (
-            f"{location}: provider {self.provider_code}: {level}: "
+            f"{location}: {self.source_kind} {self.provider_code}: {level}: "
             f"{self.field}: {self.message}"
         )
 
 
-PROVIDER_DEFINITION_FORMAT = "legacy .lay key=value"
-PROVIDER_FIELD_SCHEMA = {
-    "request_type": ProviderFieldSchema(
-        "enum", allowed_values=("wms", "wmts", "tms", "local_tms")
-    ),
-    "grid_type": ProviderFieldSchema("enum", allowed_values=("webmercator",)),
-    "fake_headers": ProviderFieldSchema("headers"),
-    "epsg_code": ProviderFieldSchema("epsg"),
-    "in_GUI": ProviderFieldSchema("bool"),
-    "image_type": ProviderFieldSchema("string"),
-    "url_prefix": ProviderFieldSchema("string"),
-    "url_template": ProviderFieldSchema("string"),
-    "layers": ProviderFieldSchema("string"),
-    "wms_size": ProviderFieldSchema("size"),
-    "tile_size": ProviderFieldSchema("size"),
-    "wms_version": ProviderFieldSchema("version"),
-    "wmts_version": ProviderFieldSchema("version"),
-    "top_left_corner": ProviderFieldSchema("float-pair"),
-    "scaledenominator": ProviderFieldSchema("float-list"),
-    "tilematrixset": ProviderFieldSchema("string"),
-    "resolutions": ProviderFieldSchema("float-list"),
-    "max_threads": ProviderFieldSchema("int"),
-    "max_zl": ProviderFieldSchema("int"),
-    "extent": ProviderFieldSchema("string"),
-    "color_filters": ProviderFieldSchema("color-filters"),
-    "color_filter": ProviderFieldSchema("color-filters", alias_for="color_filters"),
-    "imagery_dir": ProviderFieldSchema(
-        "enum", allowed_values=("grouped", "normal", "code")
-    ),
-}
+PROVIDER_DEFINITION_FORMAT = "JSON provider definition"
 
 
 def _provider_issue(
@@ -166,6 +139,7 @@ def _provider_issue(
     message,
     line_number=None,
     is_error=True,
+    source_kind="provider",
 ):
     return ProviderValidationIssue(
         provider_code=provider_code,
@@ -174,6 +148,7 @@ def _provider_issue(
         message=message,
         line_number=line_number,
         is_error=is_error,
+        source_kind=source_kind,
     )
 
 
@@ -182,69 +157,24 @@ def _print_provider_issues(issues):
         UI.vprint(0, str(issue))
 
 
-def _strip_provider_comment(line):
-    line = line.strip()
-    if not line:
-        return ""
-    if "#" in line:
-        if line.startswith("#"):
-            return ""
-        line = line.split("#", 1)[0].strip()
-    return line
-
-
-def _read_provider_key_values(provider_code, source_path):
-    raw_provider = {}
+def _validation_issues(source_code, source_path, source_kind, exc):
     issues = []
-    with open(source_path, "r", encoding="utf-8") as f:
-        for line_number, raw_line in enumerate(f, start=1):
-            line = _strip_provider_comment(raw_line)
-            if not line:
-                continue
-            if "=" not in line:
-                issues.append(
-                    _provider_issue(
-                        provider_code,
-                        source_path,
-                        "line",
-                        "expected key=value syntax",
-                        line_number,
-                    )
-                )
-                continue
-            key, value = line.split("=", 1)
-            key = key.strip()
-            value = value.strip()
-            schema = PROVIDER_FIELD_SCHEMA.get(key)
-            if schema is None:
-                issues.append(
-                    _provider_issue(
-                        provider_code,
-                        source_path,
-                        key,
-                        f"unknown field for {PROVIDER_DEFINITION_FORMAT} provider definition",
-                        line_number,
-                    )
-                )
-                continue
-            normalized_key = schema.alias_for or key
-            if normalized_key in raw_provider:
-                issues.append(
-                    _provider_issue(
-                        provider_code,
-                        source_path,
-                        normalized_key,
-                        "duplicate field",
-                        line_number,
-                    )
-                )
-                continue
-            raw_provider[normalized_key] = value
-    return raw_provider, issues
+    for error in exc.errors():
+        location = error["loc"]
+        field = ".".join(str(part) for part in location) if location else "json"
+        issues.append(
+            _provider_issue(
+                source_code,
+                source_path,
+                field,
+                error["msg"],
+                source_kind=source_kind,
+            )
+        )
+    return issues
 
 
-def _parse_provider_epsg(value):
-    epsg_code = int(value)
+def _record_provider_epsg(epsg_code):
     try:
         GEO.record_epsg(epsg_code)
     except Exception:
@@ -253,97 +183,83 @@ def _parse_provider_epsg(value):
             GEO.record_epsg(3912)
         else:
             raise
-    return value
 
 
-def _parse_provider_size(value):
-    parsed_value = int(value)
-    if parsed_value < 100 or parsed_value > 10000:
-        raise ValueError("must be between 100 and 10000")
-    return parsed_value
+def _normalize_provider_for_runtime(provider):
+    if "top_left_corner" in provider:
+        provider["top_left_corner"] = [
+            numpy.array(provider["top_left_corner"]) for _ in range(40)
+        ]
+    if "resolutions" in provider:
+        provider["resolutions"] = numpy.array(provider["resolutions"])
+    if "scaledenominator" in provider:
+        provider["scaledenominator"] = numpy.array(provider["scaledenominator"])
+    return provider
 
 
-def _parse_provider_version(value):
-    if len(value.split(".")) < 2:
-        raise ValueError("must include at least major and minor version numbers")
-    return value
-
-
-def _parse_provider_float_pair(value):
-    return [numpy.array([float(x) for x in value.split()]) for _ in range(40)]
-
-
-def _parse_provider_float_list(value):
-    return numpy.array([float(x) for x in value.split()])
-
-
-def _parse_provider_field(provider_code, source_path, key, value):
-    schema = PROVIDER_FIELD_SCHEMA[key]
-    if schema.value_type == "enum":
-        if value not in schema.allowed_values:
-            allowed = ", ".join(schema.allowed_values)
-            raise ValueError(f"must be one of: {allowed}")
-        return value
-    if schema.value_type == "headers":
-        return parse_provider_fake_headers(value)
-    if schema.value_type == "epsg":
-        return _parse_provider_epsg(value)
-    if schema.value_type == "bool":
-        return parse_provider_bool(value)
-    if schema.value_type == "size":
-        return _parse_provider_size(value)
-    if schema.value_type == "version":
-        return _parse_provider_version(value)
-    if schema.value_type == "float-pair":
-        return _parse_provider_float_pair(value)
-    if schema.value_type == "float-list":
-        return _parse_provider_float_list(value)
-    if schema.value_type == "int":
-        return int(value)
-    if schema.value_type == "color-filters":
-        if value not in color_filters_dict:
-            raise ValueError("unknown color filter; load Filters/*.flt first")
-        return value
-    return value
-
-
-def parse_provider_definition(provider_code, source_path):
-    raw_provider, issues = _read_provider_key_values(provider_code, source_path)
-    provider = {}
-    for key, value in raw_provider.items():
-        try:
-            provider[key] = _parse_provider_field(
-                provider_code, source_path, key, value
-            )
-        except (SyntaxError, ValueError, TypeError) as exc:
-            issues.append(
-                _provider_issue(
-                    provider_code,
-                    source_path,
-                    key,
-                    str(exc),
-                )
-            )
-        except Exception as exc:
-            issues.append(
-                _provider_issue(
-                    provider_code,
-                    source_path,
-                    key,
-                    f"could not validate field: {exc}",
-                )
-            )
-
-    if "request_type" not in provider and provider.get("grid_type") != "webmercator":
+def _provider_validation_issues(provider_code, source_path, exc):
+    issues = []
+    for error in exc.errors():
+        location = error["loc"]
+        field = str(location[0]) if location else "request_type"
         issues.append(
             _provider_issue(
                 provider_code,
                 source_path,
-                "request_type",
-                "missing request_type or grid_type=webmercator",
+                field,
+                error["msg"],
             )
         )
-    return provider, issues
+    return issues
+
+
+def _json_decode_issues(source_code, source_path, source_kind, exc):
+    return [
+        _provider_issue(
+            source_code,
+            source_path,
+            "json",
+            exc.msg,
+            exc.lineno,
+            source_kind=source_kind,
+        )
+    ]
+
+
+def parse_provider_definition(provider_code, source_path):
+    source_path = Path(source_path)
+    try:
+        provider_model = ProviderDefinition.model_validate_json(
+            source_path.read_text(encoding="utf-8"),
+            context={"color_filters": color_filters_dict},
+        )
+    except ValidationError as exc:
+        return {}, _provider_validation_issues(provider_code, source_path, exc)
+    except json.JSONDecodeError as exc:
+        return {}, [
+            _provider_issue(
+                provider_code,
+                source_path,
+                "json",
+                exc.msg,
+                exc.lineno,
+            )
+        ]
+
+    provider = provider_model.to_runtime_dict()
+    if "epsg_code" in provider:
+        try:
+            _record_provider_epsg(provider["epsg_code"])
+        except Exception as exc:
+            return provider, [
+                _provider_issue(
+                    provider_code,
+                    source_path,
+                    "epsg_code",
+                    f"could not validate EPSG code: {exc}",
+                )
+            ]
+    return _normalize_provider_for_runtime(provider), []
 
 
 def iter_provider_definition_paths(provider_dir=None):
@@ -351,131 +267,76 @@ def iter_provider_definition_paths(provider_dir=None):
     for dir_path in sorted(provider_root.iterdir()):
         if not dir_path.is_dir():
             continue
-        yield from sorted(dir_path.glob("*.lay"))
+        yield from sorted(dir_path.glob("*.lay.json"))
 
 
 def validate_provider_definitions(provider_dir=None):
     issues = []
     for provider_path in iter_provider_definition_paths(provider_dir):
-        provider_code = provider_path.stem
+        provider_code = source_code_from_path(provider_path, "lay")
         _, provider_issues = parse_provider_definition(provider_code, provider_path)
         issues.extend(provider_issues)
     return issues
 
 
 ################################################################################
-def _literal_with_provider_names(node):
-    if isinstance(node, ast.Constant):
-        return node.value
-    if isinstance(node, ast.Dict):
-        return {
-            _literal_with_provider_names(key): _literal_with_provider_names(value)
-            for key, value in zip(node.keys, node.values)
-        }
-    if isinstance(node, ast.List):
-        return [_literal_with_provider_names(item) for item in node.elts]
-    if isinstance(node, ast.Tuple):
-        return tuple(_literal_with_provider_names(item) for item in node.elts)
-    if isinstance(node, ast.Name) and node.id == "user_agent_generic":
-        return user_agent_generic
-    raise ValueError("unsupported provider literal")
+def _print_source_issues(issues):
+    for issue in issues:
+        UI.vprint(0, str(issue))
 
 
-def parse_provider_fake_headers(value):
-    parsed = ast.parse(value, mode="eval")
-    headers = _literal_with_provider_names(parsed.body)
-    if type(headers) is not dict:
-        raise ValueError("fake_headers must be a dictionary")
-    if not all(
-        isinstance(key, str) and isinstance(header_value, str)
-        for key, header_value in headers.items()
-    ):
-        raise ValueError("fake_headers keys and values must be strings")
-    return headers
+def _record_extent_epsg(epsg_code):
+    try:
+        GEO.record_epsg(epsg_code)
+    except Exception:
+        # HACK for Slovenia
+        if epsg_code == 102060:
+            GEO.record_epsg(3912)
+        else:
+            raise
 
 
-def parse_provider_bool(value):
-    parsed = ast.literal_eval(value)
-    if not isinstance(parsed, bool):
-        raise ValueError("boolean field must be True or False")
-    return parsed
+def parse_extent_definition(extent_code, source_path):
+    source_path = Path(source_path)
+    try:
+        extent_model = ExtentDefinition.model_validate_json(
+            source_path.read_text(encoding="utf-8")
+        )
+    except ValidationError as exc:
+        return {}, _validation_issues(extent_code, source_path, "extent", exc)
+    except json.JSONDecodeError as exc:
+        return {}, _json_decode_issues(extent_code, source_path, "extent", exc)
+    extent = extent_model.to_runtime_dict()
+    if "epsg_code" in extent:
+        try:
+            _record_extent_epsg(extent["epsg_code"])
+        except Exception as exc:
+            return extent, [
+                _provider_issue(
+                    extent_code,
+                    source_path,
+                    "epsg_code",
+                    f"could not validate EPSG code: {exc}",
+                    source_kind="extent",
+                )
+            ]
+    return extent, []
 
 
-################################################################################
 def initialize_extents_dict():
-    for dir_name in os.listdir(FNAMES.Extent_dir):
-        if not os.path.isdir(os.path.join(FNAMES.Extent_dir, dir_name)):
+    for dir_path in sorted(Path(FNAMES.Extent_dir).iterdir()):
+        if not dir_path.is_dir():
             continue
-        for file_name in os.listdir(os.path.join(FNAMES.Extent_dir, dir_name)):
-            if "." not in file_name or file_name.split(".")[-1] != "ext":
-                continue
-            extent_code = file_name.split(".")[0]
-            extent = {}
-            f = open(
-                os.path.join(FNAMES.Extent_dir, dir_name, file_name),
-                "r",
-                encoding="utf-8",
-            )
-            valid_extent = True
-            for line in f.readlines():
-                line = line[:-1]
-                if "#" in line:
-                    line = line.split("#")[0]
-                if "=" not in line:
-                    continue
-                try:
-                    key = line.split("=")[0]
-                    value = line[len(key) + 1 :]
-                    extent[key] = value
-                except:
-                    print("Error for extent", extent_code, "in line", line)
-                    continue
-                # structuring data
-                if key == "epsg_code":
-                    try:
-                        GEO.record_epsg(int(value))
-                    except:
-                        # HACK for Slovenia
-                        if int(value) == 102060:
-                            GEO.record_epsg(3912)
-                        else:
-                            print("Error in epsg code for extent", extent_code)
-                            valid_extent = False
-                elif key == "mask_bounds":
-                    try:
-                        extent[key] = [float(x) for x in value.split(",")]
-                    except:
-                        print(
-                            "Error in reading mask bounds for extent",
-                            extent_code,
-                        )
-                        valid_extent = False
-                elif key == "buffer_width":
-                    try:
-                        extent[key] = float(value)
-                    except:
-                        print(
-                            "Error in reading mask buffer width for extent",
-                            extent_code,
-                        )
-                        valid_extent = False
-                elif key == "mask_width":
-                    try:
-                        extent[key] = float(value)
-                    except:
-                        print(
-                            "Error in reading mask width for extent",
-                            extent_code,
-                        )
-                        valid_extent = False
-            if valid_extent:
+        for extent_path in sorted(dir_path.glob("*.ext.json")):
+            extent_code = source_code_from_path(extent_path, "ext")
+            extent, issues = parse_extent_definition(extent_code, extent_path)
+            _print_source_issues(issues)
+            if not any(issue.is_error for issue in issues):
                 extent["code"] = extent_code
-                extent["dir"] = dir_name
+                extent["dir"] = dir_path.name
                 extents_dict[extent_code] = extent
             else:
-                print("Error in reading extent definition file for", file_name)
-                pass
-            f.close()
+                print("Error in reading extent definition file for", extent_path.name)
 
 
 ################################################################################
@@ -484,34 +345,25 @@ def initialize_extents_dict():
 ################################################################################
 def initialize_color_filters_dict():
     color_filters_dict.setdefault("none", [])
-    for file_name in os.listdir(FNAMES.Filter_dir):
-        if "." not in file_name or file_name.split(".")[-1] != "flt":
-            continue
-        color_code = file_name.split(".")[0]
-        f = open(os.path.join(FNAMES.Filter_dir, file_name), "r")
-        valid_color_filters = True
-        color_filters = []
-        for line in f.readlines():
-            line = line[:-1]
-            if "#" in line:
-                line = line.split("#")[0]
-            if not line:
-                continue
-            try:
-                items = line.split()
-                color_filters.append([items[0]] + [float(x) for x in items[1:]])
-            except:
-                valid_color_filters = False
-        if valid_color_filters:
-            color_filters_dict[color_code] = color_filters
-        else:
-            print(
-                "Could not understand color filter ",
-                color_code,
-                ", skipping it.",
+    for filter_path in sorted(Path(FNAMES.Filter_dir).glob("*.flt.json")):
+        color_code = source_code_from_path(filter_path, "flt")
+        try:
+            color_filter_model = ColorFilterDefinition.model_validate_json(
+                filter_path.read_text(encoding="utf-8")
             )
-            pass
-        f.close()
+        except ValidationError as exc:
+            _print_source_issues(
+                _validation_issues(color_code, filter_path, "color filter", exc)
+            )
+            print("Could not understand color filter ", color_code, ", skipping it.")
+            continue
+        except json.JSONDecodeError as exc:
+            _print_source_issues(
+                _json_decode_issues(color_code, filter_path, "color filter", exc)
+            )
+            print("Could not understand color filter ", color_code, ", skipping it.")
+            continue
+        color_filters_dict[color_code] = color_filter_model.to_runtime_list()
 
 
 ################################################################################
@@ -520,7 +372,7 @@ def initialize_color_filters_dict():
 ################################################################################
 def initialize_providers_dict():
     for provider_path in iter_provider_definition_paths():
-        provider_code = provider_path.stem
+        provider_code = source_code_from_path(provider_path, "lay")
         dir_name = provider_path.parent.name
         file_name = provider_path.name
         provider, provider_issues = parse_provider_definition(
@@ -630,19 +482,18 @@ def initialize_providers_dict():
 
 ################################################################################
 def initialize_combined_providers_dict():
-    for file_name in os.listdir(FNAMES.Provider_dir):
-        if "." not in file_name or file_name.split(".")[-1] != "comb":
-            continue
-        provider_code = file_name.split(".")[0]
+    for combined_path in sorted(Path(FNAMES.Provider_dir).glob("*.comb.json")):
+        provider_code = source_code_from_path(combined_path, "comb")
         try:
             comb_list = []
-            f = open(os.path.join(FNAMES.Provider_dir, file_name), "r")
-            for line in f.readlines():
-                if "#" in line:
-                    line = line.split("#")[0]
-                if not line[:-1]:
-                    continue
-                layer_code, extent_code, color_code, priority = line[:-1].split()
+            combined_model = CombinedProviderDefinition.model_validate_json(
+                combined_path.read_text(encoding="utf-8")
+            )
+            for layer in combined_model.to_runtime_list():
+                layer_code = layer["layer_code"]
+                extent_code = layer["extent_code"]
+                color_code = layer["color_code"]
+                priority = layer["priority"]
                 if layer_code not in providers_dict:
                     print(
                         "Unknown provider in combined provider",
@@ -714,7 +565,6 @@ def initialize_combined_providers_dict():
                         "priority": priority,
                     }
                 )
-            f.close()
             if comb_list:
                 combined_providers_dict[provider_code] = comb_list
             else:
@@ -723,7 +573,19 @@ def initialize_combined_providers_dict():
                     provider_code,
                     "did not contained valid providers, skipped.",
                 )
-        except:
+        except ValidationError as exc:
+            _print_source_issues(
+                _validation_issues(
+                    provider_code, combined_path, "combined provider", exc
+                )
+            )
+            print("Error reading definition of combined provider", provider_code)
+        except json.JSONDecodeError as exc:
+            _print_source_issues(
+                _json_decode_issues(
+                    provider_code, combined_path, "combined provider", exc
+                )
+            )
             print("Error reading definition of combined provider", provider_code)
 
 

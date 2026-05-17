@@ -1,0 +1,15 @@
+[
+  {
+    "operation": "brightness-contrast",
+    "parameters": [
+      -40.0,
+      15.0
+    ]
+  },
+  {
+    "operation": "saturation",
+    "parameters": [
+      30.0
+    ]
+  }
+]

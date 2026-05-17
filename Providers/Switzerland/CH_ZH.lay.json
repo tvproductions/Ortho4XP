@@ -1,0 +1,9 @@
+{
+  "request_type": "wms",
+  "epsg_code": 2056,
+  "wms_version": "1.0.0",
+  "wms_size": 1024,
+  "layers": "ortho",
+  "url_prefix": "http://wms.zh.ch/OGDOrthoZH?",
+  "in_GUI": false
+}

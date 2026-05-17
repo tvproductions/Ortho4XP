@@ -32,14 +32,16 @@
       "name": "llvm-release",
       "configurePreset": "llvm-release",
       "targets": [
-        "Triangle4XP"
+        "Triangle4XP",
+        "triangle"
       ]
     },
     {
       "name": "llvm-debug",
       "configurePreset": "llvm-debug",
       "targets": [
-        "Triangle4XP"
+        "Triangle4XP",
+        "triangle"
       ]
     }
   ]

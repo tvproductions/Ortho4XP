@@ -32,9 +32,12 @@ Run one coherent quality gate for Ortho4XP changes. Collect deterministic eviden
 ## Rules
 
 - Use `uv`, Ruff, ty, and `unittest`; do not introduce alternate test runners or dependency managers.
-- The full quality check runs repo-wide Ruff lint, Ruff format checks for changed Python files and skill scripts, ty baseline, changed-file ty, unittest, whitespace checks, Radon/Lizard/Cohesion complexity checks, and LLVM/CMake native checks.
+- The full quality check runs repo-wide Ruff lint, Ruff format checks for changed Python files and skill scripts, ty baseline, changed-file ty, unittest, whitespace checks, Xenon/Radon/Lizard/Cohesion complexity checks, and LLVM/CMake native checks.
 - Complexity thresholds live in `complexity-thresholds.json`; accepted legacy findings live in `complexity-baseline.json`.
+- Xenon uses the gzkit-style `C/C/C` gate on the modern quality target set; legacy Ortho4XP modules remain governed by the Radon/Lizard/Cohesion baseline comparison.
 - Complexity regressions fail the quality check when a finding becomes worse than baseline or a new block-level finding appears.
+- Native clang-tidy runs against repo native files represented in the CMake compile database, not changed-file scope.
+- Native compiler and clang-tidy output is captured on successful runs to keep legacy Triangle warnings from burying actionable results; captured output is printed when a native command fails.
 - Do not copy build outputs into bundled platform tool directories unless the user is intentionally refreshing release tools.
 - Report skipped checks clearly with the reason.
 

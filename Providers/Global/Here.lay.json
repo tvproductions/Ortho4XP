@@ -1,0 +1,5 @@
+{
+  "grid_type": "webmercator",
+  "max_threads": 16,
+  "imagery_dir": "grouped"
+}

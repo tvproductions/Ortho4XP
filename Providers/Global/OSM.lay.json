@@ -1,0 +1,11 @@
+{
+  "grid_type": "webmercator",
+  "url_template": "https://tile.openstreetmap.org/{zoom}/{x}/{y}.png",
+  "max_threads": 2,
+  "fake_headers": {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0",
+    "Referer": "https://www.openstreetmap.org/",
+    "Connection": "keep-alive",
+    "Accept": "image/png"
+  }
+}

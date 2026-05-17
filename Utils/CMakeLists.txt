@@ -12,11 +12,23 @@ if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
   message(FATAL_ERROR "Triangle4XP must be built with LLVM/Clang. Use `cmake --preset llvm-release`.")
 endif()
 
+set(ORTHO4XP_NATIVE_TARGETS
+  Triangle4XP
+  triangle
+)
+
 add_executable(Triangle4XP src/Triangle4XP.c)
-target_compile_features(Triangle4XP PRIVATE c_std_17)
-if(WIN32)
-  target_compile_definitions(Triangle4XP PRIVATE _CRT_SECURE_NO_WARNINGS)
-endif()
-if(NOT WIN32)
-  target_link_libraries(Triangle4XP m)
-endif()
+add_executable(triangle src/triangle.c)
+
+foreach(target IN LISTS ORTHO4XP_NATIVE_TARGETS)
+  target_compile_features(${target} PRIVATE c_std_17)
+  if(WIN32)
+    target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    if(target STREQUAL triangle)
+      target_compile_definitions(${target} PRIVATE NO_TIMER)
+    endif()
+  endif()
+  if(NOT WIN32)
+    target_link_libraries(${target} m)
+  endif()
+endforeach()

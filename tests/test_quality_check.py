@@ -1,6 +1,9 @@
 import importlib.util
+import json
 import sys
+import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -84,6 +87,53 @@ class QualityCheckTests(unittest.TestCase):
         regressions = quality_check.compare_to_baseline([finding], baseline, thresholds)
 
         self.assertEqual(regressions, [])
+
+    def test_compile_database_files_returns_repo_relative_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            compile_db = Path(directory) / "compile_commands.json"
+            compile_db.write_text(
+                json.dumps(
+                    [
+                        {
+                            "directory": str(quality_check.ROOT),
+                            "command": "clang -c Utils/src/Triangle4XP.c",
+                            "file": str(
+                                quality_check.ROOT / "Utils" / "src" / "Triangle4XP.c"
+                            ),
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            files = quality_check.compile_database_files(compile_db)
+
+        self.assertEqual(files, {"Utils/src/Triangle4XP.c"})
+
+    def test_native_files_in_compile_database_splits_coverage(self):
+        compiled, missing = quality_check.native_files_in_compile_database(
+            ["Utils/src/Triangle4XP.c", "Utils/src/triangle.c"],
+            {"Utils/src/Triangle4XP.c"},
+        )
+
+        self.assertEqual(compiled, ["Utils/src/Triangle4XP.c"])
+        self.assertEqual(missing, ["Utils/src/triangle.c"])
+
+    def test_run_native_command_suppresses_success_output(self):
+        proc = quality_check.subprocess.CompletedProcess(
+            ["native-tool"], 0, stdout="warning noise\n", stderr="more noise\n"
+        )
+        with (
+            mock.patch.object(quality_check.subprocess, "run", return_value=proc),
+            mock.patch("builtins.print") as print_mock,
+        ):
+            result = quality_check.run_native_command(["native-tool"])
+
+        self.assertIs(result, proc)
+        printed = "\n".join(str(call.args[0]) for call in print_mock.call_args_list)
+        self.assertIn("+ native-tool", printed)
+        self.assertNotIn("warning noise", printed)
+        self.assertNotIn("more noise", printed)
 
 
 if __name__ == "__main__":

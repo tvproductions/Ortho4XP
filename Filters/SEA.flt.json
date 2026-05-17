@@ -1,0 +1,9 @@
+[
+  {
+    "operation": "brightness-contrast",
+    "parameters": [
+      -30.0,
+      10.0
+    ]
+  }
+]
