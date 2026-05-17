@@ -60,7 +60,7 @@ http://dev.x-plane.com/cgit/cgit.cgi/xptools.git/
 License for use and distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-7-Zip Copyright (C) 1999-2023 Igor Pavlov.
+7-Zip Copyright (C) 1999-2026 Igor Pavlov.
 
 The licenses for 7zz and 7zzs files are:
 
@@ -162,4 +162,3 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------
-
