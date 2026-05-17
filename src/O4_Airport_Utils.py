@@ -2,6 +2,7 @@ import pickle
 from math import floor, ceil, pi, cos, sin
 import numpy
 from shapely import geometry, affinity, ops
+from shapely.errors import GEOSException
 from PIL import Image, ImageDraw
 from rtree import index
 import O4_UI_Utils as UI
@@ -11,9 +12,8 @@ import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
 
 runway_chunks = 100  # how much chunks to split a runway longitudinally, ...
-chunk_min_size = (
-    10  # as long as the chunks do not get smaller than this (in meters) .
-)
+chunk_min_size = 10  # as long as the chunks do not get smaller than this (in meters) .
+
 
 ################################################################################
 def discover_airport_names(airport_layer, dico_airports):
@@ -82,9 +82,7 @@ def discover_airport_names(airport_layer, dico_airports):
                         numpy.array(
                             [
                                 airport_layer.dicosmn[nodeid]
-                                for nodeid in airport_layer.dicosmr[osmid][
-                                    "outer"
-                                ][0]
+                                for nodeid in airport_layer.dicosmr[osmid]["outer"][0]
                             ]
                         ),
                         axis=0,
@@ -112,12 +110,10 @@ def discover_airport_names(airport_layer, dico_airports):
             if "smoothing_pix" in airport_layer.dicosmtags[osmtype][osmid]:
                 try:
                     dico_airports[key]["smoothing_pix"] = int(
-                        airport_layer.dicosmtags[osmtype][osmid][
-                            "smoothing_pix"
-                        ]
+                        airport_layer.dicosmtags[osmtype][osmid]["smoothing_pix"]
                     )
-                except:
-                    pass
+                except (TypeError, ValueError) as exc:
+                    UI.vprint(3, exc)
             try:
                 dico_airports[key]["boundary"] = (
                     geometry.Polygon(
@@ -141,9 +137,7 @@ def discover_airport_names(airport_layer, dico_airports):
                                         ]
                                     )
                                 )
-                                for nodelist in airport_layer.dicosmr[osmid][
-                                    "outer"
-                                ]
+                                for nodelist in airport_layer.dicosmr[osmid]["outer"]
                             ]
                         ]
                     )
@@ -162,7 +156,7 @@ def discover_airport_names(airport_layer, dico_airports):
                         "None.",
                     )
                     dico_airports[key]["boundary"] = None
-            except:
+            except (KeyError, TypeError, ValueError, GEOSException):
                 UI.lvprint(
                     2,
                     "WARNING:  A presumably erroneous tag marked aerodrome ",
@@ -172,6 +166,7 @@ def discover_airport_names(airport_layer, dico_airports):
                     "online in OSM.",
                 )
                 dico_airports.pop(key, None)
+
 
 ################################################################################
 def attach_surfaces_to_airports(airport_layer, dico_airports):
@@ -193,9 +188,7 @@ def attach_surfaces_to_airports(airport_layer, dico_airports):
                 )
             )
             found_apt = False
-            for airport in (
-                x for x in dico_airports if dico_airports[x]["boundary"]
-            ):
+            for airport in (x for x in dico_airports if dico_airports[x]["boundary"]):
                 if linestring.intersects(dico_airports[airport]["boundary"]):
                     dico_airports[airport][surface_type].append(wayid)
                     found_apt = True
@@ -237,7 +230,7 @@ def attach_surfaces_to_airports(airport_layer, dico_airports):
                         "boundary": None,
                     }
                     dico_airports[name][surface_type].append(wayid)
-                except:
+                except KeyError:
                     dico_airports[pt_check] = {
                         "key_type": "repr_node",
                         "repr_node": pt_check,
@@ -266,9 +259,7 @@ def attach_surfaces_to_airports(airport_layer, dico_airports):
             )
         )
         found_apt = False
-        for airport in (
-            x for x in dico_airports if dico_airports[x]["boundary"]
-        ):
+        for airport in (x for x in dico_airports if dico_airports[x]["boundary"]):
             if linestring.intersects(dico_airports[airport]["boundary"]):
                 dico_airports[airport]["runway_as_rel"].append(relid)
                 found_apt = True
@@ -310,7 +301,7 @@ def attach_surfaces_to_airports(airport_layer, dico_airports):
                     "boundary": None,
                 }
                 dico_airports[name]["runway_as_rel"].append(relid)
-            except:
+            except KeyError:
                 dico_airports[pt_check] = {
                     "key_type": "repr_node",
                     "repr_node": pt_check,
@@ -325,34 +316,26 @@ def attach_surfaces_to_airports(airport_layer, dico_airports):
                 dico_airports[pt_check]["runway_as_rel"].append(relid)
     return
 
+
 ################################################################################
 def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
-    # Runways in OSM are either encoded as linear features or as area 
-    # features, and sometimes both for the same runway. Here we identify them 
-    # and remove duplicates. Runways of linear type are also often split in OSM 
+    # Runways in OSM are either encoded as linear features or as area
+    # features, and sometimes both for the same runway. Here we identify them
+    # and remove duplicates. Runways of linear type are also often split in OSM
     # between multiple parts (displaced threshold etc), we also group them
     # together in this funcion.
     for airport in dico_airports:
         # Distinction between linear and area runways
-        runways_as_area = (
-            []
-        )  # runways that are encoded in OSM as a polygon around their boundary
+        runways_as_area = []  # runways that are encoded in OSM as a polygon around their boundary
         runways_as_line = []  # runways that are encoded in OSM as a linestrings
-        linear = (
-            []
-        )  
-        # temporary list containing parts (displaced threshold, etc) of OSM 
+        linear = []
+        # temporary list containing parts (displaced threshold, etc) of OSM
         # runways as linestrings
-        linear_width = (
-            []
-        )  
-        # whenever the width tag appears for runways that are linear features, 
+        linear_width = []
+        # whenever the width tag appears for runways that are linear features,
         # if not we'll try to guess the width from the length
         for wayid in dico_airports[airport]["runway"]:
-            if (
-                airport_layer.dicosmw[wayid][0]
-                == airport_layer.dicosmw[wayid][-1]
-            ):
+            if airport_layer.dicosmw[wayid][0] == airport_layer.dicosmw[wayid][-1]:
                 runway_pol = geometry.Polygon(
                     numpy.round(
                         numpy.array(
@@ -394,18 +377,16 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                             UI.vprint(
                                 1,
                                 "   !You may correct it editing the file ",
-                                FNAMES.osm_cached(
-                                    tile.lat, tile.lon, "airports"
-                                ),
+                                FNAMES.osm_cached(tile.lat, tile.lon, "airports"),
                                 "in JOSM.",
                             )
                             continue
                     rectangle = numpy.array(
                         VECT.min_bounding_rectangle(runway_pol).exterior.coords
                     )
-                    if VECT.length_in_meters(
-                        rectangle[0:2]
-                    ) < VECT.length_in_meters(rectangle[1:3]):
+                    if VECT.length_in_meters(rectangle[0:2]) < VECT.length_in_meters(
+                        rectangle[1:3]
+                    ):
                         runway_start = (rectangle[0] + rectangle[1]) / 2
                         runway_end = (rectangle[2] + rectangle[3]) / 2
                         runway_width = VECT.length_in_meters(rectangle[0:2])
@@ -446,11 +427,9 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                     linear_width.append(
                         float(airport_layer.dicosmtags["w"][wayid]["width"])
                     )
-                except:
-                    linear_width.append(
-                        0
-                    )  
-                    # 0 is just a mark for non existing data, a fictive length 
+                except (KeyError, TypeError, ValueError):
+                    linear_width.append(0)
+                    # 0 is just a mark for non existing data, a fictive length
                     # will be given later based on the runway length
         for relid in dico_airports[airport]["runway_as_rel"]:
             runway_pol = geometry.Polygon(
@@ -458,9 +437,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                     numpy.array(
                         [
                             airport_layer.dicosmn[nodeid]
-                            for nodeid in airport_layer.dicosmr[relid]["outer"][
-                                0
-                            ]
+                            for nodeid in airport_layer.dicosmr[relid]["outer"][0]
                         ]
                     )
                     - numpy.array([tile.lon, tile.lat]),
@@ -503,9 +480,9 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                 rectangle = numpy.array(
                     VECT.min_bounding_rectangle(runway_pol).exterior.coords
                 )
-                if VECT.length_in_meters(
-                    rectangle[0:2]
-                ) < VECT.length_in_meters(rectangle[1:3]):
+                if VECT.length_in_meters(rectangle[0:2]) < VECT.length_in_meters(
+                    rectangle[1:3]
+                ):
                     runway_start = (rectangle[0] + rectangle[1]) / 2
                     runway_end = (rectangle[2] + rectangle[3]) / 2
                     runway_width = VECT.length_in_meters(rectangle[0:2])
@@ -558,8 +535,8 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                             - numpy.array(airport_layer.dicosmn[linear[j][0]])
                         )
                     )
-                    # Some different runways may share a common end-point in 
-                    # OSM, in this case we don't want to group them into a 
+                    # Some different runways may share a common end-point in
+                    # OSM, in this case we don't want to group them into a
                     # single one
                     if (
                         not numpy.min(
@@ -573,9 +550,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                         continue
                     if linear[i][-1] == linear[j][0]:
                         linear = [
-                            linear[k]
-                            for k in range(len(linear))
-                            if k not in (i, j)
+                            linear[k] for k in range(len(linear)) if k not in (i, j)
                         ] + [linear[i] + linear[j][1:]]
                         linear_width = [
                             linear_width[k]
@@ -586,9 +561,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                         break
                     elif linear[i][-1] == linear[j][-1]:
                         linear = [
-                            linear[k]
-                            for k in range(len(linear))
-                            if k not in (i, j)
+                            linear[k] for k in range(len(linear)) if k not in (i, j)
                         ] + [linear[i] + linear[j][-2::-1]]
                         linear_width = [
                             linear_width[k]
@@ -599,9 +572,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                         break
                     elif linear[i][0] == linear[j][0]:
                         linear = [
-                            linear[k]
-                            for k in range(len(linear))
-                            if k not in (i, j)
+                            linear[k] for k in range(len(linear)) if k not in (i, j)
                         ] + [linear[i][-1::-1] + linear[j][1:]]
                         linear_width = [
                             linear_width[k]
@@ -612,9 +583,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                         break
                     elif linear[i][0] == linear[j][-1]:
                         linear = [
-                            linear[k]
-                            for k in range(len(linear))
-                            if k not in (i, j)
+                            linear[k] for k in range(len(linear)) if k not in (i, j)
                         ] + [linear[j] + linear[i][1:]]
                         linear_width = [
                             linear_width[k]
@@ -625,9 +594,9 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                         break
                 if not runway_parts_are_grouped:
                     break
-        # Grow linear runways into rectangle ones and check wether they are 
+        # Grow linear runways into rectangle ones and check wether they are
         # duplicates of existing area ones, in which case they are skipped
-        for (nodeid_list, width) in zip(linear, linear_width):
+        for nodeid_list, width in zip(linear, linear_width):
             runway_start = airport_layer.dicosmn[nodeid_list[0]]
             runway_end = airport_layer.dicosmn[nodeid_list[-1]]
             runway_length = GEO.dist(runway_start, runway_end)
@@ -642,16 +611,12 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
             else:
                 width = 30 + runway_length // 1000
             pol = geometry.Polygon(
-                VECT.buffer_simple_way(
-                    numpy.vstack((runway_start, runway_end)), width
-                )
+                VECT.buffer_simple_way(numpy.vstack((runway_start, runway_end)), width)
             )
             keep_this = True
             i = 0
             for pol2 in runways_as_area:
-                if (pol2[0].intersection(pol)).area > 0.6 * min(
-                    pol.area, pol2[0].area
-                ):
+                if (pol2[0].intersection(pol)).area > 0.6 * min(pol.area, pol2[0].area):
                     # update area one with start end and width from linear one
                     runways_as_area[i] = (
                         pol2[0],
@@ -667,9 +632,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                 runways_as_line.append((pol, runway_start, runway_end, width))
         ##  Save (overwrite) this into the dico_airport runway dictionnary
         runway_area = VECT.ensure_MultiPolygon(
-            ops.unary_union(
-                [item[0] for item in runways_as_area + runways_as_line]
-            )
+            ops.unary_union([item[0] for item in runways_as_area + runways_as_line])
         )
         dico_airports[airport]["runway"] = (
             runway_area,
@@ -678,6 +641,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
         )
     return
 
+
 ################################################################################
 def discard_unwanted_airports(tile, dico_airports):
     # A bit of cleaning (aeromodelism, helipads, should be removed here)
@@ -685,9 +649,7 @@ def discard_unwanted_airports(tile, dico_airports):
         apt = dico_airports[airport]
         # if apt['key_type'] in ('icao','iata','local_ref'): continue
         if apt["boundary"]:
-            if apt["boundary"].area < 5000 * GEO.m_to_lat * GEO.m_to_lon(
-                tile.lat
-            ):
+            if apt["boundary"].area < 5000 * GEO.m_to_lat * GEO.m_to_lon(tile.lat):
                 # too small, skip it
                 dico_airports.pop(airport, None)
             continue
@@ -695,6 +657,7 @@ def discard_unwanted_airports(tile, dico_airports):
             # too small, skip it
             dico_airports.pop(airport, None)
             continue
+
 
 ################################################################################
 def build_hangar_areas(tile, airport_layer, dico_airports):
@@ -717,7 +680,7 @@ def build_hangar_areas(tile, airport_layer, dico_airports):
                 )
                 if not pol.is_valid:
                     continue
-            except:
+            except (KeyError, TypeError, ValueError, GEOSException):
                 UI.vprint(
                     2,
                     "Unable to turn hangar area to polygon, close to",
@@ -729,6 +692,7 @@ def build_hangar_areas(tile, airport_layer, dico_airports):
             VECT.improved_buffer(ops.unary_union(hangars), 2, 1, 0.5)
         )
         dico_airports[airport]["hangar"] = hangars
+
 
 ################################################################################
 def build_apron_areas(tile, airport_layer, dico_airports):
@@ -756,7 +720,7 @@ def build_apron_areas(tile, airport_layer, dico_airports):
                         airport_layer.dicosmn[airport_layer.dicosmw[wayid][0]],
                     )
                     continue
-            except:
+            except (KeyError, TypeError, ValueError, GEOSException):
                 UI.vprint(
                     2,
                     "Unable to turn apron area to polygon, close to",
@@ -770,6 +734,7 @@ def build_apron_areas(tile, airport_layer, dico_airports):
             dico_airports[airport]["apron"],
         )
     return
+
 
 ################################################################################
 def build_taxiway_areas(tile, airport_layer, dico_airports):
@@ -792,14 +757,13 @@ def build_taxiway_areas(tile, airport_layer, dico_airports):
                 for wayid in wayid_list
             ]
         )
-        taxiways = VECT.ensure_MultiPolygon(
-            VECT.improved_buffer(taxiways, 15, 3, 0.5)
-        )
+        taxiways = VECT.ensure_MultiPolygon(VECT.improved_buffer(taxiways, 15, 3, 0.5))
         dico_airports[airport]["taxiway"] = (
             taxiways,
             dico_airports[airport]["taxiway"],
         )
     return
+
 
 ################################################################################
 def update_airport_boundaries(tile, dico_airports):
@@ -817,9 +781,7 @@ def update_airport_boundaries(tile, dico_airports):
             apt["boundary"] = VECT.ensure_MultiPolygon(
                 ops.unary_union(
                     [
-                        affinity.translate(
-                            apt["boundary"], -tile.lon, -tile.lat
-                        ),
+                        affinity.translate(apt["boundary"], -tile.lon, -tile.lat),
                         boundary,
                     ]
                 )
@@ -830,45 +792,33 @@ def update_airport_boundaries(tile, dico_airports):
             apt["boundary"] = VECT.ensure_MultiPolygon(
                 boundary.buffer(0).simplify(0.00001)
             )
-    # pickle dico_airports for later use in Step 2 (apt_curv_tol) and Step 3 
+    # pickle dico_airports for later use in Step 2 (apt_curv_tol) and Step 3
     # (cover_airports_with_high_res)
     try:
         with open(FNAMES.apt_file(tile), "wb") as outf:
             pickle.dump(dico_airports, outf)
-    except:
+    except (OSError, pickle.PicklingError) as exc:
         UI.vprint(
             1,
             "WARNING: Could not save airport info to file",
             FNAMES.apt_file(tile),
         )
+        UI.vprint(3, exc)
     return
+
 
 ################################################################################
 def list_airports_and_runways(dico_airports):
     # Sorting for easier reading of the output
     airport_list = (
-        sorted(
-            [x for x in dico_airports if dico_airports[x]["key_type"] == "icao"]
-        )
+        sorted([x for x in dico_airports if dico_airports[x]["key_type"] == "icao"])
+        + sorted([x for x in dico_airports if dico_airports[x]["key_type"] == "iata"])
         + sorted(
-            [x for x in dico_airports if dico_airports[x]["key_type"] == "iata"]
+            [x for x in dico_airports if dico_airports[x]["key_type"] == "local_ref"]
         )
+        + sorted([x for x in dico_airports if dico_airports[x]["key_type"] == "name"])
         + sorted(
-            [
-                x
-                for x in dico_airports
-                if dico_airports[x]["key_type"] == "local_ref"
-            ]
-        )
-        + sorted(
-            [x for x in dico_airports if dico_airports[x]["key_type"] == "name"]
-        )
-        + sorted(
-            [
-                x
-                for x in dico_airports
-                if dico_airports[x]["key_type"] == "repr_node"
-            ]
+            [x for x in dico_airports if dico_airports[x]["key_type"] == "repr_node"]
         )
     )
     for airport in airport_list:
@@ -876,9 +826,7 @@ def list_airports_and_runways(dico_airports):
             dico_airports[airport]["runway"][2]
         )
         runway_str = (
-            str(l) + (" runways," if l > 1 else " runway ,")
-            if l
-            else "boundary ,"
+            str(l) + (" runways," if l > 1 else " runway ,") if l else "boundary ,"
         )
         if dico_airports[airport]["key_type"] in ("icao", "iata", "local_ref"):
             UI.vprint(
@@ -906,6 +854,7 @@ def list_airports_and_runways(dico_airports):
             )
     return
 
+
 ################################################################################
 def build_airport_array(tile, dico_airports):
     airport_array = numpy.zeros((1001, 1001), dtype=bool)
@@ -920,17 +869,16 @@ def build_airport_array(tile, dico_airports):
         airport_array[rowmin : rowmax + 1, colmin : colmax + 1] = True
     return airport_array
 
+
 ################################################################################
 def smooth_raster_over_airports(tile, dico_airports, preserve_boundary=True):
     max_pix = tile.apt_smoothing_pix
     for airport in dico_airports:
         if "smoothing_pix" in dico_airports[airport]:
             try:
-                max_pix = max(
-                    int(dico_airports[airport]["smoothing_pix"]), max_pix
-                )
-            except:
-                pass
+                max_pix = max(int(dico_airports[airport]["smoothing_pix"]), max_pix)
+            except (TypeError, ValueError) as exc:
+                UI.vprint(3, exc)
     if not max_pix:
         tile.dem.write_to_file(FNAMES.alt_file(tile))
         return
@@ -955,7 +903,7 @@ def smooth_raster_over_airports(tile, dico_airports, preserve_boundary=True):
                 if "smoothing_pix" in dico_airports[airport]
                 else tile.apt_smoothing_pix
             )
-        except:
+        except (KeyError, TypeError, ValueError):
             pix = tile.apt_smoothing_pix
         if not pix:
             continue
@@ -1005,9 +953,7 @@ def smooth_raster_over_airports(tile, dico_airports, preserve_boundary=True):
         airport_im = airport_im.resize(
             (colmax - colmin + 1, rowmax - rowmin + 1), Image.Resampling.BICUBIC
         )
-        tile.dem.alt_dem[
-            rowmin : rowmax + 1, colmin : colmax + 1
-        ] = DEM.smoothen(
+        tile.dem.alt_dem[rowmin : rowmax + 1, colmin : colmax + 1] = DEM.smoothen(
             tile.dem.alt_dem[rowmin : rowmax + 1, colmin : colmax + 1],
             pix,
             airport_im,
@@ -1020,8 +966,7 @@ def smooth_raster_over_airports(tile, dico_airports, preserve_boundary=True):
                 i / pix * tile.dem.alt_dem[i] + (pix - i) / pix * up[i]
             )
             tile.dem.alt_dem[-i - 1] = (
-                i / pix * tile.dem.alt_dem[-i - 1]
-                + (pix - i) / pix * down[-i - 1]
+                i / pix * tile.dem.alt_dem[-i - 1] + (pix - i) / pix * down[-i - 1]
             )
         for i in range(pix):
             tile.dem.alt_dem[:, i] = (
@@ -1033,6 +978,7 @@ def smooth_raster_over_airports(tile, dico_airports, preserve_boundary=True):
             )
     tile.dem.write_to_file(FNAMES.alt_file(tile))
     return
+
 
 ################################################################################
 def encode_runways_taxiways_and_aprons(
@@ -1047,16 +993,16 @@ def encode_runways_taxiways_and_aprons(
         apt = dico_airports[airport]
         total_rwy += len(apt["runway"][1] + apt["runway"][2])
         total_taxi += len(apt["taxiway"][1])
-        # First build the altitude generator function : that is a number of 
-        # least square polynomial approximations of altitudes along ways 
-        # (runways, taxiways, etc). These will be used later approriately 
-        # weighted all together in order to give altitudes to any node in a 
-        # runway or taxiway (this weighting is highly important to avoid 
+        # First build the altitude generator function : that is a number of
+        # least square polynomial approximations of altitudes along ways
+        # (runways, taxiways, etc). These will be used later approriately
+        # weighted all together in order to give altitudes to any node in a
+        # runway or taxiway (this weighting is highly important to avoid
         # steppint effects close to intersections)
         alt_idx = index.Index()
         alt_dico = {}
         id = 0
-        for (runway_pol, runway_start, runway_end, runway_width) in (
+        for runway_pol, runway_start, runway_end, runway_width in (
             apt["runway"][1] + apt["runway"][2]
         ):
             center_way = numpy.vstack((runway_start, runway_end))
@@ -1088,9 +1034,7 @@ def encode_runways_taxiways_and_aprons(
             alt_dico[id] = (linestring, polyfit, 15)
             id += 1
         # Now that alt_gen is filled, we may proceed to encoding
-        pols = (
-            []
-        )  
+        pols = []
         # Keep track of encoded pols to later plant seeds inside crossings etc
         ## First runways
         # First runways as lines
@@ -1106,9 +1050,7 @@ def encode_runways_taxiways_and_aprons(
             refine_size = max(runway_length // runway_chunks, chunk_min_size)
             for pol in VECT.ensure_MultiPolygon(VECT.cut_to_tile(runway_pol)):
                 way = numpy.round(
-                    VECT.refine_way(
-                        numpy.array(pol.exterior.coords), refine_size
-                    ),
+                    VECT.refine_way(numpy.array(pol.exterior.coords), refine_size),
                     7,
                 )
                 alti_way = numpy.array(
@@ -1121,42 +1063,36 @@ def encode_runways_taxiways_and_aprons(
                     numpy.hstack([way, alti_way]), "RUNWAY", check=True
                 )
                 pols.append(pol)
-            way = VECT.refine_way(
-                numpy.vstack((runway_start, runway_end)), refine_size
-            )
+            way = VECT.refine_way(numpy.vstack((runway_start, runway_end)), refine_size)
             way_r = VECT.shift_way(way, 0.6 * runway_width, "right")
             way_l = VECT.shift_way(way, 0.6 * runway_width, "left")
             for k in range(1, len(way)):
                 try:
-                    lin = geometry.LineString(
-                        [way_r[k], way_l[k]]
-                    ).intersection(runway_pol)
+                    lin = geometry.LineString([way_r[k], way_l[k]]).intersection(
+                        runway_pol
+                    )
                     if lin.geom_type == "LineString" and not lin.is_empty:
                         trav = numpy.round(numpy.array(lin), 7)
                         alti_trav = numpy.array(
                             [
-                                VECT.weighted_alt(
-                                    node, alt_idx, alt_dico, tile.dem
-                                )
+                                VECT.weighted_alt(node, alt_idx, alt_dico, tile.dem)
                                 for node in trav
                             ]
                         ).reshape((len(trav), 1))
                         vector_map.insert_way(
                             numpy.hstack([trav, alti_trav]), "DUMMY", check=True
                         )
-                except Exception as e:
-                    pass
+                except (KeyError, TypeError, ValueError, GEOSException) as e:
+                    UI.vprint(3, e)
         # Next runways as area
-        for (runway_pol, runway_start, runway_end, runway_width) in (
+        for runway_pol, runway_start, runway_end, runway_width in (
             apt["runway"][1] + apt["runway"][2]
         ):
             runway_length = VECT.length_in_meters(
                 numpy.vstack((runway_start, runway_end))
             )
             refine_size = max(runway_length // runway_chunks, chunk_min_size)
-            way = VECT.refine_way(
-                numpy.vstack((runway_start, runway_end)), refine_size
-            )
+            way = VECT.refine_way(numpy.vstack((runway_start, runway_end)), refine_size)
             way_r = VECT.shift_way(way, runway_width, "right")
             way_l = VECT.shift_way(way, runway_width, "left")
             for pol in VECT.ensure_MultiPolygon(VECT.cut_to_tile(runway_pol)).geoms:
@@ -1167,27 +1103,20 @@ def encode_runways_taxiways_and_aprons(
                 traverses = []
                 for k in range(1, len(way)):
                     try:
-                        lin = geometry.LineString(
-                            [way_r[k], way_l[k]]
-                        ).intersection(runway_pol)
+                        lin = geometry.LineString([way_r[k], way_l[k]]).intersection(
+                            runway_pol
+                        )
                         if lin.geom_type == "LineString":
-                            abs1 = boundary.project(
-                                geometry.Point(lin.coords[0])
-                            )
-                            abs2 = boundary.project(
-                                geometry.Point(lin.coords[-1])
-                            )
+                            abs1 = boundary.project(geometry.Point(lin.coords[0]))
+                            abs2 = boundary.project(geometry.Point(lin.coords[-1]))
                             traverses.append((abs1, abs2))
                             abscissae += [abs1, abs2]
-                    except:
-                        pass
+                    except (TypeError, ValueError, GEOSException) as exc:
+                        UI.vprint(3, exc)
                 abscissae = sorted(set(abscissae))
                 way = numpy.round(
                     numpy.array(
-                        [
-                            boundary.interpolate(x).coords[0]
-                            for x in abscissae + [0]
-                        ]
+                        [boundary.interpolate(x).coords[0] for x in abscissae + [0]]
                     ),
                     7,
                 )
@@ -1200,7 +1129,7 @@ def encode_runways_taxiways_and_aprons(
                 vector_map.insert_way(
                     numpy.hstack([way, alti_way]), "RUNWAY", check=True
                 )
-                for (abs1, abs2) in traverses:
+                for abs1, abs2 in traverses:
                     trav = numpy.round(
                         numpy.array(
                             [
@@ -1222,9 +1151,7 @@ def encode_runways_taxiways_and_aprons(
                 pols.append(pol)
         for pol in pols:
             for subpol in VECT.ensure_MultiPolygon(
-                pol.difference(
-                    ops.unary_union([pol2 for pol2 in pols if pol2 != pol])
-                )
+                pol.difference(ops.unary_union([pol2 for pol2 in pols if pol2 != pol]))
             ).geoms:
                 seeds["RUNWAY"].append(
                     numpy.array(subpol.representative_point().coords[0])
@@ -1261,14 +1188,9 @@ def encode_runways_taxiways_and_aprons(
                 continue
             way = numpy.round(VECT.refine_way(numpy.array(pol.exterior.coords), 20), 7)
             alti_way = numpy.array(
-                [
-                    VECT.weighted_alt(node, alt_idx, alt_dico, tile.dem)
-                    for node in way
-                ]
+                [VECT.weighted_alt(node, alt_idx, alt_dico, tile.dem) for node in way]
             ).reshape((len(way), 1))
-            vector_map.insert_way(
-                numpy.hstack([way, alti_way]), "TAXIWAY", check=True
-            )
+            vector_map.insert_way(numpy.hstack([way, alti_way]), "TAXIWAY", check=True)
             for subpol in pol.interiors:
                 way = numpy.round(VECT.refine_way(numpy.array(subpol.coords), 20), 7)
                 alti_way = numpy.array(
@@ -1281,8 +1203,8 @@ def encode_runways_taxiways_and_aprons(
                     numpy.hstack([way, alti_way]), "TAXIWAY", check=True
                 )
             seeds["TAXIWAY"].append(numpy.array(pol.representative_point().coords[0]))
-        ## Try to bring some aprons with, we are looking for the small ones 
-        # along runways, you just need to add the 'include' tag to that apron 
+        ## Try to bring some aprons with, we are looking for the small ones
+        # along runways, you just need to add the 'include' tag to that apron
         # in JOSM (local copy)
         for wayid in apt["apron"][1]:
             if (
@@ -1316,8 +1238,8 @@ def encode_runways_taxiways_and_aprons(
                     seeds["APRON"].append(
                         numpy.array(apron_pol.representative_point().coords[0])
                     )
-            except:
-                pass
+            except (TypeError, ValueError, GEOSException) as exc:
+                UI.vprint(3, exc)
     for surface in ("RUNWAY", "TAXIWAY", "APRON"):
         if seeds[surface]:
             if surface in vector_map.seeds:
@@ -1340,6 +1262,7 @@ def encode_runways_taxiways_and_aprons(
         + [dico_airports[airport]["apron"][0] for airport in dico_airports]
     )
 
+
 ################################################################################
 def encode_hangars(tile, dico_airports, vector_map, patches_list):
     seeds = []
@@ -1352,9 +1275,7 @@ def encode_hangars(tile, dico_airports, vector_map, patches_list):
             way = numpy.array(pol.exterior.coords)
             alt = tile.dem.alt_vec(way)
             if alt.max() - alt.min() <= 1.5:
-                alti_way = numpy.ones((len(way), 1)) * numpy.mean(
-                    tile.dem.alt_vec(way)
-                )
+                alti_way = numpy.ones((len(way), 1)) * numpy.mean(tile.dem.alt_vec(way))
                 vector_map.insert_way(
                     numpy.hstack([way, alti_way]), "HANGAR", check=True
                 )
@@ -1365,6 +1286,7 @@ def encode_hangars(tile, dico_airports, vector_map, patches_list):
         else:
             vector_map.seeds["HANGAR"] = seeds
     return 1
+
 
 ################################################################################
 def flatten_helipads(airport_layer, vector_map, tile, treated_area):
@@ -1443,17 +1365,13 @@ def flatten_helipads(airport_layer, vector_map, tile, treated_area):
         # check=True)
         # seeds.append(center)
         total += 1
-    helipad_area = VECT.ensure_MultiPolygon(
-        VECT.cut_to_tile(ops.unary_union(multipol))
-    )
+    helipad_area = VECT.ensure_MultiPolygon(VECT.cut_to_tile(ops.unary_union(multipol)))
     for pol in helipad_area.geoms:
         if (pol.is_empty) or (not pol.is_valid) or (not pol.area):
             continue
         way = numpy.array(pol.exterior.coords)
         alti_way = numpy.ones((len(way), 1)) * numpy.mean(tile.dem.alt_vec(way))
-        vector_map.insert_way(
-            numpy.hstack([way, alti_way]), "INTERP_ALT", check=True
-        )
+        vector_map.insert_way(numpy.hstack([way, alti_way]), "INTERP_ALT", check=True)
         seeds.append(numpy.array(pol.representative_point().coords[0]))
     if seeds:
         if "INTERP_ALT" in vector_map.seeds:

@@ -133,7 +133,7 @@ def build_curv_tol_weight_map(tile, weight_array):
             f = open(FNAMES.apt_file(tile), "rb")
             dico_airports = pickle.load(f)
             f.close()
-        except:
+        except (OSError, EOFError, pickle.UnpicklingError):
             UI.vprint(
                 1,
                 "   WARNING: File",
@@ -588,8 +588,9 @@ def build_mesh(tile):
         f = open(node_file, "r")
         input_nodes = int(f.readline().split()[0])
         f.close()
-    except:
+    except (OSError, IndexError, ValueError) as exc:
         UI.exit_message_and_bottom_line("\nERROR: In reading ", node_file)
+        UI.vprint(3, exc)
         return 0
 
     timer = time.time()
@@ -598,7 +599,7 @@ def build_mesh(tile):
     do_refine = "r" if tile.iterate else "A"
     try:
         max_tris = float(tile.limit_tris) * 1e6
-    except:
+    except (TypeError, ValueError):
         UI.vprint(1, "   Warning : limit_tris wrongly set, defaults to 5M.")
         max_tris = 5e6
     if max_tris <= 0 or max_tris >= 5e7:
@@ -661,8 +662,8 @@ def build_mesh(tile):
         else:
             try:
                 print(line.decode("utf-8")[:-1])
-            except:
-                pass
+            except UnicodeDecodeError as exc:
+                UI.vprint(3, exc)
     time.sleep(0.3)
     fingers_crossed.poll()
     if fingers_crossed.returncode:
@@ -697,8 +698,8 @@ def build_mesh(tile):
                 else:
                     try:
                         print(line.decode("utf-8")[:-1])
-                    except:
-                        pass
+                    except UnicodeDecodeError as exc:
+                        UI.vprint(3, exc)
             time.sleep(0.3)
             fingers_crossed.poll()
             if fingers_crossed.returncode == 0:
@@ -730,29 +731,29 @@ def build_mesh(tile):
     if UI.cleaning_level:
         try:
             os.remove(FNAMES.weight_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.output_node_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.output_ele_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
     if UI.cleaning_level > 2:
         try:
             os.remove(FNAMES.alt_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.input_node_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.input_poly_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
 
     UI.timings_and_bottom_line(timer)
     UI.logprint("Step 2 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")

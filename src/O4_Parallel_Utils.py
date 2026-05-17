@@ -1,6 +1,7 @@
 import threading
 import O4_UI_Utils as UI
 
+
 ################################################################################
 class parallel_worker(threading.Thread):
     def __init__(self, task, queue, progress=None, success=[1]):
@@ -15,9 +16,9 @@ class parallel_worker(threading.Thread):
             args = self._queue.get()
             if isinstance(args, str) and args == "quit":
                 try:
-                    UI.progress_bar(self._progress["bar"], 100)
-                except:
-                    pass
+                    UI.progress_bar(self._progress["bar"], 100)  # ty:ignore[not-subscriptable]
+                except (AttributeError, IndexError) as exc:
+                    UI.vprint(3, exc)
                 return 1
             self._success[0] = self._task(*args) and self._success[0]
             if self._progress:
@@ -32,6 +33,7 @@ class parallel_worker(threading.Thread):
                 )
             if UI.red_flag:
                 return 0
+
 
 ################################################################################
 def parallel_execute(task, queue, nbr_workers, progress=None):
@@ -57,6 +59,7 @@ def parallel_launch(task, queue, nbr_workers, progress=None):
         worker.start()
         workers.append(worker)
     return workers
+
 
 ################################################################################
 def parallel_join(workers):

@@ -10,9 +10,10 @@ import numpy
 
 try:
     from osgeo import gdal
+
     has_gdal = True
     gdal.UseExceptions()
-except:
+except ImportError:
     has_gdal = False
 from PIL import Image
 import O4_UI_Utils as UI
@@ -33,6 +34,7 @@ available_sources = (
 
 global_sources = ("View", "SRTM", "ALOS")
 
+
 ################################################################################
 class DEM:
     def __init__(self, lat, lon, source="", fill_nodata=True, info_only=False):
@@ -51,9 +53,7 @@ class DEM:
         if fill_nodata == "to zero":
             self.nodata_to_zero()
         elif fill_nodata:
-            if not fill_nodata_values_with_nearest_neighbor(
-                self.alt_dem, self.nodata
-            ):
+            if not fill_nodata_values_with_nearest_neighbor(self.alt_dem, self.nodata):
                 UI.vprint(
                     1,
                     "   INFO: Dataset contains too much no_data to be filled.",
@@ -81,9 +81,7 @@ class DEM:
         else:
             local_sources = None
         if source in available_sources[1::2]:
-            short_source = available_sources[
-                available_sources.index(source) - 1
-            ]
+            short_source = available_sources[available_sources.index(source) - 1]
             if short_source in global_sources:
                 (
                     self.epsg,
@@ -95,9 +93,7 @@ class DEM:
                     self.nxdem,
                     self.nydem,
                     self.alt_dem,
-                ) = build_combined_raster(
-                    short_source, self.lat, self.lon, info_only
-                )
+                ) = build_combined_raster(short_source, self.lat, self.lon, info_only)
             else:
                 if ensure_elevation(short_source, self.lat, self.lon):
                     (
@@ -151,18 +147,14 @@ class DEM:
                 self.nxdem,
                 self.nydem,
                 self.alt_dem,
-            ) = read_elevation_from_file(
-                file_name, self.lat, self.lon, info_only
-            )
+            ) = read_elevation_from_file(file_name, self.lat, self.lon, info_only)
         if not local_sources:
             return
         self.subdems = tuple()
         for local_source in local_sources:
-            self.subdems += (
-                DEM(self.lat, self.lon, local_source, False, info_only),
-            )
-            self.subdems[-1].alt = self.subdems[-1].alt_strict
-            self.subdems[-1].alt_vec = self.subdems[-1].alt_vec_strict
+            self.subdems += (DEM(self.lat, self.lon, local_source, False, info_only),)
+            self.subdems[-1].alt = self.subdems[-1].alt_strict  # ty:ignore[invalid-assignment]
+            self.subdems[-1].alt_vec = self.subdems[-1].alt_vec_strict  # ty:ignore[invalid-assignment]
 
     def nodata_to_zero(self):
         if (self.alt_dem == self.nodata).any():
@@ -185,24 +177,20 @@ class DEM:
         dy[0, :] = (self.alt_dem[0, :] - self.alt_dem[1, :]) / (pixy)
         dy[-1, :] = (self.alt_dem[-2, :] - self.alt_dem[-1, :]) / (pixy)
         del self.alt_dem
-        norm = numpy.sqrt(1 + dx ** 2 + dy ** 2)
+        norm = numpy.sqrt(1 + dx**2 + dy**2)
         dx = dx / norm
         dy = dy / norm
         del norm
-        band_r = Image.fromarray(
-            ((1 + dx) / 2 * 255).astype(numpy.uint8)
-        ).resize((4096, 4096))
+        band_r = Image.fromarray(((1 + dx) / 2 * 255).astype(numpy.uint8)).resize(
+            (4096, 4096)
+        )
         del dx
-        band_g = Image.fromarray(
-            ((1 - dy) / 2 * 255).astype(numpy.uint8)
-        ).resize((4096, 4096))
+        band_g = Image.fromarray(((1 - dy) / 2 * 255).astype(numpy.uint8)).resize(
+            (4096, 4096)
+        )
         del dy
-        band_b = Image.fromarray(
-            (numpy.ones((4096, 4096)) * 10).astype(numpy.uint8)
-        )
-        band_a = Image.fromarray(
-            (numpy.ones((4096, 4096)) * 128).astype(numpy.uint8)
-        )
+        band_b = Image.fromarray((numpy.ones((4096, 4096)) * 10).astype(numpy.uint8))
+        band_a = Image.fromarray((numpy.ones((4096, 4096)) * 128).astype(numpy.uint8))
         im = Image.merge("RGBA", (band_r, band_g, band_b, band_a))
         im.save("normal_map.png")
 
@@ -265,20 +253,10 @@ class DEM:
         y = node[1]
         return (
             self.nodata
-            if (
-                (x > self.x1) or (x < self.x0) or (y < self.y0) or (y > self.y1)
-            )
+            if ((x > self.x1) or (x < self.x0) or (y < self.y0) or (y > self.y1))
             else self.alt_dem[
-                int(
-                    round(
-                        (self.y1 - y) / (self.y1 - self.y0) * (self.nydem - 1)
-                    )
-                ),
-                int(
-                    round(
-                        (x - self.x0) / (self.x1 - self.x0) * (self.nxdem - 1)
-                    )
-                ),
+                int(round((self.y1 - y) / (self.y1 - self.y0) * (self.nydem - 1))),
+                int(round((x - self.x0) / (self.x1 - self.x0) * (self.nxdem - 1))),
             ]
         )
 
@@ -315,10 +293,7 @@ class DEM:
             self.alt_dem[i][j]
             for i, j in zip(Nminusny, (nx + 1) * (nx < Nx) + Nx * (nx == Nx))
         ]
-        t4 = [
-            self.alt_dem[i][j]
-            for i, j in zip((Nminusny - 1) * (Nminusny >= 1), nx)
-        ]
+        t4 = [self.alt_dem[i][j] for i, j in zip((Nminusny - 1) * (Nminusny >= 1), nx)]
         return ((1 - rx) * t1 + ry * t2 + (rx - ry) * t3) * (rx >= ry) + (
             (1 - ry) * t1 + rx * t2 + (ry - rx) * t4
         ) * (rx < ry)
@@ -326,9 +301,9 @@ class DEM:
     def alt_vec_strict(self, way):
         x, y = way[:, 0], way[:, 1]
         mask = (x >= self.x0) * (x <= self.x1) * (y >= self.y0) * (y <= self.y1)
-        nx = numpy.round(
-            (x - self.x0) / (self.x1 - self.x0) * (self.nxdem - 1)
-        ).astype(numpy.uint16)
+        nx = numpy.round((x - self.x0) / (self.x1 - self.x0) * (self.nxdem - 1)).astype(
+            numpy.uint16
+        )
         Nminusny = numpy.round(
             (self.y1 - y) / (self.y1 - self.y0) * (self.nydem - 1)
         ).astype(numpy.uint16)
@@ -345,6 +320,7 @@ class DEM:
             tmp2 = subdem.alt_vec_strict(way)
             tmp[tmp2 != subdem.nodata] = tmp2[tmp2 != subdem.nodata]
         return tmp
+
 
 ################################################################################
 def build_combined_raster(source, lat, lon, info_only):
@@ -373,7 +349,7 @@ def build_combined_raster(source, lat, lon, info_only):
     if info_only:
         return (epsg, x0, y0, x1, y1, nodata, nxdem, nydem, None)
     alt_dem = numpy.zeros((nydem, nxdem), dtype=numpy.float32)
-    for (lat0, lon0) in itertools.product(
+    for lat0, lon0 in itertools.product(
         (lat, lat - 1, lat + 1), (lon, lon - 1, lon + 1)
     ):
         verbose = True if (lat0 == lat and lon0 == lon) else False
@@ -413,34 +389,25 @@ def build_combined_raster(source, lat, lon, info_only):
             )
         elif lat0 == lat + 1 and lon0 == lon - 1:
             alt_dem[:by, :by] = (
-                tmparray[-ov - by : -ov, -ov - by : -ov]
-                if ov
-                else tmparray[-by:, -by:]
+                tmparray[-ov - by : -ov, -ov - by : -ov] if ov else tmparray[-by:, -by:]
             )
         elif lat0 == lat + 1 and lon0 == lon + 1:
             alt_dem[:by, -by:] = (
-                tmparray[-ov - by : -ov, ov : ov + by]
-                if ov
-                else tmparray[-by:, :by]
+                tmparray[-ov - by : -ov, ov : ov + by] if ov else tmparray[-by:, :by]
             )
         elif lat0 == lat - 1 and lon0 == lon - 1:
             alt_dem[-by:, :by] = (
-                tmparray[ov : ov + by, -ov - by : -ov]
-                if ov
-                else tmparray[:by, -by:]
+                tmparray[ov : ov + by, -ov - by : -ov] if ov else tmparray[:by, -by:]
             )
         elif lat0 == lat - 1 and lon0 == lon + 1:
             alt_dem[-by:, -by:] = (
-                tmparray[ov : ov + by, ov : ov + by]
-                if ov
-                else tmparray[:by, :by]
+                tmparray[ov : ov + by, ov : ov + by] if ov else tmparray[:by, :by]
             )
     return (epsg, x0, y0, x1, y1, nodata, nxdem, nydem, alt_dem)
 
+
 ################################################################################
-def read_elevation_from_file(
-    file_name, lat, lon, info_only=False, base_if_error=3601
-):
+def read_elevation_from_file(file_name, lat, lon, info_only=False, base_if_error=3601):
     alt_dem = None
     if file_name[-4:].lower() == ".hgt":
         x0 = y0 = 0
@@ -485,7 +452,7 @@ def read_elevation_from_file(
                 alt_dem = numpy.asarray(alt, dtype=numpy.float32).reshape(
                     (nxdem, nydem)
                 )[::-1]
-        except:
+        except (OSError, ValueError, EOFError):
             UI.lvprint(
                 1,
                 "    ERROR: in reading elevation from",
@@ -516,17 +483,17 @@ def read_elevation_from_file(
                     "value, assuming -32768.",
                 )
                 nodata = -32768
-            else:  
-                # elevations being stored as float32, we push the nodata to that 
-                # framework too, and then replace no_data values by -32768 
+            else:
+                # elevations being stored as float32, we push the nodata to that
+                # framework too, and then replace no_data values by -32768
                 # anyway for uniformity
                 nodata = numpy.float32(nodata)
                 if not info_only:
-                    alt_dem[alt_dem == nodata] = -32768
+                    alt_dem[alt_dem == nodata] = -32768  # ty:ignore[invalid-assignment]
                 nodata = -32768
             try:
                 epsg = int(ds.GetProjection().split('"')[-2])
-            except:
+            except (IndexError, ValueError):
                 UI.vprint(
                     1,
                     "    WARNING: raster DEM does not advertise its EPSG ",
@@ -536,9 +503,9 @@ def read_elevation_from_file(
             if epsg not in (
                 4326,
                 4269,
-            ):  
-            # let's be blind about 4269 which might be sufficiently close to 
-            # 4326 for our purposes
+            ):
+                # let's be blind about 4269 which might be sufficiently close to
+                # 4326 for our purposes
                 UI.lvprint(
                     1,
                     "    WARNING: unsupported EPSG code ",
@@ -552,13 +519,14 @@ def read_elevation_from_file(
             y1 = geo[3] + 0.5 * geo[5] - lat
             x1 = x0 + (nxdem - 1) * geo[1]
             y0 = y1 + (nydem - 1) * geo[5]
-        except:
+        except Exception as e:
             UI.lvprint(
                 1,
                 "   ERROR: in reading ",
                 file_name,
                 "-> replaced with zero altitude.",
             )
+            UI.vprint(3, e)
             nxdem = nydem = base_if_error
             if not info_only:
                 alt_dem = numpy.zeros(
@@ -577,9 +545,7 @@ def read_elevation_from_file(
         )
         nxdem = nydem = base_if_error
         if not info_only:
-            alt_dem = numpy.zeros(
-                (base_if_error, base_if_error), dtype=numpy.float32
-            )
+            alt_dem = numpy.zeros((base_if_error, base_if_error), dtype=numpy.float32)
         x0 = y0 = 0
         x1 = y1 = 1
         epsg = 4326
@@ -589,10 +555,11 @@ def read_elevation_from_file(
 
 ##############################################################################
 
+
 ##############################################################################
 def ensure_elevation(source, lat, lon, verbose=True):
     if source == "View":
-        # Viewfinderpanorama grouping of files and resolutions is a 
+        # Viewfinderpanorama grouping of files and resolutions is a
         # bit complicated...
         deferranti_nbr = 31 + lon // 6
         if deferranti_nbr < 10:
@@ -606,44 +573,44 @@ def ensure_elevation(source, lat, lon, verbose=True):
         if lat < 0:
             deferranti_letter = "S" + deferranti_letter
         if deferranti_letter + deferranti_nbr in (
-                "L31",
-                "L32",
-                "L33",
-                "K32",
-                "O31",
-                "P31",
-                "N32",
-                "O32",
-                "P32",
-                "Q32",
-                "N33",
-                "O33",
-                "P33",
-                "Q33",
-                "R33",
-                "O34",
-                "P34",
-                "Q34",
-                "R34",
-                "O35",
-                "P35",
-                "Q35",
-                "R35",
-                "P36",
-                "Q36",
-                "R36",
-                # New Zealand
-                "SL58",
-                "SI59",
-                "SJ59",
-                "SK59",
-                "SL59",
-                "SI60",
-                "SJ60",
-                "SK60",
-                "SL60",
-            ):
-                resol = 1
+            "L31",
+            "L32",
+            "L33",
+            "K32",
+            "O31",
+            "P31",
+            "N32",
+            "O32",
+            "P32",
+            "Q32",
+            "N33",
+            "O33",
+            "P33",
+            "Q33",
+            "R33",
+            "O34",
+            "P34",
+            "Q34",
+            "R34",
+            "O35",
+            "P35",
+            "Q35",
+            "R35",
+            "P36",
+            "Q36",
+            "R36",
+            # New Zealand
+            "SL58",
+            "SI59",
+            "SJ59",
+            "SK59",
+            "SL59",
+            "SI60",
+            "SJ60",
+            "SK60",
+            "SL60",
+        ):
+            resol = 1
         else:
             resol = 3
         # Wellington Intl has missing elevation data in 1" resolution
@@ -682,7 +649,7 @@ def ensure_elevation(source, lat, lon, verbose=True):
                 try:
                     lat0 = int(fname[1:3])
                     lon0 = int(fname[4:7])
-                except:
+                except (IndexError, ValueError):
                     UI.vprint(
                         2,
                         "      Archive contains the unknown file name",
@@ -695,7 +662,7 @@ def ensure_elevation(source, lat, lon, verbose=True):
                 if ("W" in fname) or ("w" in fname):
                     lon0 *= -1
                 out_filename = FNAMES.viewfinderpanorama(lat0, lon0)
-                # we don't wish to overwrite a 1" version by downloading 
+                # we don't wish to overwrite a 1" version by downloading
                 # the whole archive of a nearby 3" one
                 if (
                     not os.path.exists(out_filename)
@@ -708,16 +675,13 @@ def ensure_elevation(source, lat, lon, verbose=True):
                         out.write(zip_ref.open(f, "r").read())
     elif source in ("SRTM", "ALOS"):
         if os.path.exists(FNAMES.elevation_data(source, lat, lon)):
-            UI.vprint(
-                2, "   Recycling ", FNAMES.elevation_data(source, lat, lon)
-            )
+            UI.vprint(2, "   Recycling ", FNAMES.elevation_data(source, lat, lon))
             return 1
         UI.vprint(
-            1,
-            "    WARNING : This elevation source has no longer direct downloads !"
+            1, "    WARNING : This elevation source has no longer direct downloads !"
         )
         return 0
-        # TODO : is there a way to get it back (worth it ?) 
+        # TODO : is there a way to get it back (worth it ?)
         url = "https://cloud.sdsc.edu/v1/AUTH_opentopography/Raster/"
         if source == "SRTM":
             url += "SRTM_GL1/SRTM_GL1_srtm/"
@@ -744,22 +708,16 @@ def ensure_elevation(source, lat, lon, verbose=True):
         r = http_request(url, source, verbose)
         if not r:
             return 0
-        if not os.path.isdir(
-            os.path.dirname(FNAMES.elevation_data(source, lat, lon))
-        ):
-            os.makedirs(
-                os.path.dirname(FNAMES.elevation_data(source, lat, lon))
-            )
+        if not os.path.isdir(os.path.dirname(FNAMES.elevation_data(source, lat, lon))):
+            os.makedirs(os.path.dirname(FNAMES.elevation_data(source, lat, lon)))
         with open(FNAMES.elevation_data(source, lat, lon), "wb") as out:
             try:
                 out.write(r.content)
-            except:
+            except OSError:
                 return 0
     elif source in ("NED1", "NED1/3"):
         if os.path.exists(FNAMES.elevation_data(source, lat, lon)):
-            UI.vprint(
-                2, "   Recycling ", FNAMES.elevation_data(source, lat, lon)
-            )
+            UI.vprint(2, "   Recycling ", FNAMES.elevation_data(source, lat, lon))
             return 1
         UI.vprint(
             1,
@@ -770,35 +728,31 @@ def ensure_elevation(source, lat, lon, verbose=True):
         nbr = "1" if source == "NED1" else "13"
         url_base = (
             "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/"
-            + nbr + "/TIFF/current/"
+            + nbr
+            + "/TIFF/current/"
         )
         tid = "n" if lat >= 0 else "s"
         tid = tid + str(abs(lat + 1)).zfill(2)
         tid = tid + "w" if lon < 0 else "e"
         tid = tid + str(abs(lon)).zfill(3)
         url_base = url_base + tid + "/"
-        usgs_name = (
-            "USGS_" + nbr + "_" + tid + ".tif"
-        )
+        usgs_name = "USGS_" + nbr + "_" + tid + ".tif"
         url = url_base + usgs_name
         r = http_request(url, source, verbose)
         if not r:
             return 0
-        if not os.path.isdir(
-            os.path.dirname(FNAMES.elevation_data(source, lat, lon))
-        ):
-            os.makedirs(
-                os.path.dirname(FNAMES.elevation_data(source, lat, lon))
-            )
+        if not os.path.isdir(os.path.dirname(FNAMES.elevation_data(source, lat, lon))):
+            os.makedirs(os.path.dirname(FNAMES.elevation_data(source, lat, lon)))
         with open(FNAMES.elevation_data(source, lat, lon), "wb") as out:
             try:
                 out.write(r.content)
-            except:
+            except OSError:
                 return 0
     else:
         UI.vprint(1, "   ERROR: Unknown elevation source.")
         return 0
     return 1
+
 
 ################################################################################
 def http_request(url, source, verbose=False):
@@ -816,9 +770,7 @@ def http_request(url, source, verbose=False):
                 return 0
             elif "[5" in status_code:
                 if verbose:
-                    UI.vprint(
-                        2, "    Server said 'Internal Error'.", status_code
-                    )
+                    UI.vprint(2, "    Server said 'Internal Error'.", status_code)
             else:
                 if verbose:
                     UI.vprint(2, status_code)
@@ -833,10 +785,11 @@ def http_request(url, source, verbose=False):
             "    ",
             source,
             "server may be down or busy, new tentative in",
-            2 ** tentative,
+            2**tentative,
             "sec...",
         )
-        time.sleep(2 ** tentative)
+        time.sleep(2**tentative)
+
 
 ################################################################################
 def fill_nodata_values_with_nearest_neighbor(alt_dem, nodata):
@@ -860,7 +813,7 @@ def fill_nodata_values_with_nearest_neighbor(alt_dem, nodata):
         alt01[:, 0] = alt_dem[:, 0]
         alt02 = numpy.roll(alt_dem, -1, axis=1)
         alt02[:, -1] = alt_dem[:, -1]
-        if (nodata < 0):
+        if nodata < 0:
             atemp = numpy.maximum(alt10, alt20)
             atemp = numpy.maximum(atemp, alt01)
             atemp = numpy.maximum(atemp, alt02)
@@ -882,26 +835,19 @@ def fill_nodata_values_with_nearest_neighbor(alt_dem, nodata):
         UI.vprint(2, "    Done.")
     return 1
 
+
 ################################################################################
 def upsample(alt_dem):
     # only implemented from 1201 to 3601, might be worth upgrading it some day
     alt_dem_tmp = numpy.zeros((3601, 3601), dtype=numpy.float32)
     for i in range(1201):
         alt_dem_tmp[3 * i, ::3] = alt_dem[i]
-        alt_dem_tmp[3 * i, 1::3] = (
-            2 / 3 * alt_dem[i, :-1] + 1 / 3 * alt_dem[i, 1:]
-        )
-        alt_dem_tmp[3 * i, 2::3] = (
-            1 / 3 * alt_dem[i, :-1] + 2 / 3 * alt_dem[i, 1:]
-        )
+        alt_dem_tmp[3 * i, 1::3] = 2 / 3 * alt_dem[i, :-1] + 1 / 3 * alt_dem[i, 1:]
+        alt_dem_tmp[3 * i, 2::3] = 1 / 3 * alt_dem[i, :-1] + 2 / 3 * alt_dem[i, 1:]
         if i == 1200:
             break
-        alt_dem_tmp[3 * i + 1, ::3] = (
-            2 / 3 * alt_dem[i] + 1 / 3 * alt_dem[i + 1]
-        )
-        alt_dem_tmp[3 * i + 2, ::3] = (
-            1 / 3 * alt_dem[i] + 2 / 3 * alt_dem[i + 1]
-        )
+        alt_dem_tmp[3 * i + 1, ::3] = 2 / 3 * alt_dem[i] + 1 / 3 * alt_dem[i + 1]
+        alt_dem_tmp[3 * i + 2, ::3] = 1 / 3 * alt_dem[i] + 2 / 3 * alt_dem[i + 1]
         alt_dem_tmp[3 * i + 1, 1::3] = (
             4 / 9 * alt_dem[i][:-1]
             + 2 / 9 * alt_dem[i, 1:]
@@ -928,6 +874,7 @@ def upsample(alt_dem):
         )
     return alt_dem_tmp
 
+
 ################################################################################
 def smoothen(raster, pix_width, mask_im, preserve_boundary=True):
     if not pix_width:
@@ -952,24 +899,19 @@ def smoothen(raster, pix_width, mask_im, preserve_boundary=True):
     tmp = tmp.transpose()
     tmpw = tmpw.transpose()
     tmp[mask_array != 0] = (
-        mask_array[mask_array != 0]
-        * tmp[mask_array != 0]
-        / tmpw[mask_array != 0]
+        mask_array[mask_array != 0] * tmp[mask_array != 0] / tmpw[mask_array != 0]
         + (1 - mask_array[mask_array != 0]) * raster[mask_array != 0]
     )
     if preserve_boundary:
         for i in range(pix_width):
-            tmp[i] = (
-                i / pix_width * tmp[i] + (pix_width - i) / pix_width * raster[i]
-            )
+            tmp[i] = i / pix_width * tmp[i] + (pix_width - i) / pix_width * raster[i]
             tmp[-i - 1] = (
                 i / pix_width * tmp[-i - 1]
                 + (pix_width - i) / pix_width * raster[-i - 1]
             )
         for i in range(pix_width):
             tmp[:, i] = (
-                i / pix_width * tmp[:, i]
-                + (pix_width - i) / pix_width * raster[:, i]
+                i / pix_width * tmp[:, i] + (pix_width - i) / pix_width * raster[:, i]
             )
             tmp[:, -i - 1] = (
                 i / pix_width * tmp[:, -i - 1]

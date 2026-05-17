@@ -155,9 +155,9 @@ try:
             # Set all global tile config variables
             var = global_prefix + var
             set_global_variables(var, value)
-        except:
+        except (KeyError, TypeError, ValueError, SyntaxError) as exc:
             UI.lvprint(1, "Global config file contains an invalid line:", line)
-            pass
+            UI.vprint(3, exc)
     f.close()
 except FileNotFoundError:
     # Create a new global config file using default values
@@ -170,7 +170,7 @@ except FileNotFoundError:
         for var, value in cfg_app_vars.items():
             file.write(var + "=" + str(value["default"]) + "\n")
     _LOGGER.info("No global config file found. New config created using defaults.")
-except Exception as e:
+except OSError as e:
     _LOGGER.error("Error accessing global config file: %s", e)
 
 
@@ -206,13 +206,14 @@ class Tile:
         else:
             try:
                 os.makedirs(self.build_dir)
-            except:
+            except OSError as exc:
                 UI.vprint(
                     0,
                     "OS error: Cannot create tile directory",
                     self.build_dir,
                     " check file permissions.",
                 )
+                UI.vprint(3, exc)
                 raise Exception
 
     def read_from_config(self, config_file=None, use_global=False):
@@ -253,7 +254,7 @@ class Tile:
                     # compatibility with config files from version <= 1.20
                     value = config_compatibility(value)
                     setattr(self, var, _coerce_config_value(var, value))
-                except Exception as e:
+                except (KeyError, TypeError, ValueError, SyntaxError) as e:
                     # compatibility with zone_list config files from
                     # version <= 1.20
                     if "zone_list.append" in line:
@@ -261,19 +262,20 @@ class Tile:
                             zone = parse_legacy_zone_append(line)
                             if zone is not None:
                                 getattr(self, "zone_list").append(zone)
-                        except:
-                            pass
+                        except (TypeError, ValueError, SyntaxError) as exc:
+                            UI.vprint(3, exc)
                     else:
                         UI.vprint(2, e)
                         pass
             f.close()
             return 1
-        except:
+        except OSError as exc:
             UI.lvprint(
                 0,
                 "CFG error: Could not read config file for tile",
                 FNAMES.short_latlon(self.lat, self.lon),
             )
+            UI.vprint(3, exc)
             return 0
 
     def write_to_config(self, config_file=None):
@@ -293,8 +295,8 @@ class Tile:
             config_file_bak = config_file + ".bak"
         try:
             os.replace(config_file, config_file_bak)
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             f = open(config_file, "w")
             for var in list_tile_vars:
@@ -317,7 +319,7 @@ class Tile:
                     f.write(var + "=" + str(getattr(self, var)) + "\n")
             f.close()
             return 1
-        except Exception as e:
+        except OSError as e:
             UI.vprint(2, e)
             UI.lvprint(
                 0,
@@ -1002,7 +1004,7 @@ class Ortho4XP_Config(tk.Toplevel):
         """Reset tile settings to global tile settings."""
         try:
             (lat, lon) = self.parent.get_lat_lon()
-        except:
+        except (TypeError, ValueError):
             return 0
         # Find all the zones for the active tile
         tile_zones = []
@@ -1050,7 +1052,7 @@ class Ortho4XP_Config(tk.Toplevel):
         zone_list = []
         try:
             (lat, lon) = self.parent.get_lat_lon()
-        except:
+        except (TypeError, ValueError):
             return 0
         custom_build_dir = self.parent.custom_build_dir_entry.get()
         build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
@@ -1074,16 +1076,15 @@ class Ortho4XP_Config(tk.Toplevel):
                 (var, value) = line.split("=", 1)
                 value = config_compatibility(value)
                 self.v_[var].set(value)
-            except Exception as e:
+            except (KeyError, TypeError, ValueError, SyntaxError) as e:
                 # compatibility with zone_list config files from version <= 1.20
                 if "zone_list.append" in line:
                     try:
                         zone = parse_legacy_zone_append(line)
                         if zone is not None:
                             zone_list.append(zone)
-                    except Exception as e:
+                    except (TypeError, ValueError, SyntaxError) as e:
                         print(e)
-                        pass
                 else:
                     UI.vprint(2, e)
                     pass
@@ -1099,7 +1100,7 @@ class Ortho4XP_Config(tk.Toplevel):
         zone_list = []
         try:
             (lat, lon) = self.parent.get_lat_lon()
-        except:
+        except (TypeError, ValueError):
             return 0
         custom_build_dir = self.parent.custom_build_dir_entry.get()
         build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
@@ -1111,10 +1112,10 @@ class Ortho4XP_Config(tk.Toplevel):
                 ),
                 "r",
             )
-        except:
+        except OSError:
             try:
                 f = open(os.path.join(build_dir, "Ortho4XP.cfg"), "r")
-            except:
+            except OSError:
                 messagebox.showinfo("Not found", "No tile configuration found.")
                 return 0
         for line in f.readlines():
@@ -1127,16 +1128,15 @@ class Ortho4XP_Config(tk.Toplevel):
                 (var, value) = line.split("=", 1)
                 value = config_compatibility(value)
                 self.v_[var].set(value)
-            except Exception as e:
+            except (KeyError, TypeError, ValueError, SyntaxError) as e:
                 # compatibility with zone_list config files from version <= 1.20
                 if "zone_list.append" in line:
                     try:
                         zone = parse_legacy_zone_append(line)
                         if zone is not None:
                             zone_list.append(zone)
-                    except Exception as e:
+                    except (TypeError, ValueError, SyntaxError) as e:
                         print(e)
-                        pass
                 else:
                     UI.vprint(2, e)
                     pass
@@ -1152,7 +1152,7 @@ class Ortho4XP_Config(tk.Toplevel):
         """Save tile configuration settings for active tile."""
         try:
             (lat, lon) = self.parent.get_lat_lon()
-        except:
+        except (TypeError, ValueError):
             return 0
         custom_build_dir = self.parent.custom_build_dir_entry.get()
         build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
@@ -1161,7 +1161,7 @@ class Ortho4XP_Config(tk.Toplevel):
         )
         try:
             os.makedirs(build_dir, exist_ok=True)
-        except:
+        except OSError:
             self.popup("ERROR", "Cannot write into " + str(build_dir))
             return 0
         # Make a backup of the existing tile config file
@@ -1169,8 +1169,8 @@ class Ortho4XP_Config(tk.Toplevel):
             tile_cfg_file_bak = tile_cfg_file + ".bak"
             try:
                 os.replace(tile_cfg_file, tile_cfg_file_bak)
-            except:
-                pass
+            except OSError as exc:
+                UI.vprint(3, exc)
         with open(tile_cfg_file, "w") as f:
             # Required for when the config window is left open to make sure
             # we retain any zone modifications
@@ -1264,7 +1264,7 @@ class Ortho4XP_Config(tk.Toplevel):
                     int(self.parent.lat.get()), int(self.parent.lon.get())
                 )
             UI.vprint(1, "Global tile configuration settings saved.")
-        except Exception as e:
+        except OSError as e:
             UI.lvprint(1, "Could not write global config.")
             _LOGGER.exception("Could not write global config: %s", e)
         return
@@ -1324,7 +1324,7 @@ class Ortho4XP_Config(tk.Toplevel):
                 self.dict_to_cfg(global_cfg_file, current_config)
 
             UI.vprint(1, "Application configuration settings saved.")
-        except Exception as e:
+        except OSError as e:
             UI.lvprint(1, "Could not write application settings to global config.")
             _LOGGER.exception(
                 "Could not write application settings to global config: %s", e
@@ -1346,7 +1346,7 @@ class Ortho4XP_Config(tk.Toplevel):
                     globals()[var] = coerce_config_value(
                         var, self.v_[var].get(), cfg_global_tile_vars
                     )
-                except:
+                except (KeyError, TypeError, ValueError):
                     globals()[var] = config_default(cfg_global_tile_vars[var])
                     errors.append(var)
             if errors:
@@ -1376,7 +1376,7 @@ class Ortho4XP_Config(tk.Toplevel):
                     _set_config_value(
                         var, _coerce_config_value(var, self.v_[var].get())
                     )
-                except:
+                except (KeyError, TypeError, ValueError):
                     _set_config_value(var, config_default(cfg_vars[var]))
                     if tab == "app":
                         self.v_[var].set(str(cfg_vars[var]["default"]))
@@ -1399,7 +1399,7 @@ class Ortho4XP_Config(tk.Toplevel):
         """
         try:
             (lat, lon) = self.parent.get_lat_lon()
-        except Exception as e:
+        except (TypeError, ValueError) as e:
             _LOGGER.exception("Could not get lat/lon coordinates: %s", e)
             return
 
@@ -1473,7 +1473,7 @@ class Ortho4XP_Config(tk.Toplevel):
             except FileNotFoundError:
                 pass
 
-        except Exception as e:
+        except (AttributeError, tk.TclError) as e:
             _LOGGER.exception(e)
 
         if not select_tile:
@@ -1528,7 +1528,7 @@ class Ortho4XP_Config(tk.Toplevel):
                             break
             except FileNotFoundError:
                 _LOGGER.error("Global configuration file (Ortho4XP.cfg) not found.")
-            except Exception as e:
+            except OSError as e:
                 _LOGGER.exception(e)
 
         if any(unsaved_changes.values()):

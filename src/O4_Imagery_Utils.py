@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
 import requests
 
 import O4_File_Names as FNAMES
@@ -42,7 +42,7 @@ try:
     URL = importlib.import_module("O4_Custom_URL")
 
     has_URL = True
-except Exception:
+except ImportError:
     try:
         provider_url_path = Path(FNAMES.Provider_dir) / "O4_Custom_URL.py"
         spec = importlib.util.spec_from_file_location(
@@ -389,7 +389,7 @@ def initialize_providers_dict():
                         "capabilities_" + provider_code + ".xml",
                     )
                 )
-            except:
+            except (OSError, IndexError):
                 try:
                     tilematrixsets = read_tilematrixsets(
                         os.path.join(
@@ -398,7 +398,7 @@ def initialize_providers_dict():
                             "capabilities.xml",
                         )
                     )
-                except:
+                except (OSError, IndexError):
                     print(
                         "Error in reading capabilities for provider",
                         provider_code,
@@ -426,7 +426,7 @@ def initialize_providers_dict():
                     else:
                         print("no tilematrixset found")
                         valid_provider = False
-                except:
+                except (KeyError, TypeError, ValueError, IndexError):
                     print(
                         "Error in reading capabilities for provider",
                         provider_code,
@@ -517,7 +517,7 @@ def initialize_combined_providers_dict():
                 if color_code == "default":
                     try:
                         color_code = providers_dict[layer_code]["color_filters"]
-                    except:
+                    except KeyError:
                         print(
                             "Unknown color filter in combined provider",
                             provider_code,
@@ -541,7 +541,7 @@ def initialize_combined_providers_dict():
                             color_filters_dict[color_code].append(
                                 ["saturation", saturation]
                             )
-                    except:
+                    except (IndexError, TypeError, ValueError):
                         print(
                             "Unknown color filter in combined provider",
                             provider_code,
@@ -663,11 +663,11 @@ def initialize_local_combined_providers_dict(tile):
                 pixel_size = 10
                 try:
                     buffer_width = extents_dict[name]["buffer_width"] / pixel_size
-                except:
+                except (KeyError, TypeError, ZeroDivisionError):
                     buffer_width = 0.0
                 try:
                     mask_width = int(extents_dict[name]["mask_width"] / pixel_size)
-                except:
+                except (KeyError, TypeError, ValueError, ZeroDivisionError):
                     mask_width = int(100 / pixel_size)
                 pixel_size = pixel_size / 111139
                 vector_map = VECT.Vector_Map()
@@ -759,8 +759,8 @@ def initialize_local_combined_providers_dict(tile):
                 ]:
                     try:
                         os.remove(f)
-                    except:
-                        pass
+                    except OSError as exc:
+                        UI.vprint(3, exc)
             else:
                 new_comb_list.append(rlayer)
         local_combined_providers_dict[provider_code] = new_comb_list
@@ -994,7 +994,7 @@ def http_request_to_image(width, height, url, request_headers, http_session):
                 try:
                     small_image = Image.open(io.BytesIO(r.content))
                     return (1, small_image)
-                except:
+                except (OSError, UnidentifiedImageError):
                     UI.vprint(
                         2,
                         "Server said 'OK', but the received ",
@@ -1942,8 +1942,8 @@ def create_tile_preview(lat, lon, zoomlevel, provider_code):
         else:
             try:
                 big_image.save(filepreview)
-            except:
-                pass
+            except OSError as exc:
+                UI.vprint(3, exc)
             return 0
     return 1
 
@@ -2062,7 +2062,7 @@ def color_transform(im, color_code):
                     )
                 im = Image.merge(im.mode, bands)
         return im
-    except:
+    except (TypeError, ValueError):
         return im
 
 
@@ -2221,8 +2221,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         if os.path.exists(os.path.join(FNAMES.Geotiff_dir, out_file_name)):
             try:
                 os.remove(os.path.join(FNAMES.Geotiff_dir, out_file_name))
-            except:
-                pass
+            except OSError as exc:
+                UI.vprint(3, exc)
         png_file_name = out_file_name.replace("tif", "png")
         tmp_tif_file_name = os.path.join(
             FNAMES.resource_path("tmp"), out_file_name.replace("4326", "3857")
@@ -2298,8 +2298,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                             ),
                         )
                     )
-                except:
-                    pass
+                except OSError as exc:
+                    UI.vprint(3, exc)
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
@@ -2332,8 +2332,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                             ),
                         )
                     )
-                except:
-                    pass
+                except OSError as exc:
+                    UI.vprint(3, exc)
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
@@ -2430,8 +2430,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 )
                 try:
                     os.remove(os.path.join(FNAMES.resource_path("tmp"), png_file_name))
-                except:
-                    pass
+                except OSError as exc:
+                    UI.vprint(3, exc)
                 return
             conv_cmd = [
                 gdalwarp_cmd,
@@ -2477,13 +2477,13 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     if erase_tmp_png:
         try:
             os.remove(os.path.join(FNAMES.resource_path("tmp"), png_file_name))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
     if erase_tmp_tif:
         try:
             os.remove(tmp_tif_file_name)
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
     return
 
 

@@ -20,6 +20,7 @@ max_convert_slots = 4
 skip_downloads = False
 skip_converts = False
 
+
 ################################################################################
 def download_textures(
     tile,
@@ -39,9 +40,7 @@ def download_textures(
 
     def _update_progress_locked():
         denom = (
-            progress_state["done"]
-            + progress_state["pending"]
-            + download_queue.qsize()
+            progress_state["done"] + progress_state["pending"] + download_queue.qsize()
         )
         UI.progress_bar(2, int(100 * progress_state["done"] / denom) if denom else 100)
 
@@ -118,15 +117,14 @@ def download_textures(
         UI.vprint(1, " *Download of textures completed.")
     return 1
 
+
 ################################################################################
 def build_tile(tile):
     if UI.is_working:
         return 0
-    UI.is_working = 1
+    UI.is_working = 1  # ty:ignore[invalid-assignment]
     UI.red_flag = False
-    UI.logprint(
-        "Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting."
-    )
+    UI.logprint("Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
         0,
         "\nStep 3 : Building DSF/Imagery for tile "
@@ -135,9 +133,7 @@ def build_tile(tile):
     )
 
     if not os.path.isfile(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon)):
-        UI.lvprint(
-            0, "ERROR: A mesh file must first be constructed for the tile!"
-        )
+        UI.lvprint(0, "ERROR: A mesh file must first be constructed for the tile!")
         UI.exit_message_and_bottom_line("")
         return 0
 
@@ -172,16 +168,16 @@ def build_tile(tile):
                     continue
                 try:
                     os.remove(os.path.join(tile.build_dir, "textures", f))
-                except:
-                    pass
+                except OSError as exc:
+                    UI.vprint(3, exc)
         if not tile.grouped:
             try:
                 shutil.rmtree(os.path.join(tile.build_dir, "terrain"))
-            except:
-                pass
+            except OSError as exc:
+                UI.vprint(3, exc)
         if not os.path.isdir(os.path.join(tile.build_dir, "terrain")):
             os.makedirs(os.path.join(tile.build_dir, "terrain"))
-    except Exception as e:
+    except OSError as e:
         UI.lvprint(0, "ERROR: Cannot create tile subdirectories.")
         UI.vprint(3, e)
         UI.exit_message_and_bottom_line("")
@@ -248,40 +244,40 @@ def build_tile(tile):
     )
     try:
         os.replace(dsf_file_name + ".tmp", dsf_file_name)
-    except:
+    except OSError as exc:
         UI.vprint(0, "ERROR : could not rename DSF file, tile is not active.")
+        UI.vprint(3, exc)
     if UI.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
     if UI.cleaning_level > 1:
         try:
             os.remove(FNAMES.alt_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.input_node_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.input_poly_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
     if UI.cleaning_level > 2:
         try:
             os.remove(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         try:
             os.remove(FNAMES.apt_file(tile))
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
     if UI.cleaning_level > 1 and not tile.grouped:
         remove_unwanted_textures(tile)
     UI.timings_and_bottom_line(timer)
-    UI.logprint(
-        "Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit."
-    )
+    UI.logprint("Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")
     return 1
+
 
 ################################################################################
 def build_all(tile):
@@ -310,7 +306,7 @@ def build_all(tile):
     if UI.red_flag:
         UI.exit_message_and_bottom_line("")
         return 0
-    UI.is_working = 0
+    UI.is_working = 0  # ty:ignore[invalid-assignment]
     if IMG.incomplete_imgs:
         UI.lvprint(
             0,
@@ -319,19 +315,18 @@ def build_all(tile):
         )
     return 1
 
+
 ################################################################################
 def build_tile_list(
     tile, list_lat_lon, do_osm, do_mesh, do_mask, do_dsf, do_ovl, override_cfg
 ):
     if UI.is_working:
         return 0
-    UI.red_flag = 0
+    UI.red_flag = 0  # ty:ignore[invalid-assignment]
     timer = time.time()
-    UI.lvprint(
-        0, "Batch build launched for a number of", len(list_lat_lon), "tiles."
-    )
+    UI.lvprint(0, "Batch build launched for a number of", len(list_lat_lon), "tiles.")
     k = 0
-    for (lat, lon) in list_lat_lon:
+    for lat, lon in list_lat_lon:
         k += 1
         UI.vprint(
             1,
@@ -343,9 +338,7 @@ def build_tile_list(
             FNAMES.short_latlon(lat, lon),
         )
         (tile.lat, tile.lon) = (lat, lon)
-        tile.build_dir = FNAMES.build_dir(
-            tile.lat, tile.lon, tile.custom_build_dir
-        )
+        tile.build_dir = FNAMES.build_dir(tile.lat, tile.lon, tile.custom_build_dir)
         tile.dem = None
         if override_cfg:
             tile.read_from_config(use_global=True)
@@ -388,15 +381,13 @@ def build_tile_list(
                 UI.exit_message_and_bottom_line()
                 return 0
         try:
-            UI.gui.earth_window.canvas.delete(
-                UI.gui.earth_window.dico_tiles_todo[(lat, lon)]
+            UI.gui.earth_window.canvas.delete(  # ty:ignore[unresolved-attribute]
+                UI.gui.earth_window.dico_tiles_todo[(lat, lon)]  # ty:ignore[unresolved-attribute]
             )
-            UI.gui.earth_window.dico_tiles_todo.pop((lat, lon), None)
-        except:
-            pass
-    UI.lvprint(
-        0, "Batch process completed in", UI.nicer_timer(time.time() - timer)
-    )
+            UI.gui.earth_window.dico_tiles_todo.pop((lat, lon), None)  # ty:ignore[unresolved-attribute]
+        except (AttributeError, KeyError) as exc:
+            UI.vprint(3, exc)
+    UI.lvprint(0, "Batch process completed in", UI.nicer_timer(time.time() - timer))
     if IMG.incomplete_imgs:
         UI.lvprint(
             0,
@@ -404,6 +395,7 @@ def build_tile_list(
             f"and have been filled with white: {IMG.incomplete_imgs}",
         )
     return 1
+
 
 ################################################################################
 def remove_unwanted_textures(tile):
@@ -424,8 +416,9 @@ def remove_unwanted_textures(tile):
             print("Removing obsolete texture", f)
             try:
                 os.remove(os.path.join(tile.build_dir, "textures", f))
-            except:
-                pass
+            except OSError as exc:
+                UI.vprint(3, exc)
+
 
 def delete_incomplete_imgs(tile):
     """Delete orthophoto jpegs and dds that have white squares."""

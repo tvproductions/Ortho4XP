@@ -84,7 +84,7 @@ if __name__ == "__main__":
         try:
             lat = int(sys.argv[1])
             lon = int(sys.argv[2])
-        except:
+        except ValueError:
             print(cmd_line)
             sys.exit()
         if len(sys.argv) == 3:
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                 tile = CFG.Tile(lat, lon, "")
                 setattr(tile, "default_website", provider_code)
                 setattr(tile, "default_zl", zoomlevel)
-            except:
+            except (IndexError, ValueError):
                 print(cmd_line)
                 sys.exit()
         try:
@@ -110,5 +110,6 @@ if __name__ == "__main__":
             MASK.build_masks(tile)
             TILE.build_tile(tile)
             print("Bon vol!")
-        except:
+        except Exception as e:
+            print(e)
             print("Crash!")

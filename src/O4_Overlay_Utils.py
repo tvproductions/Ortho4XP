@@ -6,7 +6,7 @@ import subprocess
 import O4_File_Names as FNAMES
 import O4_UI_Utils as UI
 
-# the following is meant to be modified directly by users who need it (in the 
+# the following is meant to be modified directly by users who need it (in the
 # config window, not here!)
 ovl_exclude_pol = [0]
 ovl_exclude_net = []
@@ -30,11 +30,12 @@ else:
     unzip_cmd = "7z"
     dsftool_cmd = os.path.join(FNAMES.Utils_dir, "lin", "DSFTool ")
 
+
 ################################################################################
 def build_overlay(lat, lon):
     if UI.is_working:
         return 0
-    UI.is_working = 1
+    UI.is_working = 1  # ty:ignore[invalid-assignment]
     timer = time.time()
     UI.logprint("Step 4 for tile lat=", lat, ", lon=", lon, ": starting.")
     UI.vprint(
@@ -47,12 +48,12 @@ def build_overlay(lat, lon):
         custom_overlay_src,
         "Earth nav data",
         FNAMES.long_latlon(lat, lon) + ".dsf",
-        )
+    )
     if not os.path.exists(file_to_sniff):
         file_to_sniff = os.path.join(
-        custom_overlay_src_alternate,
-        "Earth nav data",
-        FNAMES.long_latlon(lat, lon) + ".dsf",
+            custom_overlay_src_alternate,
+            "Earth nav data",
+            FNAMES.long_latlon(lat, lon) + ".dsf",
         )
     if not os.path.exists(file_to_sniff):
         UI.exit_message_and_bottom_line(
@@ -68,11 +69,12 @@ def build_overlay(lat, lon):
     UI.vprint(1, "-> Making a copy of the original overlay DSF in tmp dir")
     try:
         shutil.copy(file_to_sniff, file_to_sniff_loc)
-    except:
+    except OSError as exc:
         UI.exit_message_and_bottom_line(
             "   ERROR: could not copy it. Disk full, write permissions, erased",
-            " tmp dir ?"
+            " tmp dir ?",
         )
+        UI.vprint(3, exc)
         return 0
     f = open(file_to_sniff_loc, "rb")
     dsfid = f.read(2).decode("ascii")
@@ -80,22 +82,23 @@ def build_overlay(lat, lon):
     if dsfid == "7z":
         UI.vprint(1, "-> The original DSF is a 7z archive, uncompressing...")
         os.replace(file_to_sniff_loc, file_to_sniff_loc + ".7z")
-        subprocess.run([unzip_cmd, "e", f"-o{FNAMES.Tmp_dir}", f"{file_to_sniff_loc}.7z"], env=UI.subprocess_env())
+        subprocess.run(
+            [unzip_cmd, "e", f"-o{FNAMES.Tmp_dir}", f"{file_to_sniff_loc}.7z"],
+            env=UI.subprocess_env(),
+        )
         os.remove(file_to_sniff_loc + ".7z")
     UI.vprint(1, "-> Converting the copy to text format")
     dsfconvertcmd = [
         dsftool_cmd.strip(),
         " -dsf2text ".strip(),
         file_to_sniff_loc,
-        os.path.join(
-            FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt"
-        ),
+        os.path.join(FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt"),
     ]
     fingers_crossed = subprocess.Popen(
         dsfconvertcmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
     )
     while True:
-        line = fingers_crossed.stdout.readline()
+        line = fingers_crossed.stdout.readline()  # ty:ignore[unresolved-attribute]
         if not line:
             break
         else:
@@ -105,9 +108,7 @@ def build_overlay(lat, lon):
         return 0
     UI.vprint(1, "-> Selecting overlays for copy/paste")
     f = open(
-        os.path.join(
-            FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt"
-        ),
+        os.path.join(FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt"),
         "r",
     )
     g = open(
@@ -195,7 +196,7 @@ def build_overlay(lat, lon):
         dsfconvertcmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
     )
     while True:
-        line = fingers_crossed.stdout.readline()
+        line = fingers_crossed.stdout.readline()  # ty:ignore[unresolved-attribute]
         if not line:
             break
         else:
@@ -207,11 +208,11 @@ def build_overlay(lat, lon):
     if not os.path.exists(dest_dir):
         try:
             os.makedirs(dest_dir)
-        except:
+        except OSError as exc:
             UI.exit_message_and_bottom_line(
-                "   ERROR: could not create destination directory "
-                + str(dest_dir)
+                "   ERROR: could not create destination directory " + str(dest_dir)
             )
+            UI.vprint(3, exc)
             return 0
     shutil.copy(
         os.path.join(
@@ -233,9 +234,7 @@ def build_overlay(lat, lon):
         )
     )
     os.remove(
-        os.path.join(
-            FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt"
-        )
+        os.path.join(FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt")
     )
     os.remove(file_to_sniff_loc)
     try:
@@ -251,7 +250,7 @@ def build_overlay(lat, lon):
                 FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt.sea_level.raw",
             )
         )
-    except:
-        pass
+    except OSError as exc:
+        UI.vprint(3, exc)
     UI.timings_and_bottom_line(timer)
     return 1

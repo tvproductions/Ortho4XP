@@ -131,11 +131,12 @@ def build_masks(tile, for_imagery=False):
                 (";" in tile.custom_dem) and tile.custom_dem.split(";")[0]
             ) or tile.custom_dem
             tile.dem = DEM.DEM(tile.lat, tile.lon, source, fill_nodata, info_only=False)
-        except:
+        except Exception as exc:
             UI.exit_message_and_bottom_line(
                 "\nERROR: Could not determine the appropriate elevation source.",
                 " Please check your custom_dem entry.",
             )
+            UI.vprint(3, exc)
             return 0
 
     #################################
@@ -273,8 +274,8 @@ def delete_old_masks_in_tile(tile, dest_dir):
         for til_y in range(til_y_min, til_y_max + 1, 16):
             try:
                 os.remove(os.path.join(dest_dir, FNAMES.legacy_mask(til_x, til_y)))
-            except:
-                pass
+            except OSError as exc:
+                UI.vprint(3, exc)
 
 
 ################################################################################
@@ -447,8 +448,9 @@ def record_water_tris(tile):
         try:
             f_mesh = open(mesh_file_name, "r")
             UI.vprint(1, "   * ", mesh_file_name)
-        except:
+        except OSError as exc:
             UI.lvprint(1, "Mesh file ", mesh_file_name, " could not be read. Skipped.")
+            UI.vprint(3, exc)
             continue
         mesh_version = float(f_mesh.readline().strip().split()[-1])
         has_water = 7 if mesh_version >= 1.3 else 3
@@ -863,8 +865,8 @@ def triangulation_to_image(name, pixel_size, grid_size_or_bbox):
         ]
         try:
             mask_draw.polygon([(px1, py1), (px2, py2), (px3, py3)], fill="white")
-        except:
-            pass
+        except (TypeError, ValueError) as exc:
+            UI.vprint(3, exc)
     f_ele.close()
     return ((xmin, ymin, xmax, ymax), ImageOps.flip(mask_im).convert("L"))
 
@@ -942,7 +944,7 @@ if __name__ == "__main__":
     del osm_layer
     if not multipolygon_area.area:
         # try: os.remove(cached_file_name)
-        # except: pass
+        # except Exception: pass
         print(
             "Humm... an empty response. ",
             "Are you sure about the exact OSM tag for your region ?",
@@ -1012,7 +1014,7 @@ if __name__ == "__main__":
     ]:
         try:
             os.remove(f)
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
     print("Done!")
 ################################################################################

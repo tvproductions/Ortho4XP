@@ -51,9 +51,9 @@ _LOGGER.addHandler(handler)
 # are on Linux or Windows.
 OsX = "dar" in sys.platform
 
+
 ################################################################################
 class Ortho4XP_GUI(tk.Tk):
-
     # Constants
     zl_list = ["12", "13", "14", "15", "16", "17", "18"]
 
@@ -72,9 +72,7 @@ class Ortho4XP_GUI(tk.Tk):
         )
         O4.map(
             "Flat.TButton",
-            background=[
-                ("disabled", "pressed", "!focus", "active", "light green")
-            ],
+            background=[("disabled", "pressed", "!focus", "active", "light green")],
         )
         O4.configure(
             "O4.TCombobox",
@@ -86,9 +84,7 @@ class Ortho4XP_GUI(tk.Tk):
         )
         O4.map(
             "O4.TCombobox",
-            fieldbackground=[
-                ("disabled", "!focus", "focus", "active", "white")
-            ],
+            fieldbackground=[("disabled", "!focus", "focus", "active", "white")],
         )
         self.option_add("*Font", "TkFixedFont")
 
@@ -110,12 +106,12 @@ class Ortho4XP_GUI(tk.Tk):
         )
         try:
             self.map_list.remove("OSM")
-        except:
-            pass
+        except ValueError as exc:
+            UI.vprint(3, exc)
         try:
             self.map_list.remove("SEA")
-        except:
-            pass
+        except ValueError as exc:
+            UI.vprint(3, exc)
 
         # Grid behaviour
         self.columnconfigure(0, weight=1)
@@ -135,12 +131,8 @@ class Ortho4XP_GUI(tk.Tk):
         self.config_icon = tk.PhotoImage(
             file=os.path.join(FNAMES.Utils_dir, "Config.gif")
         )
-        self.stop_icon = tk.PhotoImage(
-            file=os.path.join(FNAMES.Utils_dir, "Stop.gif")
-        )
-        self.exit_icon = tk.PhotoImage(
-            file=os.path.join(FNAMES.Utils_dir, "Exit.gif")
-        )
+        self.stop_icon = tk.PhotoImage(file=os.path.join(FNAMES.Utils_dir, "Stop.gif"))
+        self.exit_icon = tk.PhotoImage(file=os.path.join(FNAMES.Utils_dir, "Exit.gif"))
 
         # Frame instances and placement
         # Level 0
@@ -165,9 +157,7 @@ class Ortho4XP_GUI(tk.Tk):
         self.frame_folder = tk.Frame(
             self.frame_tile, border=0, padx=0, pady=0, bg="light green"
         )
-        self.frame_folder.grid(
-            row=1, column=0, columnspan=8, sticky=N + S + W + E
-        )
+        self.frame_folder.grid(row=1, column=0, columnspan=8, sticky=N + S + W + E)
 
         # Track existance of tile configuration file for active tile
         self.tile_cfg_exists = tk.BooleanVar()
@@ -191,9 +181,9 @@ class Ortho4XP_GUI(tk.Tk):
 
         self.lon = tk.StringVar()
         self.lat.trace_add("write", self.tile_change)
-        tk.Label(
-            self.frame_tile, anchor=W, text="Longitude:", bg="light green"
-        ).grid(row=0, column=2, padx=5, pady=5, sticky=E + W)
+        tk.Label(self.frame_tile, anchor=W, text="Longitude:", bg="light green").grid(
+            row=0, column=2, padx=5, pady=5, sticky=E + W
+        )
         self.lon_entry = tk.Entry(
             self.frame_tile,
             width=4,
@@ -205,9 +195,9 @@ class Ortho4XP_GUI(tk.Tk):
 
         self.default_website = tk.StringVar()
         self.default_website.trace_add("write", self.update_website)
-        tk.Label(
-            self.frame_tile, anchor=W, text="Imagery:", bg="light green"
-        ).grid(row=0, column=4, padx=5, pady=5, sticky=E + W)
+        tk.Label(self.frame_tile, anchor=W, text="Imagery:", bg="light green").grid(
+            row=0, column=4, padx=5, pady=5, sticky=E + W
+        )
         self.img_combo = ttk.Combobox(
             self.frame_tile,
             values=self.map_list,
@@ -220,9 +210,9 @@ class Ortho4XP_GUI(tk.Tk):
 
         self.default_zl = tk.StringVar()
         self.default_zl.trace_add("write", self.update_zl)
-        tk.Label(
-            self.frame_tile, anchor=W, text="Zoom Level:", bg="light green"
-        ).grid(row=0, column=6, padx=5, pady=5, sticky=E + W)
+        tk.Label(self.frame_tile, anchor=W, text="Zoom Level:", bg="light green").grid(
+            row=0, column=6, padx=5, pady=5, sticky=E + W
+        )
         self.zl_combo = ttk.Combobox(
             self.frame_tile,
             values=self.zl_list,
@@ -245,9 +235,7 @@ class Ortho4XP_GUI(tk.Tk):
             fg="blue",
             textvariable=self.custom_build_dir,
         )
-        self.custom_build_dir_entry.grid(
-            row=0, column=1, padx=0, pady=0, sticky=E + W
-        )
+        self.custom_build_dir_entry.grid(row=0, column=1, padx=0, pady=0, sticky=E + W)
         ttk.Button(
             self.frame_folder,
             takefocus=False,
@@ -304,18 +292,14 @@ class Ortho4XP_GUI(tk.Tk):
         build_mesh_button = ttk.Button(
             self.frame_steps, text="Triangulate 3D Mesh"
         )  # ,command=self.build_mesh)
-        build_mesh_button.grid(
-            row=0, column=1, padx=5, pady=0, sticky=N + S + E + W
-        )
+        build_mesh_button.grid(row=0, column=1, padx=5, pady=0, sticky=N + S + E + W)
         build_mesh_button.bind("<ButtonPress-1>", self.build_mesh)
         build_mesh_button.bind("<Shift-ButtonPress-1>", self.sort_mesh)
         build_mesh_button.bind("<Control-ButtonPress-1>", self.community_mesh)
         build_masks_button = ttk.Button(
             self.frame_steps, text=" Draw Water Masks  "
         )  # ,command=self.build_masks)
-        build_masks_button.grid(
-            row=0, column=2, padx=5, pady=0, sticky=N + S + E + W
-        )
+        build_masks_button.grid(row=0, column=2, padx=5, pady=0, sticky=N + S + E + W)
         build_masks_button.bind("<ButtonPress-1>", self.build_masks)
         build_masks_button.bind("<Shift-ButtonPress-1>", self.build_masks)
         ttk.Button(
@@ -383,11 +367,11 @@ class Ortho4XP_GUI(tk.Tk):
             self.default_zl.set(default_zl)
             self.custom_build_dir.set(custom_build_dir)
             f.close()
-        except:
-            self.lat.set(48)
-            self.lon.set(-6)
+        except (OSError, ValueError):
+            self.lat.set(48)  # ty:ignore[invalid-argument-type]
+            self.lon.set(-6)  # ty:ignore[invalid-argument-type]
             self.default_website.set("BI")
-            self.default_zl.set(16)
+            self.default_zl.set(16)  # ty:ignore[invalid-argument-type]
             self.custom_build_dir.set("")
         # Needed for load_tile_cfg to check if the window is open
         self.config_window = None
@@ -429,7 +413,7 @@ class Ortho4XP_GUI(tk.Tk):
         """Load tile configuration on tile change."""
         # TODO: Implement config loading on tile change here instead of using select_tile
         # so we can catch if the tile is changed manually or with the mouse in the map view.
-        # Problem is right now this is being called if the lat or lon is changed so it 
+        # Problem is right now this is being called if the lat or lon is changed so it
         # gets called twice. Also, having issues with the lat/lon not being accurate when
         # trying to implement here.
         return
@@ -447,7 +431,9 @@ class Ortho4XP_GUI(tk.Tk):
         custom_build_dir = self.custom_build_dir_entry.get()
         build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
 
-        tile_cfg_file = os.path.join(build_dir, "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg")
+        tile_cfg_file = os.path.join(
+            build_dir, "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg"
+        )
 
         if os.path.exists(tile_cfg_file):
             f = open(tile_cfg_file, "r")
@@ -459,7 +445,7 @@ class Ortho4XP_GUI(tk.Tk):
                     (var, value) = line.split("=")
                     value = CFG.config_compatibility(value)
                     target = (
-                        cfg_vars[var]["module"] + "." + var
+                        cfg_vars[var]["module"] + "." + var  # ty:ignore[unsupported-operator]
                         if "module" in cfg_vars[var]
                         else "CFG." + var
                     )
@@ -470,8 +456,8 @@ class Ortho4XP_GUI(tk.Tk):
                     if var == "zone_list":
                         # Append zones from config to global zone_list but also check if it's a duplicate
                         for zone in ast.literal_eval(value):
-                            if zone not in CFG.zone_list:
-                                CFG.zone_list.append(zone)
+                            if zone not in CFG.zone_list:  # ty:ignore[unresolved-attribute]
+                                CFG.zone_list.append(zone)  # ty:ignore[unresolved-attribute]
                         # Stop the loop here since we don't want to override the global zone_list which cmd will do
                         continue
                     exec(cmd)
@@ -487,8 +473,8 @@ class Ortho4XP_GUI(tk.Tk):
                         UI.vprint(2, e)
                         pass
                 # Update main window GUI values
-                self.default_website.set(CFG.default_website)
-                self.default_zl.set(CFG.default_zl)
+                self.default_website.set(CFG.default_website)  # ty:ignore[unresolved-attribute]
+                self.default_zl.set(CFG.default_zl)  # ty:ignore[unresolved-attribute]
             self.tile_cfg_exists.set(True)
             UI.vprint(1, f"Configuration loaded for tile at {lat} {lon}")
             f.close()
@@ -521,34 +507,32 @@ class Ortho4XP_GUI(tk.Tk):
                 continue
             target = "CFG." + var
             # Set tile and app config tab values from global variables
-            self.config_window.v_[var].set(str(eval(target)))
+            self.config_window.v_[var].set(str(eval(target)))  # ty:ignore[unresolved-attribute]
 
     def update_website(self, *args) -> None:
         """Update global default_website variable from GUI."""
         if self.default_website.get():
-            CFG.default_website = str(self.default_website.get())
+            CFG.default_website = str(self.default_website.get())  # ty:ignore[unresolved-attribute]
 
     def update_zl(self, *args) -> None:
         """Update global default_zl variable from GUI."""
         if self.default_zl.get():
-            CFG.default_zl = int(self.default_zl.get())
+            CFG.default_zl = int(self.default_zl.get())  # ty:ignore[unresolved-attribute]
 
     def get_lat_lon(self, check=True):
         error_string = ""
         try:
             lat = int(self.lat.get())
             if lat < -85 or lat > 84:
-                error_string += (
-                    "Latitude out of range (-85,84) for webmercator grid. "
-                )
-        except Exception as e:
+                error_string += "Latitude out of range (-85,84) for webmercator grid. "
+        except ValueError as e:
             error_string += "Latitude wrongly encoded. "
             _LOGGER.exception(e)
         try:
             lon = int(self.lon.get())
             if lon < -180 or lon > 179:
                 error_string += "Longitude out of range (-180,179)."
-        except Exception as e:
+        except ValueError as e:
             error_string += "Longitude wrongly encoded."
             _LOGGER.exception(e)
         if error_string and check:
@@ -566,81 +550,70 @@ class Ortho4XP_GUI(tk.Tk):
         ;rtype: Tile object or False
         """
         # Check for unsaved changes
-        if (
-            self.config_window is not None
-            and self.config_window.winfo_exists()
-        ):
+        if self.config_window is not None and self.config_window.winfo_exists():
             response = self.config_window.check_unsaved_changes()
             if response == "cancel":
                 return False
         try:
             (lat, lon) = self.get_lat_lon()
             return CFG.Tile(lat, lon, str(self.custom_build_dir.get()))
-        except:
+        except TypeError:
             raise Exception
 
     def build_poly_file(self):
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
             _LOGGER.exception(e)
             return 0
-        self.working_thread = threading.Thread(
-            target=VMAP.build_poly_file, args=[tile]
-        )
+        self.working_thread = threading.Thread(target=VMAP.build_poly_file, args=[tile])
         self.working_thread.start()
 
     def build_mesh(self, event):
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
             _LOGGER.exception("Exception on build_mesh")
             return 0
-        self.working_thread = threading.Thread(
-            target=MESH.build_mesh, args=[tile]
-        )
+        self.working_thread = threading.Thread(target=MESH.build_mesh, args=[tile])
         self.working_thread.start()
 
     def sort_mesh(self, event):
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
             _LOGGER.exception("Exception on sort_mesh")
             return 0
-        self.working_thread = threading.Thread(
-            target=MESH.sort_mesh, args=[tile]
-        )
+        self.working_thread = threading.Thread(target=MESH.sort_mesh, args=[tile])
         self.working_thread.start()
 
     def community_mesh(self, event):
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
             _LOGGER.exception("Exception on community_mesh")
             return 0
-        self.working_thread = threading.Thread(
-            target=MESH.community_mesh, args=[tile]
-        )
+        self.working_thread = threading.Thread(target=MESH.community_mesh, args=[tile])
         self.working_thread.start()
 
     def build_masks(self, event):
@@ -648,7 +621,7 @@ class Ortho4XP_GUI(tk.Tk):
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
@@ -664,40 +637,33 @@ class Ortho4XP_GUI(tk.Tk):
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
             _LOGGER.exception(e)
             return 0
-        self.working_thread = threading.Thread(
-            target=TILE.build_tile, args=[tile]
-        )
+        self.working_thread = threading.Thread(target=TILE.build_tile, args=[tile])
         self.working_thread.start()
 
     def build_all(self):
         # Check for unsaved changes
-        if (
-            self.config_window is not None
-            and self.config_window.winfo_exists()
-        ):
+        if self.config_window is not None and self.config_window.winfo_exists():
             response = self.config_window.check_unsaved_changes()
             if response == "cancel":
                 return
         try:
             tile = self.tile_from_interface()
             if tile:
-                tile.make_dirs()
+                tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
             _LOGGER.exception(e)
             return 0
-        self.working_thread = threading.Thread(
-            target=TILE.build_all, args=[tile]
-        )
+        self.working_thread = threading.Thread(target=TILE.build_all, args=[tile])
         self.working_thread.start()
 
     def choose_custom_build_dir(self):
@@ -708,12 +674,12 @@ class Ortho4XP_GUI(tk.Tk):
 
     def open_config_window(self):
         try:
-            self.config_window.lift()
+            self.config_window.lift()  # ty:ignore[unresolved-attribute]
             return 1
-        except:
+        except (AttributeError, tk.TclError):
             try:
                 (lat, lon) = self.get_lat_lon()
-            except Exception as e:
+            except (TypeError, ValueError) as e:
                 _LOGGER.exception(e)
                 return 0
             self.config_window = CFG.Ortho4XP_Config(self)
@@ -723,10 +689,10 @@ class Ortho4XP_GUI(tk.Tk):
         try:
             self.earth_window.lift()
             return 1
-        except:
+        except (AttributeError, tk.TclError):
             try:
                 (lat, lon) = self.get_lat_lon(check=False)
-            except:
+            except (TypeError, ValueError):
                 (lat, lon) = (48, -6)
             self.earth_window = Ortho4XP_Earth_Preview(self, lat, lon)
             return 1
@@ -735,10 +701,10 @@ class Ortho4XP_GUI(tk.Tk):
         try:
             self.custom_zl_window.lift()
             return 1
-        except:
+        except (AttributeError, tk.TclError):
             try:
                 (lat, lon) = self.get_lat_lon()
-            except:
+            except (TypeError, ValueError):
                 return 0
             self.custom_zl_window = Ortho4XP_Custom_ZL(self, lat, lon)
             return 1
@@ -755,7 +721,7 @@ class Ortho4XP_GUI(tk.Tk):
         ):
             result = self.config_window.check_unsaved_changes(select_tile=True)
             if result == "cancel":
-                return        
+                return
         try:
             f = open(FNAMES.resource_path(".last_gui_params.txt"), "w")
             f.write(
@@ -770,16 +736,16 @@ class Ortho4XP_GUI(tk.Tk):
             )
             f.write(self.custom_build_dir.get())
             f.close()
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
         self.after_cancel(self.callback_pgrb)
         self.after_cancel(self.callback_console)
         sys.stdout = self.stdout_orig
         self.destroy()
 
+
 ################################################################################
 class Ortho4XP_Custom_ZL(tk.Toplevel):
-
     dico_color = {
         15: "cyan",
         16: "green",
@@ -806,14 +772,10 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             + sorted(set(IMG.combined_providers_dict))
         )
         self.map_list = [
-            provider_code
-            for provider_code in self.map_list
-            if provider_code != "SEA"
+            provider_code for provider_code in self.map_list if provider_code != "SEA"
         ]
         self.reduced_map_list = [
-            provider_code
-            for provider_code in self.map_list
-            if provider_code != "OSM"
+            provider_code for provider_code in self.map_list if provider_code != "OSM"
         ]
         self.points = []
         self.coords = []
@@ -841,23 +803,17 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
 
         self.zlpol = tk.IntVar()
         try:  # default_zl might still be empty
-            self.zlpol.set(
-                max(min(int(self.parent.default_zl.get()) + 1, 19), 15)
-            )
-        except:
+            self.zlpol.set(max(min(int(self.parent.default_zl.get()) + 1, 19), 15))
+        except (TypeError, ValueError):
             self.zlpol.set(17)
         self.gb = tk.StringVar()
         self.gb.set("0Gb")
 
         # Frames
-        self.frame_left = tk.Frame(
-            self, border=4, bg="light green"
-        )
+        self.frame_left = tk.Frame(self, border=4, bg="light green")
         self.frame_left.grid(row=0, column=0, sticky=N + S + W + E)
 
-        self.frame_right = tk.Frame(
-            self, border=1, relief="solid", bg="light green"
-        )
+        self.frame_right = tk.Frame(self, border=1, relief="solid", bg="light green")
         self.frame_right.grid(row=0, column=1, sticky=N + S + W + E)
         self.frame_right.rowconfigure(0, weight=1)
         self.frame_right.columnconfigure(0, weight=1)
@@ -874,9 +830,9 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         ).grid(row=row, column=0, sticky=W + E)
         row += 1
 
-        tk.Label(
-            self.frame_left, anchor=W, text="Source : ", bg="light green"
-        ).grid(row=row, column=0, padx=5, pady=3, sticky=W)
+        tk.Label(self.frame_left, anchor=W, text="Source : ", bg="light green").grid(
+            row=row, column=0, padx=5, pady=3, sticky=W
+        )
         self.map_combo = ttk.Combobox(
             self.frame_left,
             textvariable=self.map_choice,
@@ -918,9 +874,9 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         ).grid(row=row, column=0, pady=10, sticky=W + E)
         row += 1
 
-        tk.Label(
-            self.frame_left, anchor=W, text="Source : ", bg="light green"
-        ).grid(row=row, column=0, sticky=W, padx=5, pady=10)
+        tk.Label(self.frame_left, anchor=W, text="Source : ", bg="light green").grid(
+            row=row, column=0, sticky=W, padx=5, pady=10
+        )
         self.zmap_combo = ttk.Combobox(
             self.frame_left,
             textvariable=self.zmap_choice,
@@ -935,9 +891,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         self.frame_zlbtn = tk.Frame(self.frame_left, border=0, bg="light green")
         for i in range(5):
             self.frame_zlbtn.columnconfigure(i, weight=1)
-        self.frame_zlbtn.grid(
-            row=row, column=0, columnspan=1, sticky=N + S + W + E
-        )
+        self.frame_zlbtn.grid(row=row, column=0, columnspan=1, sticky=N + S + W + E)
         row += 1
         for zl in range(15, 20):
             col = zl - 15
@@ -948,7 +902,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
                 activebackground=self.dico_color[zl],
                 selectcolor=self.dico_color[zl],
                 height=2,
-                indicatoron=0,
+                indicatoron=0,  # ty:ignore[invalid-argument-type]
                 text="ZL" + str(zl),
                 variable=self.zlpol,
                 value=zl,
@@ -991,8 +945,8 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         row += 1
         tk.Label(
             self.frame_left,
-            text="Ctrl+B1 : Add texture\nShift+B1: Add zone point\n" + \
-                 "Ctrl+B2 : Delete zone",
+            text="Ctrl+B1 : Add texture\nShift+B1: Add zone point\n"
+            + "Ctrl+B2 : Delete zone",
             bg="light green",
             justify=LEFT,
         ).grid(row=row, column=0, padx=5, pady=20, sticky=N + S + E + W)
@@ -1001,13 +955,13 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.frame_left, text="    Apply    ", command=self.save_zone_list
         ).grid(row=row, column=0, padx=5, pady=3, sticky=N + S + E + W)
         row += 1
-        ttk.Button(
-            self.frame_left, text="    Reset    ", command=self.delAll
-        ).grid(row=row, column=0, padx=5, pady=3, sticky=N + S + E + W)
+        ttk.Button(self.frame_left, text="    Reset    ", command=self.delAll).grid(
+            row=row, column=0, padx=5, pady=3, sticky=N + S + E + W
+        )
         row += 1
-        ttk.Button(
-            self.frame_left, text="    Exit     ", command=self.exit
-        ).grid(row=row, column=0, padx=5, pady=3, sticky=N + S + E + W)
+        ttk.Button(self.frame_left, text="    Exit     ", command=self.exit).grid(
+            row=row, column=0, padx=5, pady=3, sticky=N + S + E + W
+        )
         row += 1
         self.canvas = tk.Canvas(self.frame_right, bd=0, height=750, width=750)
         self.canvas.grid(row=0, column=0, sticky=N + S + E + W)
@@ -1021,19 +975,13 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         zoomlevel = self.zoomlevel
         provider_code = self.map_combo.get()
         (tilxleft, tilytop) = GEO.wgs84_to_gtile(lat + 1, lon, zoomlevel)
-        (self.latmax, self.lonmin) = GEO.gtile_to_wgs84(
-            tilxleft, tilytop, zoomlevel
-        )
-        (self.xmin, self.ymin) = GEO.wgs84_to_pix(
-            self.latmax, self.lonmin, zoomlevel
-        )
+        (self.latmax, self.lonmin) = GEO.gtile_to_wgs84(tilxleft, tilytop, zoomlevel)
+        (self.xmin, self.ymin) = GEO.wgs84_to_pix(self.latmax, self.lonmin, zoomlevel)
         (tilxright, tilybot) = GEO.wgs84_to_gtile(lat, lon + 1, zoomlevel)
         (self.latmin, self.lonmax) = GEO.gtile_to_wgs84(
             tilxright + 1, tilybot + 1, zoomlevel
         )
-        (self.xmax, self.ymax) = GEO.wgs84_to_pix(
-            self.latmin, self.lonmax, zoomlevel
-        )
+        (self.xmax, self.ymax) = GEO.wgs84_to_pix(self.latmin, self.lonmax, zoomlevel)
         filepreview = FNAMES.preview(lat, lon, zoomlevel, provider_code)
         if self._dispp_thread and self._dispp_thread.is_alive():
             return
@@ -1057,23 +1005,23 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         for item in self.polyobj_list:
             try:
                 self.canvas.delete(item)
-            except:
-                pass
+            except (AttributeError, tk.TclError) as exc:
+                UI.vprint(3, exc)
         try:
             self.canvas.delete(self.img_map)
-        except:
-            pass
+        except (AttributeError, tk.TclError) as exc:
+            UI.vprint(3, exc)
         try:
             self.canvas.delete(self.boundary)
-        except:
-            pass
+        except (AttributeError, tk.TclError) as exc:
+            UI.vprint(3, exc)
         try:
             while self.ctp_thread.is_alive():
                 if self._stop_event.is_set():
                     return
                 self.ctp_thread.join(timeout=0.2)
-        except:
-            pass
+        except (AttributeError, RuntimeError) as exc:
+            UI.vprint(3, exc)
         if self._stop_event.is_set():
             return
         try:
@@ -1082,9 +1030,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.image.close()
             self.map_x_res = self.photo.width()
             self.map_y_res = self.photo.height()
-            self.img_map = self.canvas.create_image(
-                0, 0, anchor=NW, image=self.photo
-            )
+            self.img_map = self.canvas.create_image(0, 0, anchor=NW, image=self.photo)
             self.canvas.config(scrollregion=self.canvas.bbox(ALL))
             # As of Python3.13.5, the mouse button mappings changed
             if "dar" in sys.platform and sys.version_info <= (3, 12):
@@ -1094,16 +1040,14 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.canvas.bind("<ButtonPress-3>", self.scroll_start)
             self.canvas.bind("<B3-Motion>", self.scroll_move)
             self.canvas.bind("<Control-ButtonPress-3>", self.delPol)
-            self.canvas.bind(
-                "<ButtonPress-1>", lambda event: self.canvas.focus_set()
-            )
+            self.canvas.bind("<ButtonPress-1>", lambda event: self.canvas.focus_set())
             self.canvas.bind("<Shift-ButtonPress-1>", self.newPoint)
             self.canvas.bind("<Control-Shift-ButtonPress-1>", self.newPointGrid)
             self.canvas.bind("<Control-ButtonPress-1>", self.newPol)
             self.canvas.focus_set()
             self.canvas.bind("p", self.newPoint)
-            self.canvas.bind("d", self.delete_zone_cmd)
-            self.canvas.bind("n", self.save_zone_cmd)
+            self.canvas.bind("d", self.delete_zone_cmd)  # ty:ignore[no-matching-overload]
+            self.canvas.bind("n", self.save_zone_cmd)  # ty:ignore[no-matching-overload]
             self.canvas.bind("<BackSpace>", self.delLast)
             self.polygon_list = []
             self.polyobj_list = []
@@ -1120,7 +1064,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.boundary = self.canvas.create_polygon(
                 bdpoints, outline="black", fill="", width=2
             )
-            for zone in CFG.zone_list:
+            for zone in CFG.zone_list:  # ty:ignore[unresolved-attribute]
                 self.coords = zone[0][0:-2]
                 self.zlpol.set(zone[1])
                 self.zmap_combo.set(zone[2])
@@ -1146,9 +1090,9 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
 
     def redraw_poly(self):
         try:
-            self.canvas.delete(self.poly_curr)
-        except:
-            pass
+            self.canvas.delete(self.poly_curr)  # ty:ignore[invalid-argument-type]
+        except (AttributeError, tk.TclError) as exc:
+            UI.vprint(3, exc)
         try:
             color = self.dico_color[self.zlpol.get()]
             if len(self.points) >= 4:
@@ -1159,8 +1103,8 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
                 self.poly_curr = self.canvas.create_polygon(
                     self.points, outline=color, fill="", width=5
                 )
-        except:
-            pass
+        except (AttributeError, KeyError, tk.TclError) as exc:
+            UI.vprint(3, exc)
         return
 
     def newPoint(self, event):
@@ -1236,9 +1180,9 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.canvas.delete(self.polyobj_list[idx])
             self.polyobj_list.pop(idx)
         try:
-            self.canvas.delete(self.poly_curr)
-        except:
-            pass
+            self.canvas.delete(self.poly_curr)  # ty:ignore[invalid-argument-type]
+        except (AttributeError, tk.TclError) as exc:
+            UI.vprint(3, exc)
         self.compute_size()
         return
 
@@ -1308,16 +1252,14 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             lon_bar = (polygon[1][1] + polygon[1][3]) / 2
             zoomlevel = int(polygon[2])
             provider_code = polygon[3]
-            til_x_left, til_y_top = GEO.wgs84_to_orthogrid(
-                lat_bar, lon_bar, zoomlevel
-            )
+            til_x_left, til_y_top = GEO.wgs84_to_orthogrid(lat_bar, lon_bar, zoomlevel)
             texture_attributes_list.append(
                 (til_x_left, til_y_top, zoomlevel, provider_code)
             )
             fake_zone_list.append(("", "", provider_code))
         UI.vprint(1, "\nBuilding geotiffs.\n------------------\n")
         tile = CFG.Tile(self.lat, self.lon, "")
-        tile.zone_list = fake_zone_list
+        tile.zone_list = fake_zone_list  # ty:ignore[unresolved-attribute]
         IMG.initialize_local_combined_providers_dict(tile)
         fargs_build_geotiffs = [tile, texture_attributes_list]
         build_geotiffs_thread = threading.Thread(
@@ -1332,9 +1274,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
         lon_bar = (polygon[1][1] + polygon[1][3]) / 2
         zoomlevel = int(polygon[2])
         provider_code = polygon[3]
-        til_x_left, til_y_top = GEO.wgs84_to_orthogrid(
-            lat_bar, lon_bar, zoomlevel
-        )
+        til_x_left, til_y_top = GEO.wgs84_to_orthogrid(lat_bar, lon_bar, zoomlevel)
         build_dir = FNAMES.build_dir(
             self.lat, self.lon, self.parent.custom_build_dir.get()
         )
@@ -1362,7 +1302,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
 
     def delete_zone_cmd(self):
         try:
-            self.canvas.delete(self.poly_curr)
+            self.canvas.delete(self.poly_curr)  # ty:ignore[invalid-argument-type]
             self.poly_curr = self.polyobj_list[-1]
             self.points = self.polygon_list[-1][0]
             self.coords = self.polygon_list[-1][1]
@@ -1371,34 +1311,31 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.polygon_list.pop(-1)
             self.polyobj_list.pop(-1)
             self.compute_size()
-        except:
+        except IndexError as exc:
+            UI.vprint(3, exc)
             self.points = []
             self.coords = []
         return
 
     def save_zone_list(self):
-        ordered_list = sorted(
-            self.polygon_list, key=lambda item: item[2], reverse=True
-        )
+        ordered_list = sorted(self.polygon_list, key=lambda item: item[2], reverse=True)
         zone_list = []
         for item in ordered_list:
             tmp = []
             for pt in item[1]:
                 tmp.append(pt)
-            for pt in item[1][
-                0:2
-            ]:  # repeat first point for point_in_polygon algo
+            for pt in item[1][0:2]:  # repeat first point for point_in_polygon algo
                 tmp.append(pt)
             zone_list.append([tmp, item[2], item[3]])
-        CFG.zone_list = zone_list
+        CFG.zone_list = zone_list  # ty:ignore[unresolved-attribute]
         # self.destroy()
         return
 
+
 ################################################################################
 class Ortho4XP_Earth_Preview(tk.Toplevel):
-
     earthzl = 6
-    resolution = 2 ** earthzl * 256
+    resolution = 2**earthzl * 256
 
     list_del_ckbtn = [
         "OSM data",
@@ -1441,13 +1378,9 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.exit)
 
         # Frames
-        self.frame_left = tk.Frame(
-            self, border=4, bg="light green"
-        )
+        self.frame_left = tk.Frame(self, border=4, bg="light green")
         self.frame_left.grid(row=0, column=0, sticky=N + S + W + E)
-        self.frame_right = tk.Frame(
-            self, border=1, bg="light green"
-        )
+        self.frame_right = tk.Frame(self, border=1, bg="light green")
         self.frame_right.grid(row=0, rowspan=60, column=1, sticky=N + S + W + E)
         self.frame_right.rowconfigure(0, weight=1, minsize=self.canvas_min_y)
         self.frame_right.columnconfigure(0, weight=1, minsize=self.canvas_min_x)
@@ -1493,9 +1426,9 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 highlightthickness=0,
             ).grid(row=row, column=0, padx=5, pady=5, sticky=N + S + E + W)
             row += 1
-        ttk.Button(
-            self.frame_left, text="  Batch Delete    ", command=self.trash
-        ).grid(row=row, column=0, padx=5, pady=5, sticky=N + S + E + W)
+        ttk.Button(self.frame_left, text="  Batch Delete    ", command=self.trash).grid(
+            row=row, column=0, padx=5, pady=5, sticky=N + S + E + W
+        )
         row += 1
         # Batch build
         tk.Label(
@@ -1522,27 +1455,29 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             self.frame_left, text="  Batch Build   ", command=self.batch_build
         ).grid(row=row, column=0, padx=5, pady=5, sticky=N + S + E + W)
         row += 1
-        ttk.Separator(self.frame_left, orient=HORIZONTAL).grid(row=row, column=0, padx=5, pady=5, sticky=N + S + E + W)
-        row +=1
+        ttk.Separator(self.frame_left, orient=HORIZONTAL).grid(
+            row=row, column=0, padx=5, pady=5, sticky=N + S + E + W
+        )
+        row += 1
         tk.Label(
             self.frame_left,
-            text="B2-click+hold: Move map\n" + \
-                 "B1-double-click: Select active\n" + \
-                 "Shift+B1: Select multiple tiles\nCtrl+B1: Link in Custom Scenery\n" + \
-                 "O: Link overlays in Custom Scenery",
+            text="B2-click+hold: Move map\n"
+            + "B1-double-click: Select active\n"
+            + "Shift+B1: Select multiple tiles\nCtrl+B1: Link in Custom Scenery\n"
+            + "O: Link overlays in Custom Scenery",
             bg="light green",
-            justify=LEFT
+            justify=LEFT,
         ).grid(row=row, column=0, padx=0, pady=5, sticky=N + S + E + W)
         row += 1
         # Refresh window
-        ttk.Button(
-            self.frame_left, text="    Refresh     ", command=self.refresh
-        ).grid(row=row, column=0, padx=5, pady=5, sticky=N + S + E + W)
+        ttk.Button(self.frame_left, text="    Refresh     ", command=self.refresh).grid(
+            row=row, column=0, padx=5, pady=5, sticky=N + S + E + W
+        )
         row += 1
         # Exit
-        ttk.Button(
-            self.frame_left, text="      Exit      ", command=self.exit
-        ).grid(row=row, column=0, padx=5, pady=5, sticky=N + S + E + W)
+        ttk.Button(self.frame_left, text="      Exit      ", command=self.exit).grid(
+            row=row, column=0, padx=5, pady=5, sticky=N + S + E + W
+        )
         row += 1
 
         self.canvas = tk.Canvas(self.frame_right, bd=0)
@@ -1552,8 +1487,8 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             scrollregion=(
                 1,
                 1,
-                2 ** self.earthzl * 256 - 1,
-                2 ** self.earthzl * 256 - 1,
+                2**self.earthzl * 256 - 1,
+                2**self.earthzl * 256 - 1,
             )
         )  # self.canvas.bbox(ALL))
         (x0, y0) = GEO.wgs84_to_pix(lat + 0.5, lon + 0.5, self.earthzl)
@@ -1579,12 +1514,8 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         self.active_lat = lat
         self.active_lon = lon
         self.latlon.set(FNAMES.short_latlon(self.active_lat, self.active_lon))
-        [x0, y0] = GEO.wgs84_to_pix(
-            self.active_lat + 1, self.active_lon, self.earthzl
-        )
-        [x1, y1] = GEO.wgs84_to_pix(
-            self.active_lat, self.active_lon + 1, self.earthzl
-        )
+        [x0, y0] = GEO.wgs84_to_pix(self.active_lat + 1, self.active_lon, self.earthzl)
+        [x1, y1] = GEO.wgs84_to_pix(self.active_lat, self.active_lon + 1, self.earthzl)
         self.active_tile = self.canvas.create_rectangle(
             x0, y0, x1, y1, fill="", outline="yellow", width=3
         )
@@ -1593,7 +1524,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
     def add_symlink(self, lat: int, lon: int) -> None:
         """Add symlink to custom_scenery_dir."""
-        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)
+        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)  # ty:ignore[unresolved-attribute]
         custom_build_dir = os.path.normpath(self.custom_build_dir)
         # Check if scenery and build directory are the same (symlinks not applicable)
         if custom_scenery_dir == custom_build_dir:
@@ -1601,7 +1532,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
         if not self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,
+                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
                 "zOrtho4XP_" + FNAMES.short_latlon(lat, lon),
             )
             target = os.path.realpath(
@@ -1609,7 +1540,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             )
         elif self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,
+                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
                 "zOrtho4XP_" + os.path.basename(self.working_dir),
             )
             target = os.path.realpath(self.working_dir)
@@ -1642,7 +1573,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
     def remove_symlink(self, lat: int, lon: int) -> None:
         """Remove symlink from custom_scenery_dir."""
-        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)
+        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)  # ty:ignore[unresolved-attribute]
         custom_build_dir = os.path.normpath(self.custom_build_dir)
         # Check if scenery and build directory are the same (symlinks not applicable)
         if custom_scenery_dir == custom_build_dir:
@@ -1650,7 +1581,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
         if not self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,
+                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
                 "zOrtho4XP_" + FNAMES.short_latlon(lat, lon),
             )
             target = os.path.realpath(
@@ -1667,11 +1598,11 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                         self.dico_tiles_done[(lat, lon)][1],
                         font=("Helvetica", "12", "normal"),
                     )
-                return True
+                return True  # ty:ignore[invalid-return-type]
 
         elif self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,
+                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
                 "zOrtho4XP_" + os.path.basename(self.working_dir),
             )
             target = os.path.realpath(self.working_dir)
@@ -1690,19 +1621,19 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                             self.dico_tiles_done[(lat, lon)][1],
                             font=("Helvetica", "12", "normal"),
                         )
-                return True
+                return True  # ty:ignore[invalid-return-type]
         # in case this was a broken link
         try:
             os.remove(link)
-        except:
-            pass
+        except OSError as exc:
+            UI.vprint(3, exc)
 
     def add_overlay_symlink(self, *args) -> None:
         """Add/remove symlink for overlays to custom_scenery_dir."""
-        if not CFG.custom_scenery_dir:
+        if not CFG.custom_scenery_dir:  # ty:ignore[unresolved-attribute]
             UI.vprint(1, "Custom Scenery directory not set.")
             return
-        link = os.path.join(CFG.custom_scenery_dir, "yOrtho4XP_Overlays")
+        link = os.path.join(CFG.custom_scenery_dir, "yOrtho4XP_Overlays")  # ty:ignore[unresolved-attribute]
         # Remove symlink if it already exists
         if os.path.isdir(link) and os.path.samefile(
             os.path.realpath(link), FNAMES.Overlay_dir
@@ -1710,7 +1641,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             os.remove(link)
             UI.vprint(
                 1,
-                f"yOrtho4XP_Overlays link removed from: {CFG.custom_scenery_dir}",
+                f"yOrtho4XP_Overlays link removed from: {CFG.custom_scenery_dir}",  # ty:ignore[unresolved-attribute]
             )
             return
         # Add symlink if it doesn't exist
@@ -1719,9 +1650,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             os.system("ln -s " + ' "' + FNAMES.Overlay_dir + '" "' + link + '"')
         else:
             os.system('MKLINK /J "' + link + '" "' + FNAMES.Overlay_dir + '"')
-        UI.vprint(
-            1, f"yOrtho4XP_Overlays link added to: {CFG.custom_scenery_dir}"
-        )
+        UI.vprint(1, f"yOrtho4XP_Overlays link added to: {CFG.custom_scenery_dir}")  # ty:ignore[unresolved-attribute]
 
     def set_working_dir(self):
         self.custom_build_dir = self.parent.custom_build_dir.get()
@@ -1777,7 +1706,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                     try:
                         lat = int(dir_name.split("XP_")[1][:3])
                         lon = int(dir_name.split("XP_")[1][3:7])
-                    except:
+                    except (IndexError, ValueError):
                         continue
                     # With the enlarged accepetance rule for directory name
                     # there might be more than one tile for the same (lat,lon),
@@ -1808,7 +1737,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                                 "r",
                             )
                             found_config = True
-                        except:
+                        except OSError:
                             try:
                                 tmpf = open(
                                     os.path.join(
@@ -1819,7 +1748,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                                     "r",
                                 )
                                 found_config = True
-                            except:
+                            except OSError:
                                 found_config = False
                         if found_config:
                             prov = zl = ""
@@ -1858,12 +1787,12 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                                 justify=CENTER,
                                 text=content,
                                 fill="black",
-                                font=("Helvetica", "12", "normal"),
+                                font=("Helvetica", "12", "normal"),  # ty:ignore[invalid-argument-type]
                             ),
                             dir_name,
                         )
                         link = os.path.join(
-                            CFG.custom_scenery_dir,
+                            CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
                             "zOrtho4XP_" + FNAMES.short_latlon(lat, lon),
                         )
                         if os.path.isdir(link):
@@ -1901,7 +1830,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                     try:
                         lat = int(file_name[0:3])
                         lon = int(file_name[3:7])
-                    except:
+                    except ValueError:
                         continue
                     [x0, y0] = GEO.wgs84_to_pix(lat + 1, lon, self.earthzl)
                     [x1, y1] = GEO.wgs84_to_pix(lat, lon + 1, self.earthzl)
@@ -1911,14 +1840,12 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                         tmpf = open(
                             os.path.join(
                                 self.working_dir,
-                                "Ortho4XP_"
-                                + FNAMES.short_latlon(lat, lon)
-                                + ".cfg",
+                                "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg",
                             ),
                             "r",
                         )
                         found_config = True
-                    except:
+                    except OSError:
                         found_config = False
                     if found_config:
                         prov = zl = ""
@@ -1952,19 +1879,19 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                             justify=CENTER,
                             text=content,
                             fill="black",
-                            font=("Helvetica", "12", "normal"),
+                            font=("Helvetica", "12", "normal"),  # ty:ignore[invalid-argument-type]
                         ),
                         dir_name,
                     )
             link = os.path.join(
-                CFG.custom_scenery_dir,
+                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
                 "zOrtho4XP_" + os.path.basename(self.working_dir),
             )
             if os.path.isdir(link):
                 if os.path.samefile(
                     os.path.realpath(link), os.path.realpath(self.working_dir)
                 ):
-                    for (lat0, lon0) in self.dico_tiles_done:
+                    for lat0, lon0 in self.dico_tiles_done:
                         if "dar" not in sys.platform:
                             self.canvas.itemconfig(
                                 self.dico_tiles_done[(lat, lon)][0],
@@ -1975,7 +1902,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                                 self.dico_tiles_done[(lat, lon)][1],
                                 font=("Helvetica", "12", "bold underline"),
                             )
-        for (lat, lon) in self.dico_tiles_todo:
+        for lat, lon in self.dico_tiles_todo:
             [x0, y0] = GEO.wgs84_to_pix(lat + 1, lon, self.earthzl)
             [x1, y1] = GEO.wgs84_to_pix(lat, lon + 1, self.earthzl)
             self.canvas.delete(self.dico_tiles_todo[(lat, lon)])
@@ -2022,7 +1949,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 3,
                 "OSM data removed for tile at " + str(lat) + str(lon),
             )
-            return True
+            return True  # ty:ignore[invalid-return-type]
         except FileNotFoundError:
             UI.vprint(
                 3,
@@ -2040,7 +1967,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 3,
                 "Mask data removed for tile at " + str(lat) + str(lon),
             )
-            return True
+            return True  # ty:ignore[invalid-return-type]
         except FileNotFoundError:
             UI.vprint(
                 3,
@@ -2063,7 +1990,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 3,
                 "Jpeg imagery removed for tile at " + str(lat) + str(lon),
             )
-            return True
+            return True  # ty:ignore[invalid-return-type]
         except FileNotFoundError:
             UI.vprint(
                 3,
@@ -2086,7 +2013,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 for objid in self.dico_tiles_done[(lat, lon)][:2]:
                     self.canvas.delete(objid)
                 del self.dico_tiles_done[(lat, lon)]
-            return True
+            return True  # ty:ignore[invalid-return-type]
         except FileNotFoundError:
             UI.vprint(
                 3,
@@ -2113,7 +2040,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 3,
                 "Tile (textures) removed for tile at " + str(lat) + str(lon),
             )
-            return True
+            return True  # ty:ignore[invalid-return-type]
         except FileNotFoundError:
             UI.vprint(
                 3,
@@ -2141,8 +2068,8 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
         try:
             self.canvas.delete(self.active_tile)
-        except:
-            pass
+        except (AttributeError, tk.TclError) as exc:
+            UI.vprint(3, exc)
         [x0, y0] = GEO.wgs84_to_pix(lat + 1, lon, self.earthzl)
         [x1, y1] = GEO.wgs84_to_pix(lat, lon + 1, self.earthzl)
         self.active_tile = self.canvas.create_rectangle(
@@ -2243,20 +2170,20 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             self.ny0 = ny0
             try:
                 self.canvas.delete(self.canv_imgNW)
-            except:
-                pass
+            except (AttributeError, tk.TclError) as exc:
+                UI.vprint(3, exc)
             try:
                 self.canvas.delete(self.canv_imgNE)
-            except:
-                pass
+            except (AttributeError, tk.TclError) as exc:
+                UI.vprint(3, exc)
             try:
                 self.canvas.delete(self.canv_imgSW)
-            except:
-                pass
+            except (AttributeError, tk.TclError) as exc:
+                UI.vprint(3, exc)
             try:
                 self.canvas.delete(self.canv_imgSE)
-            except:
-                pass
+            except (AttributeError, tk.TclError) as exc:
+                UI.vprint(3, exc)
             fargs_rc = [nx0, ny0]
             self.rc_thread = threading.Thread(
                 target=self.draw_canvas, args=fargs_rc, daemon=True
@@ -2274,8 +2201,8 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             self.photoNW = ImageTk.PhotoImage(self.imageNW)
             self.imageNW.close()
             self.canv_imgNW = self.canvas.create_image(
-                nx0 * 2 ** self.earthzl * 256 / 8,
-                ny0 * 2 ** self.earthzl * 256 / 8,
+                nx0 * 2**self.earthzl * 256 / 8,
+                ny0 * 2**self.earthzl * 256 / 8,
                 anchor=NW,
                 image=self.photoNW,
             )
@@ -2296,8 +2223,8 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 self.photoNE = ImageTk.PhotoImage(self.imageNE)
                 self.imageNE.close()
                 self.canv_imgNE = self.canvas.create_image(
-                    (nx0 + 1) * 2 ** self.earthzl * 256 / 8,
-                    ny0 * 2 ** self.earthzl * 256 / 8,
+                    (nx0 + 1) * 2**self.earthzl * 256 / 8,
+                    ny0 * 2**self.earthzl * 256 / 8,
                     anchor=NW,
                     image=self.photoNE,
                 )
@@ -2308,25 +2235,20 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 self.photoSW = ImageTk.PhotoImage(self.imageSW)
                 self.imageSW.close()
                 self.canv_imgSW = self.canvas.create_image(
-                    nx0 * 2 ** self.earthzl * 256 / 8,
-                    (ny0 + 1) * 2 ** self.earthzl * 256 / 8,
+                    nx0 * 2**self.earthzl * 256 / 8,
+                    (ny0 + 1) * 2**self.earthzl * 256 / 8,
                     anchor=NW,
                     image=self.photoSW,
                 )
                 self.canvas.tag_lower(self.canv_imgSW)
-            if (
-                nx0 < 2 ** (self.earthzl - 3) - 1
-                and ny0 < 2 ** (self.earthzl - 3) - 1
-            ):
-                filepreviewSE = (
-                    fileprefix + str(nx0 + 1) + "_" + str(ny0 + 1) + ".jpg"
-                )
+            if nx0 < 2 ** (self.earthzl - 3) - 1 and ny0 < 2 ** (self.earthzl - 3) - 1:
+                filepreviewSE = fileprefix + str(nx0 + 1) + "_" + str(ny0 + 1) + ".jpg"
                 self.imageSE = Image.open(filepreviewSE)
                 self.photoSE = ImageTk.PhotoImage(self.imageSE)
                 self.imageSE.close()
                 self.canv_imgSE = self.canvas.create_image(
-                    (nx0 + 1) * 2 ** self.earthzl * 256 / 8,
-                    (ny0 + 1) * 2 ** self.earthzl * 256 / 8,
+                    (nx0 + 1) * 2**self.earthzl * 256 / 8,
+                    (ny0 + 1) * 2**self.earthzl * 256 / 8,
                     anchor=NW,
                     image=self.photoSE,
                 )

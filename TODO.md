@@ -278,6 +278,8 @@ Suggested labels: `native`, `quality`, `cleanup`
 
 ### TODO-009: Replace Common Bare Exception Handlers
 
+Status: Done
+
 GitHub Issue: #4
 
 Replace high-impact bare `except:` blocks with specific exception handling.

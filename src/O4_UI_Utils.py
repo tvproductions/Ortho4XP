@@ -41,7 +41,7 @@ def logprint(*args):
         f = open(FNAMES.resource_path("Ortho4XP.log"), "a")
         f.write(time.strftime("%c") + " | " + " ".join([str(x) for x in args]) + "\n")
         f.close()
-    except:
+    except OSError:
         pass
 
 

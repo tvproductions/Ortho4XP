@@ -6,6 +6,7 @@ import random
 import requests
 import numpy
 from shapely import geometry, ops
+from shapely.errors import GEOSException
 import O4_UI_Utils as UI
 import O4_File_Names as FNAMES
 from O4_Version import version as O4XP_VERSION
@@ -82,13 +83,14 @@ class OSM_layer:
                     pfile = bz2.open(osm_file_name, "rt", encoding="utf-8")
                 else:
                     pfile = open(osm_file_name, "r", encoding="utf-8")
-            except:
+            except OSError as exc:
                 UI.vprint(
                     1,
                     "    Could not open",
                     osm_file_name,
                     "for reading (corrupted ?).",
                 )
+                UI.vprint(3, exc)
                 return 0
         elif isinstance(osm_input, bytes):
             pfile = io.StringIO(osm_input.decode(encoding="utf-8"))
@@ -160,7 +162,7 @@ class OSM_layer:
                     continue
                 try:
                     wayid = dicosmw_id_map[items[3]]
-                except:
+                except KeyError:
                     continue
                 self.dicosmrorig[osmid][role].append(wayid)
                 endpt1 = self.dicosmw[wayid][0]
@@ -180,9 +182,9 @@ class OSM_layer:
                 # Do we need to catch that tag ?
                 if (
                     (not input_tags)
-                    or (("all", "") in target_tags[osmtype])
-                    or ((items[1], "") in target_tags[osmtype])
-                    or ((items[1], items[3]) in target_tags[osmtype])
+                    or (("all", "") in target_tags[osmtype])  # ty:ignore[not-subscriptable]
+                    or ((items[1], "") in target_tags[osmtype])  # ty:ignore[not-subscriptable]
+                    or ((items[1], items[3]) in target_tags[osmtype])  # ty:ignore[not-subscriptable]
                 ):
                     if osmid not in self.dicosmtags[osmtype]:
                         self.dicosmtags[osmtype][osmid] = {items[1]: items[3]}
@@ -262,8 +264,8 @@ class OSM_layer:
                     ):
                         try:
                             self.dicosmfirst["w"].remove(wayid)
-                        except:
-                            pass
+                        except KeyError as exc:
+                            UI.vprint(3, exc)
                 if not self.dicosmr[osmid]["outer"]:
                     del self.dicosmr[osmid]
                     del self.dicosmrorig[osmid]
@@ -301,8 +303,9 @@ class OSM_layer:
                 fout = bz2.open(filename, "wt", encoding="utf-8")
             else:
                 fout = open(filename, "w", encoding="utf-8")
-        except:
+        except OSError as exc:
             UI.vprint(1, "    Could not open", filename, "for writing.")
+            UI.vprint(3, exc)
             return 0
         fout.write(
             '<?xml version="1.0" encoding="UTF-8"?>\n<osm version="0.6" '
@@ -414,7 +417,7 @@ def OSM_queries_to_OSM_layer(
             try:
                 target_tags[osm_type].append((items[1], items[3]))
                 input_tags[osm_type].append((items[1], items[3]))
-            except:
+            except IndexError:
                 target_tags[osm_type].append((items[1], ""))
                 input_tags[osm_type].append((items[1], ""))
             for tag in tags_of_interest:
@@ -479,7 +482,7 @@ def OSM_query_to_OSM_layer(
         try:
             target_tags[osm_type].append((items[1], items[3]))
             input_tags[osm_type].append((items[1], items[3]))
-        except:
+        except IndexError:
             target_tags[osm_type].append((items[1], ""))
             input_tags[osm_type].append((items[1], ""))
         for tag in tags_of_interest:
@@ -514,7 +517,7 @@ def get_overpass_data(query: str, bbox: tuple) -> bytes:
     """Fetch data from OSM overpass servers."""
     if not overpass_servers:
         UI.lvprint(1, "No overpass servers configured. Check overpass_servers.txt.")
-        return 0
+        return 0  # ty:ignore[invalid-return-type]
     s = requests.Session()
     s.headers.update(
         {"User-Agent": f"Ortho4XP/{O4XP_VERSION} (https://github.com/shred86/Ortho4XP)"}
@@ -544,7 +547,7 @@ def get_overpass_data(query: str, bbox: tuple) -> bytes:
                 server_keys[0],
             )
 
-        get_overpass_data.last_key = current_key
+        get_overpass_data.last_key = current_key  # ty:ignore[unresolved-attribute]
 
         UI.vprint(2, f"      Using OSM server {current_key}")
         url = (
@@ -584,16 +587,17 @@ def get_overpass_data(query: str, bbox: tuple) -> bytes:
                     f"      OSM server {current_key} rejected our query "
                     f"(HTTP {r.status_code}), new tentative in {wait} sec...",
                 )
-        except Exception:
+        except requests.RequestException as exc:
             UI.vprint(
                 1,
                 f"      OSM server {current_key} was too busy, new tentative in ",
                 f"{wait} sec...",
             )
+            UI.vprint(3, exc)
         if UI.red_flag:
-            return 0
+            return 0  # ty:ignore[invalid-return-type]
         time.sleep(wait)
-    return 0
+    return 0  # ty:ignore[invalid-return-type]
 
 
 def OSM_to_MultiLineString(osm_layer, lat, lon, tags_for_exclusion=set(), filter=None):
@@ -626,15 +630,15 @@ def OSM_to_MultiLineString(osm_layer, lat, lon, tags_for_exclusion=set(), filter
         if filter and not filter(way, filtered_segs):
             try:
                 multiline_reject.append(geometry.LineString(way))
-            except:
-                pass
+            except (TypeError, ValueError, GEOSException) as exc:
+                UI.vprint(3, exc)
             done += 1
             continue
         try:
             multiline.append(geometry.LineString(way))
             filtered_segs += len(way)
-        except:
-            pass
+        except (TypeError, ValueError, GEOSException) as exc:
+            UI.vprint(3, exc)
         done += 1
     UI.progress_bar(1, 100)
     if not filter:

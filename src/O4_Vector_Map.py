@@ -3,6 +3,7 @@ import time
 from math import pi, sin, cos, sqrt, atan, exp
 import numpy
 from shapely import geometry, ops
+from shapely.errors import GEOSException
 
 # from PIL import Image, ImageDraw, ImageFilter
 import O4_DEM_Utils as DEM
@@ -15,20 +16,19 @@ import O4_Airport_Utils as APT
 
 good_imagery_list = ()
 
+
 ################################################################################
 def build_poly_file(tile):
     if UI.is_working:
         return 0
-    UI.is_working = 1
-    UI.red_flag = 0
+    UI.is_working = 1  # ty:ignore[invalid-assignment]
+    UI.red_flag = 0  # ty:ignore[invalid-assignment]
     # in case that was forgotten by the user
     tile.iterate = 0
     # update the lat/lon scaling factor in VECT
     VECT.scalx = cos((tile.lat + 0.5) * pi / 180)
     # Let's go !
-    UI.logprint(
-        "Step 1 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting."
-    )
+    UI.logprint("Step 1 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
         0,
         "\nStep 1 : Building vector data for tile "
@@ -51,9 +51,7 @@ def build_poly_file(tile):
 
     # Airports
     (apt_array, apt_area) = include_airports(vector_map, tile)
-    UI.vprint(
-        1, "   Number of edges at this point:", len(vector_map.dico_edges)
-    )
+    UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
     if UI.red_flag:
         UI.exit_message_and_bottom_line()
@@ -62,9 +60,7 @@ def build_poly_file(tile):
     # Roads
     include_roads(vector_map, tile, apt_array, apt_area)
     if tile.road_level:
-        UI.vprint(
-            1, "   Number of edges at this point:", len(vector_map.dico_edges)
-        )
+        UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
     if UI.red_flag:
         UI.exit_message_and_bottom_line()
@@ -72,9 +68,7 @@ def build_poly_file(tile):
 
     # Sea
     include_sea(vector_map, tile)
-    UI.vprint(
-        1, "   Number of edges at this point:", len(vector_map.dico_edges)
-    )
+    UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
     if UI.red_flag:
         UI.exit_message_and_bottom_line()
@@ -82,9 +76,7 @@ def build_poly_file(tile):
 
     # Water
     include_water(vector_map, tile)
-    UI.vprint(
-        1, "   Number of edges at this point:", len(vector_map.dico_edges)
-    )
+    UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
     if UI.red_flag:
         UI.exit_message_and_bottom_line()
@@ -98,20 +90,16 @@ def build_poly_file(tile):
     UI.vprint(0, "-> Inserting edges related to the orthophotos grid")
     xgrid = set()  # x coordinates of vertical grid lines
     ygrid = set()  # y coordinates of horizontal grid lines
-    (til_xul, til_yul) = GEO.wgs84_to_orthogrid(
-        tile.lat + 1, tile.lon, tile.mesh_zl
-    )
-    (til_xlr, til_ylr) = GEO.wgs84_to_orthogrid(
-        tile.lat, tile.lon + 1, tile.mesh_zl
-    )
+    (til_xul, til_yul) = GEO.wgs84_to_orthogrid(tile.lat + 1, tile.lon, tile.mesh_zl)
+    (til_xlr, til_ylr) = GEO.wgs84_to_orthogrid(tile.lat, tile.lon + 1, tile.mesh_zl)
     for til_x in range(til_xul + 16, til_xlr + 1, 16):
         pos_x = til_x / (2 ** (tile.mesh_zl - 1)) - 1
         xgrid.add(pos_x * 180 - tile.lon)
-        #print("x", pos_x * 180 - tile.lon)
+        # print("x", pos_x * 180 - tile.lon)
     for til_y in range(til_yul + 16, til_ylr + 1, 16):
         pos_y = 1 - (til_y) / (2 ** (tile.mesh_zl - 1))
         ygrid.add(360 / pi * atan(exp(pi * pos_y)) - 90 - tile.lat)
-        #print("y", (360 / pi * atan(exp(pi * pos_y)) - 90 - tile.lat))
+        # print("y", (360 / pi * atan(exp(pi * pos_y)) - 90 - tile.lat))
 
     xgrid.add(0)
     xgrid.add(1)
@@ -119,7 +107,7 @@ def build_poly_file(tile):
     ygrid.add(1)
     xgrid = list(sorted(xgrid))
     ygrid = list(sorted(ygrid))
-    eps = 2 ** -5
+    eps = 2**-5
     ortho_network = geometry.MultiLineString(
         [geometry.LineString([(x, 0.0 - eps), (x, 1.0 + eps)]) for x in xgrid]
         + [geometry.LineString([(0.0 - eps, y), (1.0 + eps, y)]) for y in ygrid]
@@ -137,18 +125,10 @@ def build_poly_file(tile):
     segs = 2048
     gluing_network = geometry.MultiLineString(
         [
-            geometry.LineString(
-                [(x, 0) for x in numpy.arange(0, segs + 1) / segs]
-            ),
-            geometry.LineString(
-                [(x, 1) for x in numpy.arange(0, segs + 1) / segs]
-            ),
-            geometry.LineString(
-                [(0, y) for y in numpy.arange(0, segs + 1) / segs]
-            ),
-            geometry.LineString(
-                [(1, y) for y in numpy.arange(0, segs + 1) / segs]
-            ),
+            geometry.LineString([(x, 0) for x in numpy.arange(0, segs + 1) / segs]),
+            geometry.LineString([(x, 1) for x in numpy.arange(0, segs + 1) / segs]),
+            geometry.LineString([(0, y) for y in numpy.arange(0, segs + 1) / segs]),
+            geometry.LineString([(1, y) for y in numpy.arange(0, segs + 1) / segs]),
         ]
     )
     vector_map.encode_MultiLineString(
@@ -164,17 +144,13 @@ def build_poly_file(tile):
             vector_map.seeds["SEA"] = [numpy.array([1000, 1000])]
         else:
             vector_map.seeds["SEA"] = [numpy.array([0.5, 0.5])]
-    vector_map.snap_to_grid(9) 
+    vector_map.snap_to_grid(9)
     vector_map.write_node_file(node_file)
     vector_map.write_poly_file(poly_file)
 
-    UI.vprint(
-        1, "\nFinal number of constrained edges :", len(vector_map.dico_edges)
-    )
+    UI.vprint(1, "\nFinal number of constrained edges :", len(vector_map.dico_edges))
     UI.timings_and_bottom_line(timer)
-    UI.logprint(
-        "Step 1 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit."
-    )
+    UI.logprint("Step 1 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")
     return 1
 
 
@@ -227,14 +203,10 @@ def include_airports(vector_map, tile):
 ################################################################################
 def include_roads(vector_map, tile, apt_array, apt_area):
     def road_is_too_much_banked(way, filtered_segs):
-        (col, row) = numpy.minimum(
-            numpy.maximum(numpy.round(way[0] * 1000), 0), 1000
-        )
+        (col, row) = numpy.minimum(numpy.maximum(numpy.round(way[0] * 1000), 0), 1000)
         if apt_array[int(1000 - row), int(col)]:
             return True
-        (col, row) = numpy.minimum(
-            numpy.maximum(numpy.round(way[-1] * 1000), 0), 1000
-        )
+        (col, row) = numpy.minimum(numpy.maximum(numpy.round(way[-1] * 1000), 0), 1000)
         if apt_array[int(1000 - row), int(col)]:
             return True
         if filtered_segs >= tile.max_levelled_segs:
@@ -368,9 +340,7 @@ def include_sea(vector_map, tile):
     custom_coastline_dir = FNAMES.custom_coastline_dir(tile.lat, tile.lon)
     if os.path.isfile(custom_coastline):
         UI.vprint(1, "    * User defined custom coastline data detected.")
-        sea_layer.update_dicosm(
-            custom_coastline, input_tags=None, target_tags=None
-        )
+        sea_layer.update_dicosm(custom_coastline, input_tags=None, target_tags=None)
         custom_source = True
     elif os.path.isdir(custom_coastline_dir):
         UI.vprint(
@@ -430,18 +400,12 @@ def include_sea(vector_map, tile):
         if not remainder.is_empty:
             remainder = VECT.ensure_MultiLineString(ops.linemerge(remainder))
         UI.vprint(3, "...done.")
-        coastline = geometry.MultiLineString(
-            list(remainder.geoms) + list(loops.geoms)
-        )
+        coastline = geometry.MultiLineString(list(remainder.geoms) + list(loops.geoms))
         sea_area = VECT.ensure_MultiPolygon(
-            VECT.coastline_to_MultiPolygon(
-                coastline, tile.lat, tile.lon, custom_source
-            )
+            VECT.coastline_to_MultiPolygon(coastline, tile.lat, tile.lon, custom_source)
         )
         if sea_area.geoms:
-            UI.vprint(
-                1, "      Found ", len(sea_area.geoms), "contiguous patch(es)."
-            )
+            UI.vprint(1, "      Found ", len(sea_area.geoms), "contiguous patch(es).")
         for polygon in sea_area.geoms:
             seed = numpy.array(polygon.representative_point().coords[0])
             if "SEA" in vector_map.seeds:
@@ -506,13 +470,9 @@ def include_water(vector_map, tile):
     custom_water_dir = FNAMES.custom_water_dir(tile.lat, tile.lon)
     if os.path.isfile(custom_water):
         UI.vprint(1, "    * User defined custom water data detected.")
-        water_layer.update_dicosm(
-            custom_water, input_tags=None, target_tags=None
-        )
+        water_layer.update_dicosm(custom_water, input_tags=None, target_tags=None)
     elif os.path.isdir(custom_water_dir):
-        UI.vprint(
-            1, "    * User defined custom water data detected (multiple files)."
-        )
+        UI.vprint(1, "    * User defined custom water data detected (multiple files).")
         for osm_file in os.listdir(custom_water_dir):
             UI.vprint(2, "      ", osm_file)
             water_layer.update_dicosm(
@@ -549,11 +509,10 @@ def include_water(vector_map, tile):
             (idx_water, dico_water) = VECT.MultiPolygon_to_Indexed_Polygons(
                 water_area, merge_overlappings=tile.clean_bad_geometries
             )
-        except:
+        except (TypeError, ValueError, GEOSException) as exc:
+            UI.vprint(3, exc)
             return 0
-        UI.vprint(
-            2, "      Number of water Multipolygons : " + str(len(dico_water))
-        )
+        UI.vprint(2, "      Number of water Multipolygons : " + str(len(dico_water)))
         UI.vprint(1, "      Encoding it.")
         vector_map.encode_MultiPolygon(
             dico_water,
@@ -564,18 +523,15 @@ def include_water(vector_map, tile):
             check=True,
         )
     if not sea_equiv_area.is_empty:
-        UI.vprint(
-            1, "      Separate treatment for larger pieces requiring masks."
-        )
+        UI.vprint(1, "      Separate treatment for larger pieces requiring masks.")
         try:
             (idx_water, dico_water) = VECT.MultiPolygon_to_Indexed_Polygons(
                 sea_equiv_area, merge_overlappings=tile.clean_bad_geometries
             )
-        except:
+        except (TypeError, ValueError, GEOSException) as exc:
+            UI.vprint(3, exc)
             return 0
-        UI.vprint(
-            2, "      Number of water Multipolygons : " + str(len(dico_water))
-        )
+        UI.vprint(2, "      Number of water Multipolygons : " + str(len(dico_water)))
         UI.vprint(1, "      Encoding them.")
         vector_map.encode_MultiPolygon(
             dico_water,
@@ -622,7 +578,7 @@ def include_water(vector_map, tile):
 #         (idx_building, dico_building) = MultiPolygon_to_Indexed_Polygons(
 #             building_area, merge_overlappings=True
 #         )
-#     except:
+#     except Exception:
 #         return 0
 #     UI.vprint(2, "Number of building Multipolygons :", len(dico_pol_building))
 #     vector_map.encode_MultiPolygon(
@@ -641,7 +597,7 @@ def include_patches(vector_map, tile):
         return (numpy.tanh((x - 0.5) * alpha) / numpy.tanh(0.5 * alpha) + 1) / 2
 
     def spline_profile(x):
-        return 3 * x ** 2 - 2 * x ** 3
+        return 3 * x**2 - 2 * x**3
 
     def plane_profile(x):
         return x
@@ -662,8 +618,9 @@ def include_patches(vector_map, tile):
                 input_tags=None,
                 target_tags=None,
             )
-        except:
+        except (OSError, TypeError, ValueError) as exc:
             UI.vprint(1, "     Error in treating", pfile_name, ", skipped.")
+            UI.vprint(3, exc)
         patches_list.append(pfile_name[:-10])
         dw = patch_layer.dicosmw
         dn = patch_layer.dicosmn
@@ -678,22 +635,17 @@ def include_patches(vector_map, tile):
             df["w"].difference(dt["w"])
         )
         for wayid in waylist:
-            way = numpy.array(
-                [dn[nodeid] for nodeid in dw[wayid]], dtype=float
-            )
+            way = numpy.array([dn[nodeid] for nodeid in dw[wayid]], dtype=float)
             way = way - numpy.array([[tile.lon, tile.lat]])
             alti_way_orig = tile.dem.alt_vec(way)
             cplx_way = False
             if wayid in dt["w"]:
                 wtags = dt["w"][wayid]
                 if "cst_alt_abs" in wtags:
-                    alti_way = numpy.ones((len(way), 1)) * float(
-                        wtags["cst_alt_abs"]
-                    )
+                    alti_way = numpy.ones((len(way), 1)) * float(wtags["cst_alt_abs"])
                 elif "cst_alt_rel" in wtags:
                     alti_way = numpy.ones((len(way), 1)) * (
-                        numpy.mean(tile.dem.alt_vec(way))
-                        + float(wtags["cst_alt_rel"])
+                        numpy.mean(tile.dem.alt_vec(way)) + float(wtags["cst_alt_rel"])
                     )
                 elif "var_alt_rel" in wtags:
                     alti_way = alti_way_orig + float(wtags["var_alt_rel"])
@@ -701,10 +653,8 @@ def include_patches(vector_map, tile):
                     "altitude" in wtags
                 ):  # deprecated : for backward compatibility only
                     try:
-                        alti_way = numpy.ones((len(way), 1)) * float(
-                            wtags["altitude"]
-                        )
-                    except:
+                        alti_way = numpy.ones((len(way), 1)) * float(wtags["altitude"])
+                    except (KeyError, TypeError, ValueError):
                         alti_way = numpy.ones((len(way), 1)) * numpy.mean(
                             tile.dem.alt_vec(way)
                         )
@@ -722,20 +672,20 @@ def include_patches(vector_map, tile):
                     try:
                         altitude_high = float(wtags["altitude_high"])
                         altitude_low = float(wtags["altitude_low"])
-                    except:
+                    except (KeyError, TypeError, ValueError):
                         altitude_high = tile.dem.alt_vec(short_high).mean()
                         altitude_low = tile.dem.alt_vec(short_low).mean()
                     try:
                         cell_size = float(wtags["cell_size"])
-                    except:
+                    except (KeyError, TypeError, ValueError):
                         cell_size = 10
                     try:
                         rnw_profile = wtags["profile"]
-                    except:
+                    except KeyError:
                         rnw_profile = "plane"
                     try:
                         alpha = float(wtags["steepness"])
-                    except:
+                    except (KeyError, TypeError, ValueError):
                         alpha = 2
                     if "tanh" in rnw_profile:
                         rnw_profile = lambda x: tanh_profile(alpha, x)
@@ -744,10 +694,7 @@ def include_patches(vector_map, tile):
                     else:
                         rnw_profile = plane_profile
                     rnw_vect = (
-                        short_high[0]
-                        + short_high[1]
-                        - short_low[0]
-                        - short_low[1]
+                        short_high[0] + short_high[1] - short_low[0] - short_low[1]
                     ) / 2
                     rnw_length = (
                         sqrt(
@@ -779,9 +726,7 @@ def include_patches(vector_map, tile):
                                 for i in range(cuts_long + 1)
                             ]
                         )
-                        alti_way = numpy.hstack(
-                            [alti_way, alti_way[::-1], alti_way[0]]
-                        )
+                        alti_way = numpy.hstack([alti_way, alti_way[::-1], alti_way[0]])
                 else:
                     alti_way = alti_way_orig
             else:
@@ -794,9 +739,7 @@ def include_patches(vector_map, tile):
                         if "alt_abs" in ntags:
                             alti_way[i] = float(ntags["alt_abs"])
                         elif "alt_rel" in ntags:
-                            alti_way[i] = alti_way_orig[i] + float(
-                                ntags["alt_rel"]
-                            )
+                            alti_way[i] = alti_way_orig[i] + float(ntags["alt_rel"])
             alti_way = alti_way.reshape((len(alti_way), 1))
             if (way[0] == way[-1]).all():
                 try:
@@ -824,7 +767,7 @@ def include_patches(vector_map, tile):
                                 )
                     else:
                         UI.vprint(2, "     Skipping invalid patch polygon.")
-                except:
+                except (KeyError, TypeError, ValueError, GEOSException):
                     UI.vprint(2, "     Skipping invalid patch polygon.")
             else:
                 vector_map.insert_way(
@@ -839,7 +782,7 @@ def include_patches(vector_map, tile):
             pfile_namelong = os.path.join(patch_dir, pdir_name, pfile_name)
             try:
                 pfile = open(pfile_namelong, "r")
-            except:
+            except OSError:
                 continue
             firstline = pfile.readline()
             if not "ANCHOR" in firstline:
@@ -855,7 +798,7 @@ def include_patches(vector_map, tile):
                 (lon_anchor, lat_anchor, alt_anchor, heading_anchor) = [
                     float(x) for x in firstline.split()[1:]
                 ]
-            except:
+            except (IndexError, TypeError, ValueError):
                 try:
                     (lon_anchor, lat_anchor, heading_anchor) = [
                         float(x) for x in firstline.split()[1:]
@@ -863,7 +806,7 @@ def include_patches(vector_map, tile):
                     alt_anchor = tile.dem.alt(
                         (lon_anchor - tile.lon, lat_anchor - tile.lat)
                     )
-                except:
+                except (IndexError, TypeError, ValueError):
                     UI.vprint(
                         1,
                         "     Anchor wrongly encode for : ",
@@ -930,12 +873,10 @@ def keep_obj8(
                     count_tmp += len(dico_index[offset])
                     offset += 1
                 for j in range(count // 3):
-                    (a, b, c) = [
-                        dico_idx_nodes[x] for x in list[3 * j : 3 * j + 3]
-                    ]
+                    (a, b, c) = [dico_idx_nodes[x] for x in list[3 * j : 3 * j + 3]]
                     if a == b or a == c or b == c:
                         continue
-                    for (initp, endp) in ((a, b), (b, c), (c, a)):
+                    for initp, endp in ((a, b), (b, c), (c, a)):
                         vector_map.insert_edge(
                             initp,
                             endp,
@@ -962,7 +903,7 @@ def keep_obj8(
                         )
                     )
                 multipol = VECT.ensure_MultiPolygon(ops.unary_union(polist))
-            except:
-                pass
+            except (TypeError, ValueError, GEOSException) as exc:
+                UI.vprint(3, exc)
     f.close()
     return multipol
