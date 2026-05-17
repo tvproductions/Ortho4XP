@@ -1,7 +1,6 @@
 """Ortho4XP configuration window."""
 
 import ast
-import logging
 import os
 from math import ceil
 from typing import Any, cast
@@ -53,14 +52,8 @@ cfg_tile_vars = cast(dict[str, dict[str, Any]], cfg_tile_vars)
 cfg_global_tile_vars = cast(dict[str, dict[str, Any]], cfg_global_tile_vars)
 cfg_vars = cast(dict[str, dict[str, Any]], cfg_vars)
 
-_LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-_LOGGER.addHandler(handler)
-
 global_cfg_file = FNAMES.resource_path("Ortho4XP.cfg")
 global_cfg_bak_file = FNAMES.resource_path("Ortho4XP.cfg.bak")
-
 
 validate_config_registry(cfg_vars)
 
@@ -169,9 +162,9 @@ except FileNotFoundError:
             file.write(_var + "=" + str(value["default"]) + "\n")
         for var, value in cfg_app_vars.items():
             file.write(var + "=" + str(value["default"]) + "\n")
-    _LOGGER.info("No global config file found. New config created using defaults.")
-except OSError as e:
-    _LOGGER.error("Error accessing global config file: %s", e)
+    UI.log_event("No global config file found. New config created using defaults.")
+except OSError:
+    UI.log_exception("Error accessing global config file")
 
 
 ################################################################################
@@ -312,7 +305,7 @@ class Tile:
                     _zone_list = set(_zone_list)
                     if lat in _zone_list and lon in _zone_list:
                         tile_zones.append(zone)
-                        _LOGGER.debug("Zones in tile found: %s", tile_zones)
+                        _log_zones_in_tile(tile_zones)
                 if var == "zone_list":
                     f.write(var + "=" + str(tile_zones) + "\n")
                 else:
@@ -1188,9 +1181,7 @@ class Ortho4XP_Config(tk.Toplevel):
                 _zone_list = set(_zone_list)
                 if lat in _zone_list and lon in _zone_list:
                     tile_zones.append(zone)
-                    _LOGGER.debug(
-                        "Zones saved for tile at %s %s: %s", lat, lon, tile_zones
-                    )
+                    _log_zones_saved_for_tile(lat, lon, tile_zones)
             for var in list_tile_vars:
                 if var == "zone_list":
                     f.write(var + "=" + str(tile_zones) + "\n")
@@ -1264,9 +1255,9 @@ class Ortho4XP_Config(tk.Toplevel):
                     int(self.parent.lat.get()), int(self.parent.lon.get())
                 )
             UI.vprint(1, "Global tile configuration settings saved.")
-        except OSError as e:
+        except OSError:
             UI.lvprint(1, "Could not write global config.")
-            _LOGGER.exception("Could not write global config: %s", e)
+            UI.log_exception("Could not write global config")
         return
 
     def reset_app_cfg(self) -> None:
@@ -1324,11 +1315,9 @@ class Ortho4XP_Config(tk.Toplevel):
                 self.dict_to_cfg(global_cfg_file, current_config)
 
             UI.vprint(1, "Application configuration settings saved.")
-        except OSError as e:
+        except OSError:
             UI.lvprint(1, "Could not write application settings to global config.")
-            _LOGGER.exception(
-                "Could not write application settings to global config: %s", e
-            )
+            UI.log_exception("Could not write application settings to global config")
         return
 
     def apply_changes(self, tab: str) -> None:
@@ -1399,8 +1388,8 @@ class Ortho4XP_Config(tk.Toplevel):
         """
         try:
             (lat, lon) = self.parent.get_lat_lon()
-        except (TypeError, ValueError) as e:
-            _LOGGER.exception("Could not get lat/lon coordinates: %s", e)
+        except (TypeError, ValueError):
+            UI.log_exception("Could not get lat/lon coordinates")
             return
 
         custom_build_dir = self.parent.custom_build_dir_entry.get()
@@ -1433,12 +1422,7 @@ class Ortho4XP_Config(tk.Toplevel):
 
                     # Compare tab_value with value in file_dict
                     if file_value != tab_value:
-                        _LOGGER.debug(
-                            "Unsaved changes in tile config for %s - current value: %s, config file value: %s",
-                            var,
-                            tab_value,
-                            file_value,
-                        )
+                        _log_unsaved_config("tile", var, tab_value, file_value)
                         unsaved_changes["tile"] = True
                         break
         except FileNotFoundError:
@@ -1462,19 +1446,14 @@ class Ortho4XP_Config(tk.Toplevel):
                         )
 
                         if file_value != tab_value:
-                            _LOGGER.debug(
-                                "Unsaved changes in global config for %s - current value: %s, config file value: %s",
-                                var,
-                                tab_value,
-                                file_value,
-                            )
+                            _log_unsaved_config("global", var, tab_value, file_value)
                             unsaved_changes["tile"] = True
                             break
             except FileNotFoundError:
                 pass
 
         except (AttributeError, tk.TclError) as e:
-            _LOGGER.exception(e)
+            UI.log_exception(e)
 
         if not select_tile:
             # Check Global Config tab values against the global config file
@@ -1497,12 +1476,7 @@ class Ortho4XP_Config(tk.Toplevel):
                         )
 
                         if file_value != tab_value:
-                            _LOGGER.debug(
-                                "Unsaved changes in global config for %s - current value: %s, config file value: %s",
-                                var,
-                                tab_value,
-                                file_value,
-                            )
+                            _log_unsaved_config("global", var, tab_value, file_value)
                             unsaved_changes["global"] = True
                             break
                     # Check App Config tab values against the global config file
@@ -1518,18 +1492,16 @@ class Ortho4XP_Config(tk.Toplevel):
                         )
 
                         if file_value != tab_value:
-                            _LOGGER.debug(
-                                "Unsaved changes in global config for %s - current value: %s, config file value: %s",
-                                var,
-                                tab_value,
-                                file_value,
-                            )
+                            _log_unsaved_config("global", var, tab_value, file_value)
                             unsaved_changes["application"] = True
                             break
             except FileNotFoundError:
-                _LOGGER.error("Global configuration file (Ortho4XP.cfg) not found.")
+                UI.log_event(
+                    "Global configuration file (Ortho4XP.cfg) not found.",
+                    level="ERROR",
+                )
             except OSError as e:
-                _LOGGER.exception(e)
+                UI.log_exception(e)
 
         if any(unsaved_changes.values()):
             message = ""
@@ -1673,3 +1645,24 @@ class Ortho4XP_Config(tk.Toplevel):
             pady=5
         )
         return
+
+
+def _log_debug_context(message: str, **context) -> None:
+    UI.log_event(message, level="DEBUG", context=context)
+
+
+def _log_zones_in_tile(tile_zones) -> None:
+    _log_debug_context("Zones in tile found", tile_zones=tile_zones)
+
+
+def _log_zones_saved_for_tile(lat, lon, tile_zones) -> None:
+    _log_debug_context("Zones saved for tile", lat=lat, lon=lon, tile_zones=tile_zones)
+
+
+def _log_unsaved_config(scope: str, var: str, current_value, config_file_value) -> None:
+    _log_debug_context(
+        f"Unsaved changes in {scope} config",
+        var=var,
+        current_value=current_value,
+        config_file_value=config_file_value,
+    )

@@ -27,7 +27,7 @@ def run_external_tool(
         else resolve_tool(tool_name),
         *[str(arg) for arg in args],
     ]
-    UI.logprint("External command:", _format_command(command))
+    _log_command_start(tool_name, command)
     try:
         if stream_stdout:
             result = _run_streamed(tool_name, command, stdout_handler)
@@ -35,7 +35,7 @@ def run_external_tool(
             result = _run_captured(tool_name, command)
     except OSError as exc:
         result = make_result(tool_name, command, (127, "", str(exc)))
-    UI.logprint("External command return code:", tool_name, result.returncode)
+    _log_command_complete(result)
     if not result.ok:
         UI.lvprint(1, "External command failed:", result.error_summary)
     return result
@@ -73,3 +73,37 @@ def _run_streamed(
 
 def _format_command(command: Sequence[str]) -> str:
     return " ".join(command)
+
+
+def _log_command_start(tool_name: str, command: list[str]) -> None:
+    UI.log_event(
+        "External command start",
+        level="INFO",
+        context=_command_context(tool_name, command, command_text=True),
+    )
+
+
+def _log_command_complete(result: ExternalCommandResult) -> None:
+    UI.log_event(
+        "External command complete",
+        level="INFO" if result.ok else "ERROR",
+        context=_result_context(result),
+        error_type=None if result.ok else "ExternalCommandError",
+        error_summary=result.error_summary or None,
+    )
+
+
+def _command_context(
+    tool_name: str, command: list[str], *, command_text: bool = False
+) -> dict[str, object]:
+    context: dict[str, object] = {"tool_name": tool_name, "command": command}
+    if command_text:
+        context["command_text"] = _format_command(command)
+    return context
+
+
+def _result_context(result: ExternalCommandResult) -> dict[str, object]:
+    context = _command_context(result.tool_name, result.args)
+    context["returncode"] = result.returncode
+    context["ok"] = result.ok
+    return context

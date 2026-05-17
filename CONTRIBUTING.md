@@ -66,6 +66,7 @@ Generated scenery, caches, and local runtime files must stay out of commits. Com
 - `tmp/`
 - `yOrtho4XP_Overlays/`
 - `Ortho4XP.cfg`
+- `Ortho4XP.log.json`
 - `.venv/`
 - `Utils/build/`
 

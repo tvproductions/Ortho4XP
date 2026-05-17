@@ -14,6 +14,7 @@ Tiles/
 .venv/
 venv*/
 **/Ortho4XP.log
+**/Ortho4XP.log.json
 Ortho4XP.cfg
 **/__pycache__
 **/Thumbs.db

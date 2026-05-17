@@ -88,7 +88,7 @@ dds_convert_cmd = resolve_tool("DDSTool" if is_macos else "nvcompress")
 # Keep these module-level command variables for legacy call-site compatibility.
 # The helper adds .exe on Windows and uses PATH on macOS/Linux.
 # DDS conversion still switches flags below because DDSTool and nvcompress differ.
-# TODO-011 will replace the UI logging used by the shared runner.
+# Structured UI logging is handled by the shared runner.
 # External tool retries remain local to the existing call sites.
 # Existing texture conversion branches keep their original command arguments.
 gdal_transl_cmd = resolve_tool("gdal_translate")

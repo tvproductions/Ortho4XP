@@ -316,6 +316,8 @@ Suggested labels: `subprocess`, `diagnostics`, `refactor`
 
 ### TODO-011: Centralize Logging Behavior
 
+Status: Done
+
 GitHub Issue: #6
 
 Introduce a logging abstraction that can replace scattered output paths over time.
@@ -324,9 +326,9 @@ Acceptance criteria:
 
 - Supports CLI output.
 - Supports GUI console output.
-- Supports log files.
-- Supports verbosity levels.
-- Provides structured error reporting suitable for batch builds.
+- Writes persistent events as JSONL to `Ortho4XP.log.json`.
+- Keeps verbosity scoped to human-visible CLI and GUI console output.
+- Provides structured exception and external-command reporting suitable for batch builds.
 
 Suggested labels: `logging`, `diagnostics`, `refactor`
 

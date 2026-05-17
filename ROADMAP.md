@@ -105,15 +105,15 @@ This would improve diagnostics for mesh generation, texture conversion, and pack
 
 ### 8. Centralize logging
 
-The codebase currently mixes `print`, `UI.vprint`, `UI.lvprint`, `UI.logprint`, and silent exception handling.
+Persistent logging now flows through `O4_UI_Utils` as JSONL in
+`Ortho4XP.log.json`. Human-facing `print`, `UI.vprint`, and `UI.lvprint`
+output remains readable in CLI and GUI contexts.
 
-A logging abstraction should support:
+The remaining direction is to keep moving diagnostics into structured events:
 
-- CLI output.
-- GUI console output.
-- Log files.
-- Verbosity levels.
-- Structured error reporting for batch builds.
+- Preserve CLI and GUI console readability.
+- Keep verbosity levels tied to human-visible output.
+- Add structured context to batch-build, imagery, and network failures.
 
 ### 9. Add platform-specific CI jobs
 

@@ -1,5 +1,4 @@
 import ast
-import logging
 import os
 import sys
 import shutil
@@ -41,11 +40,6 @@ import O4_Mask_Utils as MASK
 import O4_Tile_Utils as TILE
 import O4_UI_Utils as UI
 import O4_Config_Utils as CFG
-
-_LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-_LOGGER.addHandler(handler)
 
 # Set OsX=True if you prefer the OsX way of drawing existing tiles but
 # are on Linux or Windows.
@@ -527,14 +521,14 @@ class Ortho4XP_GUI(tk.Tk):
                 error_string += "Latitude out of range (-85,84) for webmercator grid. "
         except ValueError as e:
             error_string += "Latitude wrongly encoded. "
-            _LOGGER.exception(e)
+            UI.log_exception(e)
         try:
             lon = int(self.lon.get())
             if lon < -180 or lon > 179:
                 error_string += "Longitude out of range (-180,179)."
         except ValueError as e:
             error_string += "Longitude wrongly encoded."
-            _LOGGER.exception(e)
+            UI.log_exception(e)
         if error_string and check:
             UI.vprint(0, "Error: " + error_string)
             return None
@@ -569,7 +563,7 @@ class Ortho4XP_GUI(tk.Tk):
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception(e)
+            UI.log_exception(e)
             return 0
         self.working_thread = threading.Thread(target=VMAP.build_poly_file, args=[tile])
         self.working_thread.start()
@@ -581,9 +575,9 @@ class Ortho4XP_GUI(tk.Tk):
                 tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
-        except Exception as e:
+        except Exception:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception("Exception on build_mesh")
+            UI.log_exception("Exception on build_mesh")
             return 0
         self.working_thread = threading.Thread(target=MESH.build_mesh, args=[tile])
         self.working_thread.start()
@@ -595,9 +589,9 @@ class Ortho4XP_GUI(tk.Tk):
                 tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
-        except Exception as e:
+        except Exception:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception("Exception on sort_mesh")
+            UI.log_exception("Exception on sort_mesh")
             return 0
         self.working_thread = threading.Thread(target=MESH.sort_mesh, args=[tile])
         self.working_thread.start()
@@ -609,9 +603,9 @@ class Ortho4XP_GUI(tk.Tk):
                 tile.make_dirs()  # ty:ignore[unresolved-attribute]
             else:
                 return
-        except Exception as e:
+        except Exception:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception("Exception on community_mesh")
+            UI.log_exception("Exception on community_mesh")
             return 0
         self.working_thread = threading.Thread(target=MESH.community_mesh, args=[tile])
         self.working_thread.start()
@@ -626,7 +620,7 @@ class Ortho4XP_GUI(tk.Tk):
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception(e)
+            UI.log_exception(e)
             return 0
         self.working_thread = threading.Thread(
             target=MASK.build_masks, args=[tile, for_imagery]
@@ -642,7 +636,7 @@ class Ortho4XP_GUI(tk.Tk):
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception(e)
+            UI.log_exception(e)
             return 0
         self.working_thread = threading.Thread(target=TILE.build_tile, args=[tile])
         self.working_thread.start()
@@ -661,7 +655,7 @@ class Ortho4XP_GUI(tk.Tk):
                 return
         except Exception as e:
             UI.vprint(1, "Process aborted.\n")
-            _LOGGER.exception(e)
+            UI.log_exception(e)
             return 0
         self.working_thread = threading.Thread(target=TILE.build_all, args=[tile])
         self.working_thread.start()
@@ -680,7 +674,7 @@ class Ortho4XP_GUI(tk.Tk):
             try:
                 (lat, lon) = self.get_lat_lon()
             except (TypeError, ValueError) as e:
-                _LOGGER.exception(e)
+                UI.log_exception(e)
                 return 0
             self.config_window = CFG.Ortho4XP_Config(self)
             return 1
@@ -1957,7 +1951,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             )
         except Exception as e:
             UI.vprint(3, e)
-            _LOGGER.exception(e)
+            UI.log_exception(e)
 
     def delete_mask_data(self, lat: int, lon: int) -> None:
         """Delete cached mask data."""
@@ -1975,7 +1969,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             )
         except Exception as e:
             UI.vprint(3, e)
-            _LOGGER.exception(e)
+            UI.log_exception(e)
 
     def delete_jpeg_imagery(self, lat: int, lon: int) -> None:
         """Delete ortho JPEG immagery."""
@@ -1998,7 +1992,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             )
         except Exception as e:
             UI.vprint(3, e)
-            _LOGGER.exception(e)
+            UI.log_exception(e)
 
     def delete_tile_whole(self, lat: int, lon: int) -> None:
         """Delete all tile data."""
@@ -2021,7 +2015,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             )
         except Exception as e:
             UI.vprint(3, e)
-            _LOGGER.exception(e)
+            UI.log_exception(e)
 
     def delete_tile_textures(self, lat: int, lon: int) -> None:
         """Delete tile textures."""
@@ -2130,7 +2124,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         try:
             tile = CFG.Tile(lat, lon, self.custom_build_dir)
         except Exception as e:
-            _LOGGER.exception(e)
+            UI.log_exception(e)
             return 0
         args = [
             tile,
@@ -2214,7 +2208,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                 filepreviewNW,
                 ", please update your installation from a fresh copy.",
             )
-            _LOGGER.exception(e)
+            UI.log_exception(e)
             return
         try:
             if nx0 < 2 ** (self.earthzl - 3) - 1:

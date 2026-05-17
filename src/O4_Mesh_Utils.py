@@ -751,7 +751,7 @@ def build_mesh(tile):
 # Moulinette handling remains in sort_mesh.
 # Standalone triangle handling remains in triangulate.
 # The command resolver keeps the historical module-level command variables.
-# TODO-011 will replace the logging calls under the shared runner.
+# Structured logging for external tools lives under the shared runner.
 # This block intentionally contains no executable behavior.
 # It only documents the boundary between mesh build and mesh post-processing.
 # The legacy complexity gate tracks the functions below by line number.

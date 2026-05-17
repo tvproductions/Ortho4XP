@@ -101,6 +101,15 @@ Run the deterministic unit test suite with:
 uv run python -m unittest discover -s tests
 ```
 
+Runtime diagnostics are written as newline-delimited JSON to
+`Ortho4XP.log.json`. Console and GUI output stays human-readable; verbosity
+only controls what users see, while enabled structured logging can still record
+events such as external command starts, return codes, and exception summaries.
+
+```json
+{"timestamp":"2026-05-17T18:24:30.123+00:00","level":"ERROR","message":"External command complete","args":[],"context":{"tool_name":"Triangle4XP","returncode":1,"ok":false},"verbosity":1,"error_type":"ExternalCommandError","error_summary":"return code 1: invalid mesh input"}
+```
+
 Build the native `Triangle4XP` helper with the LLVM/Clang preset:
 
 ```bash
