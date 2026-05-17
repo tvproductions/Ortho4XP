@@ -14,10 +14,11 @@ import O4_DSF_Utils as DSF
 import O4_Overlay_Utils as OVL
 from O4_Parallel_Utils import parallel_launch, parallel_join
 
-max_download_slots = 1
-max_convert_slots = 4
-skip_downloads = False
-skip_converts = False
+max_download_slots: int = 1
+max_convert_slots: int = 4
+max_texture_download_retries: int = 3
+skip_downloads: bool = False
+skip_converts: bool = False
 
 
 ################################################################################
@@ -34,8 +35,36 @@ def download_textures(
     progress_lock = threading.Lock()
     progress_state = {"done": 0, "pending": 0}
     attempts = defaultdict(int)
+    final_failures = []
     interrupted = False
-    max_attempts = 3
+    max_attempts = max(1, int(max_texture_download_retries))
+
+    def _texture_failure_context(attrs):
+        til_x_left, til_y_top, zoomlevel, provider_code = attrs
+        file_name = FNAMES.jpeg_file_name_from_attributes(
+            til_x_left, til_y_top, zoomlevel, provider_code
+        )
+        request_failures = IMG.failures_for_texture(file_name, provider_code)
+        context = {
+            "file_name": file_name,
+            "provider_code": provider_code,
+            "til_x_left": til_x_left,
+            "til_y_top": til_y_top,
+            "zoomlevel": zoomlevel,
+            "status_code": "download_failed",
+            "request_type": None,
+        }
+        if request_failures:
+            last_failure = request_failures[-1]
+            context.update(
+                {
+                    "status_code": last_failure.status_code,
+                    "request_type": last_failure.request_type,
+                    "url_type": last_failure.url_type,
+                    "reason": last_failure.reason,
+                }
+            )
+        return context
 
     def _update_progress_locked():
         denom = (
@@ -72,6 +101,7 @@ def download_textures(
                 attempts[attrs] = attempt
                 should_retry = attempt < max_attempts and not UI.red_flag
                 if not should_retry:
+                    final_failures.append(_texture_failure_context(attrs))
                     attempts.pop(attrs, None)
             _update_progress_locked()
 
@@ -112,6 +142,30 @@ def download_textures(
     if interrupted or UI.red_flag:
         UI.vprint(1, "Download process interrupted.")
         return 0
+    tile_coords = FNAMES.short_latlon(tile.lat, tile.lon)
+    summary = IMG.imagery_download_summary(tile_coords, final_failures)
+    if summary:
+        provider_counts = ", ".join(
+            f"{provider}={count}"
+            for provider, count in sorted(summary["by_provider"].items())
+        )
+        status_counts = ", ".join(
+            f"{status}={count}"
+            for status, count in sorted(summary["by_status"].items())
+        )
+        request_counts = ", ".join(
+            f"{request_type}={count}"
+            for request_type, count in sorted(summary["by_request_type"].items())
+        )
+        UI.vprint(
+            1,
+            "Imagery download summary:",
+            f"{summary['total_textures']} incomplete or failed texture(s)",
+            f"for tile {tile_coords}.",
+            f"Providers: {provider_counts}.",
+            f"Statuses: {status_counts}.",
+            f"Request types: {request_counts}.",
+        )
     if progress_state["done"]:
         UI.vprint(1, " *Download of textures completed.")
     return 1
@@ -298,7 +352,7 @@ def build_all(tile):
         UI.lvprint(
             1,
             f"Attempting to rebuild textures with white squares: "
-            f"{IMG.incomplete_imgs[tile_coords]}",
+            f"{IMG.incomplete_texture_file_names(tile_coords)}",
         )
         delete_incomplete_imgs(tile)
         build_tile(tile)
@@ -310,7 +364,8 @@ def build_all(tile):
         UI.lvprint(
             0,
             f"\nERROR: Parts of the following images could not be obtained "
-            f"and have been filled with white: {IMG.incomplete_imgs}",
+            f"and have been filled with white: "
+            f"{IMG.incomplete_texture_file_names_by_tile()}",
         )
     return 1
 
@@ -367,7 +422,7 @@ def build_tile_list(
                 UI.lvprint(
                     1,
                     f"Attempting to rebuild textures with white squares: "
-                    f"{IMG.incomplete_imgs[tile_coords]}",
+                    f"{IMG.incomplete_texture_file_names(tile_coords)}",
                 )
                 delete_incomplete_imgs(tile)
                 build_tile(tile)
@@ -391,7 +446,8 @@ def build_tile_list(
         UI.lvprint(
             0,
             f"\nERROR: Parts of the following images could not be obtained "
-            f"and have been filled with white: {IMG.incomplete_imgs}",
+            f"and have been filled with white: "
+            f"{IMG.incomplete_texture_file_names_by_tile()}",
         )
     return 1
 
@@ -424,7 +480,7 @@ def delete_incomplete_imgs(tile):
     tile_coords = FNAMES.short_latlon(tile.lat, tile.lon)
     if tile_coords not in IMG.incomplete_imgs:
         return
-    file_name_list = IMG.incomplete_imgs[tile_coords]
+    file_name_list = IMG.incomplete_texture_file_names(tile_coords)
     for file_name in file_name_list:
         # Delete the orthophoto jpegs with white squares
         for root, _, files in os.walk(FNAMES.Imagery_dir):

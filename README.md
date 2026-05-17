@@ -35,6 +35,7 @@ The specific changes in this forked version:
 * Default `imprint_mask_to_dds` to `False` to prevent issues with `water_tech=XP12`.
 * Added a new setting `max_download_slots` to support a new feature allowing users to specify number of parallel threads for imagery download. @tlinkin
 * Setting `max_convert_slots` can now be manually specified by the user.
+* Setting `max_texture_download_retries` can now be manually specified by the user to control how many full texture download attempts are made before the texture is reported failed or incomplete.
 * Refactored `get_overpass_data` function: moved overpass servers to external overpass_servers.txt file, specified a user-agent, and using different OSM server on each request.
 
 #### Miscellaneous
@@ -105,10 +106,24 @@ Runtime diagnostics are written as newline-delimited JSON to
 `Ortho4XP.log.json`. Console and GUI output stays human-readable; verbosity
 only controls what users see, while enabled structured logging can still record
 events such as external command starts, return codes, and exception summaries.
+Imagery failures are also logged as structured events with provider, request
+type, URL type, HTTP status, retry counts, texture coordinates, and sanitized
+URL origin/path metadata. Full imagery URLs can contain provider keys or user
+tokens, so they are omitted from normal logs and are included only when
+`verbosity >= 3`.
 
 ```json
 {"timestamp":"2026-05-17T18:24:30.123+00:00","level":"ERROR","message":"External command complete","args":[],"context":{"tool_name":"Triangle4XP","returncode":1,"ok":false},"verbosity":1,"error_type":"ExternalCommandError","error_summary":"return code 1: invalid mesh input"}
 ```
+
+Texture download retries are split into two levels. `max_texture_download_retries`
+controls how many times a complete orthophoto texture task is attempted before
+it is summarized as failed or incomplete. The lower-level imagery settings
+`check_tms_response`, `http_timeout`, `max_connect_retries`, and
+`max_baddata_retries` continue to control individual HTTP request retries inside
+that texture task. After texture downloads finish, Ortho4XP writes one concise
+imagery download summary to the console and to `Ortho4XP.log.json` when any
+texture was partially or fully unavailable.
 
 Build the native `Triangle4XP` helper with the LLVM/Clang preset:
 

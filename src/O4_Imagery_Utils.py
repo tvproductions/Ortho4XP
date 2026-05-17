@@ -18,6 +18,7 @@ import requests
 
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
+import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
@@ -60,11 +61,18 @@ except ImportError:
             "The corresponding providers won't probably work.",
         )
 
-http_timeout = 10
-check_tms_response = False
-max_connect_retries = 10
-max_baddata_retries = 10
-incomplete_imgs = {}
+http_timeout: float = 10
+check_tms_response: bool = False
+max_connect_retries: int = 10
+max_baddata_retries: int = 10
+incomplete_imgs = IFAIL.incomplete_imgs
+imagery_failure_records = IFAIL.imagery_failure_records
+ImageryFailureRecord = IFAIL.ImageryFailureRecord
+failures_for_texture = IFAIL.failures_for_texture
+imagery_download_summary = IFAIL.imagery_download_summary
+incomplete_texture_file_names = IFAIL.incomplete_texture_file_names
+incomplete_texture_file_names_by_tile = IFAIL.incomplete_texture_file_names_by_tile
+record_incomplete_texture = IFAIL.record_incomplete_texture
 
 
 user_agent_generic = (
@@ -967,18 +975,28 @@ def has_data(
 
 
 ################################################################################
-def http_request_to_image(width, height, url, request_headers, http_session):
+def http_request_to_image(
+    width,
+    height,
+    url,
+    request_headers,
+    http_session,
+):
+    request_headers, request_context = IFAIL.split_request_headers(request_headers)
     UI.vprint(3, "HTTP request issued :", url, "\nRequest headers :", request_headers)
     tentative_request = 0
     tentative_image = 0
     r = False
+    status_code = None
+    reason = "request_failed"
     while True:
         try:
             if request_headers:
                 r = http_session.get(url, timeout=http_timeout, headers=request_headers)
             else:
                 r = http_session.get(url, timeout=http_timeout)
-            status_code = str(r)
+            status_code = IFAIL.response_status_code(r)
+            status_text = IFAIL.response_status_text(r)
             # Bing white image with small camera or Arcgis no data yet =>
             # try to downsample to lower ZL
             if ("Content-Length" in r.headers) and int(
@@ -986,47 +1004,59 @@ def http_request_to_image(width, height, url, request_headers, http_session):
             ) <= 2521:
                 if (r.headers["Content-Length"] == "1033") and ("virtualearth" in url):
                     UI.vprint(3, url, r.headers)
-                    return (0, "[404]")
+                    status_code = 404
+                    reason = "provider_no_data_image"
+                    break
                 if (r.headers["Content-Length"] == "2521") and ("arcgisonline" in url):
                     UI.vprint(3, url, r.headers)
-                    return (0, "[404]")
-            if ("[200]" in status_code) and ("image" in r.headers["Content-Type"]):
+                    status_code = 404
+                    reason = "provider_no_data_image"
+                    break
+            content_type = r.headers.get("Content-Type", "")
+            if status_code == 200 and "image" in content_type:
                 try:
                     small_image = Image.open(io.BytesIO(r.content))
-                    return (1, small_image)
+                    return (1, small_image, None)
                 except (OSError, UnidentifiedImageError):
+                    reason = "corrupted_image"
                     UI.vprint(
                         2,
                         "Server said 'OK', but the received ",
                         "image was corrupted.",
                     )
                     UI.vprint(3, url, r.headers)
-            elif "[404]" in status_code:
+            elif status_code == 404:
+                reason = "not_found"
                 UI.vprint(2, "Server said 'Not Found'")
                 UI.vprint(3, url, r.headers)
                 break
-            elif "[200]" in status_code:
+            elif status_code == 200:
+                reason = "wrong_content_type"
                 UI.vprint(2, "Server said 'OK' but sent us the wrong Content-Type.")
                 UI.vprint(3, url, r.headers, r.content)
                 break
-            elif "[403]" in status_code:
+            elif status_code == 403:
+                reason = "forbidden"
                 UI.vprint(2, "Server said 'Forbidden' ! (IP banned?)")
                 UI.vprint(3, url, r.headers, r.content)
                 break
-            elif "[5" in status_code:
-                UI.vprint(2, "Server said 'Internal Error'.", status_code)
+            elif isinstance(status_code, int) and 500 <= status_code < 600:
+                reason = "server_error"
+                UI.vprint(2, "Server said 'Internal Error'.", status_text)
                 if not check_tms_response:
                     break
                 time.sleep(2)
             else:
-                UI.vprint(2, "Unmanaged Server answer:", status_code)
+                reason = "unmanaged_status"
+                UI.vprint(2, "Unmanaged Server answer:", status_text)
                 UI.vprint(3, url, r.headers)
                 break
             if UI.red_flag:
-                return (0, "Stopped")
+                return (0, "Stopped", None)
             tentative_image += 1
         except requests.exceptions.RequestException as e:
-            status_code = "Connection failure"
+            status_code = "connection_failure"
+            reason = "connection_failure"
             UI.vprint(2, "Server could not be connected, retrying in 2 secs")
             UI.vprint(3, e)
             if not check_tms_response:
@@ -1035,14 +1065,24 @@ def http_request_to_image(width, height, url, request_headers, http_session):
             http_session = requests.Session()
             time.sleep(2)
             if UI.red_flag:
-                return (0, "Stopped")
+                return (0, "Stopped", None)
             tentative_request += 1
         if (
             tentative_request == max_connect_retries
             or tentative_image == max_baddata_retries
         ):
             break
-    return (0, status_code)
+    failure = IFAIL.record_failure(
+        url,
+        status_code,
+        tentative_request,
+        tentative_image,
+        reason,
+        request_context,
+    )
+    if status_code == 404:
+        return (0, "[404]", failure)
+    return (0, str(status_code), failure)
 
 
 ################################################################################
@@ -1051,8 +1091,10 @@ def http_request_to_image(width, height, url, request_headers, http_session):
 ################################################################################
 def get_wms_image(bbox, width, height, provider, http_session):
     request_headers = None
+    url_type = provider["request_type"]
     if has_URL and provider["code"] in URL.custom_url_list:
         (url, request_headers) = URL.custom_wms_request(bbox, width, height, provider)
+        url_type = "custom_wms"
     else:
         (minx, maxy, maxx, miny) = bbox
         if provider["wms_version"].split(".")[1] == "3":
@@ -1089,8 +1131,13 @@ def get_wms_image(bbox, width, height, provider, http_session):
             request_headers = provider["fake_headers"]
         else:
             request_headers = request_headers_generic
-    (success, data) = http_request_to_image(
-        width, height, url, request_headers, http_session
+    request_context = IFAIL.request_context(provider, url_type)
+    (success, data, _failure) = http_request_to_image(
+        width,
+        height,
+        url,
+        IFAIL.request_headers_with_context(request_headers, request_context),
+        http_session,
     )
     if success:
         return (1, data)
@@ -1107,10 +1154,12 @@ def get_wmts_image(tilematrix, til_x, til_y, provider, http_session):
     down_sample = 0
     while True:
         request_headers = None
+        url_type = provider["request_type"]
         if has_URL and provider["code"] in URL.custom_url_list:
             (url, request_headers) = URL.custom_tms_request(
                 tilematrix, til_x, til_y, provider
             )
+            url_type = f"custom_{provider['request_type']}"
         elif provider["request_type"] == "tms":  # TMS
             url = provider["url_template"].replace("{zoom}", str(tilematrix))
             url = url.replace("{x}", str(til_x))
@@ -1179,6 +1228,19 @@ def get_wmts_image(tilematrix, til_x, til_y, provider, http_session):
                     url_local,
                     "absent, using white texture instead !",
                 )
+                request_context = IFAIL.request_context(
+                    provider,
+                    "local_tms",
+                    {"tile_x": til_x, "tile_y": til_y, "zoomlevel": tilematrix},
+                )
+                IFAIL.record_failure(
+                    url_local,
+                    "local_file_missing",
+                    0,
+                    0,
+                    "local_file_missing",
+                    request_context,
+                )
                 return (
                     0,
                     Image.new(
@@ -1193,8 +1255,17 @@ def get_wmts_image(tilematrix, til_x, til_y, provider, http_session):
             else:
                 request_headers = request_headers_generic
         width = height = provider["tile_size"]
-        (success, data) = http_request_to_image(
-            width, height, url, request_headers, http_session
+        request_context = IFAIL.request_context(
+            provider,
+            url_type,
+            {"tile_x": til_x, "tile_y": til_y, "zoomlevel": tilematrix},
+        )
+        (success, data, _failure) = http_request_to_image(
+            width,
+            height,
+            url,
+            IFAIL.request_headers_with_context(request_headers, request_context),
+            http_session,
         )
         if success and not down_sample:
             return (success, data)
@@ -1291,6 +1362,7 @@ def build_texture_from_tilbox(tilbox, zoomlevel, provider, progress=None):
                 x0,
                 y0,
                 http_session,
+                None,
             )
             download_queue.put(fargs)
     # then the number of workers
@@ -1483,13 +1555,22 @@ def download_jpeg_ortho(
         if zoomlevel > max_zl:
             super_resol_factor = 2 ** (max_zl - zoomlevel)
     width = height = int(4096 * super_resol_factor)
+    texture_context = {
+        "texture_filename": file_name,
+        "tile_x": til_x_left,
+        "tile_y": til_y_top,
+        "zoomlevel": zoomlevel,
+    }
+    provider = IFAIL.provider_with_texture_context(provider, texture_context)
     # we treat first the case of webmercator grid type servers
     if "grid_type" in provider and provider["grid_type"] == "webmercator":
         tilbox = [til_x_left, til_y_top, til_x_left + 16, til_y_top + 16]
         tilbox_mod = [int(round(p * super_resol_factor)) for p in tilbox]
         zoom_shift = round(log(super_resol_factor) / log(2))
         (success, big_image) = build_texture_from_tilbox(
-            tilbox_mod, zoomlevel + zoom_shift, provider
+            tilbox_mod,
+            zoomlevel + zoom_shift,
+            provider,
         )
     # if not we are in the world of epsg:3857 bboxes
     else:
@@ -1500,7 +1581,10 @@ def download_jpeg_ortho(
         [xmin, ymax] = GEO.geo_to_webm(lonmin, latmax)
         [xmax, ymin] = GEO.geo_to_webm(lonmax, latmin)
         (success, big_image) = build_texture_from_bbox_and_size(
-            [xmin, ymax, xmax, ymin], "3857", (width, height), provider
+            [xmin, ymax, xmax, ymin],
+            "3857",
+            (width, height),
+            provider,
         )
     # if stop flag we do not wish to imprint a white texture
     if UI.red_flag:
@@ -1513,8 +1597,11 @@ def download_jpeg_ortho(
             "could not be obtained ",
             "(even at lower ZL), it was filled with white there.",
         )
-        tile_coords = Path(file_dir).parent.name
-        incomplete_imgs.setdefault(tile_coords, []).append(file_name)
+        record_incomplete_texture(
+            file_dir,
+            file_name,
+            (til_x_left, til_y_top, zoomlevel, provider_code),
+        )
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
     try:

@@ -69,6 +69,8 @@ Work on `master` by default for this fork. Use short-lived branches only for ris
 
 Use `TODO.md` as the actionable queue. Use `ROADMAP.md` for direction and rationale. If TODO ordering blocks practical implementation, reorder or phase `TODO.md` before proceeding so the next item is genuinely executable.
 
+Keep GitHub Issues current for TODO-backed work. When a TODO item maps to a GHI, add an implementation/evidence comment before final handoff and close the issue when acceptance criteria and repository quality checks have passed. If the issue should remain open, comment with the remaining blocker and reference that tracking state from the active work evidence.
+
 ## Releases
 
 Releases are PyInstaller onedir bundles built per target OS/architecture; do not assume cross-packaging. Target Windows 11, current Apple Silicon macOS, and Ubuntu. Package data should include `Utils`, `Extents`, `Filters`, `Licence`, `Patches`, `Previews`, `Providers`, and `community_server.txt`; trim platform-inapplicable utility folders before distribution.

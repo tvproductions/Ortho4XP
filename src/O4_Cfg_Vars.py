@@ -1,4 +1,4 @@
-""""Ortho4XP configuration variables."""
+"""Ortho4XP configuration variables."""
 
 import O4_OSM_Utils as OSM
 
@@ -6,11 +6,12 @@ import O4_OSM_Utils as OSM
 global_prefix = "global_"
 overpass_server_keys = sorted(OSM.overpass_servers.keys())
 overpass_server_values = (
-    ["random"] + overpass_server_keys if len(overpass_server_keys) > 1 else overpass_server_keys
+    ["random"] + overpass_server_keys
+    if len(overpass_server_keys) > 1
+    else overpass_server_keys
 )
 overpass_server_default = (
-    "random" if len(overpass_server_keys) != 1
-    else overpass_server_keys[0]
+    "random" if len(overpass_server_keys) != 1 else overpass_server_keys[0]
 )
 
 cfg_app_vars = {
@@ -59,6 +60,12 @@ cfg_app_vars = {
         "type": int,
         "default": 4,
         "hint": "Number of parallel threads for dds conversion. Should be mainly dictated by the number of cores in your CPU.",
+    },
+    "max_texture_download_retries": {
+        "module": "TILE",
+        "type": int,
+        "default": 3,
+        "hint": "Maximum attempts for each full orthophoto texture download before it is reported failed or incomplete. Low-level HTTP retry behavior is still controlled by the imagery retry settings.",
     },
     "check_tms_response": {
         "module": "IMG",
@@ -368,6 +375,7 @@ list_app_vars = [
     "skip_converts",
     "max_download_slots",
     "max_convert_slots",
+    "max_texture_download_retries",
     "check_tms_response",
     "http_timeout",
     "max_connect_retries",

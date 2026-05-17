@@ -17,7 +17,7 @@ class parallel_worker(threading.Thread):
             if isinstance(args, str) and args == "quit":
                 try:
                     UI.progress_bar(self._progress["bar"], 100)  # ty:ignore[not-subscriptable]
-                except (AttributeError, IndexError) as exc:
+                except (AttributeError, IndexError, TypeError) as exc:
                     UI.vprint(3, exc)
                 return 1
             self._success[0] = self._task(*args) and self._success[0]
