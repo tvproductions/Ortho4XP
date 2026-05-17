@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Hygiene"
+  short_description: "Run Ortho4XP's repository hygiene checks."
+  default_prompt: "Run repository hygiene checks for Ortho4XP."

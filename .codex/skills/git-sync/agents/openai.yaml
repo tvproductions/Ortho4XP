@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Sync"
+  short_description: "Run Ortho4XP's guarded sync ritual."
+  default_prompt: "Sync the current Ortho4XP branch with origin."
