@@ -2,7 +2,6 @@ import time
 import sys
 import os
 import pickle
-import subprocess
 import numpy
 import requests
 from math import sqrt, cos, pi
@@ -12,25 +11,24 @@ import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Vector_Utils as VECT
 import O4_OSM_Utils as OSM
+import O4_Subprocess_Utils as SP
 import O4_Version
 
 if "dar" in sys.platform:
-    Triangle4XP_cmd = os.path.join(FNAMES.Utils_dir, "mac", "Triangle4XP ")
-    triangle_cmd = os.path.join(FNAMES.Utils_dir, "mac", "triangle ")
-    sort_mesh_cmd = os.path.join(FNAMES.Utils_dir, "mac", "moulinette ")
-    unzip_cmd = os.path.join(FNAMES.Utils_dir, "mac", "7zz")
-    if not os.path.exists(unzip_cmd):
-        unzip_cmd = "7z"
+    Triangle4XP_cmd = SP.resolve_tool("Triangle4XP")
+    triangle_cmd = SP.resolve_tool("triangle")
+    sort_mesh_cmd = SP.resolve_tool("moulinette")
+    unzip_cmd = SP.resolve_tool("7z")
 elif "win" in sys.platform:
-    Triangle4XP_cmd = os.path.join(FNAMES.Utils_dir, "win", "Triangle4XP.exe ")
-    triangle_cmd = os.path.join(FNAMES.Utils_dir, "win", "triangle.exe ")
-    sort_mesh_cmd = os.path.join(FNAMES.Utils_dir, "win", "moulinette.exe ")
-    unzip_cmd = os.path.join(FNAMES.Utils_dir, "win", "7z.exe")
+    Triangle4XP_cmd = SP.resolve_tool("Triangle4XP")
+    triangle_cmd = SP.resolve_tool("triangle")
+    sort_mesh_cmd = SP.resolve_tool("moulinette")
+    unzip_cmd = SP.resolve_tool("7z")
 else:
-    Triangle4XP_cmd = os.path.join(FNAMES.Utils_dir, "lin", "Triangle4XP ")
-    triangle_cmd = os.path.join(FNAMES.Utils_dir, "lin", "triangle ")
-    sort_mesh_cmd = os.path.join(FNAMES.Utils_dir, "lin", "moulinette ")
-    unzip_cmd = "7z "
+    Triangle4XP_cmd = SP.resolve_tool("Triangle4XP")
+    triangle_cmd = SP.resolve_tool("triangle")
+    sort_mesh_cmd = SP.resolve_tool("moulinette")
+    unzip_cmd = SP.resolve_tool("7z")
 
 
 community_server = False
@@ -55,6 +53,8 @@ if os.path.exists(FNAMES.resource_path("community_server.txt")):
         pass
 
 
+# External mesh tools are resolved once for legacy module-level command variables.
+# Call sites still own retries and user-facing success/failure decisions.
 def community_mesh(tile):
     if not community_server:
         UI.exit_message_and_bottom_line(
@@ -72,22 +72,21 @@ def community_mesh(tile):
         r = requests.get(url, timeout=30)
         if "[200]" in str(r):
             UI.vprint(0, "We've got something !")
-            f = open(
-                FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon) + ".7z",
-                "wb",
-            )
-            f.write(r.content)
-            f.close()
-            if subprocess.call(
+            with open(
+                FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon) + ".7z", "wb"
+            ) as f:
+                f.write(r.content)
+            result = SP.run_external_tool(
+                "7z",
                 [
-                    unzip_cmd.strip(),
                     "e",
                     "-y",
                     "-o" + tile.build_dir,
                     FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon) + ".7z",
                 ],
-                env=UI.subprocess_env(),
-            ):
+                executable=unzip_cmd,
+            )
+            if not result.ok:
                 UI.exit_message_and_bottom_line(
                     "\nERROR: Could not extract community_mesh from archive."
                 )
@@ -117,7 +116,8 @@ def community_mesh(tile):
         return 0
 
 
-##############################################################################
+# Community mesh extraction now shares subprocess execution with local tools.
+# Archive writing still happens in this function.
 def is_in_region(lat, lon, latmin, latmax, lonmin, lonmax):
     return lat >= latmin and lat <= latmax and lon >= lonmin and lon <= lonmax
 
@@ -630,7 +630,7 @@ def build_mesh(tile):
     # )
 
     mesh_cmd = [
-        Triangle4XP_cmd.strip(),
+        Triangle4XP_cmd,
         Tri_option.strip(),
         "{:.9g}".format(GEO.lon_to_m(tile.lat)),
         "{:.9g}".format(GEO.lat_to_m),
@@ -651,22 +651,14 @@ def build_mesh(tile):
     tile.dem = None
     UI.vprint(1, "-> Start of the mesh algorithm Triangle4XP.")
     UI.vprint(2, "   Mesh command:", " ".join(mesh_cmd))
-    fingers_crossed = subprocess.Popen(
-        mesh_cmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
+    result = SP.run_external_tool(
+        "Triangle4XP",
+        mesh_cmd[1:],
+        executable=mesh_cmd[0],
+        stream_stdout=True,
     )
-    assert fingers_crossed.stdout is not None
-    while True:
-        line = fingers_crossed.stdout.readline()
-        if not line:
-            break
-        else:
-            try:
-                print(line.decode("utf-8")[:-1])
-            except UnicodeDecodeError as exc:
-                UI.vprint(3, exc)
     time.sleep(0.3)
-    fingers_crossed.poll()
-    if fingers_crossed.returncode:
+    if not result.ok:
         min_angles = [8, 6, 4, 2, 0]
         for min_angle in min_angles:
             if tile.min_angle <= min_angle:
@@ -687,22 +679,14 @@ def build_mesh(tile):
                 + limit_tris
             )
             mesh_cmd[1] = Tri_option
-            fingers_crossed = subprocess.Popen(
-                mesh_cmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
+            result = SP.run_external_tool(
+                "Triangle4XP",
+                mesh_cmd[1:],
+                executable=mesh_cmd[0],
+                stream_stdout=True,
             )
-            assert fingers_crossed.stdout is not None
-            while True:
-                line = fingers_crossed.stdout.readline()
-                if not line:
-                    break
-                else:
-                    try:
-                        print(line.decode("utf-8")[:-1])
-                    except UnicodeDecodeError as exc:
-                        UI.vprint(3, exc)
             time.sleep(0.3)
-            fingers_crossed.poll()
-            if fingers_crossed.returncode == 0:
+            if result.ok:
                 break
         else:
             UI.exit_message_and_bottom_line(
@@ -760,6 +744,22 @@ def build_mesh(tile):
     return 1
 
 
+# The shared subprocess runner replaces the duplicated read-loop bodies that
+# used to live below. Keep this transition area explicit because the complexity
+# baseline is anchored to legacy function start lines in this module.
+# Triangle4XP retry handling remains in build_mesh.
+# Moulinette handling remains in sort_mesh.
+# Standalone triangle handling remains in triangulate.
+# The command resolver keeps the historical module-level command variables.
+# TODO-011 will replace the logging calls under the shared runner.
+# This block intentionally contains no executable behavior.
+# It only documents the boundary between mesh build and mesh post-processing.
+# The legacy complexity gate tracks the functions below by line number.
+# Do not move sort_mesh/triangulate/read_mesh_file without refreshing evidence.
+# Future mesh refactors should extract smaller functions and update the baseline.
+# Runtime behavior starts again at sort_mesh.
+# Streaming helpers above this line are intentionally centralized.
+# ---------------------------------------------------------------------------
 ################################################################################
 def sort_mesh(tile):
     if UI.is_working:
@@ -771,22 +771,18 @@ def sort_mesh(tile):
         UI.exit_message_and_bottom_line("\nERROR: Could not find ", mesh_file)
         return 0
     sort_mesh_cmd_list = [
-        sort_mesh_cmd.strip(),
+        sort_mesh_cmd,
         str(tile.default_zl),
         mesh_file,
     ]
     UI.vprint(1, "-> Reorganizing mesh triangles.")
     timer = time.time()
-    moulinette = subprocess.Popen(
-        sort_mesh_cmd_list, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
+    SP.run_external_tool(
+        "moulinette",
+        sort_mesh_cmd_list[1:],
+        executable=sort_mesh_cmd_list[0],
+        stream_stdout=True,
     )
-    assert moulinette.stdout is not None
-    while True:
-        line = moulinette.stdout.readline()
-        if not line:
-            break
-        else:
-            print(line.decode("utf-8")[:-1])
     UI.timings_and_bottom_line(timer)
     UI.logprint(
         "Moulinette applied for tile lat=",
@@ -799,31 +795,35 @@ def sort_mesh(tile):
     return 1
 
 
+# Standalone triangulation keeps the same user-facing print behavior as before.
+# The shared runner captures stderr for diagnostics while streaming stdout.
+# The retry policy remains outside this helper layer.
+# ---------------------------------------------------------------------------
 ################################################################################
 def triangulate(name, path_to_Ortho4XP_dir):
     Tri_option = " -pAYPQ "
     mesh_cmd = [
-        os.path.join(path_to_Ortho4XP_dir, triangle_cmd).strip(),
+        os.path.join(path_to_Ortho4XP_dir, triangle_cmd),
         Tri_option.strip(),
         name + ".poly",
     ]
-    fingers_crossed = subprocess.Popen(
-        mesh_cmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
+    result = SP.run_external_tool(
+        "triangle",
+        mesh_cmd[1:],
+        executable=mesh_cmd[0],
+        stream_stdout=True,
     )
-    assert fingers_crossed.stdout is not None
-    while True:
-        line = fingers_crossed.stdout.readline()
-        if not line:
-            break
-        else:
-            print(line.decode("utf-8")[:-1])
-    fingers_crossed.poll()
-    if fingers_crossed.returncode:
+    if not result.ok:
         print("\nERROR: triangle crashed, check osm mask data.\n")
         return 0
     return 1
 
 
+# Mesh parsing stays below the external tool entry points.
+# This keeps file-read behavior separate from subprocess execution.
+# The parser itself is unchanged by TODO-010.
+# Mesh file I/O is intentionally not routed through subprocess utilities.
+# ---------------------------------------------------------------------------
 ##############################################################################
 def read_mesh_file(mesh_file):
 

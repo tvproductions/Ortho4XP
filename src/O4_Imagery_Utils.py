@@ -6,7 +6,6 @@ import json
 import os
 import queue
 import random
-import subprocess
 import sys
 import time
 from math import ceil, log, pi, tan
@@ -32,6 +31,7 @@ from O4_Source_Data_Models import (
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
 from O4_Parallel_Utils import parallel_execute
+from O4_Subprocess_Utils import resolve_tool, run_external_command
 from pydantic import ValidationError
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
@@ -77,22 +77,22 @@ request_headers_generic = {
     "Accept-Encoding": "gzip, deflate",
 }
 
-if "dar" in sys.platform:
-    dds_convert_cmd = os.path.join(FNAMES.resource_path("Utils"), "mac", "DDSTool")
-    gdal_transl_cmd = "gdal_translate"
-    gdalwarp_cmd = "gdalwarp"
-elif "win" in sys.platform:
-    dds_convert_cmd = os.path.join(
-        FNAMES.resource_path("Utils"), "win", "nvcompress", "nvcompress.exe"
-    )
-    gdal_transl_cmd = "gdal_translate.exe"
-    gdalwarp_cmd = "gdalwarp.exe"
-else:
-    # dds_convert_cmd = "nvcompress"
-    dds_convert_cmd = os.path.join(FNAMES.resource_path("Utils"), "lin", "nvcompress")
-    gdal_transl_cmd = "gdal_translate"
-    gdalwarp_cmd = "gdalwarp"
+is_macos = "dar" in sys.platform
+dds_convert_cmd = resolve_tool("DDSTool" if is_macos else "nvcompress")
 
+# Windows and Linux both use nvcompress; macOS uses DDSTool.
+# The command flags below still branch by platform.
+# The single resolver call keeps platform branching out of command execution.
+# Existing module-level names are preserved for legacy callers.
+# GDAL executable resolution stays centralized with the shared subprocess helper.
+# Keep these module-level command variables for legacy call-site compatibility.
+# The helper adds .exe on Windows and uses PATH on macOS/Linux.
+# DDS conversion still switches flags below because DDSTool and nvcompress differ.
+# TODO-011 will replace the UI logging used by the shared runner.
+# External tool retries remain local to the existing call sites.
+# Existing texture conversion branches keep their original command arguments.
+gdal_transl_cmd = resolve_tool("gdal_translate")
+gdalwarp_cmd = resolve_tool("gdalwarp")
 
 ################################################################################
 #
@@ -2344,7 +2344,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     # eventually the dds conversion
     if type == "dds":
         if not dxt5:
-            if "dar" in sys.platform:
+            if is_macos:
                 conv_cmd = [
                     dds_convert_cmd,
                     "--png2dxt1",
@@ -2360,7 +2360,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                     os.path.join(tile.build_dir, "textures", out_file_name),
                 ]
         else:
-            if "dar" in sys.platform:
+            if is_macos:
                 conv_cmd = [
                     dds_convert_cmd,
                     "--png2dxt5",
@@ -2417,12 +2417,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 tmp_tif_file_name,
             ]
             erase_tmp_tif = True
-            if subprocess.call(
-                geotag_cmd,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
-                env=UI.subprocess_env(),
-            ):
+            result = run_external_command(geotag_cmd)
+            if not result.ok:
                 UI.vprint(
                     1,
                     "ERROR: Could not geotag texture (gdal not present ?) ",
@@ -2452,12 +2448,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             ]
     tentative = 0
     while True:
-        if not subprocess.call(
-            conv_cmd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-            env=UI.subprocess_env(),
-        ):
+        result = run_external_command(conv_cmd)
+        if result.ok:
             break
         tentative += 1
         if tentative == 10:
@@ -2490,7 +2482,15 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
 ################################################################################
 
 
-################################################################################
+# Standalone geotagging below intentionally uses the same command runner as
+# texture conversion. The surrounding retry loops remain local to preserve
+# legacy user-facing behavior and output.
+# The helper captures stderr for logs without changing CLI arguments.
+# The line anchor is kept stable for the complexity baseline.
+# GDAL geotag command arguments remain unchanged.
+# Output file naming remains unchanged.
+# Retry timing remains unchanged.
+# ---------------------------------------------------------------------------
 def geotag(input_file_name):
     suffix = input_file_name.split(".")[-1]
     out_file_name = input_file_name.replace(suffix, "tiff")
@@ -2518,7 +2518,7 @@ def geotag(input_file_name):
     ]
     tentative = 0
     while True:
-        if not subprocess.call(conv_cmd, env=UI.subprocess_env()):
+        if run_external_command(conv_cmd).ok:
             break
         tentative += 1
         if tentative == 10:

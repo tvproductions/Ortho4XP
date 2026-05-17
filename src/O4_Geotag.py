@@ -1,8 +1,12 @@
 import os
-from pyproj import Transformer
 from math import pi, exp, atan
 
-geo_to_webm = Transformer.transform("epsg:4326", "epsg:3857")
+from pyproj import Transformer
+
+import O4_Subprocess_Utils as SP
+
+geo_to_webm = Transformer.from_crs("epsg:4326", "epsg:3857", always_xy=True)
+
 
 def gtile_to_wgs84(til_x, til_y, zoomlevel):
     rat_x = til_x / (2 ** (zoomlevel - 1)) - 1
@@ -20,29 +24,43 @@ for f in os.listdir():
     til_x_left = int(items[1])
     zoomlevel = int(items[-1][-6:-4])
     (latmax, lonmin) = gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
-    (latmin, lonmax) = gtile_to_wgs84(
-        til_x_left + 16, til_y_top + 16, zoomlevel
-    )
+    (latmin, lonmax) = gtile_to_wgs84(til_x_left + 16, til_y_top + 16, zoomlevel)
     (xmin, ymin) = geo_to_webm.transform(lonmin, latmin)
     (xmax, ymax) = geo_to_webm.transform(lonmax, latmax)
-    os.system(
-        "gdal_translate -of Gtiff -co COMPRESS=JPEG -a_ullr "
-        + str(xmin)
-        + " "
-        + str(ymax)
-        + " "
-        + str(xmax)
-        + " "
-        + str(ymin)
-        + " -a_srs epsg:3857 "
-        + f
-        + " "
-        + f.replace(".jpg", "_tmp.tif")
+    SP.run_external_tool(
+        "gdal_translate",
+        [
+            "-of",
+            "Gtiff",
+            "-co",
+            "COMPRESS=JPEG",
+            "-a_ullr",
+            str(xmin),
+            str(ymax),
+            str(xmax),
+            str(ymin),
+            "-a_srs",
+            "epsg:3857",
+            f,
+            f.replace(".jpg", "_tmp.tif"),
+        ],
     )
-    os.system(
-        "gdalwarp -of Gtiff -co COMPRESS=JPEG "
-        + "-s_srs epsg:3857 -t_srs epsg:4326 -ts 4096 4096 -rb "
-        + f.replace(".jpg", "_tmp.tif")
-        + " "
-        + f.replace(".jpg", ".tif")
+    SP.run_external_tool(
+        "gdalwarp",
+        [
+            "-of",
+            "Gtiff",
+            "-co",
+            "COMPRESS=JPEG",
+            "-s_srs",
+            "epsg:3857",
+            "-t_srs",
+            "epsg:4326",
+            "-ts",
+            "4096",
+            "4096",
+            "-rb",
+            f.replace(".jpg", "_tmp.tif"),
+            f.replace(".jpg", ".tif"),
+        ],
     )

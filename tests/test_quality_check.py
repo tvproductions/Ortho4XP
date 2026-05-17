@@ -88,6 +88,29 @@ class QualityCheckTests(unittest.TestCase):
 
         self.assertEqual(regressions, [])
 
+    def test_baseline_comparison_matches_line_shifted_existing_finding(self):
+        finding = quality_check.Finding(
+            metric="lizard_ccn",
+            path="src/example.py",
+            name="build",
+            value=11.0,
+            severity="block",
+            line=20,
+        )
+        baseline = {
+            "lizard_ccn|src/example.py|10|build": {
+                "metric": "lizard_ccn",
+                "path": "src/example.py",
+                "name": "build",
+                "value": 11.0,
+            }
+        }
+        thresholds = {"lizard_ccn": {"polarity": "high"}}
+
+        regressions = quality_check.compare_to_baseline([finding], baseline, thresholds)
+
+        self.assertEqual(regressions, [])
+
     def test_compile_database_files_returns_repo_relative_paths(self):
         with tempfile.TemporaryDirectory() as directory:
             compile_db = Path(directory) / "compile_commands.json"

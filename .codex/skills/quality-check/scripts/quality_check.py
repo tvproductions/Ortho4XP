@@ -13,6 +13,21 @@ from pathlib import Path
 from typing import Any
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from code_quality_audits import (  # noqa: E402
+    CLASS_LINE_LIMIT,
+    MODULE_HARD_LINE_LIMIT,
+    MODULE_SOFT_LINE_LIMIT,
+    audit_class_size,
+    audit_module_size,
+    audit_test_tiers,
+    audit_type_ignores,
+    collect_code_quality_findings,
+)
+
 ROOT = Path(__file__).resolve().parents[4]
 SKILL_DIR = Path(__file__).resolve().parents[1]
 THRESHOLDS_PATH = SKILL_DIR / "complexity-thresholds.json"
@@ -23,11 +38,19 @@ RUFF_LINT_PATHS = [
     "src",
     "tests",
     ".codex/skills/quality-check/scripts/quality_check.py",
+    ".codex/skills/quality-check/scripts/code_quality_audits.py",
+    ".codex/skills/quality-check/scripts/code_quality_models.py",
+    ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+    ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
 ]
 FORMAT_BASELINE = [
     ".codex/skills/quality-check/scripts/quality_check.py",
+    ".codex/skills/quality-check/scripts/code_quality_audits.py",
+    ".codex/skills/quality-check/scripts/code_quality_models.py",
+    ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+    ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
 ]
@@ -420,14 +443,34 @@ def is_worse(value: float, baseline_value: float, polarity: str) -> bool:
     return value > baseline_value
 
 
+def stable_finding_key(finding: Finding) -> tuple[str, str, str]:
+    return (finding.metric, finding.path, finding.name)
+
+
+def baseline_by_stable_key(
+    baseline: dict[str, dict[str, Any]],
+) -> dict[tuple[str, str, str], dict[str, Any]]:
+    indexed: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for prior in baseline.values():
+        if not {"metric", "path", "name"} <= set(prior):
+            continue
+        key = (str(prior["metric"]), str(prior["path"]), str(prior["name"]))
+        if key not in indexed:
+            indexed[key] = prior
+    return indexed
+
+
 def compare_to_baseline(
     findings: list[Finding],
     baseline: dict[str, dict[str, Any]],
     thresholds: dict[str, dict[str, float | str]],
 ) -> list[Regression]:
     regressions: list[Regression] = []
+    stable_baseline = baseline_by_stable_key(baseline)
     for finding in findings:
-        prior = baseline.get(finding.key)
+        prior = baseline.get(finding.key) or stable_baseline.get(
+            stable_finding_key(finding)
+        )
         if prior is None:
             if finding.severity == "block":
                 regressions.append(
@@ -490,6 +533,26 @@ def run_complexity_gate(scope: str, *, write: bool = False) -> None:
     regressions = compare_to_baseline(findings, load_baseline(), thresholds)
     print_complexity_summary(findings, regressions)
     if regressions:
+        raise SystemExit(1)
+
+
+def run_code_quality_audits() -> None:
+    findings = collect_code_quality_findings(ROOT)
+    blocks = [finding for finding in findings if finding.severity == "block"]
+    warnings = [finding for finding in findings if finding.severity == "warn"]
+    print(
+        "Code quality findings: "
+        f"warnings={len(warnings)} blocks={len(blocks)} "
+        f"(module soft>{MODULE_SOFT_LINE_LIMIT}, hard>{MODULE_HARD_LINE_LIMIT}; class>{CLASS_LINE_LIMIT})"
+    )
+    for finding in [*blocks, *warnings][:80]:
+        print(
+            f"  {finding.severity.upper()} {finding.check} "
+            f"{finding.location} - {finding.message}"
+        )
+    if len(findings) > 80:
+        print(f"  ... {len(findings) - 80} more")
+    if blocks:
         raise SystemExit(1)
 
 
@@ -612,6 +675,7 @@ def run_full_quality(*, skip_native: bool = False) -> None:
     if changed:
         run(["uv", "run", "ty", "check", *changed])
     run(["git", "diff", "--check"])
+    run_code_quality_audits()
     run_complexity_gate("all")
     if not skip_native:
         run_native_checks()

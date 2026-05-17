@@ -32,7 +32,8 @@ Run one coherent quality gate for Ortho4XP changes. Collect deterministic eviden
 ## Rules
 
 - Use `uv`, Ruff, ty, and `unittest`; do not introduce alternate test runners or dependency managers.
-- The full quality check runs repo-wide Ruff lint, Ruff format checks for changed Python files and skill scripts, ty baseline, changed-file ty, unittest, whitespace checks, Xenon/Radon/Lizard/Cohesion complexity checks, and LLVM/CMake native checks.
+- The full quality check runs repo-wide Ruff lint, Ruff format checks for changed Python files and skill scripts, ty baseline, changed-file ty, unittest, whitespace checks, gzkit-parity code-quality audits, Xenon/Radon/Lizard/Cohesion complexity checks, and LLVM/CMake native checks.
+- Code-quality audits enforce ty-ignore syntax, forbid alternate test tiers, block unwaived modules over 1000 lines, warn on modules over 600 lines, and block unwaived classes over 300 lines.
 - Complexity thresholds live in `complexity-thresholds.json`; accepted legacy findings live in `complexity-baseline.json`.
 - Xenon uses the gzkit-style `C/C/C` gate on the modern quality target set; legacy Ortho4XP modules remain governed by the Radon/Lizard/Cohesion baseline comparison.
 - Complexity regressions fail the quality check when a finding becomes worse than baseline or a new block-level finding appears.

@@ -2,8 +2,8 @@ import time
 import os
 import shutil
 import sys
-import subprocess
 import O4_File_Names as FNAMES
+import O4_Subprocess_Utils as SP
 import O4_UI_Utils as UI
 
 # the following is meant to be modified directly by users who need it (in the
@@ -16,19 +16,19 @@ custom_overlay_src = ""
 custom_overlay_src_alternate = ""
 
 if "dar" in sys.platform:
-    unzip_cmd = os.path.join(FNAMES.Utils_dir, "mac", "7zz")
-    # As of version 1.40.08, the 7zz executable was added to Utils/mac
-    # For user upgrading from previous versions (only updated the Ortho4XP executable),
-    # we continue to use 7z installed on the system.
-    if not os.path.exists(unzip_cmd):
-        unzip_cmd = "7z"
-    dsftool_cmd = os.path.join(FNAMES.Utils_dir, "mac", "DSFTool ")
+    unzip_cmd = SP.resolve_tool("7z")
+    dsftool_cmd = SP.resolve_tool("DSFTool")
 elif "win" in sys.platform:
-    unzip_cmd = os.path.join(FNAMES.Utils_dir, "win", "7z.exe")
-    dsftool_cmd = os.path.join(FNAMES.Utils_dir, "win", "DSFTool.exe ")
+    unzip_cmd = SP.resolve_tool("7z")
+    dsftool_cmd = SP.resolve_tool("DSFTool")
 else:
-    unzip_cmd = "7z"
-    dsftool_cmd = os.path.join(FNAMES.Utils_dir, "lin", "DSFTool ")
+    unzip_cmd = SP.resolve_tool("7z")
+    dsftool_cmd = SP.resolve_tool("DSFTool")
+
+# Overlay extraction still exposes these command variables for import-time
+# compatibility with other modules.
+# Execution, output capture, and logging are centralized in O4_Subprocess_Utils.
+# The overlay workflow keeps its existing retry and exit behavior.
 
 
 ################################################################################
@@ -82,28 +82,27 @@ def build_overlay(lat, lon):
     if dsfid == "7z":
         UI.vprint(1, "-> The original DSF is a 7z archive, uncompressing...")
         os.replace(file_to_sniff_loc, file_to_sniff_loc + ".7z")
-        subprocess.run(
-            [unzip_cmd, "e", f"-o{FNAMES.Tmp_dir}", f"{file_to_sniff_loc}.7z"],
-            env=UI.subprocess_env(),
+        SP.run_external_tool(
+            "7z",
+            ["e", f"-o{FNAMES.Tmp_dir}", f"{file_to_sniff_loc}.7z"],
+            executable=unzip_cmd,
         )
         os.remove(file_to_sniff_loc + ".7z")
     UI.vprint(1, "-> Converting the copy to text format")
     dsfconvertcmd = [
-        dsftool_cmd.strip(),
-        " -dsf2text ".strip(),
+        dsftool_cmd,
+        "-dsf2text",
         file_to_sniff_loc,
         os.path.join(FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + "_tmp_dsf.txt"),
     ]
-    fingers_crossed = subprocess.Popen(
-        dsfconvertcmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
+    result = SP.run_external_tool(
+        "DSFTool",
+        dsfconvertcmd[1:],
+        executable=dsfconvertcmd[0],
+        stream_stdout=True,
+        stdout_handler=lambda line: UI.vprint(1, "     " + line),
     )
-    while True:
-        line = fingers_crossed.stdout.readline()  # ty:ignore[unresolved-attribute]
-        if not line:
-            break
-        else:
-            UI.vprint(1, "     " + line.decode("utf-8")[:-1])
-    if fingers_crossed.returncode:
+    if not result.ok:
         UI.exit_message_and_bottom_line("   ERROR: DSFTool crashed.")
         return 0
     UI.vprint(1, "-> Selecting overlays for copy/paste")
@@ -181,8 +180,8 @@ def build_overlay(lat, lon):
     g.close()
     UI.vprint(1, "-> Converting back the text DSF to binary format")
     dsfconvertcmd = [
-        dsftool_cmd.strip(),
-        " -text2dsf ".strip(),
+        dsftool_cmd,
+        "-text2dsf",
         os.path.join(
             FNAMES.Tmp_dir,
             FNAMES.short_latlon(lat, lon) + "_tmp_dsf_without_mesh.txt",
@@ -192,15 +191,13 @@ def build_overlay(lat, lon):
             FNAMES.short_latlon(lat, lon) + "_tmp_dsf_without_mesh.dsf",
         ),
     ]
-    fingers_crossed = subprocess.Popen(
-        dsfconvertcmd, stdout=subprocess.PIPE, bufsize=0, env=UI.subprocess_env()
+    SP.run_external_tool(
+        "DSFTool",
+        dsfconvertcmd[1:],
+        executable=dsfconvertcmd[0],
+        stream_stdout=True,
+        stdout_handler=lambda line: print("     " + line),
     )
-    while True:
-        line = fingers_crossed.stdout.readline()  # ty:ignore[unresolved-attribute]
-        if not line:
-            break
-        else:
-            print("     " + line.decode("utf-8")[:-1])
     dest_dir = os.path.join(
         FNAMES.Overlay_dir, "Earth nav data", FNAMES.round_latlon(lat, lon)
     )

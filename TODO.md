@@ -298,6 +298,8 @@ Suggested labels: `reliability`, `diagnostics`, `quick-win`
 
 ### TODO-010: Centralize Subprocess Execution
 
+Status: Done
+
 GitHub Issue: #5
 
 Create a shared helper for external tool execution.
@@ -537,3 +539,21 @@ Acceptance criteria:
 - Documents release verification steps before publishing.
 
 Suggested labels: `release`, `documentation`, `packaging`
+
+### TODO-025: Decompose Legacy Oversized Python Modules and Classes
+
+GitHub Issue: #29
+
+Reduce the module/class size warnings now surfaced by the gzkit-parity
+quality-check code-quality audit.
+
+Acceptance criteria:
+
+- Breaks the current warning set into independently mergeable decomposition
+  issues or resolves a first representative module/class.
+- Replaces broad size waivers with narrower waivers as modules are split.
+- Keeps quality-check green throughout; no unwaived hard-cap module or
+  class-size blocks.
+- Adds focused tests for any extracted behavior.
+
+Suggested labels: `quality`, `architecture`, `refactor`

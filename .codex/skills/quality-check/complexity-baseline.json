@@ -88,136 +88,240 @@
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|130|all_python_files( )": {
-      "line": 130,
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_models.py|67|python_files_from_base( base_path : Path )": {
+      "line": 67,
+      "metric": "lizard_ccn",
+      "name": "python_files_from_base( base_path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "advise",
+      "value": 7.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|103|_test_tier_flag_findings( project_root : Path )": {
+      "line": 103,
+      "metric": "lizard_ccn",
+      "name": "_test_tier_flag_findings( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|27|_comment_tokens( path : Path )": {
+      "line": 27,
+      "metric": "lizard_ccn",
+      "name": "_comment_tokens( path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|39|audit_type_ignores( project_root : Path , paths : list [ Path ] | None = None )": {
+      "line": 39,
+      "metric": "lizard_ccn",
+      "name": "audit_type_ignores( project_root : Path , paths : list [ Path ] | None = None )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|57|_test_tier_dir_findings( project_root : Path )": {
+      "line": 57,
+      "metric": "lizard_ccn",
+      "name": "_test_tier_dir_findings( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|73|_text_files_from_base( base_path : Path )": {
+      "line": 73,
+      "metric": "lizard_ccn",
+      "name": "_text_files_from_base( base_path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|81|_scanned_text_files( project_root : Path )": {
+      "line": 81,
+      "metric": "lizard_ccn",
+      "name": "_scanned_text_files( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_size_audits.py|103|audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 103,
+      "metric": "lizard_ccn",
+      "name": "audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_size_audits.py|20|_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )": {
+      "line": 20,
+      "metric": "lizard_ccn",
+      "name": "_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_size_audits.py|47|audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 47,
+      "metric": "lizard_ccn",
+      "name": "audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/code_quality_size_audits.py|95|_class_nodes( path : Path )": {
+      "line": 95,
+      "metric": "lizard_ccn",
+      "name": "_class_nodes( path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|153|all_python_files( )": {
+      "line": 153,
       "metric": "lizard_ccn",
       "name": "all_python_files( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|160|load_thresholds( path : Path = THRESHOLDS_PATH )": {
-      "line": 160,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|183|load_thresholds( path : Path = THRESHOLDS_PATH )": {
+      "line": 183,
       "metric": "lizard_ccn",
       "name": "load_thresholds( path : Path = THRESHOLDS_PATH )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|174|severity_for( value : float , config : dict [ str , float | str ] )": {
-      "line": 174,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|197|severity_for( value : float , config : dict [ str , float | str ] )": {
+      "line": 197,
       "metric": "lizard_ccn",
       "name": "severity_for( value : float , config : dict [ str , float | str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|229|measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 229,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|252|measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 252,
       "metric": "lizard_ccn",
       "name": "measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 11.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|256|measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 256,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|279|measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 279,
       "metric": "lizard_ccn",
       "name": "measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|273|measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 273,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|296|measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 296,
       "metric": "lizard_ccn",
       "name": "measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 9.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|298|measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 298,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|321|measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 321,
       "metric": "lizard_ccn",
       "name": "measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|321|measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 321,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|344|measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 344,
       "metric": "lizard_ccn",
       "name": "measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 12.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|355|measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 355,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|378|measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 378,
       "metric": "lizard_ccn",
       "name": "measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|423|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
-      "line": 423,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|450|baseline_by_stable_key( baseline : dict [ str , dict [ str , Any ] ] , )": {
+      "line": 450,
+      "metric": "lizard_ccn",
+      "name": "baseline_by_stable_key( baseline : dict [ str , dict [ str , Any ] ] , )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|463|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
+      "line": 463,
       "metric": "lizard_ccn",
       "name": "compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 5.0
+      "value": 6.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|450|print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )": {
-      "line": 450,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|493|print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )": {
+      "line": 493,
       "metric": "lizard_ccn",
       "name": "print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|518|resolve_tool( name : str )": {
-      "line": 518,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|539|run_code_quality_audits( )": {
+      "line": 539,
+      "metric": "lizard_ccn",
+      "name": "run_code_quality_audits( )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "warn",
+      "value": 8.0
+    },
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|581|resolve_tool( name : str )": {
+      "line": 581,
       "metric": "lizard_ccn",
       "name": "resolve_tool( name : str )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|530|native_source_files( )": {
-      "line": 530,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|593|native_source_files( )": {
+      "line": 593,
       "metric": "lizard_ccn",
       "name": "native_source_files( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|539|compile_database_files( path : Path )": {
-      "line": 539,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|602|compile_database_files( path : Path )": {
+      "line": 602,
       "metric": "lizard_ccn",
       "name": "compile_database_files( path : Path )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|571|report_native_compile_database_coverage( compiled_native : list [ str ] , missing : list [ str ] )": {
-      "line": 571,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|634|report_native_compile_database_coverage( compiled_native : list [ str ] , missing : list [ str ] )": {
+      "line": 634,
       "metric": "lizard_ccn",
       "name": "report_native_compile_database_coverage( compiled_native : list [ str ] , missing : list [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|582|run_native_checks( )": {
-      "line": 582,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|645|run_native_checks( )": {
+      "line": 645,
       "metric": "lizard_ccn",
       "name": "run_native_checks( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|653|print_completed_output( proc : subprocess . CompletedProcess [ str ] )": {
-      "line": 653,
+    "lizard_ccn|.codex/skills/quality-check/scripts/quality_check.py|717|print_completed_output( proc : subprocess . CompletedProcess [ str ] )": {
+      "line": 717,
       "metric": "lizard_ccn",
       "name": "print_completed_output( proc : subprocess . CompletedProcess [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
@@ -735,6 +839,22 @@
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 5.0
+    },
+    "lizard_ccn|src/O4_External_Command_Result.py|35|_error_summary( returncode : int , stdout : str , stderr : str )": {
+      "line": 35,
+      "metric": "lizard_ccn",
+      "name": "_error_summary( returncode : int , stdout : str , stderr : str )",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_External_Tool_Paths.py|7|resolve_tool( tool_name : str )": {
+      "line": 7,
+      "metric": "lizard_ccn",
+      "name": "resolve_tool( tool_name : str )",
+      "path": "src/O4_External_Tool_Paths.py",
+      "severity": "advise",
+      "value": 4.0
     },
     "lizard_ccn|src/O4_File_Names.py|308|elevation_data( source , lat , lon )": {
       "line": 308,
@@ -1326,7 +1446,7 @@
       "name": "build_mesh( tile )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 44.0
+      "value": 38.0
     },
     "lizard_ccn|src/O4_Mesh_Utils.py|58|community_mesh( tile )": {
       "line": 58,
@@ -1335,22 +1455,6 @@
       "path": "src/O4_Mesh_Utils.py",
       "severity": "advise",
       "value": 7.0
-    },
-    "lizard_ccn|src/O4_Mesh_Utils.py|764|sort_mesh( tile )": {
-      "line": 764,
-      "metric": "lizard_ccn",
-      "name": "sort_mesh( tile )",
-      "path": "src/O4_Mesh_Utils.py",
-      "severity": "advise",
-      "value": 5.0
-    },
-    "lizard_ccn|src/O4_Mesh_Utils.py|803|triangulate( name , path_to_Ortho4XP_dir )": {
-      "line": 803,
-      "metric": "lizard_ccn",
-      "name": "triangulate( name , path_to_Ortho4XP_dir )",
-      "path": "src/O4_Mesh_Utils.py",
-      "severity": "advise",
-      "value": 4.0
     },
     "lizard_ccn|src/O4_Mesh_Utils.py|828|read_mesh_file( mesh_file )": {
       "line": 828,
@@ -1430,7 +1534,7 @@
       "name": "build_overlay( lat , lon )",
       "path": "src/O4_Overlay_Utils.py",
       "severity": "block",
-      "value": 43.0
+      "value": 39.0
     },
     "lizard_ccn|src/O4_Parallel_Utils.py|14|run( self )": {
       "line": 14,
@@ -1479,6 +1583,22 @@
       "path": "src/O4_Source_Data_Models.py",
       "severity": "advise",
       "value": 4.0
+    },
+    "lizard_ccn|src/O4_Subprocess_Runtime.py|22|run_streamed( command : list [ str ] , stdout_handler : StdoutHandler | None )": {
+      "line": 22,
+      "metric": "lizard_ccn",
+      "name": "run_streamed( command : list [ str ] , stdout_handler : StdoutHandler | None )",
+      "path": "src/O4_Subprocess_Runtime.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|src/O4_Subprocess_Utils.py|15|run_external_tool( tool_name : str , args : Sequence [ CommandArg ] = ( )": {
+      "line": 15,
+      "metric": "lizard_ccn",
+      "name": "run_external_tool( tool_name : str , args : Sequence [ CommandArg ] = ( )",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "advise",
+      "value": 7.0
     },
     "lizard_ccn|src/O4_Tile_Utils.py|122|build_tile( tile )": {
       "line": 122,
@@ -1896,6 +2016,22 @@
       "severity": "advise",
       "value": 5.0
     },
+    "lizard_ccn|tests/test_subprocess_regression.py|30|active_source_files( )": {
+      "line": 30,
+      "metric": "lizard_ccn",
+      "name": "active_source_files( )",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|tests/test_subprocess_regression.py|40|raw_subprocess_findings( )": {
+      "line": 40,
+      "metric": "lizard_ccn",
+      "name": "raw_subprocess_findings( )",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "lizard_nesting_depth|.codex/skills/git-sync/scripts/git_sync.py|104|staged_files( )": {
       "line": 104,
       "metric": "lizard_nesting_depth",
@@ -1976,197 +2112,325 @@
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|101|existing_paths( paths : list [ str ] )": {
-      "line": 101,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_models.py|59|line_count( path : Path )": {
+      "line": 59,
+      "metric": "lizard_nesting_depth",
+      "name": "line_count( path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_models.py|67|python_files_from_base( base_path : Path )": {
+      "line": 67,
+      "metric": "lizard_nesting_depth",
+      "name": "python_files_from_base( base_path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "block",
+      "value": 4.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_models.py|79|scan_python_files( project_root : Path )": {
+      "line": 79,
+      "metric": "lizard_nesting_depth",
+      "name": "scan_python_files( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|103|_test_tier_flag_findings( project_root : Path )": {
+      "line": 103,
+      "metric": "lizard_nesting_depth",
+      "name": "_test_tier_flag_findings( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|27|_comment_tokens( path : Path )": {
+      "line": 27,
+      "metric": "lizard_nesting_depth",
+      "name": "_comment_tokens( path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|39|audit_type_ignores( project_root : Path , paths : list [ Path ] | None = None )": {
+      "line": 39,
+      "metric": "lizard_nesting_depth",
+      "name": "audit_type_ignores( project_root : Path , paths : list [ Path ] | None = None )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|57|_test_tier_dir_findings( project_root : Path )": {
+      "line": 57,
+      "metric": "lizard_nesting_depth",
+      "name": "_test_tier_dir_findings( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|73|_text_files_from_base( base_path : Path )": {
+      "line": 73,
+      "metric": "lizard_nesting_depth",
+      "name": "_text_files_from_base( base_path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "block",
+      "value": 4.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|81|_scanned_text_files( project_root : Path )": {
+      "line": 81,
+      "metric": "lizard_nesting_depth",
+      "name": "_scanned_text_files( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_size_audits.py|103|audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 103,
+      "metric": "lizard_nesting_depth",
+      "name": "audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_size_audits.py|20|_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )": {
+      "line": 20,
+      "metric": "lizard_nesting_depth",
+      "name": "_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_size_audits.py|47|audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 47,
+      "metric": "lizard_nesting_depth",
+      "name": "audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_size_audits.py|70|_class_size_finding( rel : str , node : ast . ClassDef , waivers : dict [ str , str ] )": {
+      "line": 70,
+      "metric": "lizard_nesting_depth",
+      "name": "_class_size_finding( rel : str , node : ast . ClassDef , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/code_quality_size_audits.py|95|_class_nodes( path : Path )": {
+      "line": 95,
+      "metric": "lizard_nesting_depth",
+      "name": "_class_nodes( path : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|119|capture_lines( args : list [ str ] )": {
+      "line": 119,
+      "metric": "lizard_nesting_depth",
+      "name": "capture_lines( args : list [ str ] )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|124|existing_paths( paths : list [ str ] )": {
+      "line": 124,
       "metric": "lizard_nesting_depth",
       "name": "existing_paths( paths : list [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|130|all_python_files( )": {
-      "line": 130,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|153|all_python_files( )": {
+      "line": 153,
       "metric": "lizard_nesting_depth",
       "name": "all_python_files( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|143|complexity_targets( scope : str )": {
-      "line": 143,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|166|complexity_targets( scope : str )": {
+      "line": 166,
       "metric": "lizard_nesting_depth",
       "name": "complexity_targets( scope : str )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|160|load_thresholds( path : Path = THRESHOLDS_PATH )": {
-      "line": 160,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|183|load_thresholds( path : Path = THRESHOLDS_PATH )": {
+      "line": 183,
       "metric": "lizard_nesting_depth",
       "name": "load_thresholds( path : Path = THRESHOLDS_PATH )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|174|severity_for( value : float , config : dict [ str , float | str ] )": {
-      "line": 174,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|197|severity_for( value : float , config : dict [ str , float | str ] )": {
+      "line": 197,
       "metric": "lizard_nesting_depth",
       "name": "severity_for( value : float , config : dict [ str , float | str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|194|make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )": {
-      "line": 194,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|217|make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )": {
+      "line": 217,
       "metric": "lizard_nesting_depth",
       "name": "make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|229|measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 229,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|252|measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 252,
       "metric": "lizard_nesting_depth",
       "name": "measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|256|measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 256,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|279|measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 279,
       "metric": "lizard_nesting_depth",
       "name": "measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|273|measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 273,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|296|measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 296,
       "metric": "lizard_nesting_depth",
       "name": "measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|298|measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 298,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|321|measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 321,
       "metric": "lizard_nesting_depth",
       "name": "measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|321|measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 321,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|344|measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 344,
       "metric": "lizard_nesting_depth",
       "name": "measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|355|measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 355,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|378|measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 378,
       "metric": "lizard_nesting_depth",
       "name": "measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|423|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
-      "line": 423,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|450|baseline_by_stable_key( baseline : dict [ str , dict [ str , Any ] ] , )": {
+      "line": 450,
+      "metric": "lizard_nesting_depth",
+      "name": "baseline_by_stable_key( baseline : dict [ str , dict [ str , Any ] ] , )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|463|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
+      "line": 463,
       "metric": "lizard_nesting_depth",
       "name": "compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|450|print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )": {
-      "line": 450,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|493|print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )": {
+      "line": 493,
       "metric": "lizard_nesting_depth",
       "name": "print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|480|run_complexity_gate( scope : str , * , write : bool = False )": {
-      "line": 480,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|523|run_complexity_gate( scope : str , * , write : bool = False )": {
+      "line": 523,
       "metric": "lizard_nesting_depth",
       "name": "run_complexity_gate( scope : str , * , write : bool = False )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|518|resolve_tool( name : str )": {
-      "line": 518,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|539|run_code_quality_audits( )": {
+      "line": 539,
+      "metric": "lizard_nesting_depth",
+      "name": "run_code_quality_audits( )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "block",
+      "value": 7.0
+    },
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|581|resolve_tool( name : str )": {
+      "line": 581,
       "metric": "lizard_nesting_depth",
       "name": "resolve_tool( name : str )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|530|native_source_files( )": {
-      "line": 530,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|593|native_source_files( )": {
+      "line": 593,
       "metric": "lizard_nesting_depth",
       "name": "native_source_files( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|539|compile_database_files( path : Path )": {
-      "line": 539,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|602|compile_database_files( path : Path )": {
+      "line": 602,
       "metric": "lizard_nesting_depth",
       "name": "compile_database_files( path : Path )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|551|native_files_in_compile_database( native : list [ str ] , compiled_files : set [ str ] )": {
-      "line": 551,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|614|native_files_in_compile_database( native : list [ str ] , compiled_files : set [ str ] )": {
+      "line": 614,
       "metric": "lizard_nesting_depth",
       "name": "native_files_in_compile_database( native : list [ str ] , compiled_files : set [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|571|report_native_compile_database_coverage( compiled_native : list [ str ] , missing : list [ str ] )": {
-      "line": 571,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|634|report_native_compile_database_coverage( compiled_native : list [ str ] , missing : list [ str ] )": {
+      "line": 634,
       "metric": "lizard_nesting_depth",
       "name": "report_native_compile_database_coverage( compiled_native : list [ str ] , missing : list [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|602|run_full_quality( * , skip_native : bool = False )": {
-      "line": 602,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|665|run_full_quality( * , skip_native : bool = False )": {
+      "line": 665,
       "metric": "lizard_nesting_depth",
       "name": "run_full_quality( * , skip_native : bool = False )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|621|main( )": {
-      "line": 621,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|685|main( )": {
+      "line": 685,
       "metric": "lizard_nesting_depth",
       "name": "main( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|653|print_completed_output( proc : subprocess . CompletedProcess [ str ] )": {
-      "line": 653,
+    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|717|print_completed_output( proc : subprocess . CompletedProcess [ str ] )": {
+      "line": 717,
       "metric": "lizard_nesting_depth",
       "name": "print_completed_output( proc : subprocess . CompletedProcess [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 3.0
-    },
-    "lizard_nesting_depth|.codex/skills/quality-check/scripts/quality_check.py|96|capture_lines( args : list [ str ] )": {
-      "line": 96,
-      "metric": "lizard_nesting_depth",
-      "name": "capture_lines( args : list [ str ] )",
-      "path": ".codex/skills/quality-check/scripts/quality_check.py",
-      "severity": "advise",
-      "value": 2.0
     },
     "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|117|resolve_tool( name : str )": {
       "line": 117,
@@ -2733,6 +2997,38 @@
       "metric": "lizard_nesting_depth",
       "name": "statistics( self )",
       "path": "src/O4_DSF_Utils.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_External_Command_Result.py|35|_error_summary( returncode : int , stdout : str , stderr : str )": {
+      "line": 35,
+      "metric": "lizard_nesting_depth",
+      "name": "_error_summary( returncode : int , stdout : str , stderr : str )",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_External_Command_Result.py|44|_first_nonempty_line( text : str )": {
+      "line": 44,
+      "metric": "lizard_nesting_depth",
+      "name": "_first_nonempty_line( text : str )",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_External_Tool_Paths.py|15|_platform_key( )": {
+      "line": 15,
+      "metric": "lizard_nesting_depth",
+      "name": "_platform_key( )",
+      "path": "src/O4_External_Tool_Paths.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_External_Tool_Paths.py|7|resolve_tool( tool_name : str )": {
+      "line": 7,
+      "metric": "lizard_nesting_depth",
+      "name": "resolve_tool( tool_name : str )",
+      "path": "src/O4_External_Tool_Paths.py",
       "severity": "advise",
       "value": 2.0
     },
@@ -3422,7 +3718,7 @@
       "name": "build_mesh( tile )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 28.0
+      "value": 24.0
     },
     "lizard_nesting_depth|src/O4_Mesh_Utils.py|58|community_mesh( tile )": {
       "line": 58,
@@ -3436,14 +3732,6 @@
       "line": 764,
       "metric": "lizard_nesting_depth",
       "name": "sort_mesh( tile )",
-      "path": "src/O4_Mesh_Utils.py",
-      "severity": "block",
-      "value": 4.0
-    },
-    "lizard_nesting_depth|src/O4_Mesh_Utils.py|803|triangulate( name , path_to_Ortho4XP_dir )": {
-      "line": 803,
-      "metric": "lizard_nesting_depth",
-      "name": "triangulate( name , path_to_Ortho4XP_dir )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "advise",
       "value": 2.0
@@ -3526,7 +3814,7 @@
       "name": "build_overlay( lat , lon )",
       "path": "src/O4_Overlay_Utils.py",
       "severity": "block",
-      "value": 23.0
+      "value": 21.0
     },
     "lizard_nesting_depth|src/O4_Parallel_Utils.py|14|run( self )": {
       "line": 14,
@@ -3575,6 +3863,22 @@
       "path": "src/O4_Source_Data_Models.py",
       "severity": "advise",
       "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Subprocess_Runtime.py|22|run_streamed( command : list [ str ] , stdout_handler : StdoutHandler | None )": {
+      "line": 22,
+      "metric": "lizard_nesting_depth",
+      "name": "run_streamed( command : list [ str ] , stdout_handler : StdoutHandler | None )",
+      "path": "src/O4_Subprocess_Runtime.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Subprocess_Utils.py|15|run_external_tool( tool_name : str , args : Sequence [ CommandArg ] = ( )": {
+      "line": 15,
+      "metric": "lizard_nesting_depth",
+      "name": "run_external_tool( tool_name : str , args : Sequence [ CommandArg ] = ( )",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "warn",
+      "value": 3.0
     },
     "lizard_nesting_depth|src/O4_Tile_Utils.py|122|build_tile( tile )": {
       "line": 122,
@@ -4072,6 +4376,38 @@
       "severity": "advise",
       "value": 2.0
     },
+    "lizard_nesting_depth|tests/test_subprocess_regression.py|30|active_source_files( )": {
+      "line": 30,
+      "metric": "lizard_nesting_depth",
+      "name": "active_source_files( )",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|tests/test_subprocess_regression.py|40|raw_subprocess_findings( )": {
+      "line": 40,
+      "metric": "lizard_nesting_depth",
+      "name": "raw_subprocess_findings( )",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|tests/test_subprocess_regression.py|48|raw_os_system_tool_findings( )": {
+      "line": 48,
+      "metric": "lizard_nesting_depth",
+      "name": "raw_os_system_tool_findings( )",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|tests/test_subprocess_regression.py|54|raw_os_system_tool_lines( path )": {
+      "line": 54,
+      "metric": "lizard_nesting_depth",
+      "name": "raw_os_system_tool_lines( path )",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nloc|.codex/skills/git-sync/scripts/git_sync.py|111|stranded_commit_subject( )": {
       "line": 111,
       "metric": "lizard_nloc",
@@ -4144,144 +4480,200 @@
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|105|changed_python_files( )": {
-      "line": 105,
+    "lizard_nloc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|39|audit_type_ignores( project_root : Path , paths : list [ Path ] | None = None )": {
+      "line": 39,
+      "metric": "lizard_nloc",
+      "name": "audit_type_ignores( project_root : Path , paths : list [ Path ] | None = None )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 16.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|57|_test_tier_dir_findings( project_root : Path )": {
+      "line": 57,
+      "metric": "lizard_nloc",
+      "name": "_test_tier_dir_findings( project_root : Path )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|103|audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 103,
+      "metric": "lizard_nloc",
+      "name": "audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 20.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|20|_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )": {
+      "line": 20,
+      "metric": "lizard_nloc",
+      "name": "_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "warn",
+      "value": 25.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|47|audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 47,
+      "metric": "lizard_nloc",
+      "name": "audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 21.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|70|_class_size_finding( rel : str , node : ast . ClassDef , waivers : dict [ str , str ] )": {
+      "line": 70,
+      "metric": "lizard_nloc",
+      "name": "_class_size_finding( rel : str , node : ast . ClassDef , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 23.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|128|changed_python_files( )": {
+      "line": 128,
       "metric": "lizard_nloc",
       "name": "changed_python_files( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 23.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|174|severity_for( value : float , config : dict [ str , float | str ] )": {
-      "line": 174,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|197|severity_for( value : float , config : dict [ str , float | str ] )": {
+      "line": 197,
       "metric": "lizard_nloc",
       "name": "severity_for( value : float , config : dict [ str , float | str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 17.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|194|make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )": {
-      "line": 194,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|217|make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )": {
+      "line": 217,
       "metric": "lizard_nloc",
       "name": "make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 22.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|229|measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 229,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|252|measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 252,
       "metric": "lizard_nloc",
       "name": "measure_radon_cc( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 25.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|256|measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 256,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|279|measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 279,
       "metric": "lizard_nloc",
       "name": "measure_radon_mi( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|273|measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 273,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|296|measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 296,
       "metric": "lizard_nloc",
       "name": "measure_radon_hal( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 23.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|298|measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 298,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|321|measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 321,
       "metric": "lizard_nloc",
       "name": "measure_radon_raw( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 21.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|321|measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 321,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|344|measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 344,
       "metric": "lizard_nloc",
       "name": "measure_lizard( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 29.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|355|measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 355,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|378|measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 378,
       "metric": "lizard_nloc",
       "name": "measure_cohesion( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 20.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|377|measure_complexity( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
-      "line": 377,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|400|measure_complexity( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )": {
+      "line": 400,
       "metric": "lizard_nloc",
       "name": "measure_complexity( paths : list [ str ] , thresholds : dict [ str , dict [ str , float | str ] ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|402|write_baseline( findings : list [ Finding ] , targets : list [ str ] , path : Path = BASELINE_PATH )": {
-      "line": 402,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|425|write_baseline( findings : list [ Finding ] , targets : list [ str ] , path : Path = BASELINE_PATH )": {
+      "line": 425,
       "metric": "lizard_nloc",
       "name": "write_baseline( findings : list [ Finding ] , targets : list [ str ] , path : Path = BASELINE_PATH )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|423|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
-      "line": 423,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|463|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
+      "line": 463,
       "metric": "lizard_nloc",
       "name": "compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
-      "value": 25.0
+      "value": 28.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|450|print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )": {
-      "line": 450,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|493|print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )": {
+      "line": 493,
       "metric": "lizard_nloc",
       "name": "print_complexity_summary( findings : list [ Finding ] , regressions : list [ Regression ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 28.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|480|run_complexity_gate( scope : str , * , write : bool = False )": {
-      "line": 480,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|523|run_complexity_gate( scope : str , * , write : bool = False )": {
+      "line": 523,
       "metric": "lizard_nloc",
       "name": "run_complexity_gate( scope : str , * , write : bool = False )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 14.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|496|run_xenon_gate( paths : list [ str ] )": {
-      "line": 496,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|539|run_code_quality_audits( )": {
+      "line": 539,
+      "metric": "lizard_nloc",
+      "name": "run_code_quality_audits( )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|559|run_xenon_gate( paths : list [ str ] )": {
+      "line": 559,
       "metric": "lizard_nloc",
       "name": "run_xenon_gate( paths : list [ str ] )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 20.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|582|run_native_checks( )": {
-      "line": 582,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|645|run_native_checks( )": {
+      "line": 645,
       "metric": "lizard_nloc",
       "name": "run_native_checks( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 18.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|602|run_full_quality( * , skip_native : bool = False )": {
-      "line": 602,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|665|run_full_quality( * , skip_native : bool = False )": {
+      "line": 665,
       "metric": "lizard_nloc",
       "name": "run_full_quality( * , skip_native : bool = False )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 17.0
+      "value": 18.0
     },
-    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|621|main( )": {
-      "line": 621,
+    "lizard_nloc|.codex/skills/quality-check/scripts/quality_check.py|685|main( )": {
+      "line": 685,
       "metric": "lizard_nloc",
       "name": "main( )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
@@ -4807,6 +5199,22 @@
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 15.0
+    },
+    "lizard_nloc|src/O4_External_Command_Result.py|18|make_result( tool_name : str , command : list [ str ] , outcome : CommandOutcome , )": {
+      "line": 18,
+      "metric": "lizard_nloc",
+      "name": "make_result( tool_name : str , command : list [ str ] , outcome : CommandOutcome , )",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 15.0
+    },
+    "lizard_nloc|src/O4_External_Tool_Paths.py|23|_platform_tools( )": {
+      "line": 23,
+      "metric": "lizard_nloc",
+      "name": "_platform_tools( )",
+      "path": "src/O4_External_Tool_Paths.py",
+      "severity": "warn",
+      "value": 32.0
     },
     "lizard_nloc|src/O4_File_Names.py|108|input_poly_file( tile )": {
       "line": 108,
@@ -5342,7 +5750,7 @@
       "name": "convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 268.0
+      "value": 260.0
     },
     "lizard_nloc|src/O4_Imagery_Utils.py|229|parse_provider_definition( provider_code , source_path )": {
       "line": 229,
@@ -5558,7 +5966,7 @@
       "name": "build_mesh( tile )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 236.0
+      "value": 220.0
     },
     "lizard_nloc|src/O4_Mesh_Utils.py|58|community_mesh( tile )": {
       "line": 58,
@@ -5566,7 +5974,7 @@
       "name": "community_mesh( tile )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 60.0
+      "value": 59.0
     },
     "lizard_nloc|src/O4_Mesh_Utils.py|764|sort_mesh( tile )": {
       "line": 764,
@@ -5574,7 +5982,7 @@
       "name": "sort_mesh( tile )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "warn",
-      "value": 36.0
+      "value": 32.0
     },
     "lizard_nloc|src/O4_Mesh_Utils.py|803|triangulate( name , path_to_Ortho4XP_dir )": {
       "line": 803,
@@ -5582,7 +5990,7 @@
       "name": "triangulate( name , path_to_Ortho4XP_dir )",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "advise",
-      "value": 22.0
+      "value": 17.0
     },
     "lizard_nloc|src/O4_Mesh_Utils.py|828|read_mesh_file( mesh_file )": {
       "line": 828,
@@ -5670,7 +6078,7 @@
       "name": "build_overlay( lat , lon )",
       "path": "src/O4_Overlay_Utils.py",
       "severity": "block",
-      "value": 222.0
+      "value": 219.0
     },
     "lizard_nloc|src/O4_Parallel_Utils.py|14|run( self )": {
       "line": 14,
@@ -5703,6 +6111,30 @@
       "path": "src/O4_Scenery_Utils.py",
       "severity": "block",
       "value": 55.0
+    },
+    "lizard_nloc|src/O4_Subprocess_Runtime.py|22|run_streamed( command : list [ str ] , stdout_handler : StdoutHandler | None )": {
+      "line": 22,
+      "metric": "lizard_nloc",
+      "name": "run_streamed( command : list [ str ] , stdout_handler : StdoutHandler | None )",
+      "path": "src/O4_Subprocess_Runtime.py",
+      "severity": "warn",
+      "value": 25.0
+    },
+    "lizard_nloc|src/O4_Subprocess_Utils.py|15|run_external_tool( tool_name : str , args : Sequence [ CommandArg ] = ( )": {
+      "line": 15,
+      "metric": "lizard_nloc",
+      "name": "run_external_tool( tool_name : str , args : Sequence [ CommandArg ] = ( )",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "warn",
+      "value": 26.0
+    },
+    "lizard_nloc|src/O4_Subprocess_Utils.py|44|run_external_command( command : Sequence [ CommandArg ] , * , tool_name : str | None = None , stream_stdout : bool = False , stdout_handler : StdoutHandler | None = None , )": {
+      "line": 44,
+      "metric": "lizard_nloc",
+      "name": "run_external_command( command : Sequence [ CommandArg ] , * , tool_name : str | None = None , stream_stdout : bool = False , stdout_handler : StdoutHandler | None = None , )",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "advise",
+      "value": 16.0
     },
     "lizard_nloc|src/O4_Tile_Utils.py|122|build_tile( tile )": {
       "line": 122,
@@ -6216,8 +6648,16 @@
       "severity": "advise",
       "value": 16.0
     },
-    "lizard_nloc|tests/test_quality_check.py|122|test_run_native_command_suppresses_success_output( self )": {
-      "line": 122,
+    "lizard_nloc|tests/test_quality_check.py|114|test_compile_database_files_returns_repo_relative_paths( self )": {
+      "line": 114,
+      "metric": "lizard_nloc",
+      "name": "test_compile_database_files_returns_repo_relative_paths( self )",
+      "path": "tests/test_quality_check.py",
+      "severity": "advise",
+      "value": 19.0
+    },
+    "lizard_nloc|tests/test_quality_check.py|145|test_run_native_command_suppresses_success_output( self )": {
+      "line": 145,
       "metric": "lizard_nloc",
       "name": "test_run_native_command_suppresses_success_output( self )",
       "path": "tests/test_quality_check.py",
@@ -6232,13 +6672,53 @@
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|tests/test_quality_check.py|91|test_compile_database_files_returns_repo_relative_paths( self )": {
+    "lizard_nloc|tests/test_quality_check.py|91|test_baseline_comparison_matches_line_shifted_existing_finding( self )": {
       "line": 91,
       "metric": "lizard_nloc",
-      "name": "test_compile_database_files_returns_repo_relative_paths( self )",
+      "name": "test_baseline_comparison_matches_line_shifted_existing_finding( self )",
       "path": "tests/test_quality_check.py",
       "severity": "advise",
-      "value": 19.0
+      "value": 20.0
+    },
+    "lizard_nloc|tests/test_quality_code_audits.py|112|test_type_ignore_audit_uses_python_comments_only( self )": {
+      "line": 112,
+      "metric": "lizard_nloc",
+      "name": "test_type_ignore_audit_uses_python_comments_only( self )",
+      "path": "tests/test_quality_code_audits.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|tests/test_quality_code_audits.py|40|test_module_size_reports_waived_hard_cap_as_warning( self )": {
+      "line": 40,
+      "metric": "lizard_nloc",
+      "name": "test_module_size_reports_waived_hard_cap_as_warning( self )",
+      "path": "tests/test_quality_code_audits.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|tests/test_quality_code_audits.py|57|test_module_size_blocks_stale_waiver( self )": {
+      "line": 57,
+      "metric": "lizard_nloc",
+      "name": "test_module_size_blocks_stale_waiver( self )",
+      "path": "tests/test_quality_code_audits.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|tests/test_quality_code_audits.py|74|test_class_size_blocks_unwaived_class( self )": {
+      "line": 74,
+      "metric": "lizard_nloc",
+      "name": "test_class_size_blocks_unwaived_class( self )",
+      "path": "tests/test_quality_code_audits.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|tests/test_quality_code_audits.py|91|test_class_size_reports_waived_class_as_warning( self )": {
+      "line": 91,
+      "metric": "lizard_nloc",
+      "name": "test_class_size_reports_waived_class_as_warning( self )",
+      "path": "tests/test_quality_code_audits.py",
+      "severity": "advise",
+      "value": 18.0
     },
     "lizard_nloc|tests/test_startup.py|42|test_provider_dictionaries_initialize( self )": {
       "line": 42,
@@ -6247,6 +6727,30 @@
       "path": "tests/test_startup.py",
       "severity": "advise",
       "value": 15.0
+    },
+    "lizard_nloc|tests/test_subprocess_utils.py|28|test_nonzero_command_captures_stderr_and_summary( self )": {
+      "line": 28,
+      "metric": "lizard_nloc",
+      "name": "test_nonzero_command_captures_stderr_and_summary( self )",
+      "path": "tests/test_subprocess_utils.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|tests/test_subprocess_utils.py|74|test_macos_environment_is_applied_to_captured_commands( self )": {
+      "line": 74,
+      "metric": "lizard_nloc",
+      "name": "test_macos_environment_is_applied_to_captured_commands( self )",
+      "path": "tests/test_subprocess_utils.py",
+      "severity": "advise",
+      "value": 19.0
+    },
+    "lizard_nloc|tests/test_subprocess_utils.py|96|test_resolve_tool_uses_platform_specific_paths( self )": {
+      "line": 96,
+      "metric": "lizard_nloc",
+      "name": "test_resolve_tool_uses_platform_specific_paths( self )",
+      "path": "tests/test_subprocess_utils.py",
+      "severity": "warn",
+      "value": 28.0
     },
     "lizard_param_count|.codex/skills/git-sync/scripts/git_sync.py|138|plan( * , target_branch : str | None , remote : str , apply : bool , auto_add : bool , allow_push : bool , hygiene : bool , )": {
       "line": 138,
@@ -6264,50 +6768,90 @@
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|194|make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )": {
-      "line": 194,
+    "lizard_param_count|.codex/skills/quality-check/scripts/code_quality_models.py|88|stale_waiver_findings( check : str , label : str , waivers : dict [ str , str ] , existing : set [ str ] )": {
+      "line": 88,
+      "metric": "lizard_param_count",
+      "name": "stale_waiver_findings( check : str , label : str , waivers : dict [ str , str ] , existing : set [ str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|.codex/skills/quality-check/scripts/code_quality_size_audits.py|103|audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 103,
+      "metric": "lizard_param_count",
+      "name": "audit_class_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|.codex/skills/quality-check/scripts/code_quality_size_audits.py|20|_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )": {
+      "line": 20,
+      "metric": "lizard_param_count",
+      "name": "_module_size_finding( rel : str , lines : int , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|.codex/skills/quality-check/scripts/code_quality_size_audits.py|47|audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )": {
+      "line": 47,
+      "metric": "lizard_param_count",
+      "name": "audit_module_size( project_root : Path , paths : list [ Path ] | None = None , waivers : dict [ str , str ] | None = None , )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|.codex/skills/quality-check/scripts/code_quality_size_audits.py|70|_class_size_finding( rel : str , node : ast . ClassDef , waivers : dict [ str , str ] )": {
+      "line": 70,
+      "metric": "lizard_param_count",
+      "name": "_class_size_finding( rel : str , node : ast . ClassDef , waivers : dict [ str , str ] )",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|106|run( args : list [ str ] , * , check : bool = True , capture : bool = False )": {
+      "line": 106,
+      "metric": "lizard_param_count",
+      "name": "run( args : list [ str ] , * , check : bool = True , capture : bool = False )",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|217|make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )": {
+      "line": 217,
       "metric": "lizard_param_count",
       "name": "make_finding( thresholds : dict [ str , dict [ str , float | str ] ] , metric : str , path : str , name : str , value : float , line : int | None = None , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|402|write_baseline( findings : list [ Finding ] , targets : list [ str ] , path : Path = BASELINE_PATH )": {
-      "line": 402,
+    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|425|write_baseline( findings : list [ Finding ] , targets : list [ str ] , path : Path = BASELINE_PATH )": {
+      "line": 425,
       "metric": "lizard_param_count",
       "name": "write_baseline( findings : list [ Finding ] , targets : list [ str ] , path : Path = BASELINE_PATH )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|417|is_worse( value : float , baseline_value : float , polarity : str )": {
-      "line": 417,
+    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|440|is_worse( value : float , baseline_value : float , polarity : str )": {
+      "line": 440,
       "metric": "lizard_param_count",
       "name": "is_worse( value : float , baseline_value : float , polarity : str )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|423|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
-      "line": 423,
+    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|463|compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )": {
+      "line": 463,
       "metric": "lizard_param_count",
       "name": "compare_to_baseline( findings : list [ Finding ] , baseline : dict [ str , dict [ str , Any ] ] , thresholds : dict [ str , dict [ str , float | str ] ] , )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|564|run_clang_tidy_for_native( clang_tidy : str , compile_db : Path , paths : list [ str ] )": {
-      "line": 564,
+    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|627|run_clang_tidy_for_native( clang_tidy : str , compile_db : Path , paths : list [ str ] )": {
+      "line": 627,
       "metric": "lizard_param_count",
       "name": "run_clang_tidy_for_native( clang_tidy : str , compile_db : Path , paths : list [ str ] )",
-      "path": ".codex/skills/quality-check/scripts/quality_check.py",
-      "severity": "advise",
-      "value": 3.0
-    },
-    "lizard_param_count|.codex/skills/quality-check/scripts/quality_check.py|83|run( args : list [ str ] , * , check : bool = True , capture : bool = False )": {
-      "line": 83,
-      "metric": "lizard_param_count",
-      "name": "run( args : list [ str ] , * , check : bool = True , capture : bool = False )",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 3.0
@@ -6543,6 +7087,22 @@
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
       "value": 4.0
+    },
+    "lizard_param_count|src/O4_External_Command_Result.py|18|make_result( tool_name : str , command : list [ str ] , outcome : CommandOutcome , )": {
+      "line": 18,
+      "metric": "lizard_param_count",
+      "name": "make_result( tool_name : str , command : list [ str ] , outcome : CommandOutcome , )",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_External_Command_Result.py|35|_error_summary( returncode : int , stdout : str , stderr : str )": {
+      "line": 35,
+      "metric": "lizard_param_count",
+      "name": "_error_summary( returncode : int , stdout : str , stderr : str )",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 3.0
     },
     "lizard_param_count|src/O4_File_Names.py|201|mesh_file( build_dir , lat , lon )": {
       "line": 201,
@@ -6840,8 +7400,8 @@
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Geotag.py|7|gtile_to_wgs84( til_x , til_y , zoomlevel )": {
-      "line": 7,
+    "lizard_param_count|src/O4_Geotag.py|11|gtile_to_wgs84( til_x , til_y , zoomlevel )": {
+      "line": 11,
       "metric": "lizard_param_count",
       "name": "gtile_to_wgs84( til_x , til_y , zoomlevel )",
       "path": "src/O4_Geotag.py",
@@ -7173,6 +7733,22 @@
       "metric": "lizard_param_count",
       "name": "_validate_color_filter( cls , value : str | None , info : ValidationInfo )",
       "path": "src/O4_Source_Data_Models.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Subprocess_Utils.py|44|run_external_command( command : Sequence [ CommandArg ] , * , tool_name : str | None = None , stream_stdout : bool = False , stdout_handler : StdoutHandler | None = None , )": {
+      "line": 44,
+      "metric": "lizard_param_count",
+      "name": "run_external_command( command : Sequence [ CommandArg ] , * , tool_name : str | None = None , stream_stdout : bool = False , stdout_handler : StdoutHandler | None = None , )",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Subprocess_Utils.py|66|_run_streamed( tool_name : str , command : list [ str ] , stdout_handler : StdoutHandler | None )": {
+      "line": 66,
+      "metric": "lizard_param_count",
+      "name": "_run_streamed( tool_name : str , command : list [ str ] , stdout_handler : StdoutHandler | None )",
+      "path": "src/O4_Subprocess_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
@@ -7584,136 +8160,240 @@
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|130|all_python_files": {
-      "line": 130,
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_models.py|67|python_files_from_base": {
+      "line": 67,
+      "metric": "radon_cc",
+      "name": "python_files_from_base",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "warn",
+      "value": 7.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|103|_test_tier_flag_findings": {
+      "line": 103,
+      "metric": "radon_cc",
+      "name": "_test_tier_flag_findings",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|27|_comment_tokens": {
+      "line": 27,
+      "metric": "radon_cc",
+      "name": "_comment_tokens",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|39|audit_type_ignores": {
+      "line": 39,
+      "metric": "radon_cc",
+      "name": "audit_type_ignores",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|57|_test_tier_dir_findings": {
+      "line": 57,
+      "metric": "radon_cc",
+      "name": "_test_tier_dir_findings",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|73|_text_files_from_base": {
+      "line": 73,
+      "metric": "radon_cc",
+      "name": "_text_files_from_base",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_policy_audits.py|81|_scanned_text_files": {
+      "line": 81,
+      "metric": "radon_cc",
+      "name": "_scanned_text_files",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|103|audit_class_size": {
+      "line": 103,
+      "metric": "radon_cc",
+      "name": "audit_class_size",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|20|_module_size_finding": {
+      "line": 20,
+      "metric": "radon_cc",
+      "name": "_module_size_finding",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|47|audit_module_size": {
+      "line": 47,
+      "metric": "radon_cc",
+      "name": "audit_module_size",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/code_quality_size_audits.py|95|_class_nodes": {
+      "line": 95,
+      "metric": "radon_cc",
+      "name": "_class_nodes",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|153|all_python_files": {
+      "line": 153,
       "metric": "radon_cc",
       "name": "all_python_files",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|160|load_thresholds": {
-      "line": 160,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|183|load_thresholds": {
+      "line": 183,
       "metric": "radon_cc",
       "name": "load_thresholds",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|174|severity_for": {
-      "line": 174,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|197|severity_for": {
+      "line": 197,
       "metric": "radon_cc",
       "name": "severity_for",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|229|measure_radon_cc": {
-      "line": 229,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|252|measure_radon_cc": {
+      "line": 252,
       "metric": "radon_cc",
       "name": "measure_radon_cc",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 11.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|256|measure_radon_mi": {
-      "line": 256,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|279|measure_radon_mi": {
+      "line": 279,
       "metric": "radon_cc",
       "name": "measure_radon_mi",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|273|measure_radon_hal": {
-      "line": 273,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|296|measure_radon_hal": {
+      "line": 296,
       "metric": "radon_cc",
       "name": "measure_radon_hal",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 9.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|298|measure_radon_raw": {
-      "line": 298,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|321|measure_radon_raw": {
+      "line": 321,
       "metric": "radon_cc",
       "name": "measure_radon_raw",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|321|measure_lizard": {
-      "line": 321,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|344|measure_lizard": {
+      "line": 344,
       "metric": "radon_cc",
       "name": "measure_lizard",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
       "value": 12.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|355|measure_cohesion": {
-      "line": 355,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|378|measure_cohesion": {
+      "line": 378,
       "metric": "radon_cc",
       "name": "measure_cohesion",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|423|compare_to_baseline": {
-      "line": 423,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|450|baseline_by_stable_key": {
+      "line": 450,
+      "metric": "radon_cc",
+      "name": "baseline_by_stable_key",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|463|compare_to_baseline": {
+      "line": 463,
       "metric": "radon_cc",
       "name": "compare_to_baseline",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 5.0
+      "value": 6.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|450|print_complexity_summary": {
-      "line": 450,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|493|print_complexity_summary": {
+      "line": 493,
       "metric": "radon_cc",
       "name": "print_complexity_summary",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|518|resolve_tool": {
-      "line": 518,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|539|run_code_quality_audits": {
+      "line": 539,
+      "metric": "radon_cc",
+      "name": "run_code_quality_audits",
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "severity": "warn",
+      "value": 8.0
+    },
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|581|resolve_tool": {
+      "line": 581,
       "metric": "radon_cc",
       "name": "resolve_tool",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|530|native_source_files": {
-      "line": 530,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|593|native_source_files": {
+      "line": 593,
       "metric": "radon_cc",
       "name": "native_source_files",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|539|compile_database_files": {
-      "line": 539,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|602|compile_database_files": {
+      "line": 602,
       "metric": "radon_cc",
       "name": "compile_database_files",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|571|report_native_compile_database_coverage": {
-      "line": 571,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|634|report_native_compile_database_coverage": {
+      "line": 634,
       "metric": "radon_cc",
       "name": "report_native_compile_database_coverage",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|582|run_native_checks": {
-      "line": 582,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|645|run_native_checks": {
+      "line": 645,
       "metric": "radon_cc",
       "name": "run_native_checks",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|653|print_completed_output": {
-      "line": 653,
+    "radon_cc|.codex/skills/quality-check/scripts/quality_check.py|717|print_completed_output": {
+      "line": 717,
       "metric": "radon_cc",
       "name": "print_completed_output",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
@@ -8271,6 +8951,22 @@
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 5.0
+    },
+    "radon_cc|src/O4_External_Command_Result.py|35|_error_summary": {
+      "line": 35,
+      "metric": "radon_cc",
+      "name": "_error_summary",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_External_Tool_Paths.py|7|resolve_tool": {
+      "line": 7,
+      "metric": "radon_cc",
+      "name": "resolve_tool",
+      "path": "src/O4_External_Tool_Paths.py",
+      "severity": "advise",
+      "value": 4.0
     },
     "radon_cc|src/O4_File_Names.py|308|elevation_data": {
       "line": 308,
@@ -8878,7 +9574,7 @@
       "name": "build_mesh",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 45.0
+      "value": 39.0
     },
     "radon_cc|src/O4_Mesh_Utils.py|58|community_mesh": {
       "line": 58,
@@ -8887,22 +9583,6 @@
       "path": "src/O4_Mesh_Utils.py",
       "severity": "warn",
       "value": 7.0
-    },
-    "radon_cc|src/O4_Mesh_Utils.py|764|sort_mesh": {
-      "line": 764,
-      "metric": "radon_cc",
-      "name": "sort_mesh",
-      "path": "src/O4_Mesh_Utils.py",
-      "severity": "advise",
-      "value": 5.0
-    },
-    "radon_cc|src/O4_Mesh_Utils.py|803|triangulate": {
-      "line": 803,
-      "metric": "radon_cc",
-      "name": "triangulate",
-      "path": "src/O4_Mesh_Utils.py",
-      "severity": "advise",
-      "value": 4.0
     },
     "radon_cc|src/O4_Mesh_Utils.py|828|read_mesh_file": {
       "line": 828,
@@ -8990,7 +9670,7 @@
       "name": "build_overlay",
       "path": "src/O4_Overlay_Utils.py",
       "severity": "block",
-      "value": 43.0
+      "value": 39.0
     },
     "radon_cc|src/O4_Parallel_Utils.py|14|run": {
       "line": 14,
@@ -9055,6 +9735,22 @@
       "path": "src/O4_Source_Data_Models.py",
       "severity": "advise",
       "value": 4.0
+    },
+    "radon_cc|src/O4_Subprocess_Runtime.py|22|run_streamed": {
+      "line": 22,
+      "metric": "radon_cc",
+      "name": "run_streamed",
+      "path": "src/O4_Subprocess_Runtime.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|src/O4_Subprocess_Utils.py|15|run_external_tool": {
+      "line": 15,
+      "metric": "radon_cc",
+      "name": "run_external_tool",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "warn",
+      "value": 7.0
     },
     "radon_cc|src/O4_Tile_Utils.py|122|build_tile": {
       "line": 122,
@@ -9448,13 +10144,29 @@
       "severity": "advise",
       "value": 5.0
     },
+    "radon_cc|tests/test_subprocess_regression.py|30|active_source_files": {
+      "line": 30,
+      "metric": "radon_cc",
+      "name": "active_source_files",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|tests/test_subprocess_regression.py|40|raw_subprocess_findings": {
+      "line": 40,
+      "metric": "radon_cc",
+      "name": "raw_subprocess_findings",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "radon_hal_difficulty|.codex/skills/quality-check/scripts/quality_check.py||<module>": {
       "line": null,
       "metric": "radon_hal_difficulty",
       "name": "<module>",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 9.404255319148936
+      "value": 9.426282051282051
     },
     "radon_hal_difficulty|src/O4_Airport_Utils.py||<module>": {
       "line": null,
@@ -9510,7 +10222,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 16.12689585439838
+      "value": 16.11776649746193
     },
     "radon_hal_difficulty|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -9526,7 +10238,7 @@
       "name": "<module>",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 17.301204819277107
+      "value": 16.466666666666665
     },
     "radon_hal_difficulty|src/O4_OSM_Utils.py||<module>": {
       "line": null,
@@ -9598,7 +10310,7 @@
       "name": "<module>",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 16690.848405078934
+      "value": 18851.76280481415
     },
     "radon_hal_effort|src/O4_Airport_Utils.py||<module>": {
       "line": null,
@@ -9670,7 +10382,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 370825.7393224999
+      "value": 368634.7992097834
     },
     "radon_hal_effort|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -9686,7 +10398,7 @@
       "name": "<module>",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 164835.76556470923
+      "value": 152342.94222758242
     },
     "radon_hal_effort|src/O4_OSM_Utils.py||<module>": {
       "line": null,
@@ -9774,7 +10486,7 @@
       "name": "<module>",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 1774.8187218070361
+      "value": 1999.914993234279
     },
     "radon_hal_volume|src/O4_Airport_Utils.py||<module>": {
       "line": null,
@@ -9846,7 +10558,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 22994.24158688062
+      "value": 22871.332654424077
     },
     "radon_hal_volume|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -9862,7 +10574,7 @@
       "name": "<module>",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 9527.415419130131
+      "value": 9251.59568183699
     },
     "radon_hal_volume|src/O4_OSM_Utils.py||<module>": {
       "line": null,
@@ -9878,7 +10590,7 @@
       "name": "<module>",
       "path": "src/O4_Overlay_Utils.py",
       "severity": "advise",
-      "value": 1068.405848035964
+      "value": 1008.9526330518792
     },
     "radon_hal_volume|src/O4_Recut_Water.py||<module>": {
       "line": null,
@@ -9944,13 +10656,37 @@
       "severity": "block",
       "value": 14.55140070106316
     },
+    "radon_mi|.codex/skills/quality-check/scripts/code_quality_models.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": ".codex/skills/quality-check/scripts/code_quality_models.py",
+      "severity": "block",
+      "value": 46.769576377334374
+    },
+    "radon_mi|.codex/skills/quality-check/scripts/code_quality_policy_audits.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+      "severity": "block",
+      "value": 45.37853400351528
+    },
+    "radon_mi|.codex/skills/quality-check/scripts/code_quality_size_audits.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+      "severity": "block",
+      "value": 44.33329955850113
+    },
     "radon_mi|.codex/skills/quality-check/scripts/quality_check.py||<module>": {
       "line": null,
       "metric": "radon_mi",
       "name": "<module>",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "block",
-      "value": 3.012186759687768
+      "value": 2.805725169774111
     },
     "radon_mi|.codex/skills/repo-hygiene/scripts/hygiene.py||<module>": {
       "line": null,
@@ -10022,7 +10758,23 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 4.310282098898022
+      "value": 4.3225616653748835
+    },
+    "radon_mi|src/O4_External_Command_Result.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_External_Command_Result.py",
+      "severity": "warn",
+      "value": 55.762928536839595
+    },
+    "radon_mi|src/O4_External_Tool_Paths.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_External_Tool_Paths.py",
+      "severity": "warn",
+      "value": 56.96758902345466
     },
     "radon_mi|src/O4_File_Names.py||<module>": {
       "line": null,
@@ -10053,8 +10805,8 @@
       "metric": "radon_mi",
       "name": "<module>",
       "path": "src/O4_Geotag.py",
-      "severity": "block",
-      "value": 49.95761174162544
+      "severity": "warn",
+      "value": 51.73534406205065
     },
     "radon_mi|src/O4_Imagery_Utils.py||<module>": {
       "line": null,
@@ -10078,7 +10830,7 @@
       "name": "<module>",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "block",
-      "value": 6.173293521742046
+      "value": 12.919099066828815
     },
     "radon_mi|src/O4_OSM_Utils.py||<module>": {
       "line": null,
@@ -10094,7 +10846,7 @@
       "name": "<module>",
       "path": "src/O4_Overlay_Utils.py",
       "severity": "block",
-      "value": 36.91989394287608
+      "value": 38.21588665457687
     },
     "radon_mi|src/O4_Parallel_Utils.py||<module>": {
       "line": null,
@@ -10127,6 +10879,22 @@
       "path": "src/O4_Source_Data_Models.py",
       "severity": "block",
       "value": 30.345200710631968
+    },
+    "radon_mi|src/O4_Subprocess_Runtime.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Subprocess_Runtime.py",
+      "severity": "warn",
+      "value": 55.94874439698732
+    },
+    "radon_mi|src/O4_Subprocess_Utils.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Subprocess_Utils.py",
+      "severity": "warn",
+      "value": 54.17576819128194
     },
     "radon_mi|src/O4_Tile_Utils.py||<module>": {
       "line": null,
@@ -10278,7 +11046,15 @@
       "name": "<module>",
       "path": "tests/test_quality_check.py",
       "severity": "block",
-      "value": 41.40171510214294
+      "value": 40.307030653595184
+    },
+    "radon_mi|tests/test_quality_code_audits.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_quality_code_audits.py",
+      "severity": "block",
+      "value": 36.33864967401436
     },
     "radon_mi|tests/test_startup.py||<module>": {
       "line": null,
@@ -10288,13 +11064,29 @@
       "severity": "warn",
       "value": 53.39156775730039
     },
+    "radon_mi|tests/test_subprocess_regression.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_subprocess_regression.py",
+      "severity": "warn",
+      "value": 51.08640708321384
+    },
+    "radon_mi|tests/test_subprocess_utils.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_subprocess_utils.py",
+      "severity": "warn",
+      "value": 55.880040742324326
+    },
     "radon_raw_lloc|.codex/skills/quality-check/scripts/quality_check.py||<module>": {
       "line": null,
       "metric": "radon_raw_lloc",
       "name": "<module>",
       "path": ".codex/skills/quality-check/scripts/quality_check.py",
       "severity": "advise",
-      "value": 429.0
+      "value": 458.0
     },
     "radon_raw_lloc|src/O4_Airport_Utils.py||<module>": {
       "line": null,
@@ -10326,7 +11118,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
-      "value": 772.0
+      "value": 771.0
     },
     "radon_raw_lloc|src/O4_GUI_Utils.py||<module>": {
       "line": null,
@@ -10342,7 +11134,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 1355.0
+      "value": 1349.0
     },
     "radon_raw_lloc|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -10358,7 +11150,7 @@
       "name": "<module>",
       "path": "src/O4_Mesh_Utils.py",
       "severity": "warn",
-      "value": 559.0
+      "value": 520.0
     },
     "radon_raw_lloc|src/O4_OSM_Utils.py||<module>": {
       "line": null,
@@ -10404,6 +11196,10 @@
   "generated_by": "quality-check",
   "scope": [
     ".codex/skills/git-sync/scripts/git_sync.py",
+    ".codex/skills/quality-check/scripts/code_quality_audits.py",
+    ".codex/skills/quality-check/scripts/code_quality_models.py",
+    ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
+    ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
     ".codex/skills/quality-check/scripts/quality_check.py",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     "Ortho4XP.py",
@@ -10414,6 +11210,8 @@
     "src/O4_Config_Utils.py",
     "src/O4_DEM_Utils.py",
     "src/O4_DSF_Utils.py",
+    "src/O4_External_Command_Result.py",
+    "src/O4_External_Tool_Paths.py",
     "src/O4_File_Names.py",
     "src/O4_GUI_Utils.py",
     "src/O4_Geo_Utils.py",
@@ -10427,6 +11225,8 @@
     "src/O4_Recut_Water.py",
     "src/O4_Scenery_Utils.py",
     "src/O4_Source_Data_Models.py",
+    "src/O4_Subprocess_Runtime.py",
+    "src/O4_Subprocess_Utils.py",
     "src/O4_Tile_Utils.py",
     "src/O4_UI_Utils.py",
     "src/O4_Vector_Map.py",
@@ -10448,7 +11248,10 @@
     "tests/test_geo_utils.py",
     "tests/test_provider_parsing.py",
     "tests/test_quality_check.py",
-    "tests/test_startup.py"
+    "tests/test_quality_code_audits.py",
+    "tests/test_startup.py",
+    "tests/test_subprocess_regression.py",
+    "tests/test_subprocess_utils.py"
   ],
   "version": 1
 }
