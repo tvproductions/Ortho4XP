@@ -23,8 +23,6 @@ from tkinter import (
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 from O4_Cfg_Vars import (
-    cfg_vars,
-    cfg_global_tile_vars,
     global_prefix,
     list_global_tile_vars,
     list_tile_vars,
@@ -430,59 +428,34 @@ class Ortho4XP_GUI(tk.Tk):
         )
 
         if os.path.exists(tile_cfg_file):
-            f = open(tile_cfg_file, "r")
-            for line in f.readlines():
-                line = line.strip()
-                if not line or line[0] == "#":
-                    continue
+            with open(tile_cfg_file, "r") as f:
                 try:
-                    (var, value) = line.split("=")
-                    value = CFG.config_compatibility(value)
-                    target = (
-                        cfg_vars[var]["module"] + "." + var  # ty:ignore[unsupported-operator]
-                        if "module" in cfg_vars[var]
-                        else "CFG." + var
+                    zone_list = getattr(CFG, "zone_list")
+                    values = CFG._iter_loaded_config_values(
+                        f, legacy_zone_target=zone_list
                     )
-                    if cfg_vars[var]["type"] in (bool, list):
-                        cmd = target + "=" + value
-                    else:
-                        cmd = target + "=cfg_vars['" + var + "']['type'](value)"
-                    if var == "zone_list":
-                        # Append zones from config to global zone_list but also check if it's a duplicate
-                        for zone in ast.literal_eval(value):
-                            if zone not in CFG.zone_list:  # ty:ignore[unresolved-attribute]
-                                CFG.zone_list.append(zone)  # ty:ignore[unresolved-attribute]
-                        # Stop the loop here since we don't want to override the global zone_list which cmd will do
-                        continue
-                    exec(cmd)
-                except Exception as e:
-                    # compatibility with zone_list config files from version <= 1.20
-                    if "zone_list.append" in line:
-                        try:
-                            exec(line)
-                        except Exception as e:
-                            print(e)
-                            pass
-                    else:
-                        UI.vprint(2, e)
-                        pass
+                    for var, value in values:
+                        if var == "zone_list":
+                            # Append zones from config but do not override the global zone list.
+                            for zone in ast.literal_eval(value):
+                                if zone not in zone_list:
+                                    zone_list.append(zone)
+                            continue
+                        CFG.set_global_variables(var, value)
+                except CFG.UnsupportedWaterTechError:
+                    self.tile_cfg_exists.set(False)
+                    return
                 # Update main window GUI values
                 self.default_website.set(CFG.default_website)  # ty:ignore[unresolved-attribute]
                 self.default_zl.set(CFG.default_zl)  # ty:ignore[unresolved-attribute]
             self.tile_cfg_exists.set(True)
             UI.vprint(1, f"Configuration loaded for tile at {lat} {lon}")
-            f.close()
         else:
             for var in list_global_tile_vars:
                 # Set the value of CFG.* from the value of CFG.global_*
-                _var = "CFG." + var.replace(global_prefix, "")
-                # Get the value of CFG.global_*
-                value = eval("CFG." + var)
-                if cfg_global_tile_vars[var]["type"] in (bool, list):
-                    cmd = _var + "=" + str(value)
-                else:
-                    cmd = _var + "=cfg_global_tile_vars['" + var + "']['type'](value)"
-                exec(cmd)
+                _var = var.replace(global_prefix, "")
+                value = getattr(CFG, var)
+                CFG.set_global_variables(_var, value)
             self.tile_cfg_exists.set(False)
         # Update config window tile tab values if it's open
         if self.config_window is not None and self.config_window.winfo_exists():
@@ -499,9 +472,8 @@ class Ortho4XP_GUI(tk.Tk):
         for var in list_tile_vars:
             if var == "default_website" or var == "default_zl":
                 continue
-            target = "CFG." + var
             # Set tile and app config tab values from global variables
-            self.config_window.v_[var].set(str(eval(target)))  # ty:ignore[unresolved-attribute]
+            self.config_window.v_[var].set(str(getattr(CFG, var)))  # ty:ignore[unresolved-attribute]
 
     def update_website(self, *args) -> None:
         """Update global default_website variable from GUI."""

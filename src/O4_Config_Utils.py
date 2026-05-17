@@ -11,6 +11,7 @@ from tkinter import E, N, S, W, filedialog, messagebox
 
 import O4_Cfg_Vars as CFG
 from O4_Config_Models import (
+    UnsupportedWaterTechError,
     coerce_config_value,
     config_default,
     parse_legacy_config_literal,
@@ -84,6 +85,69 @@ def _coerce_config_value(var: str, value):
     return coerce_config_value(var, value, cfg_vars)
 
 
+def _validate_loaded_config_value(var: str, value):
+    _coerce_config_value(var, value)
+    return value
+
+
+def _report_unsupported_water_tech(error: UnsupportedWaterTechError) -> None:
+    UI.lvprint(0, "CFG error:", error)
+
+
+def _append_legacy_zone_line(line: str, zone_list: list[Any]) -> bool:
+    if "zone_list.append" not in line:
+        return False
+    try:
+        zone = parse_legacy_zone_append(line)
+        if zone is not None and zone not in zone_list:
+            zone_list.append(zone)
+    except (TypeError, ValueError, SyntaxError) as exc:
+        UI.vprint(3, exc)
+    return True
+
+
+def _active_config_lines(lines):
+    for line in lines:
+        line = line.strip()
+        if line and line[0] != "#":
+            yield line
+
+
+def _loaded_config_value(line, ignored_vars, key_transform, legacy_zone_target):
+    try:
+        (var, value) = line.split("=", 1)
+        if var in ignored_vars:
+            return None
+        var = key_transform(var)
+        value = config_compatibility(value)
+        _validate_loaded_config_value(var, value)
+        return var, value
+    except UnsupportedWaterTechError as exc:
+        _report_unsupported_water_tech(exc)
+        raise
+    except (KeyError, TypeError, ValueError, SyntaxError) as exc:
+        if legacy_zone_target is None or not _append_legacy_zone_line(
+            line, legacy_zone_target
+        ):
+            UI.vprint(2, exc)
+        return None
+
+
+def _iter_loaded_config_values(
+    lines,
+    *,
+    ignored_vars=(),
+    key_transform=lambda var: var,
+    legacy_zone_target: list[Any] | None = None,
+):
+    for line in _active_config_lines(lines):
+        loaded_value = _loaded_config_value(
+            line, ignored_vars, key_transform, legacy_zone_target
+        )
+        if loaded_value is not None:
+            yield loaded_value
+
+
 def _config_hint(registry: dict[str, dict[str, Any]], item: str) -> str:
     return str(registry[item]["hint"])
 
@@ -148,6 +212,9 @@ try:
             # Set all global tile config variables
             var = global_prefix + var
             set_global_variables(var, value)
+        except UnsupportedWaterTechError as exc:
+            UI.lvprint(0, "Global config file contains an unsupported line:", line)
+            UI.vprint(1, exc)
         except (KeyError, TypeError, ValueError, SyntaxError) as exc:
             UI.lvprint(1, "Global config file contains an invalid line:", line)
             UI.vprint(3, exc)
@@ -235,33 +302,14 @@ class Tile:
                     )
                     return 0
         try:
-            f = open(config_file, "r")
-            for line in f.readlines():
-                line = line.strip()
-                if not line:
-                    continue
-                if line[0] == "#":
-                    continue
-                try:
-                    (var, value) = line.split("=", 1)
-                    # compatibility with config files from version <= 1.20
-                    value = config_compatibility(value)
+            with open(config_file, "r") as f:
+                for var, value in _iter_loaded_config_values(
+                    f, legacy_zone_target=getattr(self, "zone_list")
+                ):
                     setattr(self, var, _coerce_config_value(var, value))
-                except (KeyError, TypeError, ValueError, SyntaxError) as e:
-                    # compatibility with zone_list config files from
-                    # version <= 1.20
-                    if "zone_list.append" in line:
-                        try:
-                            zone = parse_legacy_zone_append(line)
-                            if zone is not None:
-                                getattr(self, "zone_list").append(zone)
-                        except (TypeError, ValueError, SyntaxError) as exc:
-                            UI.vprint(3, exc)
-                    else:
-                        UI.vprint(2, e)
-                        pass
-            f.close()
             return 1
+        except UnsupportedWaterTechError:
+            return 0
         except OSError as exc:
             UI.lvprint(
                 0,
@@ -1061,26 +1109,14 @@ class Ortho4XP_Config(tk.Toplevel):
             messagebox.showinfo("Not found", "No backup tile configuration found.")
             return
 
-        for line in f.readlines():
-            line = line.strip()
-            if not line or line[0] == "#":
-                continue
-            try:
-                (var, value) = line.split("=", 1)
-                value = config_compatibility(value)
+        try:
+            for var, value in _iter_loaded_config_values(
+                f, legacy_zone_target=zone_list
+            ):
                 self.v_[var].set(value)
-            except (KeyError, TypeError, ValueError, SyntaxError) as e:
-                # compatibility with zone_list config files from version <= 1.20
-                if "zone_list.append" in line:
-                    try:
-                        zone = parse_legacy_zone_append(line)
-                        if zone is not None:
-                            zone_list.append(zone)
-                    except (TypeError, ValueError, SyntaxError) as e:
-                        print(e)
-                else:
-                    UI.vprint(2, e)
-                    pass
+        except UnsupportedWaterTechError:
+            f.close()
+            return 0
         if zone_list and not self.v_["zone_list"].get():
             self.v_["zone_list"].set(str(zone_list))
         # Apply changes to update global variables
@@ -1111,28 +1147,14 @@ class Ortho4XP_Config(tk.Toplevel):
             except OSError:
                 messagebox.showinfo("Not found", "No tile configuration found.")
                 return 0
-        for line in f.readlines():
-            line = line.strip()
-            if not line:
-                continue
-            if line[0] == "#":
-                continue
-            try:
-                (var, value) = line.split("=", 1)
-                value = config_compatibility(value)
+        try:
+            for var, value in _iter_loaded_config_values(
+                f, legacy_zone_target=zone_list
+            ):
                 self.v_[var].set(value)
-            except (KeyError, TypeError, ValueError, SyntaxError) as e:
-                # compatibility with zone_list config files from version <= 1.20
-                if "zone_list.append" in line:
-                    try:
-                        zone = parse_legacy_zone_append(line)
-                        if zone is not None:
-                            zone_list.append(zone)
-                    except (TypeError, ValueError, SyntaxError) as e:
-                        print(e)
-                else:
-                    UI.vprint(2, e)
-                    pass
+        except UnsupportedWaterTechError:
+            f.close()
+            return 0
         if not self.v_["zone_list"].get():
             self.v_["zone_list"].set(str(zone_list))
         self.parent.tile_cfg_exists.set(True)
@@ -1208,20 +1230,17 @@ class Ortho4XP_Config(tk.Toplevel):
         """Load backup global tile configuration settings."""
         try:
             with open(global_cfg_bak_file, "r") as f:
-                for line in f.readlines():
-                    line = line.strip()
-                    if not line or line[0] == "#":
-                        continue
-                    (var, value) = line.split("=")
-                    # Ignore list_app_vars
-                    if var in list_app_vars:
-                        continue
-                    var = global_prefix + var
-                    value = config_compatibility(value)
+                for var, value in _iter_loaded_config_values(
+                    f,
+                    ignored_vars=list_app_vars,
+                    key_transform=lambda var: global_prefix + var,
+                ):
                     self.v_[var].set(value)
                 # Apply changes to update global variables
                 self.apply_changes("tile")
                 UI.vprint(0, f"Backup configuration loaded for global tile settings.")
+        except UnsupportedWaterTechError:
+            return
         except FileNotFoundError:
             messagebox.showinfo("Not found", "No backup global configuration found.")
             return

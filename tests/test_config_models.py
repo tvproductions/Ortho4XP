@@ -1,8 +1,14 @@
+from pathlib import Path
+import re
 import unittest
 
-import _path  # noqa: F401
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 from O4_Cfg_Vars import cfg_vars
 from O4_Config_Models import (
+    UnsupportedWaterTechError,
     coerce_config_value,
     parse_legacy_config_literal,
     parse_legacy_zone_append,
@@ -44,6 +50,31 @@ class ConfigModelTests(unittest.TestCase):
 
     def test_legacy_quotes_are_removed_once(self):
         self.assertEqual(parse_legacy_config_literal('"Arc"'), "Arc")
+
+    def test_water_tech_is_fixed_to_xp12(self):
+        self.assertEqual(cfg_vars["water_tech"]["default"], "XP12")
+        self.assertEqual(cfg_vars["water_tech"]["values"], ("XP12",))
+        self.assertEqual(coerce_config_value("water_tech", "XP12", cfg_vars), "XP12")
+
+    def test_legacy_water_tech_values_are_rejected(self):
+        for value in ("XP11", "XP11 + bathy"):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(
+                    UnsupportedWaterTechError,
+                    rf"{re.escape(f'water_tech={value!r}')}.*water_tech=XP12",
+                ):
+                    coerce_config_value("water_tech", value, cfg_vars)
+
+    def test_legacy_water_tech_global_value_is_rejected(self):
+        with self.assertRaisesRegex(
+            UnsupportedWaterTechError,
+            r"water_tech='XP11 \+ bathy'.*water_tech=XP12",
+        ):
+            coerce_config_value("global_water_tech", "XP11 + bathy", cfg_vars)
+
+    def test_dsf_generation_has_no_legacy_water_tech_branch(self):
+        dsf_source = Path("src/O4_DSF_Utils.py").read_text()
+        self.assertNotIn("XP11 + bathy", dsf_source)
 
 
 if __name__ == "__main__":

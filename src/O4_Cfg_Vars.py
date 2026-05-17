@@ -299,9 +299,9 @@ cfg_tile_vars = {
     },
     "water_tech": {
         "type": str,
-        "default": "XP11 + bathy",
-        "values": ("XP12", "XP11 + bathy"),
-        "hint": "Water tech type. XP12 uses a new (partly in construction) rendering tech, XP11 + bathy uses a more traditionnal blend. Both allows for 3D water.",
+        "default": "XP12",
+        "values": ("XP12",),
+        "hint": "Water tech marker. XP12 is the only supported water mesh mode.",
     },
     # "add_low_res_sea_ovl": {
     #    "type": bool,

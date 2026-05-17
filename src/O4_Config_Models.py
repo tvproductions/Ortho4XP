@@ -13,6 +13,26 @@ _TYPE_ADAPTERS = {
     list: TypeAdapter(list),
     str: TypeAdapter(str),
 }
+_LEGACY_WATER_TECH_VALUES = {"XP11", "XP11 + bathy"}
+
+
+class UnsupportedWaterTechError(ValueError):
+    """Raised when a config file requests a removed water tech mode."""
+
+
+def _reject_legacy_water_tech(var: str, value: Any) -> None:
+    var_name = var.removeprefix("global_")
+    if var_name == "water_tech" and value in _LEGACY_WATER_TECH_VALUES:
+        raise UnsupportedWaterTechError(
+            f"water_tech={value!r} is no longer supported; set water_tech=XP12."
+        )
+
+
+def _allowed_values_after_legacy_check(
+    definition: dict[str, Any], var: str, value: Any
+) -> list[Any] | tuple[Any, ...] | None:
+    _reject_legacy_water_tech(var, value)
+    return definition.get("values")
 
 
 class ConfigVariableDefinition(BaseModel):
@@ -78,7 +98,7 @@ def coerce_config_value(
     coerced = _TYPE_ADAPTERS[expected_type].validate_python(value)
     if var == "zone_list":
         ZoneListDefinition.model_validate({"zones": coerced})
-    allowed_values = definition.get("values")
+    allowed_values = _allowed_values_after_legacy_check(definition, var, coerced)
     if allowed_values is not None and coerced not in allowed_values:
         raise ValueError(f"{var} must be one of {allowed_values}")
     return coerced

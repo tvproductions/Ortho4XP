@@ -599,22 +599,14 @@ def build_dsf(tile, download_queue):
     for idx_dsfpool in range(dsf_pool_nbr):
         dsf_pools[idx_dsfpool] = array.array("H")
     dsf_pool_length = numpy.zeros(dsf_pool_nbr, "int")
-    if tile.water_tech == "XP11 + bathy":
-        # Land with ortho
-        dsf_pool_plane = 7 * numpy.ones(dsf_pool_nbr, "int")
-        # Masked ortho (UV1 = ortho, UV2 = border_tex (if aplicable))
-        dsf_pool_plane[pool_nbr : 2 * pool_nbr] = 9
-        # Regular XP water
-        dsf_pool_plane[2 * pool_nbr : 3 * pool_nbr] = 7
-    elif tile.water_tech == "XP12":
-        # Land with ortho
-        dsf_pool_plane = 7 * numpy.ones(dsf_pool_nbr, "int")
-        # Masked ortho : UV1 = fetch/depth UV2 = ortho)
-        #           or : UV1 = ortho, V2 = border_tex
-        #                for inland water with constant alpha
-        dsf_pool_plane[pool_nbr : 2 * pool_nbr] = 9
-        # Regular XP water
-        dsf_pool_plane[2 * pool_nbr : 3 * pool_nbr] = 7
+    # Land with ortho
+    dsf_pool_plane = 7 * numpy.ones(dsf_pool_nbr, "int")
+    # Masked ortho : UV1 = fetch/depth UV2 = ortho)
+    #           or : UV1 = ortho, V2 = border_tex
+    #                for inland water with constant alpha
+    dsf_pool_plane[pool_nbr : 2 * pool_nbr] = 9
+    # Regular XP water
+    dsf_pool_plane[2 * pool_nbr : 3 * pool_nbr] = 7
     textured_nodes = {}
     len_textured_nodes = 0
     textured_tris = {}
@@ -699,11 +691,8 @@ def build_dsf(tile, download_queue):
                 textured_tris[terrain_idx] = defaultdict(lambda: array.array("H"))
                 dico_terrains[terrain_attributes] = terrain_idx  # ty:ignore[invalid-assignment]
 
-                # Is it an overlay terrain or the new XP 12 phys water type ?
-                # XP11 style => overlay
-                is_overlay = tile.water_tech == "XP11 + bathy"
                 # No alpha channel in DDS => overlay
-                is_overlay |= not tile.imprint_masks_to_dds
+                is_overlay = not tile.imprint_masks_to_dds
 
                 if is_overlay:
                     overlay_terrains.add(terrain_idx)

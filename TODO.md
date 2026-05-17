@@ -334,9 +334,15 @@ Suggested labels: `logging`, `diagnostics`, `refactor`
 
 ### TODO-012: Improve Network and Imagery Failure Reporting
 
-GitHub Issue: #7
+Status: Done
+
+GitHub Issue: #7 (closed)
 
 Make imagery download failures easier to diagnose without excessive noise.
+
+Completed by adding structured sanitized imagery-failure logging,
+retry-aware failure records, configurable texture retry limits,
+end-of-download failure summaries, documentation, and deterministic tests.
 
 Acceptance criteria:
 
@@ -352,9 +358,16 @@ Suggested labels: `imagery`, `network`, `diagnostics`
 
 ### TODO-013: Enforce XP12 Water Tech and Purge Legacy Flags
 
-GitHub Issue: #8
+Status: Done
+
+GitHub Issue: #8 (closed)
 
 Remove backward-compatible water rendering states to prevent accidental legacy compilation.
+
+Completed by fixing `water_tech` to XP12 in the config registry,
+rejecting legacy XP11 water modes through shared config validation,
+applying that validation to tile/global/backup/GUI config load paths,
+and removing the legacy XP11 overlay branch from DSF generation.
 
 Acceptance criteria:
 
