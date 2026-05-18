@@ -1,6 +1,5 @@
 import array
 import hashlib
-import io
 import numpy
 import os
 import pickle
@@ -10,6 +9,7 @@ from collections import defaultdict
 from math import ceil, floor
 from PIL import Image, ImageDraw
 import O4_Bathymetry as BATHY
+import O4_Bathymetry_Input as BATHY_INPUT
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Mask_Utils as MASK
@@ -350,110 +350,21 @@ def create_terrain_file(
 
 ################################################################################
 def extract_elevation_and_bathymetry_data(lat, lon):
-    UI.vprint(1, "     Extracting some rasters from X-Plane's Global Scenery")
-    global_scenery_dsf = os.path.join(
-        OVL.custom_overlay_src,
-        "Earth nav data",
-        FNAMES.long_latlon(lat, lon) + ".dsf",
+    UI.vprint(1, "     Extracting XP12 rasters from X-Plane Global Scenery")
+    result = BATHY_INPUT.extract_validated_global_scenery_rasters(
+        lat,
+        lon,
+        primary_overlay_src=OVL.custom_overlay_src,
+        alternate_overlay_src=OVL.custom_overlay_src_alternate,
+        tmp_dir=FNAMES.Tmp_dir,
+        unzip_executable=OVL.unzip_cmd,
+        run_external_tool=SP.run_external_tool,
     )
-    if not os.path.exists(global_scenery_dsf):
-        global_scenery_dsf = os.path.join(
-            OVL.custom_overlay_src_alternate,
-            "Earth nav data",
-            FNAMES.long_latlon(lat, lon) + ".dsf",
-        )
-    if not os.path.exists(global_scenery_dsf):
-        UI.exit_message_and_bottom_line(
-            "   ERROR: file ",
-            global_scenery_dsf,
-            "absent. Global Scenery directory needs to be set in the config ",
-            "window first.",
-        )
-        return (b"", b"")
-    tmp_file = os.path.join(FNAMES.Tmp_dir, FNAMES.short_latlon(lat, lon) + ".dsf")
-    UI.vprint(2, "     Making a copy of the Global Scenery DSF in tmp dir")
-    try:
-        shutil.copy(global_scenery_dsf, tmp_file)
-    except OSError as exc:
-        UI.exit_message_and_bottom_line(
-            "     ERROR: could not copy it. Disk full, write permissions,",
-            " erased tmp dir ?",
-        )
-        UI.vprint(3, exc)
-        return (b"", b"")
+    return (result.demn, result.dems)
 
-    with open(tmp_file, "rb") as f:
-        dsfid = f.read(2).decode("ascii")
-    if dsfid == "7z":
-        UI.vprint(2, "     The original DSF is a 7z archive, uncompressing...")
-        os.replace(tmp_file, tmp_file + ".7z")
-        SP.run_external_tool(
-            "7z",
-            ["e", f"-o{FNAMES.Tmp_dir}", f"{tmp_file}.7z"],
-            executable=OVL.unzip_cmd,
-        )
-        os.remove(tmp_file + ".7z")
-    file_len = os.path.getsize(tmp_file)
-    f = open(tmp_file, "rb")
-    # read filetype cookie
-    dsfid = f.read(8).decode("ascii")
-    if dsfid != "XPLNEDSF":
-        UI.exit_message_and_bottom_line("     ERROR: Corrupted DSF file.")
-        os.remove(tmp_file)
-        return (b"", b"")
-    # skip format number
-    f.read(4)
-    # read atoms
-    atoms_len = file_len - 12 - 16  # 12 for HDR and 16 for MD5
-    atoms_consumed = 0
-    while atoms_consumed < atoms_len:
-        atom_hdr = f.read(4).decode("ascii")
-        atom_len = struct.unpack("<I", f.read(4))[0]
-        if atom_hdr == "SMED":
-            bDEMS_orig = f.read(atom_len - 8)
-            bDEMS = b""
-            bELEV = b""
-            g = io.BytesIO(bDEMS_orig)
-            consumed = 8
-            i = 0
-            while consumed < atom_len:
-                bH = g.read(4)
-                sub_atom_hdr = bH.decode("ascii")
-                bL = g.read(4)
-                sub_atom_len = struct.unpack("<I", bL)[0]
-                bDATA = g.read(sub_atom_len - 8)
-                if sub_atom_len > 100:
-                    i += 1
-                    if i == 1:
-                        bELEV = bDATA
-                    elif i == 2:
-                        # XP bathy data for inland water is only partial,
-                        # we use a safe margin = DEM_elev - 2 to cope with it
-                        bathy = numpy.frombuffer(bDATA, dtype=numpy.int16)
-                        safe = numpy.frombuffer(bELEV, dtype=numpy.int16) - 2
-                        bathy = numpy.minimum(bathy, safe)
-                        bDATA = bytes(bathy)
-                bDEMS += bH + bL + bDATA
-                consumed += sub_atom_len
-            g.close()
-        elif atom_hdr == "NFED":
-            consumed = 8
-            while consumed < atom_len:
-                sub_atom_hdr = f.read(4).decode("ascii")
-                sub_atom_len = struct.unpack("<I", f.read(4))[0]
-                data = f.read(sub_atom_len - 8)
-                if sub_atom_hdr == "NMED":
-                    bDEMN = data
-                consumed += sub_atom_len
-        else:
-            f.read(atom_len - 8)
 
-        atoms_consumed += atom_len
-
-    f.close()
-    os.remove(tmp_file)
-
-    return (bDEMN, bDEMS)
+def mesh_requires_bathymetry(tri_types):
+    return any(tri_type in (1, 2) for tri_type in tri_types)
 
 
 ################################################################################
@@ -495,6 +406,17 @@ def build_dsf(tile, download_queue):
     node_bathy = BATHY.compute_depth_ratio_bounds_from_masks(
         nbr_nodes, node_coords, node_types, tile
     )
+
+    if mesh_requires_bathymetry(tri_types):
+        try:
+            (bDEMN, bDEMS) = extract_elevation_and_bathymetry_data(tile.lat, tile.lon)
+        except BATHY_INPUT.BathymetryInputError as exc:
+            UI.exit_message_and_bottom_line("\nERROR:", exc)
+            return 0
+    else:
+        UI.vprint(1, "-> No water triangles detected; skipping XP12 bathymetry input")
+        bDEMN = b""
+        bDEMS = b""
 
     UI.vprint(1, "-> Computing point pools and texture requirements")
 
@@ -1041,9 +963,6 @@ def build_dsf(tile, download_queue):
         )
     else:
         bPROP += b"sim/creation_agent\0Patched by Ortho4XP\0"
-
-    # Transfer DEM and bathymetry raster from Global Scenery tiles
-    (bDEMN, bDEMS) = extract_elevation_and_bathymetry_data(tile.lat, tile.lon)
 
     # Computation of intermediate and of total length
     size_of_head_atom = 16 + len(bPROP)

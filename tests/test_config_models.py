@@ -76,6 +76,27 @@ class ConfigModelTests(unittest.TestCase):
         dsf_source = Path("src/O4_DSF_Utils.py").read_text()
         self.assertNotIn("XP11 + bathy", dsf_source)
 
+    def test_dsf_generation_uses_bathymetry_input_boundary(self):
+        dsf_source = Path("src/O4_DSF_Utils.py").read_text()
+        self.assertIn("extract_elevation_and_bathymetry_data", dsf_source)
+        self.assertIn("mesh_requires_bathymetry", dsf_source)
+        self.assertIn("O4_Bathymetry_Input", dsf_source)
+
+    def test_bathymetry_input_is_extracted_before_dsf_backup(self):
+        dsf_source = Path("src/O4_DSF_Utils.py").read_text()
+        extraction = "extract_elevation_and_bathymetry_data(tile.lat, tile.lon)"
+        backup = 'os.replace(dsf_file_name, dsf_file_name + ".bak")'
+
+        self.assertEqual(dsf_source.count(extraction), 1)
+        self.assertLess(dsf_source.index(extraction), dsf_source.index(backup))
+        self.assertIn("BATHY_INPUT.BathymetryInputError", dsf_source)
+
+    def test_masks_are_not_treated_as_bathymetry_source(self):
+        bathy_source = Path("src/O4_Bathymetry_Input.py").read_text()
+        self.assertNotIn("distance_masks_too", bathy_source)
+        self.assertNotIn("ratio_bathy", bathy_source)
+        self.assertNotIn("node_bathy", bathy_source)
+
 
 if __name__ == "__main__":
     unittest.main()
