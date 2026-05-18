@@ -1,3 +1,10 @@
+"""Regression tests for config schema and TODO-014 water-tech boundaries.
+
+Several assertions intentionally inspect source text because they guard removal
+of legacy water-tech branches and prevent bathymetry input from drifting back
+into mask-derived data paths.
+"""
+
 from pathlib import Path
 import re
 import unittest
@@ -107,7 +114,17 @@ class ConfigModelTests(unittest.TestCase):
         self.assertLess(dsf_source.index(water_gate), dsf_source.index(extraction))
 
     def test_masks_are_not_treated_as_bathymetry_source(self):
-        bathy_source = Path("src/O4_Bathymetry_Input.py").read_text()
+        bathy_source = "\n".join(
+            Path("src", filename).read_text()
+            for filename in (
+                "O4_Bathymetry_DSF_Atoms.py",
+                "O4_Bathymetry_DSF_Bytes.py",
+                "O4_Bathymetry_Input.py",
+                "O4_Bathymetry_Models.py",
+                "O4_Bathymetry_Raster_Parser.py",
+                "O4_Bathymetry_Source.py",
+            )
+        )
         self.assertNotIn("distance_masks_too", bathy_source)
         self.assertNotIn("ratio_bathy", bathy_source)
         self.assertNotIn("node_bathy", bathy_source)
