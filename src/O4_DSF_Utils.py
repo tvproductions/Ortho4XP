@@ -358,15 +358,13 @@ def create_terrain_file(
 def extract_elevation_and_bathymetry_data(lat, lon):
     UI.vprint(1, "     Extracting XP12 rasters from X-Plane Global Scenery")
     result = BATHY_INPUT.extract_validated_global_scenery_rasters(
-        BATHY_INPUT.GlobalSceneryRasterSource(
-            lat,
-            lon,
-            OVL.custom_overlay_src,
-            OVL.custom_overlay_src_alternate,
-            FNAMES.Tmp_dir,
-            OVL.unzip_cmd,
-            SP.run_external_tool,
-        )
+        lat,
+        lon,
+        primary_overlay_src=OVL.custom_overlay_src,
+        alternate_overlay_src=OVL.custom_overlay_src_alternate,
+        tmp_dir=FNAMES.Tmp_dir,
+        unzip_executable=OVL.unzip_cmd,
+        run_external_tool=SP.run_external_tool,
     )
     return (result.demn, result.dems)
 
@@ -422,7 +420,11 @@ def build_dsf(tile, download_queue):
         nbr_nodes, node_coords, node_types, tile
     )
 
-    (bDEMN, bDEMS) = extract_required_bathymetry_rasters(tile, tri_types)
+    try:
+        (bDEMN, bDEMS) = extract_required_bathymetry_rasters(tile, tri_types)
+    except BATHY_INPUT.BathymetryInputError as exc:
+        UI.exit_message_and_bottom_line(str(exc))
+        return 0
 
     UI.vprint(1, "-> Computing point pools and texture requirements")
 

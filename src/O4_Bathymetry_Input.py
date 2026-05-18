@@ -20,7 +20,32 @@ from O4_Bathymetry_Models import (
     ValidatedRasterBytes,
 )
 from O4_Bathymetry_Raster_Parser import validate_raster_payload
-from O4_Bathymetry_Source import extract_validated_global_scenery_rasters
+from O4_Bathymetry_Source import (
+    extract_validated_global_scenery_rasters as _extract_validated_global_scenery_rasters,
+)
+
+
+def extract_validated_global_scenery_rasters(
+    lat,
+    lon,
+    *,
+    primary_overlay_src,
+    alternate_overlay_src,
+    tmp_dir,
+    unzip_executable,
+    run_external_tool,
+):
+    source = GlobalSceneryRasterSource(
+        lat,
+        lon,
+        primary_overlay_src,
+        alternate_overlay_src,
+        tmp_dir,
+        unzip_executable,
+        run_external_tool,
+    )
+    return _extract_validated_global_scenery_rasters(source)
+
 
 __all__ = [
     "BathymetryErrorContext",

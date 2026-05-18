@@ -10,8 +10,8 @@ except ModuleNotFoundError:
 from O4_Bathymetry_Input import (
     BathymetryInputError,
     GlobalSceneryRasterSource,
-    extract_validated_global_scenery_rasters,
 )
+from O4_Bathymetry_Source import extract_validated_global_scenery_rasters
 from tests.test_bathymetry_provider import (
     global_scenery_dsf_path,
     raster_source,

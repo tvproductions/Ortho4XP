@@ -8,10 +8,8 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
-from O4_Bathymetry_Input import (
-    BathymetryInputError,
-    extract_validated_global_scenery_rasters,
-)
+from O4_Bathymetry_Input import BathymetryInputError
+from O4_Bathymetry_Source import extract_validated_global_scenery_rasters
 from tests.test_bathymetry_provider import (
     global_scenery_dsf_path,
     raster_source,
