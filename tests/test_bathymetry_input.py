@@ -17,6 +17,10 @@ def atom(name: bytes, payload: bytes) -> bytes:
     return name[::-1] + struct.pack("<I", len(payload) + 8) + payload
 
 
+def raw_atom(name: bytes, payload: bytes) -> bytes:
+    return name + struct.pack("<I", len(payload) + 8) + payload
+
+
 def demn_payload(*names: str) -> bytes:
     return b"".join(name.encode("ascii") + b"\0" for name in names)
 
@@ -225,8 +229,8 @@ class BathymetryInputTests(unittest.TestCase):
 
 
 def dsf_file(*, demn: bytes, dems: bytes) -> bytes:
-    body = atom("NFED".encode("ascii"), atom("NMED".encode("ascii"), demn))
-    body += atom("SMED".encode("ascii"), dems)
+    body = raw_atom("NFED".encode("ascii"), raw_atom("NMED".encode("ascii"), demn))
+    body += raw_atom("SMED".encode("ascii"), dems)
     return b"XPLNEDSF" + struct.pack("<I", 1) + body + (b"0" * 16)
 
 

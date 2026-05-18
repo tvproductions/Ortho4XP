@@ -135,9 +135,9 @@ def _extract_raw_raster_atoms(
             source_path,
             atom_table_name="DSF",
         )
-        if header == "NFED":
+        if header == "DEFN":
             demn = _extract_demn_from_defn(payload, tile_label, source_path)
-        elif header == "SMED":
+        elif header == "DEMS":
             dems = payload
         if stream.tell() <= atom_start:
             raise _error(tile_label, source_path, "malformed DSF atom table")
@@ -164,7 +164,7 @@ def _extract_demn_from_defn(
             source_path,
             atom_table_name="DEFN",
         )
-        if header == "NMED":
+        if header == "DEMN":
             return data
     raise _error(tile_label, source_path, "missing DEMN raster definitions")
 
