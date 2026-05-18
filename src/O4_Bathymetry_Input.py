@@ -92,9 +92,14 @@ def _parse_layer_names(demn: bytes, tile_label: str, source_path: str) -> tuple[
     if not demn:
         raise _error(tile_label, source_path, "empty DEMN raster definition payload")
     try:
-        names = tuple(
-            part.decode("ascii") for part in demn.rstrip(b"\0").split(b"\0") if part
-        )
+        parts = demn.rstrip(b"\0").split(b"\0")
+        if any(not part for part in parts):
+            raise _error(
+                tile_label,
+                source_path,
+                "malformed DEMN raster definition names",
+            )
+        names = tuple(part.decode("ascii") for part in parts)
     except UnicodeDecodeError as exc:
         raise _error(
             tile_label,
@@ -117,7 +122,7 @@ def _parse_dems(
     pairs: list[tuple[_RasterMetadata, bytes]] = []
     while stream.tell() < len(dems):
         header, payload = _read_atom(stream, len(dems), tile_label, source_path)
-        if header not in ("DEMI", "IMED"):
+        if header != "DEMI":
             raise _error(
                 tile_label,
                 source_path,
@@ -125,7 +130,7 @@ def _parse_dems(
             )
         metadata = _parse_demi(payload, tile_label, source_path)
         header, data = _read_atom(stream, len(dems), tile_label, source_path)
-        if header not in ("DEMD", "DMED"):
+        if header != "DEMD":
             raise _error(
                 tile_label,
                 source_path,

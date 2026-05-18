@@ -50,16 +50,16 @@ def dems_payload(
     include_sea_level: bool = True,
     empty_sea_level: bool = False,
 ) -> bytes:
-    elevation = atom("IMED".encode("ascii"), demi(*elevation_size)) + atom(
-        "DMED".encode("ascii"), demd(*elevation_size)
+    elevation = atom("DEMI".encode("ascii"), demi(*elevation_size)) + atom(
+        "DEMD".encode("ascii"), demd(*elevation_size)
     )
     if not include_sea_level:
         return elevation
     sea_data = b"" if empty_sea_level else demd(*sea_level_size)
     return (
         elevation
-        + atom("IMED".encode("ascii"), demi(*sea_level_size))
-        + atom("DMED".encode("ascii"), sea_data)
+        + atom("DEMI".encode("ascii"), demi(*sea_level_size))
+        + atom("DEMD".encode("ascii"), sea_data)
     )
 
 
@@ -135,6 +135,33 @@ class BathymetryInputTests(unittest.TestCase):
             validate_raster_payload(
                 demn_payload("elevation", "sea_level"),
                 b"\xffMED" + struct.pack("<I", 8),
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
+    def test_non_canonical_dems_atom_byte_order_is_rejected(self):
+        non_canonical_dems = atom("IMED".encode("ascii"), demi(2, 2)) + atom(
+            "DMED".encode("ascii"), demd(2, 2)
+        )
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*malformed.*DEMS",
+        ):
+            validate_raster_payload(
+                demn_payload("elevation"),
+                non_canonical_dems,
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
+    def test_empty_demn_layer_entry_is_rejected(self):
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*malformed.*DEMN",
+        ):
+            validate_raster_payload(
+                b"elevation\0\0sea_level\0",
+                dems_payload(),
                 tile_label="+12-123",
                 source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
             )
