@@ -407,6 +407,8 @@ def build_dsf(tile, download_queue):
         nbr_nodes, node_coords, node_types, tile
     )
 
+    bDEMN = b""
+    bDEMS = b""
     if mesh_requires_bathymetry(tri_types):
         try:
             (bDEMN, bDEMS) = extract_elevation_and_bathymetry_data(tile.lat, tile.lon)
@@ -415,8 +417,6 @@ def build_dsf(tile, download_queue):
             return 0
     else:
         UI.vprint(1, "-> No water triangles detected; skipping XP12 bathymetry input")
-        bDEMN = b""
-        bDEMS = b""
 
     UI.vprint(1, "-> Computing point pools and texture requirements")
 
@@ -540,9 +540,7 @@ def build_dsf(tile, download_queue):
     bOBJT = b""
     bPOLY = b""
     bNETW = b""
-    bDEMN = b""
     bGEOD = b""
-    bDEMS = b""
     bCMDS = b""
 
     nbr_dsfpools_yet_in = 0

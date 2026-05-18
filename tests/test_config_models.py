@@ -91,6 +91,16 @@ class ConfigModelTests(unittest.TestCase):
         self.assertLess(dsf_source.index(extraction), dsf_source.index(backup))
         self.assertIn("BATHY_INPUT.BathymetryInputError", dsf_source)
 
+    def test_empty_bathymetry_rasters_are_initialized_before_water_gate(self):
+        dsf_source = Path("src/O4_DSF_Utils.py").read_text()
+        water_gate = "if mesh_requires_bathymetry(tri_types):"
+        extraction = "extract_elevation_and_bathymetry_data(tile.lat, tile.lon)"
+
+        self.assertLess(dsf_source.index('bDEMN = b""'), dsf_source.index(water_gate))
+        self.assertLess(dsf_source.index('bDEMS = b""'), dsf_source.index(water_gate))
+        self.assertNotIn('bDEMN = b""', dsf_source[dsf_source.index(extraction) :])
+        self.assertNotIn('bDEMS = b""', dsf_source[dsf_source.index(extraction) :])
+
     def test_masks_are_not_treated_as_bathymetry_source(self):
         bathy_source = Path("src/O4_Bathymetry_Input.py").read_text()
         self.assertNotIn("distance_masks_too", bathy_source)
