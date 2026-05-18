@@ -381,9 +381,19 @@ Suggested labels: `xp12max`, `mesh`, `breaking-change`
 
 ### TODO-014: Require Valid Bathymetry Inputs for Physical Water Meshes
 
-GitHub Issue: #9
+Status: Done
+
+GitHub Issue: #9 (closed)
 
 Make XP12 3D bathymetry requirements explicit before deeper mesh rewrites.
+
+Completed by defining a validated bathymetry raster contract, extracting
+`elevation` and `sea_level` raster atoms from XP12 Global Scenery DSFs,
+requiring those rasters only for tiles whose mesh contains water triangles,
+failing DSF generation through the controlled UI error path when required input
+is missing or invalid, and preserving validated DEMN/DEMS payloads in generated
+XP12 DSFs. The implementation keeps future custom bathymetry providers behind
+the same validation boundary.
 
 Acceptance criteria:
 
