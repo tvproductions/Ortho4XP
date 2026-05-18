@@ -77,7 +77,7 @@ Examples:
 This will make user bug reports and support issues easier to diagnose.
 
 ### 6. Eliminate Legacy Mesh Fallbacks & Hardcode 3D Bathymetry
-Legacy X-Plane 11 `water_tech` modes are removed from active configuration and rejected when found in existing config files. Continue by rewriting the core mesh engine inside `src/O4_Mesh_Utils.py` to exclusively output X-Plane 12 physical 3D waterbed vector meshes. Intercept the triangulation loop to force strict validation against native elevation profiles; if the dataset fails to yield physical sub-surface bathymetric layer data, throw a hard compilation exception instead of defaulting to a flat, opaque terrain block. This ensures the simulator's native wave amplitude and light attenuation physics execute flawlessly.
+Legacy X-Plane 11 `water_tech` modes are removed from active configuration and rejected when found in existing config files. Continue by enforcing a bathymetry input contract for XP12 water tiles before DSF encoding. For TODO-014, XP12 Global Scenery raster extraction is the only implemented bathymetry provider; future custom or repo-owned bathymetry sources should plug into the same contract and must not bypass validation with mask heuristics. Once that boundary is proven, deeper mesh work can rewrite the core mesh path toward X-Plane 12 physical 3D waterbed vector meshes.
 
 ## Medium-Term Improvements
 
