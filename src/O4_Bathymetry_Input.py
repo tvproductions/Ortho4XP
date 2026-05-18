@@ -67,8 +67,8 @@ def validate_raster_payload(
 
     elevation = by_name["elevation"]
     bathymetry = by_name["sea_level"]
-    _validate_raster_data(elevation, tile_label, source_path)
-    _validate_raster_data(bathymetry, tile_label, source_path)
+    for raster in rasters:
+        _validate_raster_data(raster, tile_label, source_path)
     if (bathymetry.width, bathymetry.height) != (elevation.width, elevation.height):
         raise _error(
             tile_label,
@@ -91,8 +91,14 @@ class _RasterMetadata:
 def _parse_layer_names(demn: bytes, tile_label: str, source_path: str) -> tuple[str, ...]:
     if not demn:
         raise _error(tile_label, source_path, "empty DEMN raster definition payload")
+    if not demn.endswith(b"\0"):
+        raise _error(
+            tile_label,
+            source_path,
+            "malformed DEMN raster definition names",
+        )
     try:
-        parts = demn[:-1].split(b"\0") if demn.endswith(b"\0") else demn.split(b"\0")
+        parts = demn[:-1].split(b"\0")
         if any(not part for part in parts):
             raise _error(
                 tile_label,
@@ -170,7 +176,7 @@ def _parse_demi(
     source_path: str,
 ) -> _RasterMetadata:
     metadata_size = struct.calcsize("<BBHIIff")
-    if len(payload) < metadata_size:
+    if len(payload) != metadata_size:
         raise _error(tile_label, source_path, "malformed DEMI raster metadata")
     _version, bytes_per_pixel, flags, width, height, _scale, _offset = struct.unpack(
         "<BBHIIff", payload[:metadata_size]

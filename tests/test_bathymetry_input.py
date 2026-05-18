@@ -115,6 +115,21 @@ class BathymetryInputTests(unittest.TestCase):
                 source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
             )
 
+    def test_extra_raster_with_wrong_payload_size_is_rejected(self):
+        extra_raster = atom("DEMI".encode("ascii"), demi(2, 2)) + atom(
+            "DEMD".encode("ascii"), b"\0"
+        )
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*temperature.*expected",
+        ):
+            validate_raster_payload(
+                demn_payload("elevation", "sea_level", "temperature"),
+                dems_payload() + extra_raster,
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
     def test_malformed_dems_payload_is_rejected(self):
         with self.assertRaisesRegex(
             BathymetryInputError,
@@ -174,6 +189,36 @@ class BathymetryInputTests(unittest.TestCase):
             validate_raster_payload(
                 b"elevation\0sea_level\0\0",
                 dems_payload(),
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
+    def test_truncated_demn_final_name_is_rejected(self):
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*malformed.*DEMN",
+        ):
+            validate_raster_payload(
+                b"elevation\0sea_level",
+                dems_payload(),
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
+    def test_oversized_demi_metadata_is_rejected(self):
+        oversized_elevation = atom("DEMI".encode("ascii"), demi(2, 2) + b"x") + atom(
+            "DEMD".encode("ascii"), demd(2, 2)
+        )
+        sea_level = atom("DEMI".encode("ascii"), demi(2, 2)) + atom(
+            "DEMD".encode("ascii"), demd(2, 2)
+        )
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*malformed.*DEMI",
+        ):
+            validate_raster_payload(
+                demn_payload("elevation", "sea_level"),
+                oversized_elevation + sea_level,
                 tile_label="+12-123",
                 source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
             )
