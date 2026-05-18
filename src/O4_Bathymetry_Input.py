@@ -152,7 +152,11 @@ def _read_atom(
     payload = stream.read(atom_size - 8)
     if len(payload) != atom_size - 8:
         raise _error(tile_label, source_path, "truncated DEMS atom payload")
-    return header[::-1].decode("ascii"), payload
+    try:
+        atom_header = header[::-1].decode("ascii")
+    except UnicodeDecodeError as exc:
+        raise _error(tile_label, source_path, "malformed DEMS atom header") from exc
+    return atom_header, payload
 
 
 def _parse_demi(

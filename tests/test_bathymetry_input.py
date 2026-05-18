@@ -127,6 +127,18 @@ class BathymetryInputTests(unittest.TestCase):
                 source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
             )
 
+    def test_non_ascii_dems_atom_header_is_rejected_with_context(self):
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*malformed.*DEMS",
+        ):
+            validate_raster_payload(
+                demn_payload("elevation", "sea_level"),
+                b"\xffMED" + struct.pack("<I", 8),
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
