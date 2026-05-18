@@ -85,11 +85,12 @@ class ConfigModelTests(unittest.TestCase):
 
     def test_dsf_generation_uses_bathymetry_input_boundary(self):
         dsf_source = Path("src/O4_DSF_Utils.py").read_text()
+        bathy_input_source = Path("src/O4_Bathymetry_Input.py").read_text()
         self.assertIn("extract_elevation_and_bathymetry_data", dsf_source)
         self.assertIn("extract_required_bathymetry_rasters", dsf_source)
         self.assertIn("mesh_requires_bathymetry", dsf_source)
-        self.assertIn("GlobalSceneryRasterSource", dsf_source)
         self.assertIn("O4_Bathymetry_Input", dsf_source)
+        self.assertIn("GlobalSceneryRasterSource", bathy_input_source)
 
     def test_bathymetry_input_is_extracted_before_dsf_backup(self):
         dsf_source = Path("src/O4_DSF_Utils.py").read_text()
