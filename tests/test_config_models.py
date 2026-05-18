@@ -79,27 +79,32 @@ class ConfigModelTests(unittest.TestCase):
     def test_dsf_generation_uses_bathymetry_input_boundary(self):
         dsf_source = Path("src/O4_DSF_Utils.py").read_text()
         self.assertIn("extract_elevation_and_bathymetry_data", dsf_source)
+        self.assertIn("extract_required_bathymetry_rasters", dsf_source)
         self.assertIn("mesh_requires_bathymetry", dsf_source)
+        self.assertIn("GlobalSceneryRasterSource", dsf_source)
         self.assertIn("O4_Bathymetry_Input", dsf_source)
 
     def test_bathymetry_input_is_extracted_before_dsf_backup(self):
         dsf_source = Path("src/O4_DSF_Utils.py").read_text()
-        extraction = "extract_elevation_and_bathymetry_data(tile.lat, tile.lon)"
+        extraction = (
+            "(bDEMN, bDEMS) = extract_required_bathymetry_rasters(tile, tri_types)"
+        )
         backup = 'os.replace(dsf_file_name, dsf_file_name + ".bak")'
 
         self.assertEqual(dsf_source.count(extraction), 1)
         self.assertLess(dsf_source.index(extraction), dsf_source.index(backup))
-        self.assertIn("BATHY_INPUT.BathymetryInputError", dsf_source)
+        self.assertIn("extract_validated_global_scenery_rasters", dsf_source)
 
-    def test_empty_bathymetry_rasters_are_initialized_before_water_gate(self):
+    def test_all_land_bathymetry_rasters_are_empty_before_water_gate(self):
         dsf_source = Path("src/O4_DSF_Utils.py").read_text()
-        water_gate = "if mesh_requires_bathymetry(tri_types):"
+        water_gate = "if not mesh_requires_bathymetry(tri_types):"
         extraction = "extract_elevation_and_bathymetry_data(tile.lat, tile.lon)"
 
-        self.assertLess(dsf_source.index('bDEMN = b""'), dsf_source.index(water_gate))
-        self.assertLess(dsf_source.index('bDEMS = b""'), dsf_source.index(water_gate))
-        self.assertNotIn('bDEMN = b""', dsf_source[dsf_source.index(extraction) :])
-        self.assertNotIn('bDEMS = b""', dsf_source[dsf_source.index(extraction) :])
+        self.assertLess(
+            dsf_source.index("return XP12_EMPTY_BATHYMETRY_RASTERS"),
+            dsf_source.index(extraction),
+        )
+        self.assertLess(dsf_source.index(water_gate), dsf_source.index(extraction))
 
     def test_masks_are_not_treated_as_bathymetry_source(self):
         bathy_source = Path("src/O4_Bathymetry_Input.py").read_text()

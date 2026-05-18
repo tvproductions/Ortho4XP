@@ -512,6 +512,38 @@
       "severity": "warn",
       "value": 8.0
     },
+    "lizard_ccn|src/O4_Bathymetry_Input.py|372|_find_global_scenery_dsf( source )": {
+      "line": 372,
+      "metric": "lizard_ccn",
+      "name": "_find_global_scenery_dsf( source )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Bathymetry_Input.py|407|_validate_7z_result( result , tmp_path , errors )": {
+      "line": 407,
+      "metric": "lizard_ccn",
+      "name": "_validate_7z_result( result , tmp_path , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Bathymetry_Input.py|452|_validate_dsf_envelope( dsf_bytes , errors )": {
+      "line": 452,
+      "metric": "lizard_ccn",
+      "name": "_validate_dsf_envelope( dsf_bytes , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Bathymetry_Input.py|611|_validate_demi_shape( width , height , bytes_per_pixel , errors )": {
+      "line": 611,
+      "metric": "lizard_ccn",
+      "name": "_validate_demi_shape( width , height , bytes_per_pixel , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "lizard_ccn|src/O4_Config_Models.py|63|_validate_zone_entries( cls , value : list [ Any ] )": {
       "line": 63,
       "metric": "lizard_ccn",
@@ -816,48 +848,40 @@
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|115|zone_list_to_ortho_dico( tile )": {
-      "line": 115,
+    "lizard_ccn|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico( tile )": {
+      "line": 121,
       "metric": "lizard_ccn",
       "name": "zone_list_to_ortho_dico( tile )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 20.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|257|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 257,
+    "lizard_ccn|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 263,
       "metric": "lizard_ccn",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|352|extract_elevation_and_bathymetry_data( lat , lon )": {
-      "line": 352,
-      "metric": "lizard_ccn",
-      "name": "extract_elevation_and_bathymetry_data( lat , lon )",
-      "path": "src/O4_DSF_Utils.py",
-      "severity": "block",
-      "value": 15.0
-    },
-    "lizard_ccn|src/O4_DSF_Utils.py|463|build_dsf( tile , download_queue )": {
-      "line": 463,
+    "lizard_ccn|src/O4_DSF_Utils.py|389|build_dsf( tile , download_queue )": {
+      "line": 389,
       "metric": "lizard_ccn",
       "name": "build_dsf( tile , download_queue )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 110.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|46|__init__( self , level , bucket_size )": {
-      "line": 46,
+    "lizard_ccn|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
+      "line": 52,
       "metric": "lizard_ccn",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|75|insert( self , bx , by , level )": {
-      "line": 75,
+    "lizard_ccn|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
+      "line": 81,
       "metric": "lizard_ccn",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
@@ -2728,6 +2752,142 @@
       "severity": "block",
       "value": 5.0
     },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|303|_validate_raster_semantics( rasters , errors )": {
+      "line": 303,
+      "metric": "lizard_nesting_depth",
+      "name": "_validate_raster_semantics( rasters , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|314|_validate_raster_data( raster , errors )": {
+      "line": 314,
+      "metric": "lizard_nesting_depth",
+      "name": "_validate_raster_data( raster , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|325|_required_raster( by_name , name , errors )": {
+      "line": 325,
+      "metric": "lizard_nesting_depth",
+      "name": "_required_raster( by_name , name , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|372|_find_global_scenery_dsf( source )": {
+      "line": 372,
+      "metric": "lizard_nesting_depth",
+      "name": "_find_global_scenery_dsf( source )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|407|_validate_7z_result( result , tmp_path , errors )": {
+      "line": 407,
+      "metric": "lizard_nesting_depth",
+      "name": "_validate_7z_result( result , tmp_path , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|415|_remove_temp_dsf_files( tmp_path )": {
+      "line": 415,
+      "metric": "lizard_nesting_depth",
+      "name": "_remove_temp_dsf_files( tmp_path )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|424|_external_tool_failure_detail( result )": {
+      "line": 424,
+      "metric": "lizard_nesting_depth",
+      "name": "_external_tool_failure_detail( result )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|452|_validate_dsf_envelope( dsf_bytes , errors )": {
+      "line": 452,
+      "metric": "lizard_nesting_depth",
+      "name": "_validate_dsf_envelope( dsf_bytes , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|479|_capture_raw_raster_atom( header , payload , atoms , errors )": {
+      "line": 479,
+      "metric": "lizard_nesting_depth",
+      "name": "_capture_raw_raster_atom( header , payload , atoms , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|486|_require_raw_raster_atoms( atoms , errors )": {
+      "line": 486,
+      "metric": "lizard_nesting_depth",
+      "name": "_require_raw_raster_atoms( atoms , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|494|_extract_demn_from_defn( payload , errors )": {
+      "line": 494,
+      "metric": "lizard_nesting_depth",
+      "name": "_extract_demn_from_defn( payload , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|504|_parse_layer_names( demn , errors )": {
+      "line": 504,
+      "metric": "lizard_nesting_depth",
+      "name": "_parse_layer_names( demn , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|520|_reject_empty_layer_names( raw_names , errors )": {
+      "line": 520,
+      "metric": "lizard_nesting_depth",
+      "name": "_reject_empty_layer_names( raw_names , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|526|_decode_ascii_layer_names( raw_names , errors )": {
+      "line": 526,
+      "metric": "lizard_nesting_depth",
+      "name": "_decode_ascii_layer_names( raw_names , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|537|_parse_dems( dems , errors )": {
+      "line": 537,
+      "metric": "lizard_nesting_depth",
+      "name": "_parse_dems( dems , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|611|_validate_demi_shape( width , height , bytes_per_pixel , errors )": {
+      "line": 611,
+      "metric": "lizard_nesting_depth",
+      "name": "_validate_demi_shape( width , height , bytes_per_pixel , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Bathymetry_Input.py|620|_build_rasters( layer_names , raster_pairs , errors )": {
+      "line": 620,
+      "metric": "lizard_nesting_depth",
+      "name": "_build_rasters( layer_names , raster_pairs , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nesting_depth|src/O4_Config_Models.py|63|_validate_zone_entries( cls , value : list [ Any ] )": {
       "line": 63,
       "metric": "lizard_nesting_depth",
@@ -3072,66 +3232,58 @@
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|115|zone_list_to_ortho_dico( tile )": {
-      "line": 115,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|103|statistics( self )": {
+      "line": 103,
+      "metric": "lizard_nesting_depth",
+      "name": "statistics( self )",
+      "path": "src/O4_DSF_Utils.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico( tile )": {
+      "line": 121,
       "metric": "lizard_nesting_depth",
       "name": "zone_list_to_ortho_dico( tile )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 15.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|257|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 257,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 263,
       "metric": "lizard_nesting_depth",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|352|extract_elevation_and_bathymetry_data( lat , lon )": {
-      "line": 352,
-      "metric": "lizard_nesting_depth",
-      "name": "extract_elevation_and_bathymetry_data( lat , lon )",
-      "path": "src/O4_DSF_Utils.py",
-      "severity": "block",
-      "value": 12.0
-    },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|463|build_dsf( tile , download_queue )": {
-      "line": 463,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|389|build_dsf( tile , download_queue )": {
+      "line": 389,
       "metric": "lizard_nesting_depth",
       "name": "build_dsf( tile , download_queue )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 63.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|46|__init__( self , level , bucket_size )": {
-      "line": 46,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
+      "line": 52,
       "metric": "lizard_nesting_depth",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|75|insert( self , bx , by , level )": {
-      "line": 75,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
+      "line": 81,
       "metric": "lizard_nesting_depth",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|92|clean( self )": {
-      "line": 92,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|98|clean( self )": {
+      "line": 98,
       "metric": "lizard_nesting_depth",
       "name": "clean( self )",
-      "path": "src/O4_DSF_Utils.py",
-      "severity": "advise",
-      "value": 2.0
-    },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|97|statistics( self )": {
-      "line": 97,
-      "metric": "lizard_nesting_depth",
-      "name": "statistics( self )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 2.0
@@ -4576,6 +4728,30 @@
       "severity": "warn",
       "value": 3.0
     },
+    "lizard_nesting_depth|tests/test_bathymetry_input.py|38|demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )": {
+      "line": 38,
+      "metric": "lizard_nesting_depth",
+      "name": "demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|tests/test_bathymetry_input.py|46|dems_payload( * , elevation_size : tuple [ int , int ] = ( 2 , 2 )": {
+      "line": 46,
+      "metric": "lizard_nesting_depth",
+      "name": "dems_payload( * , elevation_size : tuple [ int , int ] = ( 2 , 2 )",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|tests/test_bathymetry_provider.py|38|demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )": {
+      "line": 38,
+      "metric": "lizard_nesting_depth",
+      "name": "demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )",
+      "path": "tests/test_bathymetry_provider.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nesting_depth|tests/test_exception_handling.py|8|test_no_bare_except_handlers_remain( self )": {
       "line": 8,
       "metric": "lizard_nesting_depth",
@@ -5072,6 +5248,38 @@
       "severity": "warn",
       "value": 29.0
     },
+    "lizard_nloc|src/O4_Bathymetry_Input.py|344|extract_validated_global_scenery_rasters( source )": {
+      "line": 344,
+      "metric": "lizard_nloc",
+      "name": "extract_validated_global_scenery_rasters( source )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|src/O4_Bathymetry_Input.py|372|_find_global_scenery_dsf( source )": {
+      "line": 372,
+      "metric": "lizard_nloc",
+      "name": "_find_global_scenery_dsf( source )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 16.0
+    },
+    "lizard_nloc|src/O4_Bathymetry_Input.py|390|_read_uncompressed_or_7z_dsf( source , tmp_path , errors )": {
+      "line": 390,
+      "metric": "lizard_nloc",
+      "name": "_read_uncompressed_or_7z_dsf( source , tmp_path , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|src/O4_Bathymetry_Input.py|620|_build_rasters( layer_names , raster_pairs , errors )": {
+      "line": 620,
+      "metric": "lizard_nloc",
+      "name": "_build_rasters( layer_names , raster_pairs , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 17.0
+    },
     "lizard_nloc|src/O4_Config_Models.py|88|coerce_config_value( var : str , value : Any , registry : dict [ str , dict [ str , Any ] ] )": {
       "line": 88,
       "metric": "lizard_nloc",
@@ -5384,48 +5592,48 @@
       "severity": "block",
       "value": 42.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|115|zone_list_to_ortho_dico( tile )": {
-      "line": 115,
+    "lizard_nloc|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico( tile )": {
+      "line": 121,
       "metric": "lizard_nloc",
       "name": "zone_list_to_ortho_dico( tile )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 129.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|257|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 257,
+    "lizard_nloc|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 263,
       "metric": "lizard_nloc",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 73.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|352|extract_elevation_and_bathymetry_data( lat , lon )": {
-      "line": 352,
+    "lizard_nloc|src/O4_DSF_Utils.py|358|extract_elevation_and_bathymetry_data( lat , lon )": {
+      "line": 358,
       "metric": "lizard_nloc",
       "name": "extract_elevation_and_bathymetry_data( lat , lon )",
       "path": "src/O4_DSF_Utils.py",
-      "severity": "block",
-      "value": 96.0
+      "severity": "advise",
+      "value": 14.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|463|build_dsf( tile , download_queue )": {
-      "line": 463,
+    "lizard_nloc|src/O4_DSF_Utils.py|389|build_dsf( tile , download_queue )": {
+      "line": 389,
       "metric": "lizard_nloc",
       "name": "build_dsf( tile , download_queue )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 716.0
+      "value": 714.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|46|__init__( self , level , bucket_size )": {
-      "line": 46,
+    "lizard_nloc|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
+      "line": 52,
       "metric": "lizard_nloc",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|75|insert( self , bx , by , level )": {
-      "line": 75,
+    "lizard_nloc|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
+      "line": 81,
       "metric": "lizard_nloc",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
@@ -6880,6 +7088,86 @@
       "severity": "advise",
       "value": 22.0
     },
+    "lizard_nloc|tests/test_bathymetry_input.py|46|dems_payload( * , elevation_size : tuple [ int , int ] = ( 2 , 2 )": {
+      "line": 46,
+      "metric": "lizard_nloc",
+      "name": "dems_payload( * , elevation_size : tuple [ int , int ] = ( 2 , 2 )",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|tests/test_bathymetry_input.py|67|test_valid_payload_requires_elevation_and_sea_level( self )": {
+      "line": 67,
+      "metric": "lizard_nloc",
+      "name": "test_valid_payload_requires_elevation_and_sea_level( self )",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|tests/test_bathymetry_payload_errors.py|100|test_oversized_demi_metadata_is_rejected( self )": {
+      "line": 100,
+      "metric": "lizard_nloc",
+      "name": "test_oversized_demi_metadata_is_rejected( self )",
+      "path": "tests/test_bathymetry_payload_errors.py",
+      "severity": "advise",
+      "value": 15.0
+    },
+    "lizard_nloc|tests/test_bathymetry_provider.py|70|raster_source( tmp : str , * , primary : Path | str , alternate : Path | str = '' , run_external_tool = mock . Mock ( )": {
+      "line": 70,
+      "metric": "lizard_nloc",
+      "name": "raster_source( tmp : str , * , primary : Path | str , alternate : Path | str = '' , run_external_tool = mock . Mock ( )",
+      "path": "tests/test_bathymetry_provider.py",
+      "severity": "advise",
+      "value": 16.0
+    },
+    "lizard_nloc|tests/test_bathymetry_provider_7z.py|106|test_7z_success_without_extracted_dsf_is_rejected( self )": {
+      "line": 106,
+      "metric": "lizard_nloc",
+      "name": "test_7z_success_without_extracted_dsf_is_rejected( self )",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|tests/test_bathymetry_provider_7z.py|36|test_reads_compressed_global_scenery_dsf( self )": {
+      "line": 36,
+      "metric": "lizard_nloc",
+      "name": "test_reads_compressed_global_scenery_dsf( self )",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "advise",
+      "value": 21.0
+    },
+    "lizard_nloc|tests/test_bathymetry_provider_7z.py|64|test_failed_7z_result_is_rejected_with_error_summary( self )": {
+      "line": 64,
+      "metric": "lizard_nloc",
+      "name": "test_failed_7z_result_is_rejected_with_error_summary( self )",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "advise",
+      "value": 19.0
+    },
+    "lizard_nloc|tests/test_bathymetry_provider_7z.py|85|test_failed_7z_result_is_rejected_with_returncode_when_no_summary( self )": {
+      "line": 85,
+      "metric": "lizard_nloc",
+      "name": "test_failed_7z_result_is_rejected_with_returncode_when_no_summary( self )",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "advise",
+      "value": 19.0
+    },
+    "lizard_nloc|tests/test_bathymetry_source_lookup.py|23|test_missing_global_scenery_dsf_is_rejected( self )": {
+      "line": 23,
+      "metric": "lizard_nloc",
+      "name": "test_missing_global_scenery_dsf_is_rejected( self )",
+      "path": "tests/test_bathymetry_source_lookup.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|tests/test_bathymetry_source_lookup.py|64|test_removes_temp_dsf_and_7z_sibling_after_uncompressed_read( self )": {
+      "line": 64,
+      "metric": "lizard_nloc",
+      "name": "test_removes_temp_dsf_and_7z_sibling_after_uncompressed_read( self )",
+      "path": "tests/test_bathymetry_source_lookup.py",
+      "severity": "advise",
+      "value": 15.0
+    },
     "lizard_nloc|tests/test_file_names.py|38|test_mesh_and_dsf_file_paths_use_tile_naming_conventions( self )": {
       "line": 38,
       "metric": "lizard_nloc",
@@ -7352,6 +7640,102 @@
       "severity": "warn",
       "value": 4.0
     },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|294|validate_raster_payload( demn , dems , * , tile_label , source_path )": {
+      "line": 294,
+      "metric": "lizard_param_count",
+      "name": "validate_raster_payload( demn , dems , * , tile_label , source_path )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|325|_required_raster( by_name , name , errors )": {
+      "line": 325,
+      "metric": "lizard_param_count",
+      "name": "_required_raster( by_name , name , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|335|_validate_matching_shape( elevation , bathymetry , errors )": {
+      "line": 335,
+      "metric": "lizard_param_count",
+      "name": "_validate_matching_shape( elevation , bathymetry , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|365|_copy_and_read_global_scenery_dsf( source , source_path , tmp_path )": {
+      "line": 365,
+      "metric": "lizard_param_count",
+      "name": "_copy_and_read_global_scenery_dsf( source , source_path , tmp_path )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|390|_read_uncompressed_or_7z_dsf( source , tmp_path , errors )": {
+      "line": 390,
+      "metric": "lizard_param_count",
+      "name": "_read_uncompressed_or_7z_dsf( source , tmp_path , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|407|_validate_7z_result( result , tmp_path , errors )": {
+      "line": 407,
+      "metric": "lizard_param_count",
+      "name": "_validate_7z_result( result , tmp_path , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|434|extract_validated_rasters_from_dsf_bytes( dsf_bytes , * , tile_label , source_path )": {
+      "line": 434,
+      "metric": "lizard_param_count",
+      "name": "extract_validated_rasters_from_dsf_bytes( dsf_bytes , * , tile_label , source_path )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|461|_scan_dsf_atoms( dsf_bytes , atoms_end , errors )": {
+      "line": 461,
+      "metric": "lizard_param_count",
+      "name": "_scan_dsf_atoms( dsf_bytes , atoms_end , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|479|_capture_raw_raster_atom( header , payload , atoms , errors )": {
+      "line": 479,
+      "metric": "lizard_param_count",
+      "name": "_capture_raw_raster_atom( header , payload , atoms , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|579|_validate_atom_size( atom_start , atom_size , context )": {
+      "line": 579,
+      "metric": "lizard_param_count",
+      "name": "_validate_atom_size( atom_start , atom_size , context )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|611|_validate_demi_shape( width , height , bytes_per_pixel , errors )": {
+      "line": 611,
+      "metric": "lizard_param_count",
+      "name": "_validate_demi_shape( width , height , bytes_per_pixel , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Bathymetry_Input.py|620|_build_rasters( layer_names , raster_pairs , errors )": {
+      "line": 620,
+      "metric": "lizard_param_count",
+      "name": "_build_rasters( layer_names , raster_pairs , errors )",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
     "lizard_param_count|src/O4_Config_Models.py|31|_allowed_values_after_legacy_check( definition : dict [ str , Any ] , var : str , value : Any )": {
       "line": 31,
       "metric": "lizard_param_count",
@@ -7504,24 +7888,24 @@
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_DSF_Utils.py|257|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 257,
+    "lizard_param_count|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 263,
       "metric": "lizard_param_count",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 8.0
     },
-    "lizard_param_count|src/O4_DSF_Utils.py|46|__init__( self , level , bucket_size )": {
-      "line": 46,
+    "lizard_param_count|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
+      "line": 52,
       "metric": "lizard_param_count",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_DSF_Utils.py|75|insert( self , bx , by , level )": {
-      "line": 75,
+    "lizard_param_count|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
+      "line": 81,
       "metric": "lizard_param_count",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
@@ -8584,6 +8968,62 @@
       "severity": "block",
       "value": 7.0
     },
+    "lizard_param_count|tests/test_bathymetry_input.py|24|demi( width : int , height : int , bytes_per_pixel : int = 2 )": {
+      "line": 24,
+      "metric": "lizard_param_count",
+      "name": "demi( width : int , height : int , bytes_per_pixel : int = 2 )",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|tests/test_bathymetry_input.py|38|demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )": {
+      "line": 38,
+      "metric": "lizard_param_count",
+      "name": "demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/test_bathymetry_provider.py|25|demi( width : int , height : int , bytes_per_pixel : int = 2 )": {
+      "line": 25,
+      "metric": "lizard_param_count",
+      "name": "demi( width : int , height : int , bytes_per_pixel : int = 2 )",
+      "path": "tests/test_bathymetry_provider.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|tests/test_bathymetry_provider.py|38|demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )": {
+      "line": 38,
+      "metric": "lizard_param_count",
+      "name": "demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )",
+      "path": "tests/test_bathymetry_provider.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/test_bathymetry_provider.py|70|raster_source( tmp : str , * , primary : Path | str , alternate : Path | str = '' , run_external_tool = mock . Mock ( )": {
+      "line": 70,
+      "metric": "lizard_param_count",
+      "name": "raster_source( tmp : str , * , primary : Path | str , alternate : Path | str = '' , run_external_tool = mock . Mock ( )",
+      "path": "tests/test_bathymetry_provider.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/test_bathymetry_provider_7z.py|23|__init__( self , * , ok : bool , error_summary : str | None = None , returncode : int | None = None , )": {
+      "line": 23,
+      "metric": "lizard_param_count",
+      "name": "__init__( self , * , ok : bool , error_summary : str | None = None , returncode : int | None = None , )",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/test_bathymetry_provider_7z.py|43|test_reads_compressed_global_scenery_dsf.extract( _tool , _args , * , executable )": {
+      "line": 43,
+      "metric": "lizard_param_count",
+      "name": "test_reads_compressed_global_scenery_dsf.extract( _tool , _args , * , executable )",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "advise",
+      "value": 3.0
+    },
     "lizard_param_count|tests/test_imagery_failures.py|21|__init__( self , status_code , headers = None , content = b '' )": {
       "line": 21,
       "metric": "lizard_param_count",
@@ -9112,6 +9552,38 @@
       "severity": "warn",
       "value": 8.0
     },
+    "radon_cc|src/O4_Bathymetry_Input.py|372|_find_global_scenery_dsf": {
+      "line": 372,
+      "metric": "radon_cc",
+      "name": "_find_global_scenery_dsf",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Bathymetry_Input.py|407|_validate_7z_result": {
+      "line": 407,
+      "metric": "radon_cc",
+      "name": "_validate_7z_result",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Bathymetry_Input.py|452|_validate_dsf_envelope": {
+      "line": 452,
+      "metric": "radon_cc",
+      "name": "_validate_dsf_envelope",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Bathymetry_Input.py|611|_validate_demi_shape": {
+      "line": 611,
+      "metric": "radon_cc",
+      "name": "_validate_demi_shape",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "radon_cc|src/O4_Config_Models.py|56|ZoneListDefinition": {
       "line": 56,
       "metric": "radon_cc",
@@ -9448,56 +9920,48 @@
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|115|zone_list_to_ortho_dico": {
-      "line": 115,
+    "radon_cc|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico": {
+      "line": 121,
       "metric": "radon_cc",
       "name": "zone_list_to_ortho_dico",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 20.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|257|create_terrain_file": {
-      "line": 257,
+    "radon_cc|src/O4_DSF_Utils.py|263|create_terrain_file": {
+      "line": 263,
       "metric": "radon_cc",
       "name": "create_terrain_file",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|352|extract_elevation_and_bathymetry_data": {
-      "line": 352,
-      "metric": "radon_cc",
-      "name": "extract_elevation_and_bathymetry_data",
-      "path": "src/O4_DSF_Utils.py",
-      "severity": "block",
-      "value": 15.0
-    },
-    "radon_cc|src/O4_DSF_Utils.py|40|QuadTree": {
-      "line": 40,
-      "metric": "radon_cc",
-      "name": "QuadTree",
-      "path": "src/O4_DSF_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "radon_cc|src/O4_DSF_Utils.py|463|build_dsf": {
-      "line": 463,
+    "radon_cc|src/O4_DSF_Utils.py|389|build_dsf": {
+      "line": 389,
       "metric": "radon_cc",
       "name": "build_dsf",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 110.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|46|__init__": {
+    "radon_cc|src/O4_DSF_Utils.py|46|QuadTree": {
       "line": 46,
+      "metric": "radon_cc",
+      "name": "QuadTree",
+      "path": "src/O4_DSF_Utils.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_DSF_Utils.py|52|__init__": {
+      "line": 52,
       "metric": "radon_cc",
       "name": "__init__",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|75|insert": {
-      "line": 75,
+    "radon_cc|src/O4_DSF_Utils.py|81|insert": {
+      "line": 81,
       "metric": "radon_cc",
       "name": "insert",
       "path": "src/O4_DSF_Utils.py",
@@ -10824,6 +11288,14 @@
       "severity": "block",
       "value": 18.96153846153846
     },
+    "radon_hal_difficulty|src/O4_Bathymetry_Input.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_difficulty",
+      "name": "<module>",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 9.927835051546392
+    },
     "radon_hal_difficulty|src/O4_Config_Utils.py||<module>": {
       "line": null,
       "metric": "radon_hal_difficulty",
@@ -10846,7 +11318,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 18.53356890459364
+      "value": 18.60902255639098
     },
     "radon_hal_difficulty|src/O4_GUI_Utils.py||<module>": {
       "line": null,
@@ -10976,6 +11448,14 @@
       "severity": "warn",
       "value": 66640.81016823635
     },
+    "radon_hal_effort|src/O4_Bathymetry_Input.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_effort",
+      "name": "<module>",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 11281.508748081093
+    },
     "radon_hal_effort|src/O4_Config_Utils.py||<module>": {
       "line": null,
       "metric": "radon_hal_effort",
@@ -10998,7 +11478,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 270443.30397947953
+      "value": 253912.10413329248
     },
     "radon_hal_effort|src/O4_File_Names.py||<module>": {
       "line": null,
@@ -11152,6 +11632,14 @@
       "severity": "warn",
       "value": 3514.5254855459334
     },
+    "radon_hal_volume|src/O4_Bathymetry_Input.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_volume",
+      "name": "<module>",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 1136.3513484567663
+    },
     "radon_hal_volume|src/O4_Config_Utils.py||<module>": {
       "line": null,
       "metric": "radon_hal_volume",
@@ -11174,7 +11662,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 14592.079127968105
+      "value": 13644.569636253696
     },
     "radon_hal_volume|src/O4_File_Names.py||<module>": {
       "line": null,
@@ -11368,6 +11856,14 @@
       "severity": "block",
       "value": 42.874424836262904
     },
+    "radon_mi|src/O4_Bathymetry_Input.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "block",
+      "value": 45.6961852172792
+    },
     "radon_mi|src/O4_Cfg_Vars.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -11406,7 +11902,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 4.531735519581681
+      "value": 7.359677414044343
     },
     "radon_mi|src/O4_External_Command_Result.py||<module>": {
       "line": null,
@@ -11656,6 +12152,54 @@
       "severity": "advise",
       "value": 79.87684562974381
     },
+    "radon_mi|tests/test_bathymetry_dsf_bytes.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_bathymetry_dsf_bytes.py",
+      "severity": "advise",
+      "value": 77.66617267293391
+    },
+    "radon_mi|tests/test_bathymetry_input.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_bathymetry_input.py",
+      "severity": "warn",
+      "value": 53.17522141848539
+    },
+    "radon_mi|tests/test_bathymetry_payload_errors.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_bathymetry_payload_errors.py",
+      "severity": "warn",
+      "value": 57.58789692254695
+    },
+    "radon_mi|tests/test_bathymetry_provider.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_bathymetry_provider.py",
+      "severity": "warn",
+      "value": 56.210941051124266
+    },
+    "radon_mi|tests/test_bathymetry_provider_7z.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "warn",
+      "value": 54.248113550007716
+    },
+    "radon_mi|tests/test_bathymetry_source_lookup.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_bathymetry_source_lookup.py",
+      "severity": "warn",
+      "value": 58.16526463391822
+    },
     "radon_mi|tests/test_config_loading.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -11670,7 +12214,7 @@
       "name": "<module>",
       "path": "tests/test_config_models.py",
       "severity": "warn",
-      "value": 63.707026856493634
+      "value": 57.23296889121379
     },
     "radon_mi|tests/test_exception_handling.py||<module>": {
       "line": null,
@@ -11776,6 +12320,14 @@
       "severity": "warn",
       "value": 608.0
     },
+    "radon_raw_lloc|src/O4_Bathymetry_Input.py||<module>": {
+      "line": null,
+      "metric": "radon_raw_lloc",
+      "name": "<module>",
+      "path": "src/O4_Bathymetry_Input.py",
+      "severity": "advise",
+      "value": 321.0
+    },
     "radon_raw_lloc|src/O4_Config_Utils.py||<module>": {
       "line": null,
       "metric": "radon_raw_lloc",
@@ -11798,7 +12350,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
-      "value": 763.0
+      "value": 699.0
     },
     "radon_raw_lloc|src/O4_GUI_Utils.py||<module>": {
       "line": null,
@@ -11885,6 +12437,7 @@
     "Ortho4XP.py",
     "src/O4_Airport_Utils.py",
     "src/O4_Bathymetry.py",
+    "src/O4_Bathymetry_Input.py",
     "src/O4_Cfg_Vars.py",
     "src/O4_Config_Models.py",
     "src/O4_Config_Utils.py",
@@ -11923,6 +12476,13 @@
     "src/Unused/O4_buildings.py",
     "src/Unused/build_house.py",
     "tests/_path.py",
+    "tests/test_bathymetry_dsf_bytes.py",
+    "tests/test_bathymetry_gate.py",
+    "tests/test_bathymetry_input.py",
+    "tests/test_bathymetry_payload_errors.py",
+    "tests/test_bathymetry_provider.py",
+    "tests/test_bathymetry_provider_7z.py",
+    "tests/test_bathymetry_source_lookup.py",
     "tests/test_config_loading.py",
     "tests/test_config_models.py",
     "tests/test_exception_handling.py",

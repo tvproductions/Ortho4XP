@@ -25,6 +25,12 @@ quad_capacity_low = 35000
 # For Laminar test suite
 use_test_texture = False
 
+XP12_BATHYMETRY_TRI_TYPES = (1, 2)
+XP12_EMPTY_BATHYMETRY_RASTERS = (b"", b"")
+XP12_SKIP_BATHYMETRY_MESSAGE = (
+    "-> No water triangles detected; skipping XP12 bathymetry input"
+)
+
 
 ################################################################################
 def float2qquad(x):
@@ -352,19 +358,28 @@ def create_terrain_file(
 def extract_elevation_and_bathymetry_data(lat, lon):
     UI.vprint(1, "     Extracting XP12 rasters from X-Plane Global Scenery")
     result = BATHY_INPUT.extract_validated_global_scenery_rasters(
-        lat,
-        lon,
-        primary_overlay_src=OVL.custom_overlay_src,
-        alternate_overlay_src=OVL.custom_overlay_src_alternate,
-        tmp_dir=FNAMES.Tmp_dir,
-        unzip_executable=OVL.unzip_cmd,
-        run_external_tool=SP.run_external_tool,
+        BATHY_INPUT.GlobalSceneryRasterSource(
+            lat,
+            lon,
+            OVL.custom_overlay_src,
+            OVL.custom_overlay_src_alternate,
+            FNAMES.Tmp_dir,
+            OVL.unzip_cmd,
+            SP.run_external_tool,
+        )
     )
     return (result.demn, result.dems)
 
 
 def mesh_requires_bathymetry(tri_types):
-    return any(tri_type in (1, 2) for tri_type in tri_types)
+    return any(tri_type in XP12_BATHYMETRY_TRI_TYPES for tri_type in tri_types)
+
+
+def extract_required_bathymetry_rasters(tile, tri_types):
+    if not mesh_requires_bathymetry(tri_types):
+        UI.vprint(1, XP12_SKIP_BATHYMETRY_MESSAGE)
+        return XP12_EMPTY_BATHYMETRY_RASTERS
+    return extract_elevation_and_bathymetry_data(tile.lat, tile.lon)
 
 
 ################################################################################
@@ -407,16 +422,7 @@ def build_dsf(tile, download_queue):
         nbr_nodes, node_coords, node_types, tile
     )
 
-    bDEMN = b""
-    bDEMS = b""
-    if mesh_requires_bathymetry(tri_types):
-        try:
-            (bDEMN, bDEMS) = extract_elevation_and_bathymetry_data(tile.lat, tile.lon)
-        except BATHY_INPUT.BathymetryInputError as exc:
-            UI.exit_message_and_bottom_line("\nERROR:", exc)
-            return 0
-    else:
-        UI.vprint(1, "-> No water triangles detected; skipping XP12 bathymetry input")
+    (bDEMN, bDEMS) = extract_required_bathymetry_rasters(tile, tri_types)
 
     UI.vprint(1, "-> Computing point pools and texture requirements")
 
