@@ -192,10 +192,24 @@ def _read_uncompressed_or_7z_dsf(
         executable=unzip_executable,
     )
     if result is not None and not getattr(result, "ok", False):
-        raise _error(tile_label, source_path, "could not unpack compressed DSF")
+        raise _error(
+            tile_label,
+            source_path,
+            f"could not unpack compressed DSF{_external_tool_failure_detail(result)}",
+        )
     if not tmp_path.exists():
         raise _error(tile_label, source_path, "7z extraction did not produce DSF file")
     return tmp_path.read_bytes()
+
+
+def _external_tool_failure_detail(result) -> str:
+    error_summary = getattr(result, "error_summary", None)
+    if error_summary:
+        return f": {error_summary}"
+    returncode = getattr(result, "returncode", None)
+    if returncode is not None:
+        return f": returncode {returncode}"
+    return ""
 
 
 def extract_validated_rasters_from_dsf_bytes(

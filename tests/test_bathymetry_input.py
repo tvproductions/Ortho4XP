@@ -237,6 +237,30 @@ def dsf_file(*, demn: bytes, dems: bytes) -> bytes:
     return b"XPLNEDSF" + struct.pack("<I", 1) + body + (b"0" * 16)
 
 
+def valid_dsf_file() -> bytes:
+    return dsf_file(
+        demn=demn_payload("elevation", "sea_level"),
+        dems=dems_payload(),
+    )
+
+
+def global_scenery_dsf_path(root: Path) -> Path:
+    return root / "Earth nav data" / "+10-130" / "+12-123.dsf"
+
+
+class FakeToolResult:
+    def __init__(
+        self,
+        *,
+        ok: bool,
+        error_summary: str | None = None,
+        returncode: int | None = None,
+    ):
+        self.ok = ok
+        self.error_summary = error_summary
+        self.returncode = returncode
+
+
 class GlobalSceneryProviderTests(unittest.TestCase):
     def test_extract_validated_global_scenery_rasters(self):
         from O4_Bathymetry_Input import extract_validated_rasters_from_dsf_bytes
@@ -303,14 +327,9 @@ class BathymetrySourceLookupTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "XP12"
-            dsf_path = root / "Earth nav data" / "+10-130" / "+12-123.dsf"
+            dsf_path = global_scenery_dsf_path(root)
             dsf_path.parent.mkdir(parents=True)
-            dsf_path.write_bytes(
-                dsf_file(
-                    demn=demn_payload("elevation", "sea_level"),
-                    dems=dems_payload(),
-                )
-            )
+            dsf_path.write_bytes(valid_dsf_file())
 
             result = extract_validated_global_scenery_rasters(
                 12,
@@ -323,6 +342,159 @@ class BathymetrySourceLookupTests(unittest.TestCase):
             )
 
         self.assertEqual(result.payload.bathymetry.name, "sea_level")
+
+    def test_reads_alternate_source_when_primary_is_missing(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            primary = Path(tmp) / "missing-primary"
+            alternate = Path(tmp) / "XP12"
+            dsf_path = global_scenery_dsf_path(alternate)
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(valid_dsf_file())
+
+            result = extract_validated_global_scenery_rasters(
+                12,
+                -123,
+                primary_overlay_src=str(primary),
+                alternate_overlay_src=str(alternate),
+                tmp_dir=str(Path(tmp) / "tmp"),
+                unzip_executable="7z",
+                run_external_tool=mock.Mock(),
+            )
+
+        self.assertEqual(result.payload.bathymetry.name, "sea_level")
+
+    def test_removes_temp_dsf_and_7z_sibling_after_uncompressed_read(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "XP12"
+            dsf_path = global_scenery_dsf_path(root)
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(valid_dsf_file())
+            tmp_dir = Path(tmp) / "tmp"
+            tmp_dir.mkdir()
+            temp_dsf = tmp_dir / "+12-123.dsf"
+            temp_archive = Path(str(temp_dsf) + ".7z")
+            temp_archive.write_bytes(b"stale archive")
+
+            extract_validated_global_scenery_rasters(
+                12,
+                -123,
+                primary_overlay_src=str(root),
+                alternate_overlay_src="",
+                tmp_dir=str(tmp_dir),
+                unzip_executable="7z",
+                run_external_tool=mock.Mock(),
+            )
+
+            self.assertFalse(temp_dsf.exists())
+            self.assertFalse(temp_archive.exists())
+
+    def test_reads_compressed_global_scenery_dsf(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "XP12"
+            dsf_path = global_scenery_dsf_path(root)
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(b"7z compressed DSF fixture")
+            tmp_dir = Path(tmp) / "tmp"
+
+            def extract(_tool, _args, *, executable):
+                self.assertEqual(executable, "custom-7z")
+                (tmp_dir / "+12-123.dsf").write_bytes(valid_dsf_file())
+                return FakeToolResult(ok=True)
+
+            result = extract_validated_global_scenery_rasters(
+                12,
+                -123,
+                primary_overlay_src=str(root),
+                alternate_overlay_src="",
+                tmp_dir=str(tmp_dir),
+                unzip_executable="custom-7z",
+                run_external_tool=extract,
+            )
+
+            self.assertEqual(result.payload.bathymetry.name, "sea_level")
+            self.assertFalse((tmp_dir / "+12-123.dsf").exists())
+            self.assertFalse((tmp_dir / "+12-123.dsf.7z").exists())
+
+    def test_failed_7z_result_is_rejected_with_error_summary(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "XP12"
+            dsf_path = global_scenery_dsf_path(root)
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(b"7z compressed DSF fixture")
+
+            with self.assertRaisesRegex(
+                BathymetryInputError,
+                r"could not unpack compressed DSF.*bad archive",
+            ):
+                extract_validated_global_scenery_rasters(
+                    12,
+                    -123,
+                    primary_overlay_src=str(root),
+                    alternate_overlay_src="",
+                    tmp_dir=str(Path(tmp) / "tmp"),
+                    unzip_executable="7z",
+                    run_external_tool=lambda *_args, **_kwargs: FakeToolResult(
+                        ok=False,
+                        error_summary="bad archive",
+                    ),
+                )
+
+    def test_failed_7z_result_is_rejected_with_returncode_when_no_summary(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "XP12"
+            dsf_path = global_scenery_dsf_path(root)
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(b"7z compressed DSF fixture")
+
+            with self.assertRaisesRegex(
+                BathymetryInputError,
+                r"could not unpack compressed DSF.*returncode 7",
+            ):
+                extract_validated_global_scenery_rasters(
+                    12,
+                    -123,
+                    primary_overlay_src=str(root),
+                    alternate_overlay_src="",
+                    tmp_dir=str(Path(tmp) / "tmp"),
+                    unzip_executable="7z",
+                    run_external_tool=lambda *_args, **_kwargs: FakeToolResult(
+                        ok=False,
+                        returncode=7,
+                    ),
+                )
+
+    def test_7z_success_without_extracted_dsf_is_rejected(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "XP12"
+            dsf_path = global_scenery_dsf_path(root)
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(b"7z compressed DSF fixture")
+
+            with self.assertRaisesRegex(
+                BathymetryInputError,
+                r"7z extraction did not produce DSF file",
+            ):
+                extract_validated_global_scenery_rasters(
+                    12,
+                    -123,
+                    primary_overlay_src=str(root),
+                    alternate_overlay_src="",
+                    tmp_dir=str(Path(tmp) / "tmp"),
+                    unzip_executable="7z",
+                    run_external_tool=lambda *_args, **_kwargs: FakeToolResult(ok=True),
+                )
 
 
 if __name__ == "__main__":
