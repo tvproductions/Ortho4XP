@@ -166,6 +166,18 @@ class BathymetryInputTests(unittest.TestCase):
                 source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
             )
 
+    def test_extra_trailing_demn_empty_entry_is_rejected(self):
+        with self.assertRaisesRegex(
+            BathymetryInputError,
+            r"\+12-123.*malformed.*DEMN",
+        ):
+            validate_raster_payload(
+                b"elevation\0sea_level\0\0",
+                dems_payload(),
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

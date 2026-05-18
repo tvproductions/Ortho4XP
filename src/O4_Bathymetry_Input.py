@@ -92,7 +92,7 @@ def _parse_layer_names(demn: bytes, tile_label: str, source_path: str) -> tuple[
     if not demn:
         raise _error(tile_label, source_path, "empty DEMN raster definition payload")
     try:
-        parts = demn.rstrip(b"\0").split(b"\0")
+        parts = demn[:-1].split(b"\0") if demn.endswith(b"\0") else demn.split(b"\0")
         if any(not part for part in parts):
             raise _error(
                 tile_label,
