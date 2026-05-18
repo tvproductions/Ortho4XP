@@ -1,5 +1,8 @@
 import struct
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 try:
     import _path  # noqa: F401
@@ -272,6 +275,54 @@ class GlobalSceneryProviderTests(unittest.TestCase):
                 tile_label="+12-123",
                 source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
             )
+
+
+class BathymetrySourceLookupTests(unittest.TestCase):
+    def test_missing_global_scenery_dsf_is_rejected(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            missing_primary = str(Path(tmp) / "primary")
+            missing_alternate = str(Path(tmp) / "alternate")
+            with self.assertRaisesRegex(
+                BathymetryInputError,
+                r"custom_overlay_src.*custom_overlay_src_alternate.*XP12 Global Scenery",
+            ):
+                extract_validated_global_scenery_rasters(
+                    12,
+                    -123,
+                    primary_overlay_src=missing_primary,
+                    alternate_overlay_src=missing_alternate,
+                    tmp_dir=str(Path(tmp) / "tmp"),
+                    unzip_executable="7z",
+                    run_external_tool=lambda *args, **kwargs: None,
+                )
+
+    def test_reads_uncompressed_global_scenery_dsf(self):
+        from O4_Bathymetry_Input import extract_validated_global_scenery_rasters
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "XP12"
+            dsf_path = root / "Earth nav data" / "+10-130" / "+12-123.dsf"
+            dsf_path.parent.mkdir(parents=True)
+            dsf_path.write_bytes(
+                dsf_file(
+                    demn=demn_payload("elevation", "sea_level"),
+                    dems=dems_payload(),
+                )
+            )
+
+            result = extract_validated_global_scenery_rasters(
+                12,
+                -123,
+                primary_overlay_src=str(root),
+                alternate_overlay_src="",
+                tmp_dir=str(Path(tmp) / "tmp"),
+                unzip_executable="7z",
+                run_external_tool=mock.Mock(),
+            )
+
+        self.assertEqual(result.payload.bathymetry.name, "sea_level")
 
 
 if __name__ == "__main__":

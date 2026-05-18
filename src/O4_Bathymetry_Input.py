@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import io
+import os
+from pathlib import Path
+import shutil
 import struct
+
+import O4_File_Names as FNAMES
 
 
 class BathymetryInputError(RuntimeError):
@@ -93,6 +98,104 @@ class _RasterMetadata:
     height: int
     bytes_per_pixel: int
     flags: int
+
+
+def extract_validated_global_scenery_rasters(
+    lat: int,
+    lon: int,
+    *,
+    primary_overlay_src: str,
+    alternate_overlay_src: str,
+    tmp_dir: str,
+    unzip_executable: str,
+    run_external_tool,
+) -> ValidatedRasterBytes:
+    tile_label = FNAMES.short_latlon(lat, lon)
+    source_path = _find_global_scenery_dsf(
+        lat,
+        lon,
+        primary_overlay_src,
+        alternate_overlay_src,
+        tile_label,
+    )
+    tmp_path = Path(tmp_dir) / f"{tile_label}.dsf"
+    try:
+        tmp_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(source_path, tmp_path)
+        dsf_bytes = _read_uncompressed_or_7z_dsf(
+            tmp_path,
+            tile_label,
+            str(source_path),
+            unzip_executable,
+            run_external_tool,
+        )
+    except OSError as exc:
+        raise _error(
+            tile_label,
+            str(source_path),
+            f"could not copy/read XP12 Global Scenery DSF: {exc}",
+        ) from exc
+    finally:
+        for suffix in ("", ".7z"):
+            candidate = Path(str(tmp_path) + suffix)
+            try:
+                candidate.unlink()
+            except OSError:
+                pass
+
+    return extract_validated_rasters_from_dsf_bytes(
+        dsf_bytes,
+        tile_label=tile_label,
+        source_path=str(source_path),
+    )
+
+
+def _find_global_scenery_dsf(
+    lat: int,
+    lon: int,
+    primary_overlay_src: str,
+    alternate_overlay_src: str,
+    tile_label: str,
+) -> Path:
+    relative = Path("Earth nav data") / f"{FNAMES.long_latlon(lat, lon)}.dsf"
+    for root in (primary_overlay_src, alternate_overlay_src):
+        if not root:
+            continue
+        candidate = Path(root) / relative
+        if candidate.exists():
+            return candidate
+    raise _error(
+        tile_label,
+        f"{primary_overlay_src!r} or {alternate_overlay_src!r}",
+        "missing XP12 Global Scenery DSF; check custom_overlay_src and "
+        "custom_overlay_src_alternate",
+    )
+
+
+def _read_uncompressed_or_7z_dsf(
+    tmp_path: Path,
+    tile_label: str,
+    source_path: str,
+    unzip_executable: str,
+    run_external_tool,
+) -> bytes:
+    with tmp_path.open("rb") as f:
+        signature = f.read(2)
+    if signature != b"7z":
+        return tmp_path.read_bytes()
+
+    archive_path = Path(str(tmp_path) + ".7z")
+    os.replace(tmp_path, archive_path)
+    result = run_external_tool(
+        "7z",
+        ["e", f"-o{tmp_path.parent}", str(archive_path)],
+        executable=unzip_executable,
+    )
+    if result is not None and not getattr(result, "ok", False):
+        raise _error(tile_label, source_path, "could not unpack compressed DSF")
+    if not tmp_path.exists():
+        raise _error(tile_label, source_path, "7z extraction did not produce DSF file")
+    return tmp_path.read_bytes()
 
 
 def extract_validated_rasters_from_dsf_bytes(
