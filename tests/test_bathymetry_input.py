@@ -224,5 +224,51 @@ class BathymetryInputTests(unittest.TestCase):
             )
 
 
+def dsf_file(*, demn: bytes, dems: bytes) -> bytes:
+    body = atom("NFED".encode("ascii"), atom("NMED".encode("ascii"), demn))
+    body += atom("SMED".encode("ascii"), dems)
+    return b"XPLNEDSF" + struct.pack("<I", 1) + body + (b"0" * 16)
+
+
+class GlobalSceneryProviderTests(unittest.TestCase):
+    def test_extract_validated_global_scenery_rasters(self):
+        from O4_Bathymetry_Input import extract_validated_rasters_from_dsf_bytes
+
+        demn = demn_payload("elevation", "sea_level")
+        dems = dems_payload()
+        result = extract_validated_rasters_from_dsf_bytes(
+            dsf_file(demn=demn, dems=dems),
+            tile_label="+12-123",
+            source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+        )
+
+        self.assertEqual(result.demn, demn)
+        self.assertEqual(result.dems, dems)
+        self.assertEqual(result.payload.bathymetry.name, "sea_level")
+
+    def test_rejects_dsf_without_required_rasters(self):
+        from O4_Bathymetry_Input import extract_validated_rasters_from_dsf_bytes
+
+        with self.assertRaisesRegex(BathymetryInputError, r"missing sea_level"):
+            extract_validated_rasters_from_dsf_bytes(
+                dsf_file(
+                    demn=demn_payload("elevation"),
+                    dems=dems_payload(include_sea_level=False),
+                ),
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
+    def test_rejects_corrupted_dsf_header(self):
+        from O4_Bathymetry_Input import extract_validated_rasters_from_dsf_bytes
+
+        with self.assertRaisesRegex(BathymetryInputError, r"corrupted DSF"):
+            extract_validated_rasters_from_dsf_bytes(
+                b"not-a-dsf",
+                tile_label="+12-123",
+                source_path="XP12/Earth nav data/+10-130/+12-123.dsf",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

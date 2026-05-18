@@ -27,6 +27,13 @@ class RasterPayload:
     bathymetry: RasterInfo
 
 
+@dataclass(frozen=True)
+class ValidatedRasterBytes:
+    demn: bytes
+    dems: bytes
+    payload: RasterPayload
+
+
 def validate_raster_payload(
     demn: bytes,
     dems: bytes,
@@ -86,6 +93,80 @@ class _RasterMetadata:
     height: int
     bytes_per_pixel: int
     flags: int
+
+
+def extract_validated_rasters_from_dsf_bytes(
+    dsf_bytes: bytes,
+    *,
+    tile_label: str,
+    source_path: str,
+) -> ValidatedRasterBytes:
+    demn, dems = _extract_raw_raster_atoms(dsf_bytes, tile_label, source_path)
+    payload = validate_raster_payload(
+        demn,
+        dems,
+        tile_label=tile_label,
+        source_path=source_path,
+    )
+    return ValidatedRasterBytes(demn=demn, dems=dems, payload=payload)
+
+
+def _extract_raw_raster_atoms(
+    dsf_bytes: bytes,
+    tile_label: str,
+    source_path: str,
+) -> tuple[bytes, bytes]:
+    if len(dsf_bytes) < 28 or dsf_bytes[:8] != b"XPLNEDSF":
+        raise _error(tile_label, source_path, "corrupted DSF header")
+    stream = io.BytesIO(dsf_bytes)
+    stream.seek(12)
+    atoms_end = len(dsf_bytes) - 16
+    if atoms_end < 12:
+        raise _error(tile_label, source_path, "corrupted DSF atom table")
+
+    demn: bytes | None = None
+    dems: bytes | None = None
+    while stream.tell() < atoms_end:
+        atom_start = stream.tell()
+        header, payload = _read_atom(
+            stream,
+            atoms_end,
+            tile_label,
+            source_path,
+            atom_table_name="DSF",
+        )
+        if header == "NFED":
+            demn = _extract_demn_from_defn(payload, tile_label, source_path)
+        elif header == "SMED":
+            dems = payload
+        if stream.tell() <= atom_start:
+            raise _error(tile_label, source_path, "malformed DSF atom table")
+
+    if demn is None:
+        raise _error(tile_label, source_path, "missing DEMN raster definitions")
+    if dems is None:
+        raise _error(tile_label, source_path, "missing DEMS raster data")
+    return demn, dems
+
+
+def _extract_demn_from_defn(
+    payload: bytes,
+    tile_label: str,
+    source_path: str,
+) -> bytes:
+    stream = io.BytesIO(payload)
+    total_len = len(payload)
+    while stream.tell() < total_len:
+        header, data = _read_atom(
+            stream,
+            total_len,
+            tile_label,
+            source_path,
+            atom_table_name="DEFN",
+        )
+        if header == "NMED":
+            return data
+    raise _error(tile_label, source_path, "missing DEMN raster definitions")
 
 
 def _parse_layer_names(demn: bytes, tile_label: str, source_path: str) -> tuple[str, ...]:
@@ -151,22 +232,28 @@ def _read_atom(
     total_len: int,
     tile_label: str,
     source_path: str,
+    *,
+    atom_table_name: str = "DEMS",
 ) -> tuple[str, bytes]:
     atom_start = stream.tell()
     header = stream.read(4)
     size_bytes = stream.read(4)
     if len(header) != 4 or len(size_bytes) != 4:
-        raise _error(tile_label, source_path, "malformed DEMS atom header")
+        raise _error(tile_label, source_path, f"malformed {atom_table_name} atom header")
     atom_size = struct.unpack("<I", size_bytes)[0]
     if atom_size < 8 or atom_start + atom_size > total_len:
-        raise _error(tile_label, source_path, "malformed DEMS atom length")
+        raise _error(tile_label, source_path, f"malformed {atom_table_name} atom length")
     payload = stream.read(atom_size - 8)
     if len(payload) != atom_size - 8:
-        raise _error(tile_label, source_path, "truncated DEMS atom payload")
+        raise _error(tile_label, source_path, f"truncated {atom_table_name} atom payload")
     try:
         atom_header = header[::-1].decode("ascii")
     except UnicodeDecodeError as exc:
-        raise _error(tile_label, source_path, "malformed DEMS atom header") from exc
+        raise _error(
+            tile_label,
+            source_path,
+            f"malformed {atom_table_name} atom header",
+        ) from exc
     return atom_header, payload
 
 
