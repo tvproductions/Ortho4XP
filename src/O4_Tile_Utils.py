@@ -201,11 +201,29 @@ def _texture_conversion_provider_counts(failures):
 
 
 def _run_texture_conversion_scheduler(convert_queue, result_holder):
-    result_holder["result"] = TCS.run_texture_conversion_queue(
-        convert_queue,
-        max_convert_slots,
-        convert_texture=IMG.convert_texture,
-    )
+    try:
+        result_holder["result"] = TCS.run_texture_conversion_queue(
+            convert_queue,
+            max_convert_slots,
+            convert_texture=IMG.convert_texture,
+        )
+    except Exception as exc:
+        result_holder["exception"] = exc
+
+
+def _handle_texture_conversion_scheduler_result(tile, result_holder):
+    if "exception" in result_holder:
+        exc = result_holder["exception"]
+        UI.vprint(1, "DDS conversion scheduler failed:", str(exc))
+        UI.vprint(3, exc)
+        UI.red_flag = True
+        return
+    result = result_holder.get("result")
+    if result is None:
+        UI.vprint(1, "DDS conversion scheduler failed:", "missing conversion result.")
+        UI.red_flag = True
+        return
+    _report_texture_conversion_result(tile, result)
 
 
 ################################################################################
@@ -320,9 +338,9 @@ def build_tile(tile):
         if convert_launched:
             convert_queue.put("quit")
             convert_thread.join()
-            _report_texture_conversion_result(
+            _handle_texture_conversion_scheduler_result(
                 tile,
-                convert_result_holder["result"],
+                convert_result_holder,
             )
     UI.vprint(1, " *Activating DSF file.")
     dsf_file_name = os.path.join(
