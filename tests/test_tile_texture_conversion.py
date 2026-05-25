@@ -4,6 +4,12 @@ from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import mock
 
+# Tile conversion tests cover the Step 3 integration boundary:
+# summary reporting, scheduler thread shutdown, and DSF activation failure.
+# External DSF, download, filesystem, and conversion work are patched out.
+# The assertions stay at the user-visible lifecycle rather than thread internals.
+# This keeps the tests stable while conversion backends evolve.
+
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
@@ -11,6 +17,7 @@ except ModuleNotFoundError:
 
 import O4_Texture_Conversion_Scheduler as TCS
 import O4_Texture_Encoder as TEX
+import O4_Tile_Texture_Conversion as TTC
 import O4_Tile_Utils as TILE
 
 
@@ -75,7 +82,7 @@ class TileTextureConversionSummaryTests(unittest.TestCase):
         )
 
         with mock.patch.object(TILE.UI, "vprint") as vprint:
-            TILE._report_texture_conversion_result(_tile(), result)
+            TTC.report_texture_conversion_result(_tile(), result)
 
         vprint.assert_any_call(
             1,
@@ -94,7 +101,7 @@ class TileTextureConversionSummaryTests(unittest.TestCase):
         )
 
         with mock.patch.object(TILE.UI, "vprint") as vprint:
-            TILE._report_texture_conversion_result(_tile(), result)
+            TTC.report_texture_conversion_result(_tile(), result)
 
         vprint.assert_any_call(1, " *DDS conversion of textures completed.")
 
@@ -107,7 +114,7 @@ class TileTextureConversionSummaryTests(unittest.TestCase):
         )
 
         with mock.patch.object(TILE.UI, "vprint") as vprint:
-            TILE._report_texture_conversion_result(_tile(), result)
+            TTC.report_texture_conversion_result(_tile(), result)
 
         vprint.assert_any_call(1, "DDS conversion process interrupted.")
 
@@ -141,7 +148,7 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
             with (
                 mock.patch.object(TILE.queue, "Queue", side_effect=queue_factory),
                 mock.patch.object(
-                    TILE.TCS,
+                    TTC.TCS,
                     "run_texture_conversion_queue",
                     side_effect=run_scheduler,
                 ),
@@ -161,7 +168,7 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
 
         with _build_tile_patches(tile, replace=replace, vprint=vprint):
             with mock.patch.object(
-                TILE.TCS,
+                TTC.TCS,
                 "run_texture_conversion_queue",
                 side_effect=RuntimeError("scheduler failed"),
             ):
@@ -179,18 +186,22 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
         result_holder = {}
 
         with mock.patch.object(
-            TILE.TCS,
+            TTC.TCS,
             "run_texture_conversion_queue",
             side_effect=original_error,
         ):
-            TILE._run_texture_conversion_scheduler(_RecordingQueue(), result_holder)
+            TTC.run_texture_conversion_scheduler(
+                _RecordingQueue(),
+                result_holder,
+                max_convert_slots=4,
+            )
 
         self.assertIs(result_holder["exception"], original_error)
         with (
             mock.patch.object(TILE.UI, "vprint") as vprint,
             mock.patch.object(TILE.UI, "red_flag", False),
         ):
-            TILE._handle_texture_conversion_scheduler_result(_tile(), result_holder)
+            TTC.handle_texture_conversion_scheduler_result(_tile(), result_holder)
             self.assertTrue(TILE.UI.red_flag)
 
         vprint.assert_any_call(

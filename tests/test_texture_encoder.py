@@ -1,12 +1,19 @@
 import unittest
 from unittest import mock
 
+# Texture encoder tests intentionally cover both the facade contract and the
+# native backend's platform command lines.
+# Retry tests use injected runtime dependencies so they never launch tools.
+# Result-coercion tests document compatibility with legacy converter returns.
+# The split keeps future backend modules free to reuse these shared model tests.
+
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
 from O4_External_Command_Result import ExternalCommandResult
+import O4_Native_Texture_Encoder as NTE
 import O4_Texture_Encoder as TEX
 
 
@@ -36,6 +43,13 @@ def _command_result(ok=True, returncode=0, error_summary=""):
     )
 
 
+def _runtime(runner=None, sleep=None):
+    return TEX.TextureEncoderRuntime(
+        run_external_command=runner or mock.Mock(return_value=_command_result()),
+        sleep=sleep or (lambda _seconds: None),
+    )
+
+
 class NativeTextureEncoderTests(unittest.TestCase):
     def test_windows_linux_bc1_command_uses_nvcompress(self):
         backend = TEX.NativeTextureEncoderBackend(
@@ -61,7 +75,7 @@ class NativeTextureEncoderTests(unittest.TestCase):
 
     def test_default_windows_linux_executable_uses_repo_tool_resolver(self):
         with mock.patch.object(
-            TEX.SP,
+            NTE.SP,
             "resolve_tool",
             return_value="Utils/win/nvcompress.exe",
         ) as resolve_tool:
@@ -77,7 +91,7 @@ class NativeTextureEncoderTests(unittest.TestCase):
         backend = TEX.NativeTextureEncoderBackend(
             is_macos=False,
             executable="nvcompress",
-            run_external_command=runner,
+            runtime=_runtime(runner=runner),
         )
 
         with self.assertRaises(ValueError):
@@ -112,7 +126,7 @@ class NativeTextureEncoderTests(unittest.TestCase):
         backend = TEX.NativeTextureEncoderBackend(
             is_macos=True,
             executable="DDSTool",
-            run_external_command=runner,
+            runtime=_runtime(runner=runner),
         )
 
         with self.assertRaises(ValueError):
@@ -125,8 +139,7 @@ class NativeTextureEncoderTests(unittest.TestCase):
         backend = TEX.NativeTextureEncoderBackend(
             is_macos=False,
             executable="nvcompress",
-            run_external_command=runner,
-            sleep=lambda _seconds: None,
+            runtime=_runtime(runner=runner),
         )
 
         result = backend.encode(_request("bc1"))
@@ -153,11 +166,10 @@ class NativeTextureEncoderTests(unittest.TestCase):
         backend = TEX.NativeTextureEncoderBackend(
             is_macos=False,
             executable="nvcompress",
-            run_external_command=runner,
-            sleep=lambda _seconds: None,
+            runtime=_runtime(runner=runner),
         )
 
-        with mock.patch.object(TEX.UI, "lvprint"):
+        with mock.patch.object(NTE.UI, "lvprint"):
             result = backend.encode(_request("bc1", max_attempts=1))
 
         self.assertFalse(result.ok)
@@ -177,11 +189,10 @@ class NativeTextureEncoderTests(unittest.TestCase):
         backend = TEX.NativeTextureEncoderBackend(
             is_macos=False,
             executable="nvcompress",
-            run_external_command=runner,
-            sleep=sleeps.append,
+            runtime=_runtime(runner=runner, sleep=sleeps.append),
         )
 
-        with mock.patch.object(TEX.UI, "lvprint"):
+        with mock.patch.object(NTE.UI, "lvprint"):
             result = backend.encode(_request("bc1", max_attempts=3))
 
         self.assertTrue(result.ok)
@@ -200,11 +211,10 @@ class NativeTextureEncoderTests(unittest.TestCase):
         backend = TEX.NativeTextureEncoderBackend(
             is_macos=False,
             executable="nvcompress",
-            run_external_command=runner,
-            sleep=sleeps.append,
+            runtime=_runtime(runner=runner, sleep=sleeps.append),
         )
 
-        with mock.patch.object(TEX.UI, "lvprint"):
+        with mock.patch.object(NTE.UI, "lvprint"):
             result = backend.encode(_request("bc1", max_attempts=2))
 
         self.assertFalse(result.ok)

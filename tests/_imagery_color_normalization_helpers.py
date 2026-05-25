@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import mock
 
@@ -14,6 +15,7 @@ except ModuleNotFoundError:
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
 import O4_Texture_Color_Normalization as TCN
+import O4_Texture_Conversion_Utils as TCU
 
 
 class ImageryColorNormalizationTestCase(unittest.TestCase):
@@ -67,24 +69,9 @@ class ConvertTexturePatchMixin(ImageryColorNormalizationTestCase):
     def _convert_texture_patches(self, provider_code, **options):
         settings = _ConversionPatchSettings.from_options(options)
         tmp_dir = self._conversion_tmp_dir()
-        patches = [
-            _conversion_core_patch(),
-            mock.patch.object(IMG.TEX, "encode_texture"),
-            mock.patch.object(TCN, "normalize_texture_image_if_enabled"),
-            mock.patch.dict(
-                IMG.providers_dict, settings.providers(provider_code), clear=True
-            ),
-            mock.patch.dict(
-                IMG.local_combined_providers_dict,
-                settings.combined_providers(provider_code),
-                clear=True,
-            ),
-            mock.patch.object(
-                FNAMES, "jpeg_file_dir_from_attributes", return_value=self.temp_dir.name
-            ),
-            mock.patch.object(FNAMES, "resource_path", return_value=tmp_dir),
-            mock.patch.object(IMG.UI, "vprint"),
-        ]
+        patches = _conversion_patches(
+            settings, provider_code, self.temp_dir.name, tmp_dir
+        )
         return ConvertTexturePatchContext(patches, SimpleNamespace(ok=True), tmp_dir)
 
     def _conversion_tmp_dir(self):
@@ -123,9 +110,49 @@ def _conversion_core_patch():
     return mock.patch.multiple(
         IMG,
         is_macos=False,
-        run_external_command=mock.DEFAULT,
         color_transform=mock.DEFAULT,
         combine_textures=mock.DEFAULT,
+    )
+
+
+def _conversion_patches(settings, provider_code, jpeg_dir, tmp_dir):
+    return SimpleNamespace(
+        core=_conversion_core_patch(),
+        command=mock.patch.object(TCU, "run_external_command"),
+        encode=mock.patch.object(TCU.TEX, "encode_texture"),
+        normalize=mock.patch.object(TCN, "normalize_texture_image_if_enabled"),
+        data=[
+            mock.patch.dict(
+                IMG.providers_dict, settings.providers(provider_code), clear=True
+            ),
+            mock.patch.dict(
+                IMG.local_combined_providers_dict,
+                settings.combined_providers(provider_code),
+                clear=True,
+            ),
+            mock.patch.object(
+                FNAMES, "jpeg_file_dir_from_attributes", return_value=jpeg_dir
+            ),
+            mock.patch.object(FNAMES, "resource_path", return_value=tmp_dir),
+        ],
+        vprint=mock.patch.object(IMG.UI, "vprint"),
+    )
+
+
+def _texture_encode_result():
+    return TCU.TEX.TextureEncodeResult(
+        request=TCU.TEX.TextureEncodeRequest(
+            source_path="input.png",
+            output_path="output.dds",
+            codec="bc1",
+            display_name="output.dds",
+        ),
+        ok=True,
+        attempts=1,
+        backend_name="native",
+        tool_name="nvcompress",
+        returncode=0,
+        error_summary="",
     )
 
 
@@ -134,43 +161,24 @@ class ConvertTexturePatchContext:
         self.patches = patches
         self.command_result = command_result
         self.tmp_dir = tmp_dir
-        self.started = []
+        self.stack = ExitStack()
 
     def __enter__(self):
-        multiple_mocks = self.patches[0].start()
-        self.started.append(self.patches[0])
-        self.run_external_command = multiple_mocks["run_external_command"]
+        multiple_mocks = self.stack.enter_context(self.patches.core)
+        self.run_external_command = self.stack.enter_context(self.patches.command)
         self.run_external_command.return_value = self.command_result
         self.color_transform = multiple_mocks["color_transform"]
         self.combine_textures = multiple_mocks["combine_textures"]
-        self.encode_texture = self.patches[1].start()
-        self.started.append(self.patches[1])
-        self.encode_texture.return_value = IMG.TEX.TextureEncodeResult(
-            request=IMG.TEX.TextureEncodeRequest(
-                source_path="input.png",
-                output_path="output.dds",
-                codec="bc1",
-                display_name="output.dds",
-            ),
-            ok=True,
-            attempts=1,
-            backend_name="native",
-            tool_name="nvcompress",
-            returncode=0,
-            error_summary="",
-        )
-        self.normalize = self.patches[2].start()
-        self.started.append(self.patches[2])
-        for patcher in self.patches[3:-1]:
-            patcher.start()
-            self.started.append(patcher)
-        self.vprint = self.patches[-1].start()
-        self.started.append(self.patches[-1])
+        self.encode_texture = self.stack.enter_context(self.patches.encode)
+        self.encode_texture.return_value = _texture_encode_result()
+        self.normalize = self.stack.enter_context(self.patches.normalize)
+        for patcher in self.patches.data:
+            self.stack.enter_context(patcher)
+        self.vprint = self.stack.enter_context(self.patches.vprint)
         return self
 
     def __exit__(self, exc_type, exc, traceback):
-        for patcher in reversed(self.started):
-            patcher.stop()
+        self.stack.close()
 
     @property
     def encode_request(self):

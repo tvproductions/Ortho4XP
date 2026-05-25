@@ -1,6 +1,9 @@
 import unittest
 
-import _path
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 
 
 FORBIDDEN_SUBPROCESS = (

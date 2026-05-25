@@ -8,7 +8,10 @@ import tempfile
 import unittest
 from unittest import mock
 
-import _path  # noqa: F401
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 
 import O4_External_Tool_Paths as PATHS
 import O4_Subprocess_Runtime as RUNTIME

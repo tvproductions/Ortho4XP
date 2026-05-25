@@ -22,7 +22,6 @@ import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
-import O4_Texture_Encoder as TEX
 import O4_Texture_Color_Normalization as TCN
 from O4_Source_Data_Models import (
     ColorFilterDefinition,
@@ -35,6 +34,10 @@ import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
 from O4_Parallel_Utils import parallel_execute
 from O4_Subprocess_Utils import resolve_tool, run_external_command
+from O4_Texture_Conversion_Utils import (
+    convert_dds_texture,
+    convert_geotiff_texture,
+)
 from pydantic import ValidationError
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
@@ -89,6 +92,8 @@ request_headers_generic = {
 }
 
 is_macos = "dar" in sys.platform
+DDS_OUTPUT_TYPE = "dds"
+TIF_OUTPUT_TYPE = "tif"
 dds_convert_cmd = resolve_tool("DDSTool" if is_macos else "nvcompress")
 
 # Windows and Linux both use nvcompress; macOS uses DDSTool.
@@ -2299,57 +2304,14 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
 ################################################################################
 
 
-################################################################################
-def _texture_encode_request(
-    tile,
-    til_x_left,
-    til_y_top,
-    zoomlevel,
-    provider_code,
-    *,
-    source_path,
-    output_file_name,
-    dxt5,
-):
-    return TEX.TextureEncodeRequest(
-        source_path=source_path,
-        output_path=os.path.join(tile.build_dir, "textures", output_file_name),
-        codec="bc3" if dxt5 else "bc1",
-        display_name=output_file_name,
-        provider_code=provider_code,
-        til_x_left=til_x_left,
-        til_y_top=til_y_top,
-        zoomlevel=zoomlevel,
-    )
-
-
-def _cleanup_conversion_temps(
-    *,
-    erase_tmp_png,
-    png_file_name,
-    erase_tmp_tif=False,
-    tmp_tif_file_name=None,
-):
-    if erase_tmp_png:
-        try:
-            os.remove(os.path.join(FNAMES.resource_path("tmp"), png_file_name))
-        except OSError as exc:
-            UI.vprint(3, exc)
-    if erase_tmp_tif and tmp_tif_file_name:
-        try:
-            os.remove(tmp_tif_file_name)
-        except OSError as exc:
-            UI.vprint(3, exc)
-
-
 def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type="dds"):
     texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
-    if type == "dds":
+    if type == DDS_OUTPUT_TYPE:
         out_file_name = FNAMES.dds_file_name_from_attributes(
             til_x_left, til_y_top, zoomlevel, provider_code
         )
-        png_file_name = out_file_name.replace("dds", "png")
-    elif type == "tif":
+        png_file_name = out_file_name.replace(DDS_OUTPUT_TYPE, "png")
+    elif type == TIF_OUTPUT_TYPE:
         out_file_name = FNAMES.geotiff_file_name_from_attributes(
             til_x_left, til_y_top, zoomlevel, provider_code
         )
@@ -2358,17 +2320,16 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 os.remove(os.path.join(FNAMES.Geotiff_dir, out_file_name))
             except OSError as exc:
                 UI.vprint(3, exc)
-        png_file_name = out_file_name.replace("tif", "png")
+        png_file_name = out_file_name.replace(TIF_OUTPUT_TYPE, "png")
         tmp_tif_file_name = os.path.join(
             FNAMES.resource_path("tmp"), out_file_name.replace("4326", "3857")
         )
     UI.vprint(1, "   Converting orthophoto(s) to build texture " + out_file_name + ".")
     erase_tmp_png = False
-    erase_tmp_tif = False
 
     dxt5 = False
     masked_texture = False
-    if tile.imprint_masks_to_dds and type == "dds":
+    if tile.imprint_masks_to_dds and type == DDS_OUTPUT_TYPE:
         masked_texture = os.path.exists(
             os.path.join(
                 tile.build_dir,
@@ -2406,7 +2367,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 if small_array.max() > 30:
                     masked_texture = True
 
-    file_dir = jpeg_file_name = cached_texture_path = ""
+    file_dir = cached_texture_path = ""
     if provider_code in providers_dict:
         jpeg_file_name = FNAMES.jpeg_file_name_from_attributes(
             til_x_left, til_y_top, zoomlevel, provider_code
@@ -2433,7 +2394,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
             big_image.putalpha(mask_im.resize((4096, 4096), Image.Resampling.BICUBIC))
-            if type == "dds":
+            if type == DDS_OUTPUT_TYPE:
                 try:
                     os.remove(
                         os.path.join(
@@ -2466,7 +2427,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
             big_image.putalpha(mask_im.resize((4096, 4096), Image.Resampling.BICUBIC))
-            if type == "dds":
+            if type == DDS_OUTPUT_TYPE:
                 try:
                     os.remove(
                         os.path.join(
@@ -2490,141 +2451,25 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             png_file_name,
             color_context,
         )
-    if type == "dds":
-        request = _texture_encode_request(
+    if type == DDS_OUTPUT_TYPE:
+        return convert_dds_texture(
             tile,
-            til_x_left,
-            til_y_top,
-            zoomlevel,
-            provider_code,
-            source_path=file_to_convert,
-            output_file_name=out_file_name,
-            dxt5=dxt5,
+            texture_attrs,
+            (file_to_convert, out_file_name, dxt5),
+            (erase_tmp_png, png_file_name),
         )
-        try:
-            encode_result = TEX.encode_texture(request)
-            return TEX.TextureConversionResult.from_encode_result(encode_result)
-        finally:
-            _cleanup_conversion_temps(
-                erase_tmp_png=erase_tmp_png,
-                png_file_name=png_file_name,
-            )
-    (latmax, lonmin) = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
-    (latmin, lonmax) = GEO.gtile_to_wgs84(
-        til_x_left + 16, til_y_top + 16, zoomlevel
-    )
-    (xmin, ymin) = GEO.geo_to_webm(lonmin, latmin)
-    (xmax, ymax) = GEO.geo_to_webm(lonmax, latmax)
-    if latmax - latmin < 0.04:
-        conv_cmd = [
-            gdal_transl_cmd,
-            "-of",
-            "Gtiff",
-            "-co",
-            "COMPRESS=JPEG",
-            "-a_ullr",
-            str(lonmin),
-            str(latmax),
-            str(lonmax),
-            str(latmin),
-            "-a_srs",
-            "epsg:4326",
+    return convert_geotiff_texture(
+        tile,
+        texture_attrs,
+        (
             file_to_convert,
-            os.path.join(FNAMES.Geotiff_dir, out_file_name),
-        ]
-    else:
-        geotag_cmd = [
-            gdal_transl_cmd,
-            "-of",
-            "Gtiff",
-            "-co",
-            "COMPRESS=JPEG",
-            "-a_ullr",
-            str(xmin),
-            str(ymax),
-            str(xmax),
-            str(ymin),
-            "-a_srs",
-            "epsg:3857",
-            file_to_convert,
-            tmp_tif_file_name,
-        ]
-        erase_tmp_tif = True
-        result = run_external_command(geotag_cmd)
-        if not result.ok:
-            UI.vprint(
-                1,
-                "ERROR: Could not geotag texture (gdal not present ?) ",
-                os.path.join(tile.build_dir, "textures", out_file_name),
-            )
-            _cleanup_conversion_temps(
-                erase_tmp_png=erase_tmp_png,
-                png_file_name=png_file_name,
-                erase_tmp_tif=True,
-                tmp_tif_file_name=tmp_tif_file_name,
-            )
-            return TEX.TextureConversionResult.failure(
-                out_file_name,
-                provider_code,
-                "Could not geotag texture",
-            )
-        conv_cmd = [
-            gdalwarp_cmd,
-            "-of",
-            "Gtiff",
-            "-co",
-            "COMPRESS=JPEG",
-            "-s_srs",
-            "epsg:3857",
-            "-t_srs",
-            "epsg:4326",
-            "-ts",
-            "4096",
-            "4096",
-            "-rb",
-            tmp_tif_file_name,
-            os.path.join(FNAMES.Geotiff_dir, out_file_name),
-        ]
-    tentative = 0
-    conversion_failed = False
-    while True:
-        result = run_external_command(conv_cmd)
-        if result.ok:
-            break
-        tentative += 1
-        if tentative == 10:
-            UI.lvprint(
-                1,
-                "ERROR: Could not convert texture",
-                os.path.join(tile.build_dir, "textures", out_file_name),
-                "(10 tries)",
-            )
-            conversion_failed = True
-            break
-        UI.lvprint(
-            1,
-            "WARNING: Could not convert texture",
-            os.path.join(tile.build_dir, "textures", out_file_name),
-        )
-        time.sleep(1)
-    _cleanup_conversion_temps(
-        erase_tmp_png=erase_tmp_png,
-        png_file_name=png_file_name,
-        erase_tmp_tif=erase_tmp_tif,
-        tmp_tif_file_name=tmp_tif_file_name if erase_tmp_tif else None,
-    )
-    if conversion_failed:
-        error_summary = getattr(result, "error_summary", "")
-        if error_summary:
-            error_summary = f"Could not convert texture: {error_summary}"
-        else:
-            error_summary = "Could not convert texture"
-        return TEX.TextureConversionResult.failure(
             out_file_name,
-            provider_code,
-            error_summary,
-        )
-    return TEX.TextureConversionResult.success(out_file_name, provider_code)
+            erase_tmp_png,
+            png_file_name,
+            tmp_tif_file_name,
+        ),
+        (gdal_transl_cmd, gdalwarp_cmd),
+    )
 
 
 ################################################################################

@@ -7,7 +7,10 @@ from pathlib import Path
 
 import numpy
 
-import _path  # noqa: F401
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 import O4_File_Names as names
 import O4_Imagery_Utils as imagery
 

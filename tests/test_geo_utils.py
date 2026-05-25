@@ -1,7 +1,10 @@
 import unittest
 from math import isclose, pi
 
-import _path  # noqa: F401
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 import O4_Geo_Utils as geo
 
 

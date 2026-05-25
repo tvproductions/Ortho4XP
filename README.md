@@ -125,6 +125,18 @@ that texture task. After texture downloads finish, Ortho4XP writes one concise
 imagery download summary to the console and to `Ortho4XP.log.json` when any
 texture was partially or fully unavailable.
 
+## Texture conversion scheduling
+
+`max_convert_slots` controls the bounded CPU worker count used for DDS texture
+conversion during Step 3. Ortho4XP schedules conversions through a native
+texture encoder backend while preserving the platform-specific tools used by
+this fork: `nvcompress` on Windows/Linux and `DDSTool` on macOS.
+
+If one or more DDS conversions fail, Step 3 prints a concise conversion summary
+with failed texture counts by imagery provider. Full external command details,
+return codes, and stderr summaries continue to be written to
+`Ortho4XP.log.json` by the shared subprocess runner.
+
 ## Texture color normalization
 
 `normalize_texture_colors` is an opt-in texture preprocessing setting. When

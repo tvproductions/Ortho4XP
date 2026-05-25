@@ -2,7 +2,10 @@ import os
 import unittest
 from types import SimpleNamespace
 
-import _path  # noqa: F401
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 import O4_File_Names as names
 
 

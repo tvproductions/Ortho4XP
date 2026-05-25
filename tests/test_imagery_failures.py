@@ -7,7 +7,10 @@ import tempfile
 import unittest
 from unittest import mock
 
-import _path  # noqa: F401
+try:
+    import _path  # noqa: F401
+except ModuleNotFoundError:
+    from tests import _path  # noqa: F401
 
 import requests
 

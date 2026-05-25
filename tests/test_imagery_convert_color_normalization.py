@@ -1,7 +1,5 @@
 import os
-from types import SimpleNamespace
 import unittest
-from unittest import mock
 
 from PIL import Image
 
@@ -12,6 +10,10 @@ except ModuleNotFoundError:
 
 from tests._imagery_color_normalization_helpers import (
     ConvertTexturePatchMixin,
+)
+from tests._imagery_geotiff_conversion_helpers import (
+    convert_geotiff_with_failed_final_conversion,
+    convert_geotiff_with_failed_geotag,
 )
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
@@ -36,6 +38,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         self._write_cached_jpeg("TMPPNG")
         tile = self._tile_for_conversion()
         normalized = Image.new("RGB", (16, 16), (120, 120, 120))
+        expected_png = _dds_tmp_png_path("TMPPNG", self._conversion_tmp_dir())
 
         with self._convert_texture_patches("TMPPNG") as conversion:
             IMG.normalize_texture_colors = True
@@ -43,12 +46,6 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
 
             result = IMG.convert_texture(tile, 32, 48, 16, "TMPPNG")
 
-        expected_png = os.path.join(
-            conversion.tmp_dir,
-            FNAMES.dds_file_name_from_attributes(32, 48, 16, "TMPPNG").replace(
-                "dds", "png"
-            ),
-        )
         self.assertEqual(conversion.encode_request.source_path, expected_png)
         self.assertFalse(os.path.exists(expected_png))
         conversion.normalize.assert_called_once()
@@ -127,29 +124,9 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         )
 
     def test_convert_geotiff_final_conversion_failure_returns_failure_result(self):
-        self._write_cached_jpeg("TIFFAIL")
-        tile = self._tile_for_conversion()
-        expected_name = FNAMES.geotiff_file_name_from_attributes(
-            32, 48, 16, "TIFFAIL"
+        result, conversion, expected_name = (
+            convert_geotiff_with_failed_final_conversion(self)
         )
-
-        with (
-            self._convert_texture_patches("TIFFAIL") as conversion,
-            mock.patch.object(
-                IMG.GEO,
-                "gtile_to_wgs84",
-                side_effect=[(1.0, 2.0), (0.99, 2.01)],
-            ),
-            mock.patch.object(IMG.GEO, "geo_to_webm", return_value=(0, 0)),
-            mock.patch.object(IMG.UI, "lvprint"),
-            mock.patch.object(IMG.time, "sleep"),
-        ):
-            conversion.run_external_command.return_value = SimpleNamespace(
-                ok=False,
-                error_summary="gdal translate failed",
-            )
-
-            result = IMG.convert_texture(tile, 32, 48, 16, "TIFFAIL", type="tif")
 
         self.assertFalse(result.ok)
         self.assertEqual(result.display_name, expected_name)
@@ -158,47 +135,26 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         self.assertEqual(conversion.run_external_command.call_count, 10)
 
     def test_convert_geotiff_geotag_failure_cleans_png_and_temp_tiff(self):
-        self._write_cached_jpeg("GEOTAGFAIL")
-        tile = self._tile_for_conversion()
-        expected_name = FNAMES.geotiff_file_name_from_attributes(
-            32, 48, 16, "GEOTAGFAIL"
+        result, remove, tmp_dir, expected_name = convert_geotiff_with_failed_geotag(
+            self
         )
 
-        with (
-            self._convert_texture_patches(
-                "GEOTAGFAIL", color_filters="FILTER"
-            ) as conversion,
-            mock.patch.object(
-                IMG.GEO,
-                "gtile_to_wgs84",
-                side_effect=[(1.0, 2.0), (0.0, 3.0)],
-            ),
-            mock.patch.object(
-                IMG.GEO,
-                "geo_to_webm",
-                side_effect=[(20, 0), (30, 10)],
-            ),
-            mock.patch.object(IMG.os, "remove") as remove,
-        ):
-            conversion.color_transform.side_effect = lambda image, _: image
-            conversion.run_external_command.return_value = SimpleNamespace(
-                ok=False,
-                error_summary="gdal geotag failed",
-            )
-
-            result = IMG.convert_texture(tile, 32, 48, 16, "GEOTAGFAIL", type="tif")
-
-        expected_png = os.path.join(
-            conversion.tmp_dir,
-            expected_name.replace("tif", "png"),
-        )
-        expected_tmp_tif = os.path.join(
-            conversion.tmp_dir,
-            expected_name.replace("4326", "3857"),
-        )
         self.assertFalse(result.ok)
-        remove.assert_any_call(expected_png)
-        remove.assert_any_call(expected_tmp_tif)
+        remove.assert_any_call(
+            os.path.join(tmp_dir, expected_name.replace("tif", "png"))
+        )
+        remove.assert_any_call(
+            os.path.join(tmp_dir, expected_name.replace("4326", "3857"))
+        )
+
+
+def _dds_tmp_png_path(provider_code, tmp_dir):
+    return os.path.join(
+        tmp_dir,
+        FNAMES.dds_file_name_from_attributes(32, 48, 16, provider_code).replace(
+            "dds", "png"
+        ),
+    )
 
 
 if __name__ == "__main__":

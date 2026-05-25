@@ -469,6 +469,8 @@ Suggested labels: `xp12max`, `dsf-bridge`, `seasons`
 
 ### TODO-018: Deploy Multi-Threaded Texture Encoder Backend
 
+Status: Done
+
 GitHub Issue: #13
 
 Remove serial texturing bottlenecks before adding GPU-specific backends.
