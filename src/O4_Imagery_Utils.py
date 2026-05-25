@@ -2405,17 +2405,19 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     erase_tmp_png = False
     erase_tmp_tif = False
 
-    def normalized_tmp_conversion_input(source_path):
+    def normalized_tmp_conversion_input(source_path, source_file_dir, target_png_file_name):
         big_image = Image.open(source_path, "r").convert("RGB")
         big_image = normalize_texture_image_if_enabled(
             big_image,
-            file_dir,
+            source_file_dir,
             til_x_left,
             til_y_top,
             zoomlevel,
             provider_code,
         )
-        file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
+        file_to_convert = os.path.join(
+            FNAMES.resource_path("tmp"), target_png_file_name
+        )
         big_image.save(file_to_convert)
         return file_to_convert
 
@@ -2481,6 +2483,13 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 til_y_top,
                 zoomlevel,
                 provider_code,
+            )
+        elif normalize_texture_colors:
+            UI.vprint(
+                3,
+                "Skipping texture color normalization for combined provider",
+                provider_code,
+                "because no cached provider directory is available for neighbor lookup.",
             )
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
@@ -2548,7 +2557,9 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     else:
         source_path = os.path.join(file_dir, jpeg_file_name)
         if normalize_texture_colors:
-            file_to_convert = normalized_tmp_conversion_input(source_path)
+            file_to_convert = normalized_tmp_conversion_input(
+                source_path, file_dir, png_file_name
+            )
             erase_tmp_png = True
         else:
             file_to_convert = source_path
