@@ -46,12 +46,8 @@ class ColorCorrection:
         )
 
     def is_identity(self) -> bool:
-        return (
-            self.strength <= 0.0
-            or (
-                self.exposure_scale == 1.0
-                and self.channel_scales == (1.0, 1.0, 1.0)
-            )
+        return self.strength <= 0.0 or (
+            self.exposure_scale == 1.0 and self.channel_scales == (1.0, 1.0, 1.0)
         )
 
 
@@ -102,7 +98,11 @@ def edge_stats(image, edge: EdgeName, band_width=EDGE_BAND_PIXELS) -> EdgeStats:
     mean_rgb_array = linear.mean(axis=0)
     mean_luminance = float(mean_rgb_array.dot(_LUMINANCE_WEIGHTS))
     return EdgeStats(
-        mean_rgb=tuple(float(value) for value in mean_rgb_array),
+        mean_rgb=(
+            float(mean_rgb_array[0]),
+            float(mean_rgb_array[1]),
+            float(mean_rgb_array[2]),
+        ),
         mean_luminance=mean_luminance,
         pixel_count=int(linear.shape[0]),
     )
@@ -135,7 +135,11 @@ def derive_color_correction(edge_pairs) -> ColorCorrection:
 
     return ColorCorrection(
         exposure_scale=float(exposure_scale),
-        channel_scales=tuple(float(value) for value in channel_scales),
+        channel_scales=(
+            float(channel_scales[0]),
+            float(channel_scales[1]),
+            float(channel_scales[2]),
+        ),
         strength=DEFAULT_CORRECTION_STRENGTH,
     )
 
@@ -183,13 +187,17 @@ def _weighted_means(stats_list):
     if total_pixels <= 0:
         return numpy.ones(3, dtype=numpy.float64), 1.0
 
-    mean_rgb = sum(
-        numpy.array(stats.mean_rgb, dtype=numpy.float64) * stats.pixel_count
-        for stats in stats_list
-    ) / total_pixels
-    mean_luminance = sum(
-        stats.mean_luminance * stats.pixel_count for stats in stats_list
-    ) / total_pixels
+    mean_rgb = (
+        sum(
+            numpy.array(stats.mean_rgb, dtype=numpy.float64) * stats.pixel_count
+            for stats in stats_list
+        )
+        / total_pixels
+    )
+    mean_luminance = (
+        sum(stats.mean_luminance * stats.pixel_count for stats in stats_list)
+        / total_pixels
+    )
     return mean_rgb, float(mean_luminance)
 
 

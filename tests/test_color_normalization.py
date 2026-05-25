@@ -50,9 +50,7 @@ class ColorNormalizationTests(unittest.TestCase):
 
     def test_correction_moves_target_toward_neighbor_with_clamps(self):
         target = CNORM.edge_stats(Image.new("RGB", (32, 32), (80, 60, 40)), "east")
-        neighbor = CNORM.edge_stats(
-            Image.new("RGB", (32, 32), (220, 230, 240)), "west"
-        )
+        neighbor = CNORM.edge_stats(Image.new("RGB", (32, 32), (220, 230, 240)), "west")
 
         correction = CNORM.derive_color_correction([(target, neighbor)])
 
@@ -76,7 +74,9 @@ class ColorNormalizationTests(unittest.TestCase):
         self.assertEqual(result.size, image.size)
         self.assertNotEqual(result.getpixel((0, 0)), image.getpixel((0, 0)))
 
-    def test_normalize_image_with_neighbors_returns_unchanged_without_valid_neighbors(self):
+    def test_normalize_image_with_neighbors_returns_unchanged_without_valid_neighbors(
+        self,
+    ):
         image = Image.new("RGB", (16, 16), (100, 110, 120))
 
         result = CNORM.normalize_image_with_neighbors(
@@ -92,15 +92,24 @@ class ColorNormalizationTests(unittest.TestCase):
 
     def test_normalize_image_with_neighbors_uses_opposite_neighbor_edge(self):
         target = Image.new("RGB", (16, 16), (90, 70, 50))
-        neighbor = Image.new("RGB", (16, 16), (150, 160, 170))
+        neighbor_pixels = numpy.zeros((16, 16, 3), dtype=numpy.uint8)
+        neighbor_pixels[:, :4, :] = (150, 160, 170)
+        neighbor_pixels[:, 4:, :] = (90, 70, 50)
+        neighbor = Image.fromarray(neighbor_pixels, "RGB")
 
         result = CNORM.normalize_image_with_neighbors(
             target,
             {"east": neighbor},
             band_width=4,
         )
+        wrong_edge_result = CNORM.normalize_image_with_neighbors(
+            target,
+            {"west": neighbor},
+            band_width=4,
+        )
 
         self.assertNotEqual(result.getpixel((8, 8)), target.getpixel((8, 8)))
+        self.assertEqual(wrong_edge_result.getpixel((8, 8)), target.getpixel((8, 8)))
 
 
 if __name__ == "__main__":
