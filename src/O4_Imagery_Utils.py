@@ -2404,6 +2404,21 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     UI.vprint(1, "   Converting orthophoto(s) to build texture " + out_file_name + ".")
     erase_tmp_png = False
     erase_tmp_tif = False
+
+    def normalized_tmp_conversion_input(source_path):
+        big_image = Image.open(source_path, "r").convert("RGB")
+        big_image = normalize_texture_image_if_enabled(
+            big_image,
+            file_dir,
+            til_x_left,
+            til_y_top,
+            zoomlevel,
+            provider_code,
+        )
+        file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
+        big_image.save(file_to_convert)
+        return file_to_convert
+
     dxt5 = False
     masked_texture = False
     if tile.imprint_masks_to_dds and type == "dds":
@@ -2458,6 +2473,15 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         big_image = combine_textures(
             tile, til_x_left, til_y_top, zoomlevel, provider_code
         )
+        if provider_code in providers_dict:
+            big_image = normalize_texture_image_if_enabled(
+                big_image,
+                file_dir,
+                til_x_left,
+                til_y_top,
+                zoomlevel,
+                provider_code,
+            )
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
             big_image.putalpha(mask_im.resize((4096, 4096), Image.Resampling.BICUBIC))
@@ -2488,6 +2512,14 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         big_image = Image.open(os.path.join(file_dir, jpeg_file_name), "r").convert(
             "RGB"
         )
+        big_image = normalize_texture_image_if_enabled(
+            big_image,
+            file_dir,
+            til_x_left,
+            til_y_top,
+            zoomlevel,
+            provider_code,
+        )
         if providers_dict[provider_code]["color_filters"] != "none":
             big_image = color_transform(
                 big_image, providers_dict[provider_code]["color_filters"]
@@ -2514,7 +2546,12 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         big_image.save(file_to_convert)
     # finally if nothing needs to be done prior to the conversion
     else:
-        file_to_convert = os.path.join(file_dir, jpeg_file_name)
+        source_path = os.path.join(file_dir, jpeg_file_name)
+        if normalize_texture_colors:
+            file_to_convert = normalized_tmp_conversion_input(source_path)
+            erase_tmp_png = True
+        else:
+            file_to_convert = source_path
     # eventually the dds conversion
     if type == "dds":
         if not dxt5:

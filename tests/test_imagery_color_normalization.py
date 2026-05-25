@@ -194,6 +194,15 @@ class ImageryColorNormalizationTests(unittest.TestCase):
                 else:
                     normalize.assert_not_called()
 
+    def test_convert_texture_can_normalize_existing_cached_jpeg_before_conversion(self):
+        source = inspect.getsource(IMG.convert_texture)
+
+        self.assertIn("normalize_texture_image_if_enabled(", source)
+        self.assertIn(
+            'file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)',
+            source,
+        )
+
     def _color_for_edge(self, edge):
         return {
             "north": (100, 110, 120),
