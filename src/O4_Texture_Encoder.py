@@ -2,15 +2,14 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Literal, Sequence
+from typing import Callable, Literal
 
 from O4_External_Command_Result import ExternalCommandResult
-from O4_Subprocess_Utils import run_external_command as _run_external_command
+import O4_Subprocess_Utils as SP
 import O4_UI_Utils as UI
 
 
 TextureCodec = Literal["bc1", "bc3"]
-CommandRunner = Callable[[Sequence[str]], ExternalCommandResult]
 Sleep = Callable[[float], None]
 
 
@@ -101,12 +100,19 @@ class NativeTextureEncoderBackend(TextureEncoderBackend):
         sleep: Sleep | None = None,
     ) -> None:
         self.is_macos = sys.platform == "darwin" if is_macos is None else is_macos
-        self.executable = executable or ("DDSTool" if self.is_macos else "nvcompress")
-        self.run_external_command = run_external_command or _run_external_command
+        self.tool_name = (
+            Path(executable).stem
+            if executable is not None
+            else "DDSTool"
+            if self.is_macos
+            else "nvcompress"
+        )
+        self.executable = executable or SP.resolve_tool(self.tool_name)
+        self.run_external_command = run_external_command or SP.run_external_command
         self.sleep = sleep or time.sleep
-        self.tool_name = Path(self.executable).stem
 
     def build_command(self, request: TextureEncodeRequest) -> list[str]:
+        _validate_codec(request.codec)
         if self.is_macos:
             return [
                 self.executable,
@@ -179,8 +185,17 @@ def coerce_conversion_result(
     if isinstance(result, TextureEncodeResult):
         return TextureConversionResult.from_encode_result(result)
     if result is False:
-        return TextureConversionResult.failure(display_name, provider_code)
+        return TextureConversionResult.failure(
+            display_name,
+            provider_code,
+            "conversion returned False",
+        )
     return TextureConversionResult.success(display_name, provider_code)
+
+
+def _validate_codec(codec: str) -> None:
+    if codec not in ("bc1", "bc3"):
+        raise ValueError(f"Unsupported texture codec: {codec}")
 
 
 def _ddstool_codec_flag(codec: TextureCodec) -> str:
