@@ -36,6 +36,66 @@ def _queue(*provider_codes):
 
 
 class TextureConversionSchedulerTests(unittest.TestCase):
+    def test_scheduler_does_not_report_complete_while_live_work_is_queued(self):
+        class RecordingUI:
+            def __init__(self):
+                self.red_flag = False
+                self.progress = []
+
+            def progress_bar(self, bar, value):
+                with lock:
+                    self.progress.append((bar, value, len(completed_codes)))
+
+        lock = threading.Lock()
+        completed_codes = []
+        first_started = threading.Event()
+        second_queued = threading.Event()
+        convert_queue = queue.Queue()
+        ui = RecordingUI()
+
+        def producer():
+            convert_queue.put((_tile(), 32, 48, 16, "FIRST"))
+            self.assertTrue(first_started.wait(timeout=1))
+            convert_queue.put((_tile(), 48, 48, 16, "SECOND"))
+            second_queued.set()
+            while True:
+                with lock:
+                    if len(completed_codes) >= 1:
+                        break
+                time.sleep(0.001)
+            convert_queue.put("quit")
+
+        def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code):
+            if provider_code == "FIRST":
+                first_started.set()
+                self.assertTrue(second_queued.wait(timeout=1))
+            with lock:
+                completed_codes.append(provider_code)
+            return TEX.TextureConversionResult.success(
+                f"{provider_code}.dds",
+                provider_code,
+            )
+
+        producer_thread = threading.Thread(target=producer)
+        producer_thread.start()
+        try:
+            with mock.patch.object(TCS, "UI", ui):
+                result = TCS.run_texture_conversion_queue(
+                    convert_queue,
+                    1,
+                    convert_texture=convert_texture,
+                    poll_interval=0.001,
+                )
+        finally:
+            producer_thread.join(timeout=1)
+
+        self.assertEqual(result.completed, 2)
+        self.assertEqual(completed_codes, ["FIRST", "SECOND"])
+        premature_complete_events = [
+            event for event in ui.progress if event[1] == 100 and event[2] < 2
+        ]
+        self.assertEqual(premature_complete_events, [])
+
     def test_scheduler_honors_worker_limit(self):
         ui = FakeUI()
         active = 0
@@ -94,6 +154,25 @@ class TextureConversionSchedulerTests(unittest.TestCase):
         self.assertEqual(result.failures[0].display_name, "bad.dds")
         self.assertEqual(result.failures[0].provider_code, "BAD")
         self.assertEqual(result.failures[0].error_summary, "encoder failed")
+
+    def test_scheduler_coerces_false_conversion_result_to_failure(self):
+        ui = FakeUI()
+
+        def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code):
+            return False
+
+        with mock.patch.object(TCS, "UI", ui):
+            result = TCS.run_texture_conversion_queue(
+                _queue("BI"),
+                1,
+                convert_texture=convert_texture,
+                poll_interval=0.001,
+            )
+
+        self.assertEqual(result.completed, 1)
+        self.assertEqual(result.failed, 1)
+        self.assertEqual(result.failures[0].provider_code, "BI")
+        self.assertEqual(result.failures[0].error_summary, "conversion returned False")
 
     def test_scheduler_converts_exceptions_to_failures(self):
         ui = FakeUI()

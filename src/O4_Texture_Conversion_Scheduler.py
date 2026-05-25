@@ -154,6 +154,6 @@ def _update_progress(progress_bar, completed, remaining):
 
 def _queued_job_count(convert_queue):
     try:
-        return max(0, convert_queue.qsize() - 1)
+        return max(0, convert_queue.qsize())
     except NotImplementedError:
         return 0
