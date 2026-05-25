@@ -8,6 +8,12 @@ This roadmap captures suggested improvements for the Ortho4XP codebase. Ortho4XP
 - Make packaging and dependency management easier to maintain.
 - Add automated validation for core geospatial, imagery, configuration, and native-tool workflows.
 - Improve diagnostics for users when external tools, imagery providers, or network services fail.
+- Document and improve the GIS/raster/imagery pipeline so GDAL, masks,
+  projection handling, color processing, and texture compression decisions are
+  explicit and testable.
+- Evolve from an orthophoto tile baker into an XP12-native scenery
+  compiler/workbench for base mesh, imagery, raster data, DSF preservation,
+  package validation, and future GIS-derived companion layers.
 - Reduce security and maintainability risks in provider parsing and broad exception handling.
 - **XP12 Engine Exploitation:** Native integration with physical 3D bathymetry, dynamic seasons, micro-soundscapes, and advanced lighting shaders by discarding legacy backward-compatibility paths.
 - **Hardware Maxxing:** Decouple from legacy single-threaded x86 binaries; route texture processing and geometry math through modern multi-core CPUs and discrete GPU hardware platforms (CUDA/Vulkan).
@@ -210,12 +216,44 @@ Refactor Step 4 (`build_dsf`) inside `src/Ortho4XP_v140.py` or the Ypsos pipelin
 ### 19. Automated sRGB Histogram & Color Normalization Pipeline
 Neutralize the "patchwork quilt" effect caused by stitching adjacent textures from varying imagery providers or differing satellite capture angles. Integrate an image-processing correction loop using OpenCV (`cv2`) or Pillow directly into the tile retrieval worker pipeline inside `src/O4_Imagery_Utils.py`. The function must extract the mean luminance and RGB color distributions from the edge pixels of a previously processed tile quadrant and apply an automated sRGB gamma transformation curve to newly downloaded sheets, flattening extreme exposure steps and neutralizing color drift prior to `.dds` baking.
 
-### 20. GPU-Accelerated Texture Encoding Engine
+### 20. GIS/Raster/Imagery Technology Map
+
+Harvest the project knowledge behind the geospatial and imagery toolchain before
+adding more visual processing features. Document how `gdal_translate`,
+`gdalwarp`, Pillow, NumPy, provider color filters, masks, GeoTIFF export, DDS
+encoders, and XP12 DSF raster handling fit together. The audit should trace
+provider imagery from download/cache through crop/warp, masking, static color
+filters, optional sRGB normalization, GeoTIFF export, and DDS handoff.
+
+Use the documentation to identify staged improvements rather than making broad
+runtime changes in the first pass. Candidate follow-ups include explicit
+resampling policy, GDAL VRT pipelines, nodata/alpha handling, compression-aware
+image quality checks, sharpening, richer color correction, and a measured
+decision on whether OpenCV, rasterio, or GDAL Python bindings add enough value
+to justify their dependency cost.
+
+### 21. XP12-Native Scenery Compiler/Workbench Strategy
+
+Define the beyond-ortho direction for the fork. The goal is not to copy
+third-party scenery packages or assets, but to understand the public techniques
+behind modern XP12 scenery stacks: layered packages, OSM/building-footprint data
+use, vegetation libraries, regionalization, sound/effect layers, VFR object
+layers, optional orthos, and install/validation ergonomics.
+
+Use that strategy to retire older assumptions where XP12 no longer needs them.
+In particular, audit the legacy `zOrtho4XP_` naming and scenery-order model and
+replace folder-name folklore with explicit package metadata, validation,
+generated documentation, and compatibility checks. This project should own the
+XP12-native terrain/scenery foundation: mesh generation, imagery/raster
+processing, bathymetry, DSF metadata/header preservation, generated package
+validation, dependency checks, and compatibility reporting.
+
+### 22. GPU-Accelerated Texture Encoding Engine
 Bypass legacy, single-threaded external CPU texturing binaries. Completely decouple texture tile sheet splitting and conversion paths inside `src/O4_Tile_Utils.py` from legacy single-threaded external executables (like serial `nvcompress` calls). Utilize Python's built-in `concurrent.futures` module to orchestrate massive parallel processing batches across host hardware threads, and implement direct hardware-accelerated wrapper configurations to offload the raw raster triangulation and format conversion tasks straight to discrete graphics processors (CUDA/Vulkan backends).
 
 ## Repository Health
 
-### 21. Add or verify project metadata
+### 23. Add or verify project metadata
 
 Recommended files and settings:
 
@@ -226,7 +264,7 @@ Recommended files and settings:
 - Pull request template.
 - GitHub topics such as `x-plane`, `scenery`, `orthophoto`, `gis`, and `flight-simulator`.
 
-### 22. Document development setup
+### 24. Document development setup
 
 Add a development section to `README.md` or a dedicated `CONTRIBUTING.md` covering:
 
@@ -238,7 +276,7 @@ Add a development section to `README.md` or a dedicated `CONTRIBUTING.md` coveri
 - Running lint/format checks.
 - Running the app from source.
 
-### 23. Publish release guidance
+### 25. Publish release guidance
 
 If this fork distributes packaged builds, document:
 
@@ -249,7 +287,7 @@ If this fork distributes packaged builds, document:
 - Release versioning policy, including the fork's switch to SemVer at `v1.0.0`.
 - How to verify a release before publishing.
 
-### 24. Full Standalone Decoupling (Breakaway Playbook)
+### 26. Full Standalone Decoupling (Breakaway Playbook)
 
 In the event of upstream stagnation, completely sever backward compatibility ties. Purge all legacy UI widgets, deprecated X-Plane 11 formatting forks, and flat-water legacy codeblocks. Transition the core architecture to a headless, scriptable engine driven entirely by structured configuration files (JSON/TOML), allowing for automated, high-throughput batch tile compilation without graphical user interface overhead.
 
@@ -263,6 +301,10 @@ In the event of upstream stagnation, completely sever backward compatibility tie
 6. Replace the most common bare `except:` blocks in high-traffic modules.
 7. Add development setup documentation.
 8. Require valid bathymetry inputs for physical XP12 water meshes.
+9. Document the GIS/raster/imagery technology map before expanding sharpening,
+   color correction, or GDAL pipeline behavior.
+10. Define the XP12-native scenery compiler/workbench strategy before changing
+    package naming, scenery-stack behavior, or beyond-ortho output scope.
 
 ## Success Metrics
 
@@ -275,5 +317,11 @@ The roadmap is working if:
 - Core utility functions have unit test coverage.
 - Native utility build or availability is validated automatically.
 - Cross-platform behavior is checked regularly in CI.
+- GIS/raster/imagery behavior is documented well enough that projection,
+  resampling, masking, color, and compression changes can be reviewed against an
+  explicit pipeline.
+- XP12 scenery output is planned around explicit package metadata,
+  compatibility checks, and native scenery features rather than legacy
+  folder-name conventions alone.
 - Pristine coastal transitions are generated natively with dynamic water shaders.
 - High-fidelity ortho layers maintain native dynamic winter/spring seasonal shifts.

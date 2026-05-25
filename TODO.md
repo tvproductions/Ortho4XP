@@ -602,3 +602,71 @@ Acceptance criteria:
 - Adds focused tests for any extracted behavior.
 
 Suggested labels: `quality`, `architecture`, `refactor`
+
+## Phase 6: GIS, Raster, and Imagery Modernization
+
+### TODO-026: Document GIS/Raster/Imagery Technology Map
+
+GitHub Issue: #30
+
+Harvest the current project understanding of the GIS, raster, and imagery
+toolchain before adding more visual processing features.
+
+Acceptance criteria:
+
+- Inventories active GIS/raster/imagery tools and libraries, including
+  `gdal_translate`, `gdalwarp`, Pillow, NumPy, DDS encoders, provider color
+  filters, mask generation, GeoTIFF export, and XP12 DSF raster handling.
+- Traces imagery and raster data flow from provider download/cache through
+  crop/warp, masks, color filters, optional normalization, GeoTIFF export, and
+  DDS handoff.
+- Documents CRS/projection assumptions, current GDAL command options, and where
+  internal/Pillow paths are used instead of GDAL.
+- Documents current resampling, nodata, alpha, mask, and compression
+  assumptions, including known gaps or undefined behavior.
+- Evaluates staged opportunities such as GDAL VRT use, explicit resampling
+  policy, overviews/COG-style debug exports, rasterio/GDAL Python bindings,
+  OpenCV, sharpening, color correction, and compression-aware image QA.
+- Recommends concrete follow-up issues for sharpening, color correction, GDAL
+  pipeline improvements, and texture compression validation.
+- Keeps the first deliverable documentation/audit focused; does not add new
+  runtime dependencies or change generated scenery output in this issue.
+
+Suggested labels: `documentation`, `imagery`, `gis`, `color-pipeline`
+
+### TODO-027: Define XP12-Native Scenery Compiler/Workbench Strategy
+
+GitHub Issue: #31
+
+Define the beyond-ortho direction for the fork as an XP12-native scenery
+compiler/workbench. The goal is to understand public scenery-stack techniques
+and architecture, not to copy third-party assets or redistribute third-party
+packages.
+
+Acceptance criteria:
+
+- Audits current `zOrtho4XP_` naming, package layout, and scenery-order
+  assumptions; identifies what XP12 still requires versus what is legacy
+  convention.
+- Documents how generated ortho/base-mesh packages interact with XP12 Global
+  Scenery, overlays, SimHeaven/X-WORLD-style packages, libraries, and
+  `scenery_packs.ini` ordering.
+- Studies public SimHeaven/X-WORLD/X-WORLD Pro techniques at the architecture
+  level only: layered packages, OSM/building-footprint data use, vegetation
+  libraries, regionalization, sound/effect layers, VFR object layers, optional
+  orthos, and install/validation ergonomics.
+- Defines project ownership boundaries: mesh generation, imagery/raster
+  pipeline, bathymetry, DSF metadata/header preservation, generated package
+  validation, dependency checks, and compatibility reporting.
+- Defines first-phase non-goals: no copying third-party assets, no
+  redistributing SimHeaven data, no replacing SimHeaven packages, and no broad
+  object-library generator until the base compiler architecture is understood.
+- Proposes a future XP12-native package naming/layout strategy that does not
+  depend on `zOrtho4XP_` as the primary mechanism.
+- Recommends concrete follow-up issues for scenery-stack validation, package
+  metadata generation, XP12 package layout modernization, optional companion
+  overlay layers, and future naming/release-positioning work for `v1.0.0`.
+- Keeps this first deliverable documentation/design focused; does not change
+  generated scenery output in this issue.
+
+Suggested labels: `documentation`, `architecture`, `xp12max`, `scenery-stack`
