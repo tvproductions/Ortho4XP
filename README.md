@@ -125,6 +125,19 @@ that texture task. After texture downloads finish, Ortho4XP writes one concise
 imagery download summary to the console and to `Ortho4XP.log.json` when any
 texture was partially or fully unavailable.
 
+## Texture color normalization
+
+`normalize_texture_colors` is an opt-in texture preprocessing setting. When
+enabled, Ortho4XP compares a texture's north, south, east, and west edges with
+already available neighboring JPEG textures at the same provider and zoom level.
+It computes conservative luminance and RGB balance correction from those local
+edge statistics before DDS conversion.
+
+The feature does not blend neighbor pixels into the target image and does not
+create persistent provider calibration data. Missing, unreadable, incomplete, or
+wrong-sized neighbors are skipped; if no valid neighbor evidence exists, the
+texture is left unchanged.
+
 Build the native `Triangle4XP` helper with the LLVM/Clang preset:
 
 ```bash
