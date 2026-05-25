@@ -100,6 +100,49 @@ class ImageryColorNormalizationTests(unittest.TestCase):
         self.assertEqual(result.tobytes(), image.tobytes())
         normalize.assert_not_called()
 
+    def test_normalize_texture_image_skips_wrong_sized_neighbors(self):
+        IMG.normalize_texture_colors = True
+        image = Image.new("RGB", (16, 16), (90, 80, 70))
+        wrong_size_path = os.path.join(
+            self.temp_dir.name,
+            FNAMES.jpeg_file_name_from_attributes(32, 32, 16, "BI"),
+        )
+        Image.new("RGB", (8, 16), (100, 110, 120)).save(wrong_size_path)
+
+        with mock.patch.object(
+            IMG, "normalize_image_with_neighbors", return_value=image
+        ) as normalize:
+            result = IMG.normalize_texture_image_if_enabled(
+                image,
+                self.temp_dir.name,
+                32,
+                48,
+                16,
+                "BI",
+            )
+
+        self.assertEqual(result.tobytes(), image.tobytes())
+        normalize.assert_not_called()
+
+    def test_loaded_neighbor_images_remain_usable_after_file_close(self):
+        neighbor_path = os.path.join(
+            self.temp_dir.name,
+            FNAMES.jpeg_file_name_from_attributes(32, 32, 16, "BI"),
+        )
+        Image.new("RGB", (16, 16), (100, 110, 120)).save(neighbor_path)
+
+        neighbors = IMG._load_neighbor_texture_images(
+            self.temp_dir.name,
+            32,
+            48,
+            16,
+            "BI",
+            (16, 16),
+        )
+
+        self.assertEqual(set(neighbors), {"north"})
+        self.assertEqual(neighbors["north"].getpixel((0, 0)), (100, 110, 120))
+
     def _color_for_edge(self, edge):
         return {
             "north": (100, 110, 120),

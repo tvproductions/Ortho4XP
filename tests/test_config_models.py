@@ -13,7 +13,7 @@ try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
-from O4_Cfg_Vars import cfg_vars
+from O4_Cfg_Vars import cfg_vars, list_app_vars
 from O4_Config_Models import (
     UnsupportedWaterTechError,
     coerce_config_value,
@@ -41,6 +41,7 @@ class ConfigModelTests(unittest.TestCase):
         self.assertEqual(definition["module"], "IMG")
         self.assertIs(definition["type"], bool)
         self.assertIs(definition["default"], False)
+        self.assertIn("normalize_texture_colors", list_app_vars)
         self.assertIs(
             coerce_config_value("normalize_texture_colors", "True", cfg_vars),
             True,
