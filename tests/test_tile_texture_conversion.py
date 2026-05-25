@@ -1,5 +1,6 @@
 import unittest
 import queue
+from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import mock
 
@@ -21,6 +22,34 @@ def _tile():
         grouped=False,
         write_to_config=mock.Mock(),
     )
+
+
+def _build_tile_patches(tile, *, replace=None, vprint=None):
+    stack = ExitStack()
+    stack.enter_context(mock.patch.object(TILE.os.path, "isfile", return_value=True))
+    stack.enter_context(mock.patch.object(TILE.os.path, "exists", return_value=True))
+    stack.enter_context(mock.patch.object(TILE.os.path, "isdir", return_value=True))
+    stack.enter_context(mock.patch.object(TILE.shutil, "rmtree"))
+    stack.enter_context(
+        mock.patch.object(
+            TILE.IMG,
+            "initialize_local_combined_providers_dict",
+            return_value=True,
+        )
+    )
+    stack.enter_context(mock.patch.object(TILE.DSF, "build_dsf"))
+    stack.enter_context(mock.patch.object(TILE, "download_textures"))
+    stack.enter_context(mock.patch.object(TILE.os, "replace", replace or mock.Mock()))
+    stack.enter_context(mock.patch.object(TILE.UI, "is_working", 0))
+    stack.enter_context(mock.patch.object(TILE.UI, "red_flag", False))
+    stack.enter_context(mock.patch.object(TILE.UI, "cleaning_level", 0))
+    stack.enter_context(mock.patch.object(TILE.UI, "vprint", vprint or mock.Mock()))
+    stack.enter_context(mock.patch.object(TILE.UI, "lvprint"))
+    stack.enter_context(mock.patch.object(TILE.UI, "logprint"))
+    stack.enter_context(mock.patch.object(TILE.UI, "exit_message_and_bottom_line"))
+    stack.enter_context(mock.patch.object(TILE.UI, "timings_and_bottom_line"))
+    tile.grouped = True
+    return stack
 
 
 class _RecordingQueue(queue.Queue):
@@ -86,55 +115,64 @@ class TileTextureConversionSummaryTests(unittest.TestCase):
 class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
     def test_build_tile_sends_one_quit_joins_scheduler_and_reports_result(self):
         tile = _tile()
-        download_queue = _RecordingQueue()
-        convert_queue = _RecordingQueue()
+        queues = [_RecordingQueue(), _RecordingQueue()]
         result = TCS.TextureConversionBatchResult(
             completed=1,
             failed=0,
             interrupted=False,
             failures=(),
         )
-        scheduler_joined = []
-
-        class FakeThread:
-            def __init__(self, target, args):
-                self.target = target
-                self.args = args
-
-            def start(self):
-                pass
-
-            def join(self):
-                if self.target is TILE._run_texture_conversion_scheduler:
-                    scheduler_joined.append(list(convert_queue.put_calls))
-                    self.args[1]["result"] = result
+        consumed_sentinels = []
+        scheduler_queues = []
 
         queue_factory_calls = [0]
 
         def queue_factory():
             queue_factory_calls[0] += 1
-            return download_queue if queue_factory_calls[0] == 1 else convert_queue
+            return queues[queue_factory_calls[0] - 1]
 
-        with (
-            mock.patch.object(TILE.os.path, "isfile", return_value=True),
-            mock.patch.object(TILE.os.path, "exists", return_value=True),
-            mock.patch.object(TILE.os.path, "isdir", return_value=True),
-            mock.patch.object(TILE.IMG, "initialize_local_combined_providers_dict", return_value=True),
-            mock.patch.object(TILE.threading, "Thread", side_effect=FakeThread),
-            mock.patch.object(TILE.queue, "Queue", side_effect=queue_factory),
-            mock.patch.object(TILE.os, "replace"),
-            mock.patch.object(TILE.UI, "is_working", 0),
-            mock.patch.object(TILE.UI, "red_flag", False),
-            mock.patch.object(TILE.UI, "cleaning_level", 0),
-            mock.patch.object(TILE.UI, "vprint") as vprint,
-            mock.patch.object(TILE.UI, "logprint"),
-            mock.patch.object(TILE.UI, "timings_and_bottom_line"),
-        ):
-            self.assertEqual(TILE.build_tile(tile), 1)
+        def run_scheduler(convert_queue, _max_workers, *, convert_texture):
+            scheduler_queues.append(convert_queue)
+            consumed_sentinels.append(convert_queue.get(timeout=1))
+            return result
 
+        vprint = mock.Mock()
+        with _build_tile_patches(tile, vprint=vprint):
+            with (
+                mock.patch.object(TILE.queue, "Queue", side_effect=queue_factory),
+                mock.patch.object(
+                    TILE.TCS,
+                    "run_texture_conversion_queue",
+                    side_effect=run_scheduler,
+                ),
+            ):
+                self.assertEqual(TILE.build_tile(tile), 1)
+
+        convert_queue = queues[1]
+        self.assertIs(scheduler_queues[0], convert_queue)
         self.assertEqual(convert_queue.put_calls, ["quit"])
-        self.assertEqual(scheduler_joined, [["quit"]])
+        self.assertEqual(consumed_sentinels, ["quit"])
         vprint.assert_any_call(1, " *DDS conversion of textures completed.")
+
+    def test_scheduler_failure_aborts_before_dsf_activation(self):
+        tile = _tile()
+        replace = mock.Mock()
+        vprint = mock.Mock()
+
+        with _build_tile_patches(tile, replace=replace, vprint=vprint):
+            with mock.patch.object(
+                TILE.TCS,
+                "run_texture_conversion_queue",
+                side_effect=RuntimeError("scheduler failed"),
+            ):
+                self.assertEqual(TILE.build_tile(tile), 0)
+
+        replace.assert_not_called()
+        vprint.assert_any_call(
+            1,
+            "DDS conversion scheduler failed:",
+            "RuntimeError: scheduler failed",
+        )
 
     def test_scheduler_exception_is_reported_without_key_error(self):
         original_error = RuntimeError("scheduler failed")
@@ -158,7 +196,7 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
         vprint.assert_any_call(
             1,
             "DDS conversion scheduler failed:",
-            "scheduler failed",
+            "RuntimeError: scheduler failed",
         )
 
 

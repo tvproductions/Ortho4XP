@@ -214,7 +214,11 @@ def _run_texture_conversion_scheduler(convert_queue, result_holder):
 def _handle_texture_conversion_scheduler_result(tile, result_holder):
     if "exception" in result_holder:
         exc = result_holder["exception"]
-        UI.vprint(1, "DDS conversion scheduler failed:", str(exc))
+        UI.vprint(
+            1,
+            "DDS conversion scheduler failed:",
+            f"{type(exc).__name__}: {exc}",
+        )
         UI.vprint(3, exc)
         UI.red_flag = True
         return
@@ -342,6 +346,9 @@ def build_tile(tile):
                 tile,
                 convert_result_holder,
             )
+    if UI.red_flag:
+        UI.exit_message_and_bottom_line()
+        return 0
     UI.vprint(1, " *Activating DSF file.")
     dsf_file_name = os.path.join(
         tile.build_dir,
