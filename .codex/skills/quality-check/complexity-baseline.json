@@ -328,56 +328,56 @@
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|117|resolve_tool( name : str )": {
-      "line": 117,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|129|resolve_tool( name : str )": {
+      "line": 129,
       "metric": "lizard_ccn",
       "name": "resolve_tool( name : str )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|132|changed_line_ranges( path : str )": {
-      "line": 132,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|144|changed_line_ranges( path : str )": {
+      "line": 144,
       "metric": "lizard_ccn",
       "name": "changed_line_ranges( path : str )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|162|run_clang_format_check( files : list [ str ] )": {
-      "line": 162,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|174|run_clang_format_check( files : list [ str ] )": {
+      "line": 174,
       "metric": "lizard_ccn",
       "name": "run_clang_format_check( files : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|179|run_clang_tidy( files : list [ str ] )": {
-      "line": 179,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|191|run_clang_tidy( files : list [ str ] )": {
+      "line": 191,
       "metric": "lizard_ccn",
       "name": "run_clang_tidy( files : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|218|scan_forbidden_patterns( )": {
-      "line": 218,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|230|scan_forbidden_patterns( )": {
+      "line": 230,
       "metric": "lizard_ccn",
       "name": "scan_forbidden_patterns( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|259|main( )": {
-      "line": 259,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|270|main( )": {
+      "line": 270,
       "metric": "lizard_ccn",
       "name": "main( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|82|changed_native_files( )": {
-      "line": 82,
+    "lizard_ccn|.codex/skills/repo-hygiene/scripts/hygiene.py|94|changed_native_files( )": {
+      "line": 94,
       "metric": "lizard_ccn",
       "name": "changed_native_files( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
@@ -880,40 +880,72 @@
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico( tile )": {
-      "line": 121,
+    "lizard_ccn|src/O4_DSF_Header_Bridge.py|150|_find_default_dsf( request : DsfHeaderBridgeRequest )": {
+      "line": 150,
+      "metric": "lizard_ccn",
+      "name": "_find_default_dsf( request : DsfHeaderBridgeRequest )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_DSF_Header_Bridge.py|163|_prepare_default_dsf_for_dsftool( context : _BridgeContext )": {
+      "line": 163,
+      "metric": "lizard_ccn",
+      "name": "_prepare_default_dsf_for_dsftool( context : _BridgeContext )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_DSF_Header_Text.py|31|splice_supported_header_lines( generated_dsf_text : str , supported_header_lines : tuple [ str , ... ] )": {
+      "line": 31,
+      "metric": "lizard_ccn",
+      "name": "splice_supported_header_lines( generated_dsf_text : str , supported_header_lines : tuple [ str , ... ] )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 7.0
+    },
+    "lizard_ccn|src/O4_DSF_Header_Text.py|51|_iter_header_lines( dsf_text : str )": {
+      "line": 51,
+      "metric": "lizard_ccn",
+      "name": "_iter_header_lines( dsf_text : str )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_DSF_Utils.py|122|zone_list_to_ortho_dico( tile )": {
+      "line": 122,
       "metric": "lizard_ccn",
       "name": "zone_list_to_ortho_dico( tile )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 20.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 263,
+    "lizard_ccn|src/O4_DSF_Utils.py|264|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 264,
       "metric": "lizard_ccn",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|387|build_dsf( tile , download_queue )": {
-      "line": 387,
+    "lizard_ccn|src/O4_DSF_Utils.py|388|build_dsf( tile , download_queue )": {
+      "line": 388,
       "metric": "lizard_ccn",
       "name": "build_dsf( tile , download_queue )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 111.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
-      "line": 52,
+    "lizard_ccn|src/O4_DSF_Utils.py|53|__init__( self , level , bucket_size )": {
+      "line": 53,
       "metric": "lizard_ccn",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
-      "line": 81,
+    "lizard_ccn|src/O4_DSF_Utils.py|82|insert( self , bx , by , level )": {
+      "line": 82,
       "metric": "lizard_ccn",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
@@ -2176,6 +2208,22 @@
       "severity": "advise",
       "value": 4.0
     },
+    "lizard_ccn|tests/_dsf_header_bridge_helpers.py|26|run( self , tool_name , args , * , executable )": {
+      "line": 26,
+      "metric": "lizard_ccn",
+      "name": "run( self , tool_name , args , * , executable )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|tests/test_dsf_header_bridge.py|28|test_round_trips_default_and_generated_dsf_text_with_dsftool( self )": {
+      "line": 28,
+      "metric": "lizard_ccn",
+      "name": "test_round_trips_default_and_generated_dsf_text_with_dsftool( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "lizard_ccn|tests/test_exception_handling.py|8|test_no_bare_except_handlers_remain( self )": {
       "line": 8,
       "metric": "lizard_ccn",
@@ -2600,64 +2648,64 @@
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|117|resolve_tool( name : str )": {
-      "line": 117,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|129|resolve_tool( name : str )": {
+      "line": 129,
       "metric": "lizard_nesting_depth",
       "name": "resolve_tool( name : str )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|132|changed_line_ranges( path : str )": {
-      "line": 132,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|144|changed_line_ranges( path : str )": {
+      "line": 144,
       "metric": "lizard_nesting_depth",
       "name": "changed_line_ranges( path : str )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|162|run_clang_format_check( files : list [ str ] )": {
-      "line": 162,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|174|run_clang_format_check( files : list [ str ] )": {
+      "line": 174,
       "metric": "lizard_nesting_depth",
       "name": "run_clang_format_check( files : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|179|run_clang_tidy( files : list [ str ] )": {
-      "line": 179,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|191|run_clang_tidy( files : list [ str ] )": {
+      "line": 191,
       "metric": "lizard_nesting_depth",
       "name": "run_clang_tidy( files : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|218|scan_forbidden_patterns( )": {
-      "line": 218,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|230|scan_forbidden_patterns( )": {
+      "line": 230,
       "metric": "lizard_nesting_depth",
       "name": "scan_forbidden_patterns( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|259|main( )": {
-      "line": 259,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|270|main( )": {
+      "line": 270,
       "metric": "lizard_nesting_depth",
       "name": "main( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|63|capture_lines( args : list [ str ] )": {
-      "line": 63,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|75|capture_lines( args : list [ str ] )": {
+      "line": 75,
       "metric": "lizard_nesting_depth",
       "name": "capture_lines( args : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|82|changed_native_files( )": {
-      "line": 82,
+    "lizard_nesting_depth|.codex/skills/repo-hygiene/scripts/hygiene.py|94|changed_native_files( )": {
+      "line": 94,
       "metric": "lizard_nesting_depth",
       "name": "changed_native_files( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
@@ -3312,56 +3360,120 @@
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|103|statistics( self )": {
-      "line": 103,
+    "lizard_nesting_depth|src/O4_DSF_Header_Bridge.py|150|_find_default_dsf( request : DsfHeaderBridgeRequest )": {
+      "line": 150,
+      "metric": "lizard_nesting_depth",
+      "name": "_find_default_dsf( request : DsfHeaderBridgeRequest )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Bridge.py|163|_prepare_default_dsf_for_dsftool( context : _BridgeContext )": {
+      "line": 163,
+      "metric": "lizard_nesting_depth",
+      "name": "_prepare_default_dsf_for_dsftool( context : _BridgeContext )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Bridge.py|230|_cleanup_paths( paths : list [ Path ] )": {
+      "line": 230,
+      "metric": "lizard_nesting_depth",
+      "name": "_cleanup_paths( paths : list [ Path ] )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Bridge.py|78|splice_native_dsf_headers( request : DsfHeaderBridgeRequest )": {
+      "line": 78,
+      "metric": "lizard_nesting_depth",
+      "name": "splice_native_dsf_headers( request : DsfHeaderBridgeRequest )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Text.py|21|extract_supported_header_lines( dsf_text : str )": {
+      "line": 21,
+      "metric": "lizard_nesting_depth",
+      "name": "extract_supported_header_lines( dsf_text : str )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Text.py|31|splice_supported_header_lines( generated_dsf_text : str , supported_header_lines : tuple [ str , ... ] )": {
+      "line": 31,
+      "metric": "lizard_nesting_depth",
+      "name": "splice_supported_header_lines( generated_dsf_text : str , supported_header_lines : tuple [ str , ... ] )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Text.py|51|_iter_header_lines( dsf_text : str )": {
+      "line": 51,
+      "metric": "lizard_nesting_depth",
+      "name": "_iter_header_lines( dsf_text : str )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Header_Text.py|78|_header_insertion_index( generated_lines : list [ str ] )": {
+      "line": 78,
+      "metric": "lizard_nesting_depth",
+      "name": "_header_insertion_index( generated_lines : list [ str ] )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|104|statistics( self )": {
+      "line": 104,
       "metric": "lizard_nesting_depth",
       "name": "statistics( self )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico( tile )": {
-      "line": 121,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|122|zone_list_to_ortho_dico( tile )": {
+      "line": 122,
       "metric": "lizard_nesting_depth",
       "name": "zone_list_to_ortho_dico( tile )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 15.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 263,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|264|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 264,
       "metric": "lizard_nesting_depth",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|387|build_dsf( tile , download_queue )": {
-      "line": 387,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|388|build_dsf( tile , download_queue )": {
+      "line": 388,
       "metric": "lizard_nesting_depth",
       "name": "build_dsf( tile , download_queue )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 64.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
-      "line": 52,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|53|__init__( self , level , bucket_size )": {
+      "line": 53,
       "metric": "lizard_nesting_depth",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
-      "line": 81,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|82|insert( self , bx , by , level )": {
+      "line": 82,
       "metric": "lizard_nesting_depth",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_DSF_Utils.py|98|clean( self )": {
-      "line": 98,
+    "lizard_nesting_depth|src/O4_DSF_Utils.py|99|clean( self )": {
+      "line": 99,
       "metric": "lizard_nesting_depth",
       "name": "clean( self )",
       "path": "src/O4_DSF_Utils.py",
@@ -4840,6 +4952,14 @@
       "severity": "warn",
       "value": 3.0
     },
+    "lizard_nesting_depth|tests/_dsf_header_bridge_helpers.py|26|run( self , tool_name , args , * , executable )": {
+      "line": 26,
+      "metric": "lizard_nesting_depth",
+      "name": "run( self , tool_name , args , * , executable )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nesting_depth|tests/test_bathymetry_input.py|38|demd( width : int , height : int , bytes_per_pixel : int = 2 , value : int = 7 )": {
       "line": 38,
       "metric": "lizard_nesting_depth",
@@ -4863,6 +4983,22 @@
       "path": "tests/test_bathymetry_provider.py",
       "severity": "advise",
       "value": 2.0
+    },
+    "lizard_nesting_depth|tests/test_dsf_header_bridge.py|138|test_unsupported_default_headers_leave_generated_dsf_unchanged( self )": {
+      "line": 138,
+      "metric": "lizard_nesting_depth",
+      "name": "test_unsupported_default_headers_leave_generated_dsf_unchanged( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|tests/test_dsf_header_bridge.py|28|test_round_trips_default_and_generated_dsf_text_with_dsftool( self )": {
+      "line": 28,
+      "metric": "lizard_nesting_depth",
+      "name": "test_round_trips_default_and_generated_dsf_text_with_dsftool( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "warn",
+      "value": 3.0
     },
     "lizard_nesting_depth|tests/test_exception_handling.py|8|test_no_bare_except_handlers_remain( self )": {
       "line": 8,
@@ -5208,56 +5344,56 @@
       "severity": "warn",
       "value": 28.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|117|resolve_tool( name : str )": {
-      "line": 117,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|129|resolve_tool( name : str )": {
+      "line": 129,
       "metric": "lizard_nloc",
       "name": "resolve_tool( name : str )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|132|changed_line_ranges( path : str )": {
-      "line": 132,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|144|changed_line_ranges( path : str )": {
+      "line": 144,
       "metric": "lizard_nloc",
       "name": "changed_line_ranges( path : str )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "warn",
       "value": 26.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|162|run_clang_format_check( files : list [ str ] )": {
-      "line": 162,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|174|run_clang_format_check( files : list [ str ] )": {
+      "line": 174,
       "metric": "lizard_nloc",
       "name": "run_clang_format_check( files : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 14.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|179|run_clang_tidy( files : list [ str ] )": {
-      "line": 179,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|191|run_clang_tidy( files : list [ str ] )": {
+      "line": 191,
       "metric": "lizard_nloc",
       "name": "run_clang_tidy( files : list [ str ] )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "warn",
       "value": 27.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|218|scan_forbidden_patterns( )": {
-      "line": 218,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|230|scan_forbidden_patterns( )": {
+      "line": 230,
       "metric": "lizard_nloc",
       "name": "scan_forbidden_patterns( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
-      "severity": "warn",
-      "value": 25.0
+      "severity": "advise",
+      "value": 24.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|259|main( )": {
-      "line": 259,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|270|main( )": {
+      "line": 270,
       "metric": "lizard_nloc",
       "name": "main( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "warn",
       "value": 29.0
     },
-    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|82|changed_native_files( )": {
-      "line": 82,
+    "lizard_nloc|.codex/skills/repo-hygiene/scripts/hygiene.py|94|changed_native_files( )": {
+      "line": 94,
       "metric": "lizard_nloc",
       "name": "changed_native_files( )",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
@@ -5760,40 +5896,80 @@
       "severity": "block",
       "value": 42.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico( tile )": {
-      "line": 121,
+    "lizard_nloc|src/O4_DSF_Header_Bridge.py|113|_apply_native_dsf_headers( context : _BridgeContext )": {
+      "line": 113,
+      "metric": "lizard_nloc",
+      "name": "_apply_native_dsf_headers( context : _BridgeContext )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 22.0
+    },
+    "lizard_nloc|src/O4_DSF_Header_Bridge.py|163|_prepare_default_dsf_for_dsftool( context : _BridgeContext )": {
+      "line": 163,
+      "metric": "lizard_nloc",
+      "name": "_prepare_default_dsf_for_dsftool( context : _BridgeContext )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 16.0
+    },
+    "lizard_nloc|src/O4_DSF_Header_Bridge.py|57|splice_native_dsf_headers_for_tile( tile , generated_dsf_path )": {
+      "line": 57,
+      "metric": "lizard_nloc",
+      "name": "splice_native_dsf_headers_for_tile( tile , generated_dsf_path )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|src/O4_DSF_Header_Bridge.py|89|_bridge_context( request : DsfHeaderBridgeRequest , default_dsf_path : Path )": {
+      "line": 89,
+      "metric": "lizard_nloc",
+      "name": "_bridge_context( request : DsfHeaderBridgeRequest , default_dsf_path : Path )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|src/O4_DSF_Header_Text.py|31|splice_supported_header_lines( generated_dsf_text : str , supported_header_lines : tuple [ str , ... ] )": {
+      "line": 31,
+      "metric": "lizard_nloc",
+      "name": "splice_supported_header_lines( generated_dsf_text : str , supported_header_lines : tuple [ str , ... ] )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|src/O4_DSF_Utils.py|122|zone_list_to_ortho_dico( tile )": {
+      "line": 122,
       "metric": "lizard_nloc",
       "name": "zone_list_to_ortho_dico( tile )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 129.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 263,
+    "lizard_nloc|src/O4_DSF_Utils.py|264|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 264,
       "metric": "lizard_nloc",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 73.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|387|build_dsf( tile , download_queue )": {
-      "line": 387,
+    "lizard_nloc|src/O4_DSF_Utils.py|388|build_dsf( tile , download_queue )": {
+      "line": 388,
       "metric": "lizard_nloc",
       "name": "build_dsf( tile , download_queue )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 718.0
+      "value": 714.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
-      "line": 52,
+    "lizard_nloc|src/O4_DSF_Utils.py|53|__init__( self , level , bucket_size )": {
+      "line": 53,
       "metric": "lizard_nloc",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
-      "line": 81,
+    "lizard_nloc|src/O4_DSF_Utils.py|82|insert( self , bx , by , level )": {
+      "line": 82,
       "metric": "lizard_nloc",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
@@ -7248,6 +7424,14 @@
       "severity": "advise",
       "value": 22.0
     },
+    "lizard_nloc|tests/_dsf_header_bridge_helpers.py|78|bridge_request( * , tmp : Path , root : Path | str , generated_dsf : Path , run_external_tool , )": {
+      "line": 78,
+      "metric": "lizard_nloc",
+      "name": "bridge_request( * , tmp : Path , root : Path | str , generated_dsf : Path , run_external_tool , )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "advise",
+      "value": 18.0
+    },
     "lizard_nloc|tests/_imagery_color_normalization_helpers.py|139|__enter__( self )": {
       "line": 139,
       "metric": "lizard_nloc",
@@ -7399,6 +7583,62 @@
       "path": "tests/test_config_models.py",
       "severity": "advise",
       "value": 15.0
+    },
+    "lizard_nloc|tests/test_dsf_header_bridge.py|114|test_failed_dsftool_leaves_generated_dsf_unchanged( self )": {
+      "line": 114,
+      "metric": "lizard_nloc",
+      "name": "test_failed_dsftool_leaves_generated_dsf_unchanged( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "advise",
+      "value": 21.0
+    },
+    "lizard_nloc|tests/test_dsf_header_bridge.py|138|test_unsupported_default_headers_leave_generated_dsf_unchanged( self )": {
+      "line": 138,
+      "metric": "lizard_nloc",
+      "name": "test_unsupported_default_headers_leave_generated_dsf_unchanged( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "advise",
+      "value": 22.0
+    },
+    "lizard_nloc|tests/test_dsf_header_bridge.py|28|test_round_trips_default_and_generated_dsf_text_with_dsftool( self )": {
+      "line": 28,
+      "metric": "lizard_nloc",
+      "name": "test_round_trips_default_and_generated_dsf_text_with_dsftool( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "warn",
+      "value": 33.0
+    },
+    "lizard_nloc|tests/test_dsf_header_bridge.py|64|test_missing_default_dsf_leaves_generated_dsf_unchanged( self )": {
+      "line": 64,
+      "metric": "lizard_nloc",
+      "name": "test_missing_default_dsf_leaves_generated_dsf_unchanged( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|tests/test_dsf_header_bridge.py|84|test_compressed_default_dsf_is_extracted_before_dsftool( self )": {
+      "line": 84,
+      "metric": "lizard_nloc",
+      "name": "test_compressed_default_dsf_is_extracted_before_dsftool( self )",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "warn",
+      "value": 27.0
+    },
+    "lizard_nloc|tests/test_dsf_header_text.py|37|test_splices_supported_lines_after_generated_property_block( self )": {
+      "line": 37,
+      "metric": "lizard_nloc",
+      "name": "test_splices_supported_lines_after_generated_property_block( self )",
+      "path": "tests/test_dsf_header_text.py",
+      "severity": "advise",
+      "value": 21.0
+    },
+    "lizard_nloc|tests/test_dsf_header_text.py|60|test_splice_deduplicates_existing_supported_lines( self )": {
+      "line": 60,
+      "metric": "lizard_nloc",
+      "name": "test_splice_deduplicates_existing_supported_lines( self )",
+      "path": "tests/test_dsf_header_text.py",
+      "severity": "advise",
+      "value": 22.0
     },
     "lizard_nloc|tests/test_file_names.py|38|test_mesh_and_dsf_file_paths_use_tile_naming_conventions( self )": {
       "line": 38,
@@ -8240,24 +8480,40 @@
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_DSF_Utils.py|263|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
-      "line": 263,
+    "lizard_param_count|src/O4_DSF_Header_Bridge.py|191|_convert_dsf_to_text( context : _BridgeContext , source : Path , destination : Path )": {
+      "line": 191,
+      "metric": "lizard_param_count",
+      "name": "_convert_dsf_to_text( context : _BridgeContext , source : Path , destination : Path )",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_DSF_Header_Text.py|71|_append_unique_line( lines : list [ str ] , seen : set [ str ] , line : str )": {
+      "line": 71,
+      "metric": "lizard_param_count",
+      "name": "_append_unique_line( lines : list [ str ] , seen : set [ str ] , line : str )",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_DSF_Utils.py|264|create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )": {
+      "line": 264,
       "metric": "lizard_param_count",
       "name": "create_terrain_file( tile , texture_file_name , til_x_left , til_y_top , zoomlevel , provider_code , tri_type , is_overlay , )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 8.0
     },
-    "lizard_param_count|src/O4_DSF_Utils.py|52|__init__( self , level , bucket_size )": {
-      "line": 52,
+    "lizard_param_count|src/O4_DSF_Utils.py|53|__init__( self , level , bucket_size )": {
+      "line": 53,
       "metric": "lizard_param_count",
       "name": "__init__( self , level , bucket_size )",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_DSF_Utils.py|81|insert( self , bx , by , level )": {
-      "line": 81,
+    "lizard_param_count|src/O4_DSF_Utils.py|82|insert( self , bx , by , level )": {
+      "line": 82,
       "metric": "lizard_param_count",
       "name": "insert( self , bx , by , level )",
       "path": "src/O4_DSF_Utils.py",
@@ -9352,6 +9608,38 @@
       "severity": "block",
       "value": 7.0
     },
+    "lizard_param_count|tests/_dsf_header_bridge_helpers.py|18|__init__( self , default_text_source : Path , extracted_default : Path | None = None )": {
+      "line": 18,
+      "metric": "lizard_param_count",
+      "name": "__init__( self , default_text_source : Path , extracted_default : Path | None = None )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|tests/_dsf_header_bridge_helpers.py|26|run( self , tool_name , args , * , executable )": {
+      "line": 26,
+      "metric": "lizard_param_count",
+      "name": "run( self , tool_name , args , * , executable )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/_dsf_header_bridge_helpers.py|78|bridge_request( * , tmp : Path , root : Path | str , generated_dsf : Path , run_external_tool , )": {
+      "line": 78,
+      "metric": "lizard_param_count",
+      "name": "bridge_request( * , tmp : Path , root : Path | str , generated_dsf : Path , run_external_tool , )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/_dsf_header_bridge_helpers.py|9|__init__( self , * , ok : bool , error_summary : str | None = None )": {
+      "line": 9,
+      "metric": "lizard_param_count",
+      "name": "__init__( self , * , ok : bool , error_summary : str | None = None )",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "advise",
+      "value": 3.0
+    },
     "lizard_param_count|tests/_imagery_color_normalization_helpers.py|133|__init__( self , patches , command_result , tmp_dir )": {
       "line": 133,
       "metric": "lizard_param_count",
@@ -9445,6 +9733,14 @@
       "metric": "lizard_param_count",
       "name": "test_reads_compressed_global_scenery_dsf.extract( _tool , _args , * , executable )",
       "path": "tests/test_bathymetry_provider_7z.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|tests/test_dsf_header_bridge.py|148|test_unsupported_default_headers_leave_generated_dsf_unchanged.run_external_tool( tool_name , args , * , executable )": {
+      "line": 148,
+      "metric": "lizard_param_count",
+      "name": "test_unsupported_default_headers_leave_generated_dsf_unchanged.run_external_tool( tool_name , args , * , executable )",
+      "path": "tests/test_dsf_header_bridge.py",
       "severity": "advise",
       "value": 3.0
     },
@@ -9792,56 +10088,56 @@
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|117|resolve_tool": {
-      "line": 117,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|129|resolve_tool": {
+      "line": 129,
       "metric": "radon_cc",
       "name": "resolve_tool",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|132|changed_line_ranges": {
-      "line": 132,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|144|changed_line_ranges": {
+      "line": 144,
       "metric": "radon_cc",
       "name": "changed_line_ranges",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|162|run_clang_format_check": {
-      "line": 162,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|174|run_clang_format_check": {
+      "line": 174,
       "metric": "radon_cc",
       "name": "run_clang_format_check",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|179|run_clang_tidy": {
-      "line": 179,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|191|run_clang_tidy": {
+      "line": 191,
       "metric": "radon_cc",
       "name": "run_clang_tidy",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|218|scan_forbidden_patterns": {
-      "line": 218,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|230|scan_forbidden_patterns": {
+      "line": 230,
       "metric": "radon_cc",
       "name": "scan_forbidden_patterns",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|259|main": {
-      "line": 259,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|270|main": {
+      "line": 270,
       "metric": "radon_cc",
       "name": "main",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|82|changed_native_files": {
-      "line": 82,
+    "radon_cc|.codex/skills/repo-hygiene/scripts/hygiene.py|94|changed_native_files": {
+      "line": 94,
       "metric": "radon_cc",
       "name": "changed_native_files",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
@@ -10376,48 +10672,80 @@
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|121|zone_list_to_ortho_dico": {
-      "line": 121,
+    "radon_cc|src/O4_DSF_Header_Bridge.py|150|_find_default_dsf": {
+      "line": 150,
+      "metric": "radon_cc",
+      "name": "_find_default_dsf",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_DSF_Header_Bridge.py|163|_prepare_default_dsf_for_dsftool": {
+      "line": 163,
+      "metric": "radon_cc",
+      "name": "_prepare_default_dsf_for_dsftool",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_DSF_Header_Text.py|31|splice_supported_header_lines": {
+      "line": 31,
+      "metric": "radon_cc",
+      "name": "splice_supported_header_lines",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "warn",
+      "value": 7.0
+    },
+    "radon_cc|src/O4_DSF_Header_Text.py|51|_iter_header_lines": {
+      "line": 51,
+      "metric": "radon_cc",
+      "name": "_iter_header_lines",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_DSF_Utils.py|122|zone_list_to_ortho_dico": {
+      "line": 122,
       "metric": "radon_cc",
       "name": "zone_list_to_ortho_dico",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 20.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|263|create_terrain_file": {
-      "line": 263,
+    "radon_cc|src/O4_DSF_Utils.py|264|create_terrain_file": {
+      "line": 264,
       "metric": "radon_cc",
       "name": "create_terrain_file",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|387|build_dsf": {
-      "line": 387,
+    "radon_cc|src/O4_DSF_Utils.py|388|build_dsf": {
+      "line": 388,
       "metric": "radon_cc",
       "name": "build_dsf",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
       "value": 111.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|46|QuadTree": {
-      "line": 46,
+    "radon_cc|src/O4_DSF_Utils.py|47|QuadTree": {
+      "line": 47,
       "metric": "radon_cc",
       "name": "QuadTree",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|52|__init__": {
-      "line": 52,
+    "radon_cc|src/O4_DSF_Utils.py|53|__init__": {
+      "line": 53,
       "metric": "radon_cc",
       "name": "__init__",
       "path": "src/O4_DSF_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_DSF_Utils.py|81|insert": {
-      "line": 81,
+    "radon_cc|src/O4_DSF_Utils.py|82|insert": {
+      "line": 82,
       "metric": "radon_cc",
       "name": "insert",
       "path": "src/O4_DSF_Utils.py",
@@ -11696,6 +12024,22 @@
       "severity": "advise",
       "value": 4.0
     },
+    "radon_cc|tests/_dsf_header_bridge_helpers.py|26|run": {
+      "line": 26,
+      "metric": "radon_cc",
+      "name": "run",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|tests/test_dsf_header_bridge.py|28|test_round_trips_default_and_generated_dsf_text_with_dsftool": {
+      "line": 28,
+      "metric": "radon_cc",
+      "name": "test_round_trips_default_and_generated_dsf_text_with_dsftool",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "radon_cc|tests/test_exception_handling.py|7|ExceptionHandlingTests": {
       "line": 7,
       "metric": "radon_cc",
@@ -11774,7 +12118,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 18.60902255639098
+      "value": 18.646616541353385
     },
     "radon_hal_difficulty|src/O4_GUI_Utils.py||<module>": {
       "line": null,
@@ -11926,7 +12270,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 253912.10413329248
+      "value": 254934.58736742556
     },
     "radon_hal_effort|src/O4_File_Names.py||<module>": {
       "line": null,
@@ -12102,7 +12446,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 13644.569636253696
+      "value": 13671.89520962403
     },
     "radon_hal_volume|src/O4_File_Names.py||<module>": {
       "line": null,
@@ -12270,7 +12614,7 @@
       "name": "<module>",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
-      "value": 28.878609553294986
+      "value": 28.029986443586903
     },
     "radon_mi|Ortho4XP.py||<module>": {
       "line": null,
@@ -12376,13 +12720,29 @@
       "severity": "block",
       "value": 0.0
     },
+    "radon_mi|src/O4_DSF_Header_Bridge.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_DSF_Header_Bridge.py",
+      "severity": "block",
+      "value": 46.08343047323032
+    },
+    "radon_mi|src/O4_DSF_Header_Text.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_DSF_Header_Text.py",
+      "severity": "warn",
+      "value": 66.63865188727972
+    },
     "radon_mi|src/O4_DSF_Utils.py||<module>": {
       "line": null,
       "metric": "radon_mi",
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "block",
-      "value": 7.1553683811907245
+      "value": 7.2134335751837915
     },
     "radon_mi|src/O4_External_Command_Result.py||<module>": {
       "line": null,
@@ -12648,6 +13008,14 @@
       "severity": "block",
       "value": 44.22208092824179
     },
+    "radon_mi|tests/_dsf_header_bridge_helpers.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/_dsf_header_bridge_helpers.py",
+      "severity": "block",
+      "value": 48.17253829023975
+    },
     "radon_mi|tests/_imagery_color_normalization_helpers.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -12752,6 +13120,22 @@
       "severity": "warn",
       "value": 61.36863239488804
     },
+    "radon_mi|tests/test_dsf_header_bridge.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_dsf_header_bridge.py",
+      "severity": "warn",
+      "value": 51.158510540063645
+    },
+    "radon_mi|tests/test_dsf_header_text.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_dsf_header_text.py",
+      "severity": "advise",
+      "value": 83.64720077172146
+    },
     "radon_mi|tests/test_exception_handling.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -12848,6 +13232,14 @@
       "severity": "block",
       "value": 36.33864967401436
     },
+    "radon_mi|tests/test_repo_hygiene.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_repo_hygiene.py",
+      "severity": "warn",
+      "value": 53.024656294028624
+    },
     "radon_mi|tests/test_startup.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -12918,7 +13310,7 @@
       "name": "<module>",
       "path": "src/O4_DSF_Utils.py",
       "severity": "warn",
-      "value": 703.0
+      "value": 700.0
     },
     "radon_raw_lloc|src/O4_GUI_Utils.py||<module>": {
       "line": null,
@@ -13017,6 +13409,9 @@
     "src/O4_Config_Models.py",
     "src/O4_Config_Utils.py",
     "src/O4_DEM_Utils.py",
+    "src/O4_DSF_Header_Bridge.py",
+    "src/O4_DSF_Header_Models.py",
+    "src/O4_DSF_Header_Text.py",
     "src/O4_DSF_Utils.py",
     "src/O4_External_Command_Result.py",
     "src/O4_External_Tool_Paths.py",
@@ -13053,6 +13448,7 @@
     "src/Unused/O4_Shapefile_Utils.py",
     "src/Unused/O4_buildings.py",
     "src/Unused/build_house.py",
+    "tests/_dsf_header_bridge_helpers.py",
     "tests/_imagery_color_normalization_helpers.py",
     "tests/_path.py",
     "tests/test_bathymetry_dsf_bytes.py",
@@ -13066,6 +13462,8 @@
     "tests/test_color_normalization.py",
     "tests/test_config_loading.py",
     "tests/test_config_models.py",
+    "tests/test_dsf_header_bridge.py",
+    "tests/test_dsf_header_text.py",
     "tests/test_exception_handling.py",
     "tests/test_file_names.py",
     "tests/test_geo_utils.py",
@@ -13078,6 +13476,7 @@
     "tests/test_provider_parsing.py",
     "tests/test_quality_check.py",
     "tests/test_quality_code_audits.py",
+    "tests/test_repo_hygiene.py",
     "tests/test_startup.py",
     "tests/test_subprocess_regression.py",
     "tests/test_subprocess_utils.py",

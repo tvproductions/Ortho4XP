@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -44,6 +45,17 @@ SCAN_PATHS = [
     "pyproject.toml",
     "tests",
 ]
+
+
+def forbidden_pattern_regex() -> str:
+    return "|".join(_forbidden_pattern_regex(pattern) for pattern in FORBIDDEN_PATTERNS)
+
+
+def _forbidden_pattern_regex(pattern: str) -> str:
+    escaped = re.escape(pattern)
+    if pattern in {"pytest", "py.test"}:
+        return rf"(^|[^\w.]){escaped}([^\w.]|$)"
+    return escaped
 
 
 def run(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -219,12 +231,11 @@ def scan_forbidden_patterns() -> None:
     existing_paths = [path for path in SCAN_PATHS if (ROOT / path).exists()]
     if not existing_paths:
         return
-    pattern = "|".join(FORBIDDEN_PATTERNS)
     result = run(
         [
             "rg",
             "-n",
-            pattern,
+            forbidden_pattern_regex(),
             "-S",
             *existing_paths,
             "-g",

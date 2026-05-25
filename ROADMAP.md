@@ -246,6 +246,7 @@ If this fork distributes packaged builds, document:
 - Which platforms are supported.
 - How bundled native tools are produced.
 - How packaged dependencies differ from source dependencies.
+- Release versioning policy, including the fork's switch to SemVer at `v1.0.0`.
 - How to verify a release before publishing.
 
 ### 24. Full Standalone Decoupling (Breakaway Playbook)

@@ -445,7 +445,15 @@ Suggested labels: `xp12max`, `imagery`, `color-pipeline`
 
 ### TODO-017: Develop Non-Destructive DSF Header Splicing Loop
 
-GitHub Issue: #12
+Status: Done
+
+GitHub Issue: #12 (closed)
+
+Implemented by adding a staged DSFTool bridge that converts default and
+generated DSFs to text through the shared subprocess helper, extracts only
+allowlisted season/vegetation/sound/friction header lines, splices them into
+generated DSF text, and replaces the generated `.dsf.tmp` only after
+`--text2dsf` succeeds.
 
 Build a data bridge using `DSFTool` to inherit native X-Plane 12 features into custom ortho tile headers.
 
@@ -569,6 +577,8 @@ Acceptance criteria:
 - Documents bundled data layout.
 - Documents how bundled native tools are produced and staged.
 - Documents how packaged dependencies differ from source dependencies.
+- Defines release versioning policy, including the fork's switch to SemVer at
+  `v1.0.0`.
 - Documents release verification steps before publishing.
 
 Suggested labels: `release`, `documentation`, `packaging`

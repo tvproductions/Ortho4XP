@@ -17,6 +17,7 @@ import O4_Mesh_Utils as MESH
 import O4_Overlay_Utils as OVL
 import O4_Subprocess_Utils as SP
 import O4_UI_Utils as UI
+from O4_DSF_Header_Bridge import splice_native_dsf_headers_for_tile
 
 quad_init_level = 3
 quad_capacity_high = 50000
@@ -1196,15 +1197,12 @@ def build_dsf(tile, download_queue):
 
     f.close()
 
-    f = open(dsf_file_name + ".tmp", "rb")
-    data = f.read()
-    m = hashlib.md5()
-    m.update(data)
-    md5sum = m.digest()
-    f.close()
-    f = open(dsf_file_name + ".tmp", "ab")
-    f.write(md5sum)
-    f.close()
+    with open(dsf_file_name + ".tmp", "rb") as f:
+        md5sum = hashlib.file_digest(f, "md5").digest()
+    with open(dsf_file_name + ".tmp", "ab") as f:
+        f.write(md5sum)
+
+    splice_native_dsf_headers_for_tile(tile, dsf_file_name + ".tmp")
 
     UI.progress_bar(1, 100)
 
