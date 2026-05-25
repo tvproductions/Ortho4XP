@@ -16,6 +16,7 @@ import numpy
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
 import requests
 
+from O4_Color_Normalization import normalize_image_with_neighbors
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Imagery_Failures as IFAIL
@@ -65,6 +66,7 @@ http_timeout: float = 10
 check_tms_response: bool = False
 max_connect_retries: int = 10
 max_baddata_retries: int = 10
+normalize_texture_colors: bool = False
 incomplete_imgs = IFAIL.incomplete_imgs
 imagery_failure_records = IFAIL.imagery_failure_records
 ImageryFailureRecord = IFAIL.ImageryFailureRecord
@@ -1532,6 +1534,81 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
         )
         big_image = big_image.resize(t_size, Image.Resampling.BICUBIC)
     return (success, big_image)
+
+
+################################################################################
+
+
+################################################################################
+_NEIGHBOR_TEXTURE_OFFSETS = {
+    "north": (0, -16),
+    "south": (0, 16),
+    "west": (-16, 0),
+    "east": (16, 0),
+}
+
+
+def normalize_texture_image_if_enabled(
+    image,
+    file_dir,
+    til_x_left,
+    til_y_top,
+    zoomlevel,
+    provider_code,
+):
+    if not normalize_texture_colors:
+        return image
+    neighbors = _load_neighbor_texture_images(
+        file_dir,
+        til_x_left,
+        til_y_top,
+        zoomlevel,
+        provider_code,
+        image.size,
+    )
+    if not neighbors:
+        return image
+    return normalize_image_with_neighbors(image, neighbors)
+
+
+def _load_neighbor_texture_images(
+    file_dir,
+    til_x_left,
+    til_y_top,
+    zoomlevel,
+    provider_code,
+    target_size,
+):
+    neighbors = {}
+    for edge, (dx, dy) in _NEIGHBOR_TEXTURE_OFFSETS.items():
+        neighbor_file = FNAMES.jpeg_file_name_from_attributes(
+            til_x_left + dx,
+            til_y_top + dy,
+            zoomlevel,
+            provider_code,
+        )
+        neighbor_path = os.path.join(file_dir, neighbor_file)
+        if not os.path.isfile(neighbor_path):
+            continue
+        try:
+            with Image.open(neighbor_path) as neighbor:
+                if neighbor.size != target_size:
+                    UI.vprint(
+                        3,
+                        "Skipping color-normalization neighbor with unexpected size",
+                        neighbor_path,
+                        neighbor.size,
+                    )
+                    continue
+                neighbors[edge] = neighbor.convert("RGB")
+        except (OSError, ValueError, UnidentifiedImageError) as exc:
+            UI.vprint(
+                3,
+                "Skipping color-normalization neighbor",
+                neighbor_path,
+                exc,
+            )
+    return neighbors
 
 
 ################################################################################

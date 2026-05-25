@@ -35,6 +35,17 @@ class ConfigModelTests(unittest.TestCase):
             coerce_config_value("default_website", "'Arc'", cfg_vars), "Arc"
         )
 
+    def test_texture_color_normalization_is_opt_in_img_setting(self):
+        definition = cfg_vars["normalize_texture_colors"]
+
+        self.assertEqual(definition["module"], "IMG")
+        self.assertIs(definition["type"], bool)
+        self.assertIs(definition["default"], False)
+        self.assertIs(
+            coerce_config_value("normalize_texture_colors", "True", cfg_vars),
+            True,
+        )
+
     def test_list_typed_scalar_compatibility_is_preserved(self):
         self.assertEqual(coerce_config_value("masks_width", "100", cfg_vars), 100)
         self.assertEqual(

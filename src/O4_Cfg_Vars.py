@@ -67,6 +67,12 @@ cfg_app_vars = {
         "default": 3,
         "hint": "Maximum attempts for each full orthophoto texture download before it is reported failed or incomplete. Low-level HTTP retry behavior is still controlled by the imagery retry settings.",
     },
+    "normalize_texture_colors": {
+        "module": "IMG",
+        "type": bool,
+        "default": False,
+        "hint": "When enabled, applies conservative neighbor-edge color normalization to orthophotos before DDS conversion. The correction uses local texture edge statistics only and does not blend neighbor pixels into the image.",
+    },
     "check_tms_response": {
         "module": "IMG",
         "type": bool,
@@ -376,6 +382,7 @@ list_app_vars = [
     "max_download_slots",
     "max_convert_slots",
     "max_texture_download_retries",
+    "normalize_texture_colors",
     "check_tms_response",
     "http_timeout",
     "max_connect_retries",
