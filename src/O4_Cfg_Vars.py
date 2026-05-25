@@ -71,7 +71,7 @@ cfg_app_vars = {
         "module": "IMG",
         "type": bool,
         "default": False,
-        "hint": "When enabled, applies conservative neighbor-edge color normalization to orthophotos before DDS conversion. The correction uses local texture edge statistics only and does not blend neighbor pixels into the image.",
+        "hint": "Apply conservative neighbor-edge color normalization before DDS conversion without blending neighbor pixels.",
     },
     "check_tms_response": {
         "module": "IMG",

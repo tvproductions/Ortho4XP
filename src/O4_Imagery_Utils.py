@@ -16,13 +16,13 @@ import numpy
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
 import requests
 
-from O4_Color_Normalization import normalize_image_with_neighbors
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
+import O4_Texture_Color_Normalization as TCN
 from O4_Source_Data_Models import (
     ColorFilterDefinition,
     CombinedProviderDefinition,
@@ -1540,77 +1540,6 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
 
 
 ################################################################################
-_NEIGHBOR_TEXTURE_OFFSETS = {
-    "north": (0, -16),
-    "south": (0, 16),
-    "west": (-16, 0),
-    "east": (16, 0),
-}
-
-
-def normalize_texture_image_if_enabled(
-    image,
-    file_dir,
-    til_x_left,
-    til_y_top,
-    zoomlevel,
-    provider_code,
-):
-    if not normalize_texture_colors:
-        return image
-    neighbors = _load_neighbor_texture_images(
-        file_dir,
-        til_x_left,
-        til_y_top,
-        zoomlevel,
-        provider_code,
-        image.size,
-    )
-    if not neighbors:
-        return image
-    return normalize_image_with_neighbors(image, neighbors)
-
-
-def _load_neighbor_texture_images(
-    file_dir,
-    til_x_left,
-    til_y_top,
-    zoomlevel,
-    provider_code,
-    target_size,
-):
-    neighbors = {}
-    for edge, (dx, dy) in _NEIGHBOR_TEXTURE_OFFSETS.items():
-        neighbor_file = FNAMES.jpeg_file_name_from_attributes(
-            til_x_left + dx,
-            til_y_top + dy,
-            zoomlevel,
-            provider_code,
-        )
-        neighbor_path = os.path.join(file_dir, neighbor_file)
-        if not os.path.isfile(neighbor_path):
-            continue
-        try:
-            with Image.open(neighbor_path) as neighbor:
-                if neighbor.size != target_size:
-                    UI.vprint(
-                        3,
-                        "Skipping color-normalization neighbor with unexpected size",
-                        neighbor_path,
-                        neighbor.size,
-                    )
-                    continue
-                neighbors[edge] = neighbor.convert("RGB")
-        except (OSError, ValueError, UnidentifiedImageError) as exc:
-            UI.vprint(
-                3,
-                "Skipping color-normalization neighbor",
-                neighbor_path,
-                exc,
-            )
-    return neighbors
-
-
 ################################################################################
 
 
@@ -1625,6 +1554,7 @@ def download_jpeg_ortho(
     super_resol_factor=1,
 ):
     provider = providers_dict[provider_code]
+    texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     if ("super_resol_factor" in provider) and (super_resol_factor == 1):
         super_resol_factor = int(provider["super_resol_factor"])
     if "max_zl" in provider:
@@ -1674,11 +1604,7 @@ def download_jpeg_ortho(
             "could not be obtained ",
             "(even at lower ZL), it was filled with white there.",
         )
-        record_incomplete_texture(
-            file_dir,
-            file_name,
-            (til_x_left, til_y_top, zoomlevel, provider_code),
-        )
+        record_incomplete_texture(file_dir, file_name, texture_attrs)
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
     try:
@@ -1692,15 +1618,12 @@ def download_jpeg_ortho(
                 ),
                 Image.Resampling.BICUBIC,
             ).convert("RGB")
-        if success:
-            output_image = normalize_texture_image_if_enabled(
-                output_image,
-                file_dir,
-                til_x_left,
-                til_y_top,
-                zoomlevel,
-                provider_code,
-            )
+        color_context = TCN.texture_color_context(
+            file_dir, texture_attrs, normalize_texture_colors
+        )
+        output_image = TCN.normalize_completed_texture_image(
+            output_image, success, color_context
+        )
         output_image.save(os.path.join(file_dir, file_name))
     except Exception as e:
         UI.lvprint(
@@ -2383,6 +2306,7 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
 
 ################################################################################
 def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type="dds"):
+    texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     if type == "dds":
         out_file_name = FNAMES.dds_file_name_from_attributes(
             til_x_left, til_y_top, zoomlevel, provider_code
@@ -2404,22 +2328,6 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     UI.vprint(1, "   Converting orthophoto(s) to build texture " + out_file_name + ".")
     erase_tmp_png = False
     erase_tmp_tif = False
-
-    def normalized_tmp_conversion_input(source_path, source_file_dir, target_png_file_name):
-        big_image = Image.open(source_path, "r").convert("RGB")
-        big_image = normalize_texture_image_if_enabled(
-            big_image,
-            source_file_dir,
-            til_x_left,
-            til_y_top,
-            zoomlevel,
-            provider_code,
-        )
-        file_to_convert = os.path.join(
-            FNAMES.resource_path("tmp"), target_png_file_name
-        )
-        big_image.save(file_to_convert)
-        return file_to_convert
 
     dxt5 = False
     masked_texture = False
@@ -2461,6 +2369,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 if small_array.max() > 30:
                     masked_texture = True
 
+    file_dir = jpeg_file_name = cached_texture_path = ""
     if provider_code in providers_dict:
         jpeg_file_name = FNAMES.jpeg_file_name_from_attributes(
             til_x_left, til_y_top, zoomlevel, provider_code
@@ -2468,29 +2377,22 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         file_dir = FNAMES.jpeg_file_dir_from_attributes(
             tile.lat, tile.lon, zoomlevel, providers_dict[provider_code]
         )
+        cached_texture_path = os.path.join(file_dir, jpeg_file_name)
+    color_context = TCN.texture_color_context(
+        file_dir or None, texture_attrs, normalize_texture_colors
+    )
     if (provider_code in local_combined_providers_dict) and (
-        (provider_code not in providers_dict)
-        or not os.path.exists(os.path.join(file_dir, jpeg_file_name))
+        TCN.texture_path_missing(cached_texture_path)
     ):
         big_image = combine_textures(
             tile, til_x_left, til_y_top, zoomlevel, provider_code
         )
-        if provider_code in providers_dict:
-            big_image = normalize_texture_image_if_enabled(
-                big_image,
-                file_dir,
-                til_x_left,
-                til_y_top,
-                zoomlevel,
-                provider_code,
-            )
-        elif normalize_texture_colors:
-            UI.vprint(
-                3,
-                "Skipping texture color normalization for combined provider",
-                provider_code,
-                "because no cached provider directory is available for neighbor lookup.",
-            )
+        big_image = TCN.normalize_combined_texture_image(
+            big_image,
+            color_context,
+            provider_code,
+            normalize_texture_colors,
+        )
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
             big_image.putalpha(mask_im.resize((4096, 4096), Image.Resampling.BICUBIC))
@@ -2518,17 +2420,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     # now if provider_code was not in local_combined_providers_dict but
     # color correction is required.
     elif (providers_dict[provider_code]["color_filters"] != "none") or masked_texture:
-        big_image = Image.open(os.path.join(file_dir, jpeg_file_name), "r").convert(
-            "RGB"
-        )
-        big_image = normalize_texture_image_if_enabled(
-            big_image,
-            file_dir,
-            til_x_left,
-            til_y_top,
-            zoomlevel,
-            provider_code,
-        )
+        big_image = Image.open(cached_texture_path, "r").convert("RGB")
+        big_image = TCN.normalize_texture_image_if_enabled(big_image, color_context)
         if providers_dict[provider_code]["color_filters"] != "none":
             big_image = color_transform(
                 big_image, providers_dict[provider_code]["color_filters"]
@@ -2555,14 +2448,11 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         big_image.save(file_to_convert)
     # finally if nothing needs to be done prior to the conversion
     else:
-        source_path = os.path.join(file_dir, jpeg_file_name)
-        if normalize_texture_colors:
-            file_to_convert = normalized_tmp_conversion_input(
-                source_path, file_dir, png_file_name
-            )
-            erase_tmp_png = True
-        else:
-            file_to_convert = source_path
+        file_to_convert, erase_tmp_png = TCN.normalized_conversion_input_path(
+            cached_texture_path,
+            png_file_name,
+            color_context,
+        )
     # eventually the dds conversion
     if type == "dds":
         if not dxt5:
