@@ -423,7 +423,13 @@ Suggested labels: `xp12max`, `textures`, `masks`
 
 ### TODO-016: Integrate Automated sRGB Histogram Color Normalization
 
+Status: Done
+
 GitHub Issue: #11
+
+Completed by adding opt-in neighbor-edge texture color normalization using
+Pillow/NumPy sRGB linear-light statistics, bounded correction clamps, config
+integration, documentation, and deterministic tests.
 
 Neutralize mismatched imagery tile boundaries before texture compression.
 
