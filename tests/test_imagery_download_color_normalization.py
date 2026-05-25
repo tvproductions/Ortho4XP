@@ -16,14 +16,13 @@ import O4_Texture_Color_Normalization as TCN
 
 
 class DownloadJpegColorNormalizationTests(ImageryColorNormalizationTestCase):
-    def test_download_jpeg_ortho_normalizes_successful_downloads_only(self):
+    def test_download_jpeg_ortho_leaves_cache_raw_for_conversion_normalization(self):
         provider_code = "TEST"
         provider = {"code": provider_code, "request_type": "test"}
 
         for success in (True, False):
             with self.subTest(success=success):
                 image = Image.new("RGB", (16, 16), (90, 80, 70))
-                normalized = Image.new("RGB", (16, 16), (120, 120, 120))
                 file_name = f"download-success-{success}.jpg"
 
                 with (
@@ -37,7 +36,6 @@ class DownloadJpegColorNormalizationTests(ImageryColorNormalizationTestCase):
                     mock.patch.object(
                         TCN,
                         "normalize_texture_image_if_enabled",
-                        return_value=normalized,
                     ) as normalize,
                     mock.patch.object(IMG.UI, "lvprint"),
                     mock.patch.object(IMG, "record_incomplete_texture"),
@@ -51,10 +49,7 @@ class DownloadJpegColorNormalizationTests(ImageryColorNormalizationTestCase):
                         provider_code,
                     )
 
-                if success:
-                    normalize.assert_called_once()
-                else:
-                    normalize.assert_not_called()
+                normalize.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -6,6 +6,12 @@
 
 **Architecture:** Add a pure Pillow/NumPy normalization module, then integrate it through `src/O4_Imagery_Utils.py` behind a new `normalize_texture_colors` config flag. The implementation uses existing JPEG filename and directory helpers, skips missing or invalid neighbors, preserves current behavior when disabled, and keeps provider color filters and mask imprinting on the current conversion path.
 
+**Final implementation note:** Code review changed the integration point to keep
+JPEG cache entries raw and apply normalization only to temporary conversion
+inputs. This prevents a normal download-then-convert flow from applying the
+bounded correction twice. Neighbor discovery also checks the existing incomplete
+texture registry before accepting a cached JPEG as evidence.
+
 **Tech Stack:** Python 3.13, `unittest`, `numpy`, `Pillow`, existing Ortho4XP imagery/config utilities, `uv`, Ruff, ty.
 
 ---

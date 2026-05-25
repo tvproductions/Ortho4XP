@@ -134,9 +134,11 @@ It computes conservative luminance and RGB balance correction from those local
 edge statistics before DDS conversion.
 
 The feature does not blend neighbor pixels into the target image and does not
-create persistent provider calibration data. Missing, unreadable, incomplete, or
-wrong-sized neighbors are skipped; if no valid neighbor evidence exists, the
-texture is left unchanged.
+create persistent provider calibration data. JPEG cache entries remain raw, and
+normalization is applied to temporary conversion inputs so a texture is not
+corrected twice in the normal download-then-convert flow. Missing, unreadable,
+incomplete, or wrong-sized neighbors are skipped; if no valid neighbor evidence
+exists, the texture is left unchanged.
 
 Build the native `Triangle4XP` helper with the LLVM/Clang preset:
 

@@ -1618,12 +1618,6 @@ def download_jpeg_ortho(
                 ),
                 Image.Resampling.BICUBIC,
             ).convert("RGB")
-        color_context = TCN.texture_color_context(
-            file_dir, texture_attrs, normalize_texture_colors
-        )
-        output_image = TCN.normalize_completed_texture_image(
-            output_image, success, color_context
-        )
         output_image.save(os.path.join(file_dir, file_name))
     except Exception as e:
         UI.lvprint(

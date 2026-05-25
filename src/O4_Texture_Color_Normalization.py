@@ -19,6 +19,7 @@ from PIL import Image, UnidentifiedImageError
 
 from O4_Color_Normalization import normalize_image_with_neighbors
 import O4_File_Names as FNAMES
+import O4_Imagery_Failures as IFAIL
 import O4_UI_Utils as UI
 
 
@@ -52,12 +53,6 @@ def texture_color_context(file_dir, texture_attrs, enabled):
         provider_code,
         enabled,
     )
-
-
-def normalize_completed_texture_image(image, success, context):
-    if not success:
-        return image
-    return normalize_texture_image_if_enabled(image, context)
 
 
 def normalize_combined_texture_image(image, context, provider_code, enabled):
@@ -108,8 +103,29 @@ def load_neighbor_texture_images(context, target_size):
 
 def _load_neighbor_image(context, offset, target_size):
     neighbor_path = _neighbor_texture_path(context, offset)
-    if not os.path.isfile(neighbor_path):
+    if _should_skip_neighbor_path(context, neighbor_path):
         return None
+    return _read_neighbor_image_or_none(neighbor_path, target_size)
+
+
+def _should_skip_neighbor_path(context, neighbor_path):
+    """Reject missing or known-incomplete cache files before image decoding."""
+
+    if not os.path.isfile(neighbor_path):
+        return True
+    if not _is_incomplete_neighbor(context, neighbor_path):
+        return False
+    UI.vprint(
+        3,
+        "Skipping incomplete color-normalization neighbor",
+        neighbor_path,
+    )
+    return True
+
+
+def _read_neighbor_image_or_none(neighbor_path, target_size):
+    """Return a decoded neighbor image, logging corrupt or unreadable files."""
+
     try:
         return _read_neighbor_image(neighbor_path, target_size)
     except (OSError, ValueError, UnidentifiedImageError) as exc:
@@ -131,6 +147,12 @@ def _neighbor_texture_path(context, offset):
         context.provider_code,
     )
     return os.path.join(context.file_dir, neighbor_file)
+
+
+def _is_incomplete_neighbor(context, neighbor_path):
+    tile_coords = os.path.basename(os.path.dirname(context.file_dir))
+    file_name = os.path.basename(neighbor_path)
+    return file_name in IFAIL.incomplete_texture_file_names(tile_coords)
 
 
 def _read_neighbor_image(neighbor_path, target_size):
