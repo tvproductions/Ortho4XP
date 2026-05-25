@@ -1,5 +1,7 @@
 import os
+from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 from PIL import Image
 
@@ -123,6 +125,80 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
             "COMBINEDONLY",
             "because no cached provider directory is available for neighbor lookup.",
         )
+
+    def test_convert_geotiff_final_conversion_failure_returns_failure_result(self):
+        self._write_cached_jpeg("TIFFAIL")
+        tile = self._tile_for_conversion()
+        expected_name = FNAMES.geotiff_file_name_from_attributes(
+            32, 48, 16, "TIFFAIL"
+        )
+
+        with (
+            self._convert_texture_patches("TIFFAIL") as conversion,
+            mock.patch.object(
+                IMG.GEO,
+                "gtile_to_wgs84",
+                side_effect=[(1.0, 2.0), (0.99, 2.01)],
+            ),
+            mock.patch.object(IMG.GEO, "geo_to_webm", return_value=(0, 0)),
+            mock.patch.object(IMG.UI, "lvprint"),
+            mock.patch.object(IMG.time, "sleep"),
+        ):
+            conversion.run_external_command.return_value = SimpleNamespace(
+                ok=False,
+                error_summary="gdal translate failed",
+            )
+
+            result = IMG.convert_texture(tile, 32, 48, 16, "TIFFAIL", type="tif")
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.display_name, expected_name)
+        self.assertEqual(result.provider_code, "TIFFAIL")
+        self.assertIn("Could not convert texture", result.error_summary)
+        self.assertEqual(conversion.run_external_command.call_count, 10)
+
+    def test_convert_geotiff_geotag_failure_cleans_png_and_temp_tiff(self):
+        self._write_cached_jpeg("GEOTAGFAIL")
+        tile = self._tile_for_conversion()
+        expected_name = FNAMES.geotiff_file_name_from_attributes(
+            32, 48, 16, "GEOTAGFAIL"
+        )
+
+        with (
+            self._convert_texture_patches(
+                "GEOTAGFAIL", color_filters="FILTER"
+            ) as conversion,
+            mock.patch.object(
+                IMG.GEO,
+                "gtile_to_wgs84",
+                side_effect=[(1.0, 2.0), (0.0, 3.0)],
+            ),
+            mock.patch.object(
+                IMG.GEO,
+                "geo_to_webm",
+                side_effect=[(20, 0), (30, 10)],
+            ),
+            mock.patch.object(IMG.os, "remove") as remove,
+        ):
+            conversion.color_transform.side_effect = lambda image, _: image
+            conversion.run_external_command.return_value = SimpleNamespace(
+                ok=False,
+                error_summary="gdal geotag failed",
+            )
+
+            result = IMG.convert_texture(tile, 32, 48, 16, "GEOTAGFAIL", type="tif")
+
+        expected_png = os.path.join(
+            conversion.tmp_dir,
+            expected_name.replace("tif", "png"),
+        )
+        expected_tmp_tif = os.path.join(
+            conversion.tmp_dir,
+            expected_name.replace("4326", "3857"),
+        )
+        self.assertFalse(result.ok)
+        remove.assert_any_call(expected_png)
+        remove.assert_any_call(expected_tmp_tif)
 
 
 if __name__ == "__main__":

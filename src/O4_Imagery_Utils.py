@@ -2560,6 +2560,8 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             _cleanup_conversion_temps(
                 erase_tmp_png=erase_tmp_png,
                 png_file_name=png_file_name,
+                erase_tmp_tif=True,
+                tmp_tif_file_name=tmp_tif_file_name,
             )
             return TEX.TextureConversionResult.failure(
                 out_file_name,
@@ -2584,6 +2586,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             os.path.join(FNAMES.Geotiff_dir, out_file_name),
         ]
     tentative = 0
+    conversion_failed = False
     while True:
         result = run_external_command(conv_cmd)
         if result.ok:
@@ -2596,6 +2599,7 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
                 os.path.join(tile.build_dir, "textures", out_file_name),
                 "(10 tries)",
             )
+            conversion_failed = True
             break
         UI.lvprint(
             1,
@@ -2609,6 +2613,17 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         erase_tmp_tif=erase_tmp_tif,
         tmp_tif_file_name=tmp_tif_file_name if erase_tmp_tif else None,
     )
+    if conversion_failed:
+        error_summary = getattr(result, "error_summary", "")
+        if error_summary:
+            error_summary = f"Could not convert texture: {error_summary}"
+        else:
+            error_summary = "Could not convert texture"
+        return TEX.TextureConversionResult.failure(
+            out_file_name,
+            provider_code,
+            error_summary,
+        )
     return TEX.TextureConversionResult.success(out_file_name, provider_code)
 
 
