@@ -14,7 +14,7 @@ import O4_Geo_Utils as GEO
 import O4_Imagery_Utils as IMG
 import O4_OSM_Utils as OSM
 import O4_Vector_Utils as VECT
-import O4_Mesh_Utils as MESH
+import O4_Mask_Alpha as MA, O4_Mesh_Utils as MESH
 from O4_Parallel_Utils import parallel_execute
 
 mask_altitude_above = 0.5
@@ -785,7 +785,7 @@ def blur_mask(img_array, tile, sea_level):
         # We go from sea_level to 0 in transout meters
         stepsout = int(transout / 3)
         for i in range(stepsout):
-            value = sea_level * (1 - transition_profile((i + 1) / stepsout, "linear"))
+            value = sea_level * (1 - MA.progressive_log_alpha_ratio((i + 1) / stepsout))
             b_mask_array = (
                 numpy.array(
                     Image.fromarray(b_mask_array)

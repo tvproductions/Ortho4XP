@@ -406,6 +406,8 @@ Suggested labels: `xp12max`, `mesh`, `validation`
 
 ### TODO-015: Rewrite Alpha Masking for Logarithmic BC3 Blending
 
+Status: Done
+
 GitHub Issue: #10
 
 Overhaul coastline transitions by mapping distance fields to progressive logarithmic alpha curves.

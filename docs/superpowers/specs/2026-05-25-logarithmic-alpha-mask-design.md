@@ -59,7 +59,8 @@ is deterministic, and does not overlap with the bathymetry boundary.
 
 ## Design
 
-Add a small module-level helper in `src/O4_Mask_Utils.py`:
+Add a small pure helper in `src/O4_Mask_Alpha.py` and use it from
+`src/O4_Mask_Utils.py`:
 
 ```python
 def progressive_log_alpha_ratio(ratio):
@@ -101,10 +102,11 @@ Update only the final `3steps` fade:
 value = sea_level * (1 - progressive_log_alpha_ratio((i + 1) / stepsout))
 ```
 
-The implementation should also guard zero-step transitions. If a configured
-width produces `stepsin == 0` or `stepsout == 0`, `blur_mask()` should avoid
-division by zero and preserve existing no-transition behavior as closely as
-possible.
+The implementation should preserve existing zero-step transition behavior. When
+a configured width produces `stepsin == 0` or `stepsout == 0`, Python's
+`range(0)` skips the loop body, so the division inside the loop is not
+evaluated. Adding explicit guard branches would only increase complexity in an
+already-large legacy function.
 
 ## Data Flow
 
@@ -122,9 +124,8 @@ No new files, schemas, or configuration values are needed.
 The helper should be total for numeric inputs and clamp out-of-range values.
 It should not raise for ordinary ratio drift caused by float arithmetic.
 
-`blur_mask()` should avoid dividing by zero when the configured transition
-width rounds down to zero pixel steps. This should be handled locally without
-changing user-facing configuration validation.
+`blur_mask()` already avoids zero-step division by keeping the division inside
+the skipped loop body. This task should not add extra branching for that case.
 
 ## Testing
 
@@ -138,7 +139,7 @@ Tests should cover:
 - Clamping below `0.0` and above `1.0`.
 - Monotonic output over representative sample ratios.
 - A midpoint assertion proving the curve is not linear.
-- A small deterministic `3steps` case showing the final fade uses the
+- A source-level `3steps` regression showing the final fade uses the
   helper-derived values without full tile setup.
 
 The tests should import real production code and avoid network, X-Plane,
@@ -146,7 +147,8 @@ external compressors, imagery providers, and full tile builds.
 
 ## Acceptance Criteria
 
-- `src/O4_Mask_Utils.py` exposes a tested progressive logarithmic alpha helper.
+- `src/O4_Mask_Alpha.py` exposes a tested progressive logarithmic alpha helper.
+- `src/O4_Mask_Utils.py` uses that helper for the final `3steps` sea fade.
 - The final `3steps` sea fade uses that helper instead of the linear profile.
 - Existing `distance_masks_too` behavior is not changed.
 - Mask alpha output remains `uint8` grayscale data bounded to `0..255`.
