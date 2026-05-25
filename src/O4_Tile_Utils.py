@@ -7,6 +7,7 @@ from collections import defaultdict
 import O4_UI_Utils as UI
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
+import O4_Texture_Conversion_Scheduler as TCS
 import O4_Vector_Map as VMAP
 import O4_Mesh_Utils as MESH
 import O4_Mask_Utils as MASK
@@ -172,6 +173,42 @@ def download_textures(
 
 
 ################################################################################
+def _report_texture_conversion_result(tile, result):
+    if result.interrupted:
+        UI.vprint(1, "DDS conversion process interrupted.")
+        return
+    if result.failed:
+        provider_counts = _texture_conversion_provider_counts(result.failures)
+        UI.vprint(
+            1,
+            "DDS conversion summary:",
+            f"{result.failed} failed texture(s)",
+            f"for tile {FNAMES.short_latlon(tile.lat, tile.lon)}.",
+            f"Providers: {provider_counts}.",
+        )
+        return
+    if result.completed >= 1:
+        UI.vprint(1, " *DDS conversion of textures completed.")
+
+
+def _texture_conversion_provider_counts(failures):
+    counts = defaultdict(int)
+    for failure in failures:
+        counts[failure.provider_code or "unknown"] += 1
+    return ", ".join(
+        f"{provider}={count}" for provider, count in sorted(counts.items())
+    )
+
+
+def _run_texture_conversion_scheduler(convert_queue, result_holder):
+    result_holder["result"] = TCS.run_texture_conversion_queue(
+        convert_queue,
+        max_convert_slots,
+        convert_texture=IMG.convert_texture,
+    )
+
+
+################################################################################
 def build_tile(tile):
     if UI.is_working:
         return 0
@@ -241,6 +278,7 @@ def build_tile(tile):
 
     download_launched = False
     convert_launched = False
+    convert_result_holder = {}
     download_workers = max_download_slots
 
     build_dsf_thread = threading.Thread(
@@ -269,26 +307,23 @@ def build_tile(tile):
                 max_convert_slots,
                 "conversion workers.",
             )
-            dico_conv_progress = {"done": 0, "bar": 3}
-            convert_workers = parallel_launch(
-                IMG.convert_texture,
-                convert_queue,
-                max_convert_slots,
-                progress=dico_conv_progress,
+            convert_thread = threading.Thread(
+                target=_run_texture_conversion_scheduler,
+                args=(convert_queue, convert_result_holder),
             )
+            convert_thread.start()
             convert_launched = True
     build_dsf_thread.join()
     producer_done_event.set()
     if download_launched:
         download_thread.join()
         if convert_launched:
-            for _ in range(max_convert_slots):
-                convert_queue.put("quit")
-            parallel_join(convert_workers)
-            if UI.red_flag:
-                UI.vprint(1, "DDS conversion process interrupted.")
-            elif dico_conv_progress["done"] >= 1:
-                UI.vprint(1, " *DDS conversion of textures completed.")
+            convert_queue.put("quit")
+            convert_thread.join()
+            _report_texture_conversion_result(
+                tile,
+                convert_result_holder["result"],
+            )
     UI.vprint(1, " *Activating DSF file.")
     dsf_file_name = os.path.join(
         tile.build_dir,
