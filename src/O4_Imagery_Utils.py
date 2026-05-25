@@ -1683,15 +1683,25 @@ def download_jpeg_ortho(
         os.makedirs(file_dir)
     try:
         if super_resol_factor == 1:
-            big_image.save(os.path.join(file_dir, file_name))
+            output_image = big_image.convert("RGB")
         else:
-            big_image.resize(
+            output_image = big_image.resize(
                 (
                     int(width / super_resol_factor),
                     int(height / super_resol_factor),
                 ),
                 Image.Resampling.BICUBIC,
-            ).save(os.path.join(file_dir, file_name))
+            ).convert("RGB")
+        if success:
+            output_image = normalize_texture_image_if_enabled(
+                output_image,
+                file_dir,
+                til_x_left,
+                til_y_top,
+                zoomlevel,
+                provider_code,
+            )
+        output_image.save(os.path.join(file_dir, file_name))
     except Exception as e:
         UI.lvprint(
             0,

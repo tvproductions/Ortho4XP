@@ -1,3 +1,4 @@
+import inspect
 import os
 import tempfile
 import unittest
@@ -142,6 +143,16 @@ class ImageryColorNormalizationTests(unittest.TestCase):
 
         self.assertEqual(set(neighbors), {"north"})
         self.assertEqual(neighbors["north"].getpixel((0, 0)), (100, 110, 120))
+
+    def test_download_jpeg_ortho_normalizes_only_successful_final_image_before_save(self):
+        source = inspect.getsource(IMG.download_jpeg_ortho)
+
+        self.assertIn("if success:", source)
+        self.assertIn("normalize_texture_image_if_enabled(", source)
+        self.assertLess(
+            source.index("normalize_texture_image_if_enabled("),
+            source.index(".save(os.path.join(file_dir, file_name))"),
+        )
 
     def _color_for_edge(self, edge):
         return {
