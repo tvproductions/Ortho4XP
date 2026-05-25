@@ -69,6 +69,7 @@ class ConvertTexturePatchMixin(ImageryColorNormalizationTestCase):
         tmp_dir = self._conversion_tmp_dir()
         patches = [
             _conversion_core_patch(),
+            mock.patch.object(IMG.TEX, "encode_texture"),
             mock.patch.object(TCN, "normalize_texture_image_if_enabled"),
             mock.patch.dict(
                 IMG.providers_dict, settings.providers(provider_code), clear=True
@@ -122,7 +123,6 @@ def _conversion_core_patch():
     return mock.patch.multiple(
         IMG,
         is_macos=False,
-        dds_convert_cmd="dds-tool",
         run_external_command=mock.DEFAULT,
         color_transform=mock.DEFAULT,
         combine_textures=mock.DEFAULT,
@@ -143,9 +143,25 @@ class ConvertTexturePatchContext:
         self.run_external_command.return_value = self.command_result
         self.color_transform = multiple_mocks["color_transform"]
         self.combine_textures = multiple_mocks["combine_textures"]
-        self.normalize = self.patches[1].start()
+        self.encode_texture = self.patches[1].start()
         self.started.append(self.patches[1])
-        for patcher in self.patches[2:-1]:
+        self.encode_texture.return_value = IMG.TEX.TextureEncodeResult(
+            request=IMG.TEX.TextureEncodeRequest(
+                source_path="input.png",
+                output_path="output.dds",
+                codec="bc1",
+                display_name="output.dds",
+            ),
+            ok=True,
+            attempts=1,
+            backend_name="native",
+            tool_name="nvcompress",
+            returncode=0,
+            error_summary="",
+        )
+        self.normalize = self.patches[2].start()
+        self.started.append(self.patches[2])
+        for patcher in self.patches[3:-1]:
             patcher.start()
             self.started.append(patcher)
         self.vprint = self.patches[-1].start()
@@ -157,5 +173,5 @@ class ConvertTexturePatchContext:
             patcher.stop()
 
     @property
-    def command(self):
-        return self.run_external_command.call_args.args[0]
+    def encode_request(self):
+        return self.encode_texture.call_args.args[0]

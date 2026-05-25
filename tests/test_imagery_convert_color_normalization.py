@@ -23,10 +23,12 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         with self._convert_texture_patches("DIRECT") as conversion:
             IMG.normalize_texture_colors = False
 
-            IMG.convert_texture(tile, 32, 48, 16, "DIRECT")
+            result = IMG.convert_texture(tile, 32, 48, 16, "DIRECT")
 
         conversion.normalize.assert_not_called()
-        self.assertEqual(conversion.command[-2], cached_path)
+        self.assertEqual(conversion.encode_request.source_path, cached_path)
+        self.assertTrue(result.ok)
+        self.assertIs(result.encode_result, conversion.encode_texture.return_value)
 
     def test_convert_texture_enabled_uses_and_removes_normalized_tmp_png(self):
         self._write_cached_jpeg("TMPPNG")
@@ -37,7 +39,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
             IMG.normalize_texture_colors = True
             conversion.normalize.return_value = normalized
 
-            IMG.convert_texture(tile, 32, 48, 16, "TMPPNG")
+            result = IMG.convert_texture(tile, 32, 48, 16, "TMPPNG")
 
         expected_png = os.path.join(
             conversion.tmp_dir,
@@ -45,9 +47,11 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
                 "dds", "png"
             ),
         )
-        self.assertEqual(conversion.command[-2], expected_png)
+        self.assertEqual(conversion.encode_request.source_path, expected_png)
         self.assertFalse(os.path.exists(expected_png))
         conversion.normalize.assert_called_once()
+        self.assertTrue(result.ok)
+        self.assertIs(result.encode_result, conversion.encode_texture.return_value)
 
     def test_convert_texture_normalizes_before_color_filter_preprocessing(self):
         self._write_cached_jpeg("FILTERED")

@@ -22,6 +22,7 @@ import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
+import O4_Texture_Encoder as TEX
 import O4_Texture_Color_Normalization as TCN
 from O4_Source_Data_Models import (
     ColorFilterDefinition,
@@ -2299,6 +2300,48 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
 
 
 ################################################################################
+def _texture_encode_request(
+    tile,
+    til_x_left,
+    til_y_top,
+    zoomlevel,
+    provider_code,
+    *,
+    source_path,
+    output_file_name,
+    dxt5,
+):
+    return TEX.TextureEncodeRequest(
+        source_path=source_path,
+        output_path=os.path.join(tile.build_dir, "textures", output_file_name),
+        codec="bc3" if dxt5 else "bc1",
+        display_name=output_file_name,
+        provider_code=provider_code,
+        til_x_left=til_x_left,
+        til_y_top=til_y_top,
+        zoomlevel=zoomlevel,
+    )
+
+
+def _cleanup_conversion_temps(
+    *,
+    erase_tmp_png,
+    png_file_name,
+    erase_tmp_tif=False,
+    tmp_tif_file_name=None,
+):
+    if erase_tmp_png:
+        try:
+            os.remove(os.path.join(FNAMES.resource_path("tmp"), png_file_name))
+        except OSError as exc:
+            UI.vprint(3, exc)
+    if erase_tmp_tif and tmp_tif_file_name:
+        try:
+            os.remove(tmp_tif_file_name)
+        except OSError as exc:
+            UI.vprint(3, exc)
+
+
 def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type="dds"):
     texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     if type == "dds":
@@ -2447,111 +2490,99 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             png_file_name,
             color_context,
         )
-    # eventually the dds conversion
     if type == "dds":
-        if not dxt5:
-            if is_macos:
-                conv_cmd = [
-                    dds_convert_cmd,
-                    "--png2dxt1",
-                    file_to_convert,
-                    os.path.join(tile.build_dir, "textures", out_file_name),
-                ]
-            else:
-                conv_cmd = [
-                    dds_convert_cmd,
-                    "-bc1",
-                    "-fast",
-                    file_to_convert,
-                    os.path.join(tile.build_dir, "textures", out_file_name),
-                ]
-        else:
-            if is_macos:
-                conv_cmd = [
-                    dds_convert_cmd,
-                    "--png2dxt5",
-                    file_to_convert,
-                    os.path.join(tile.build_dir, "textures", out_file_name),
-                ]
-            else:
-                conv_cmd = [
-                    dds_convert_cmd,
-                    "-bc3",
-                    "-fast",
-                    file_to_convert,
-                    os.path.join(tile.build_dir, "textures", out_file_name),
-                ]
-    else:
-        (latmax, lonmin) = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
-        (latmin, lonmax) = GEO.gtile_to_wgs84(
-            til_x_left + 16, til_y_top + 16, zoomlevel
+        request = _texture_encode_request(
+            tile,
+            til_x_left,
+            til_y_top,
+            zoomlevel,
+            provider_code,
+            source_path=file_to_convert,
+            output_file_name=out_file_name,
+            dxt5=dxt5,
         )
-        (xmin, ymin) = GEO.geo_to_webm(lonmin, latmin)
-        (xmax, ymax) = GEO.geo_to_webm(lonmax, latmax)
-        if latmax - latmin < 0.04:
-            conv_cmd = [
-                gdal_transl_cmd,
-                "-of",
-                "Gtiff",
-                "-co",
-                "COMPRESS=JPEG",
-                "-a_ullr",
-                str(lonmin),
-                str(latmax),
-                str(lonmax),
-                str(latmin),
-                "-a_srs",
-                "epsg:4326",
-                file_to_convert,
-                os.path.join(FNAMES.Geotiff_dir, out_file_name),
-            ]
-        else:
-            geotag_cmd = [
-                gdal_transl_cmd,
-                "-of",
-                "Gtiff",
-                "-co",
-                "COMPRESS=JPEG",
-                "-a_ullr",
-                str(xmin),
-                str(ymax),
-                str(xmax),
-                str(ymin),
-                "-a_srs",
-                "epsg:3857",
-                file_to_convert,
-                tmp_tif_file_name,
-            ]
-            erase_tmp_tif = True
-            result = run_external_command(geotag_cmd)
-            if not result.ok:
-                UI.vprint(
-                    1,
-                    "ERROR: Could not geotag texture (gdal not present ?) ",
-                    os.path.join(tile.build_dir, "textures", out_file_name),
-                )
-                try:
-                    os.remove(os.path.join(FNAMES.resource_path("tmp"), png_file_name))
-                except OSError as exc:
-                    UI.vprint(3, exc)
-                return
-            conv_cmd = [
-                gdalwarp_cmd,
-                "-of",
-                "Gtiff",
-                "-co",
-                "COMPRESS=JPEG",
-                "-s_srs",
-                "epsg:3857",
-                "-t_srs",
-                "epsg:4326",
-                "-ts",
-                "4096",
-                "4096",
-                "-rb",
-                tmp_tif_file_name,
-                os.path.join(FNAMES.Geotiff_dir, out_file_name),
-            ]
+        try:
+            encode_result = TEX.encode_texture(request)
+            return TEX.TextureConversionResult.from_encode_result(encode_result)
+        finally:
+            _cleanup_conversion_temps(
+                erase_tmp_png=erase_tmp_png,
+                png_file_name=png_file_name,
+            )
+    (latmax, lonmin) = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
+    (latmin, lonmax) = GEO.gtile_to_wgs84(
+        til_x_left + 16, til_y_top + 16, zoomlevel
+    )
+    (xmin, ymin) = GEO.geo_to_webm(lonmin, latmin)
+    (xmax, ymax) = GEO.geo_to_webm(lonmax, latmax)
+    if latmax - latmin < 0.04:
+        conv_cmd = [
+            gdal_transl_cmd,
+            "-of",
+            "Gtiff",
+            "-co",
+            "COMPRESS=JPEG",
+            "-a_ullr",
+            str(lonmin),
+            str(latmax),
+            str(lonmax),
+            str(latmin),
+            "-a_srs",
+            "epsg:4326",
+            file_to_convert,
+            os.path.join(FNAMES.Geotiff_dir, out_file_name),
+        ]
+    else:
+        geotag_cmd = [
+            gdal_transl_cmd,
+            "-of",
+            "Gtiff",
+            "-co",
+            "COMPRESS=JPEG",
+            "-a_ullr",
+            str(xmin),
+            str(ymax),
+            str(xmax),
+            str(ymin),
+            "-a_srs",
+            "epsg:3857",
+            file_to_convert,
+            tmp_tif_file_name,
+        ]
+        erase_tmp_tif = True
+        result = run_external_command(geotag_cmd)
+        if not result.ok:
+            UI.vprint(
+                1,
+                "ERROR: Could not geotag texture (gdal not present ?) ",
+                os.path.join(tile.build_dir, "textures", out_file_name),
+            )
+            _cleanup_conversion_temps(
+                erase_tmp_png=erase_tmp_png,
+                png_file_name=png_file_name,
+            )
+            return TEX.TextureConversionResult.failure(
+                out_file_name,
+                provider_code,
+                "Could not geotag texture",
+            )
+        conv_cmd = [
+            gdalwarp_cmd,
+            "-of",
+            "Gtiff",
+            "-co",
+            "COMPRESS=JPEG",
+            "-s_srs",
+            "epsg:3857",
+            "-t_srs",
+            "epsg:4326",
+            "-ts",
+            "4096",
+            "4096",
+            "-rb",
+            tmp_tif_file_name,
+            os.path.join(FNAMES.Geotiff_dir, out_file_name),
+        ]
     tentative = 0
     while True:
         result = run_external_command(conv_cmd)
@@ -2572,17 +2603,13 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             os.path.join(tile.build_dir, "textures", out_file_name),
         )
         time.sleep(1)
-    if erase_tmp_png:
-        try:
-            os.remove(os.path.join(FNAMES.resource_path("tmp"), png_file_name))
-        except OSError as exc:
-            UI.vprint(3, exc)
-    if erase_tmp_tif:
-        try:
-            os.remove(tmp_tif_file_name)
-        except OSError as exc:
-            UI.vprint(3, exc)
-    return
+    _cleanup_conversion_temps(
+        erase_tmp_png=erase_tmp_png,
+        png_file_name=png_file_name,
+        erase_tmp_tif=erase_tmp_tif,
+        tmp_tif_file_name=tmp_tif_file_name if erase_tmp_tif else None,
+    )
+    return TEX.TextureConversionResult.success(out_file_name, provider_code)
 
 
 ################################################################################
