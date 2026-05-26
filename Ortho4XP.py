@@ -29,6 +29,7 @@ import O4_File_Names as FNAMES
 sys.path.append(FNAMES.Provider_dir)
 import O4_Imagery_Utils as IMG
 import O4_Build_Core as CORE
+import O4_CLI_Utils as CLI
 import O4_GUI_Utils as GUI
 import O4_Config_Utils as CFG  # CFG imported last because it can modify other modules variables
 
@@ -103,12 +104,7 @@ if __name__ == "__main__":
                 sys.exit()
         try:
             result = CORE.build_tile_all(tile)
-            if result.ok:
-                print("Bon vol!")
-            else:
-                if result.message:
-                    print(result.message)
-                print("Crash!")
+            CLI.print_build_result(result)
         except Exception as e:
             print(e)
             print("Crash!")
