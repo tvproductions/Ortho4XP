@@ -28,10 +28,7 @@ import O4_File_Names as FNAMES
 
 sys.path.append(FNAMES.Provider_dir)
 import O4_Imagery_Utils as IMG
-import O4_Vector_Map as VMAP
-import O4_Mesh_Utils as MESH
-import O4_Mask_Utils as MASK
-import O4_Tile_Utils as TILE
+import O4_Build_Core as CORE
 import O4_GUI_Utils as GUI
 import O4_Config_Utils as CFG  # CFG imported last because it can modify other modules variables
 
@@ -105,11 +102,13 @@ if __name__ == "__main__":
                 print(cmd_line)
                 sys.exit()
         try:
-            VMAP.build_poly_file(tile)
-            MESH.build_mesh(tile)
-            MASK.build_masks(tile)
-            TILE.build_tile(tile)
-            print("Bon vol!")
+            result = CORE.build_tile_all(tile)
+            if result.ok:
+                print("Bon vol!")
+            else:
+                if result.message:
+                    print(result.message)
+                print("Crash!")
         except Exception as e:
             print(e)
             print("Crash!")
