@@ -331,40 +331,10 @@ def build_tile(tile):
 
 ################################################################################
 def build_all(tile):
-    VMAP.build_poly_file(tile)
-    if UI.red_flag:
-        UI.exit_message_and_bottom_line("")
-        return 0
-    MESH.build_mesh(tile)
-    if UI.red_flag:
-        UI.exit_message_and_bottom_line("")
-        return 0
-    MASK.build_masks(tile)
-    if UI.red_flag:
-        UI.exit_message_and_bottom_line("")
-        return 0
-    build_tile(tile)
-    tile_coords = FNAMES.short_latlon(tile.lat, tile.lon)
-    if tile_coords in IMG.incomplete_imgs:
-        UI.lvprint(
-            1,
-            f"Attempting to rebuild textures with white squares: "
-            f"{IMG.incomplete_texture_file_names(tile_coords)}",
-        )
-        delete_incomplete_imgs(tile)
-        build_tile(tile)
-    if UI.red_flag:
-        UI.exit_message_and_bottom_line("")
-        return 0
-    UI.is_working = 0  # ty:ignore[invalid-assignment]
-    if IMG.incomplete_imgs:
-        UI.lvprint(
-            0,
-            f"\nERROR: Parts of the following images could not be obtained "
-            f"and have been filled with white: "
-            f"{IMG.incomplete_texture_file_names_by_tile()}",
-        )
-    return 1
+    import O4_Build_Core as CORE
+
+    result = CORE.build_tile_all(tile)
+    return 1 if result.ok else 0
 
 
 ################################################################################
