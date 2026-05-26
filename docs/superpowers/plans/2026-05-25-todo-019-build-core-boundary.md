@@ -1,12 +1,17 @@
 # Build Core Boundary Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
 **Goal:** Add a tested core all-in-one tile build API and route the CLI and existing GUI-facing wrapper through it.
 
 **Architecture:** Create `src/O4_Build_Core.py` as the narrow orchestration boundary for the current Step 1, Step 2, Step 2.5, and Step 3 sequence. Keep `src/O4_Tile_Utils.py::build_all()` as an integer-return compatibility wrapper, and make `Ortho4XP.py` use the new structured result for command-line all-in-one builds.
 
 **Tech Stack:** Python 3.13, standard-library `dataclasses`, `types.SimpleNamespace`, `unittest`, `unittest.mock`, existing `O4_UI_Utils`, Ruff, ty.
+
+**Execution note:** Implementation followed this plan, then the quality gate cleanup
+split the original build-core tests into smaller modules and added
+`src/O4_CLI_Utils.py` for launcher result formatting. The final verification
+commands below reflect the final verified file set.
 
 ---
 
@@ -23,13 +28,22 @@
   - Keep `O4_Vector_Map`, `O4_Mesh_Utils`, and `O4_Mask_Utils` imports because batch builds still use them.
 - Modify `Ortho4XP.py`
   - Import `O4_Build_Core as CORE`.
+  - Import `O4_CLI_Utils as CLI`.
   - Remove direct Step 1, Step 2, Step 2.5, and Step 3 imports from the launcher.
   - Replace direct build calls with `CORE.build_tile_all(tile)`.
+- Create `src/O4_CLI_Utils.py`
+  - Owns command-line formatting for structured build results.
 - No code change in `src/O4_GUI_Utils.py`
   - The GUI "All in one" button already targets `TILE.build_all`.
   - After the wrapper change, that GUI path reaches the same core API without changing Tk behavior.
 - Create `tests/test_build_core.py`
-  - Tests core call order, red-flag stopping, incomplete-imagery retry behavior, remaining incomplete imagery reporting, and wrapper compatibility.
+  - Tests core call order, incomplete-imagery retry behavior, and remaining incomplete imagery reporting.
+- Create `tests/test_build_core_interrupts.py`
+  - Tests red-flag stopping at each all-in-one boundary and retry interruption.
+- Create `tests/test_build_core_wrapper.py`
+  - Tests legacy wrapper compatibility.
+- Create `tests/test_cli_utils.py`
+  - Tests command-line build-result message formatting.
 - Create `tests/test_launcher_core.py`
   - Runs `Ortho4XP.py` with fake imported modules to prove the CLI path calls the core API and does not call direct legacy step functions.
 - Modify `TODO.md`
@@ -43,7 +57,7 @@
 - Create: `tests/test_build_core.py`
 - Create: `tests/test_launcher_core.py`
 
-- [ ] **Step 1: Create `tests/test_build_core.py`**
+- [x] **Step 1: Create `tests/test_build_core.py`**
 
 Create `tests/test_build_core.py` with this full content:
 
@@ -250,7 +264,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Create `tests/test_launcher_core.py`**
+- [x] **Step 2: Create `tests/test_launcher_core.py`**
 
 Create `tests/test_launcher_core.py` with this full content:
 
@@ -411,7 +425,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 3: Run the new tests and verify they fail for the expected reasons**
+- [x] **Step 3: Run the new tests and verify they fail for the expected reasons**
 
 Run:
 
@@ -435,7 +449,7 @@ Do not commit after this step. The failing tests are the TDD guard for the imple
 - Modify: `src/O4_Tile_Utils.py:333`
 - Test: `tests/test_build_core.py`
 
-- [ ] **Step 1: Create `src/O4_Build_Core.py`**
+- [x] **Step 1: Create `src/O4_Build_Core.py`**
 
 Create `src/O4_Build_Core.py` with this full content:
 
@@ -512,7 +526,7 @@ def _report_remaining_incomplete_textures() -> None:
         )
 ```
 
-- [ ] **Step 2: Replace `O4_Tile_Utils.build_all()` with the compatibility wrapper**
+- [x] **Step 2: Replace `O4_Tile_Utils.build_all()` with the compatibility wrapper**
 
 In `src/O4_Tile_Utils.py`, replace the entire current `build_all(tile)` function with:
 
@@ -527,7 +541,7 @@ def build_all(tile):
 
 Keep the surrounding `download_textures`, `build_tile`, `build_tile_list`, `remove_unwanted_textures`, and `delete_incomplete_imgs` functions unchanged.
 
-- [ ] **Step 3: Run the core tests and verify they pass**
+- [x] **Step 3: Run the core tests and verify they pass**
 
 Run:
 
@@ -535,9 +549,9 @@ Run:
 uv run python -m unittest tests.test_build_core -q
 ```
 
-Expected result: output includes `Ran 7 tests` and ends with `OK`.
+Expected result: output includes `Ran 3 tests` and ends with `OK`.
 
-- [ ] **Step 4: Run the existing Step 3 integration tests to catch wrapper regressions**
+- [x] **Step 4: Run the existing Step 3 integration tests to catch wrapper regressions**
 
 Run:
 
@@ -547,7 +561,7 @@ uv run python -m unittest tests.test_tile_texture_conversion -q
 
 Expected result: output includes `Ran 6 tests` and ends with `OK`.
 
-- [ ] **Step 5: Commit the core API and wrapper**
+- [x] **Step 5: Commit the core API and wrapper**
 
 Run:
 
@@ -566,7 +580,7 @@ git commit -m "refactor: add build core boundary"
 - Test: `tests/test_launcher_core.py`
 - Test: `tests/test_startup.py`
 
-- [ ] **Step 1: Update launcher imports**
+- [x] **Step 1: Update launcher imports**
 
 In `Ortho4XP.py`, replace this import block:
 
@@ -589,7 +603,7 @@ import O4_GUI_Utils as GUI
 import O4_Config_Utils as CFG  # CFG imported last because it can modify other modules variables
 ```
 
-- [ ] **Step 2: Replace direct CLI build calls**
+- [x] **Step 2: Replace direct CLI build calls**
 
 In `Ortho4XP.py`, replace this block:
 
@@ -621,7 +635,7 @@ with:
             print("Crash!")
 ```
 
-- [ ] **Step 3: Run launcher and startup tests**
+- [x] **Step 3: Run launcher and startup tests**
 
 Run:
 
@@ -631,19 +645,19 @@ uv run python -m unittest tests.test_launcher_core tests.test_startup -q
 
 Expected result: output includes `Ran 7 tests` and ends with `OK`.
 
-- [ ] **Step 4: Run focused core and launcher tests together**
+- [x] **Step 4: Run focused core and launcher tests together**
 
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_build_core tests.test_launcher_core tests.test_startup tests.test_tile_texture_conversion -q
+uv run python -m unittest tests.test_build_core tests.test_build_core_interrupts tests.test_build_core_wrapper tests.test_cli_utils tests.test_launcher_core tests.test_startup tests.test_tile_texture_conversion -q
 ```
 
-Expected result: output includes `Ran 20 tests` and ends with `OK`.
+Expected result: output includes `Ran 24 tests` and ends with `OK`.
 
-The exact elapsed time may vary. The important observed facts are that all four modules run and the result is `OK`.
+The exact elapsed time may vary. The important observed facts are that all focused modules run and the result is `OK`.
 
-- [ ] **Step 5: Commit the launcher routing**
+- [x] **Step 5: Commit the launcher routing**
 
 Run:
 
@@ -660,11 +674,15 @@ git commit -m "refactor: route launcher builds through core"
 - Modify: `TODO.md:490`
 - Validate: `Ortho4XP.py`
 - Validate: `src/O4_Build_Core.py`
+- Validate: `src/O4_CLI_Utils.py`
 - Validate: `src/O4_Tile_Utils.py`
 - Validate: `tests/test_build_core.py`
+- Validate: `tests/test_build_core_interrupts.py`
+- Validate: `tests/test_build_core_wrapper.py`
+- Validate: `tests/test_cli_utils.py`
 - Validate: `tests/test_launcher_core.py`
 
-- [ ] **Step 1: Update work item 019 in `TODO.md`**
+- [x] **Step 1: Update work item 019 in `TODO.md`**
 
 In `TODO.md`, under `### TODO-019: Separate GUI, CLI, and Core Build Logic`, insert `Status: Done` after the title and add the completion paragraph shown below.
 
@@ -691,34 +709,34 @@ Acceptance criteria:
 
 Do not mark any later work item done.
 
-- [ ] **Step 2: Run formatting checks for changed Python files**
+- [x] **Step 2: Run formatting checks for changed Python files**
 
 Run:
 
 ```powershell
-uv run ruff format --check Ortho4XP.py src\O4_Build_Core.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_launcher_core.py
+uv run ruff format --check Ortho4XP.py src\O4_Build_Core.py src\O4_CLI_Utils.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_build_core_interrupts.py tests\test_build_core_wrapper.py tests\test_cli_utils.py tests\test_launcher_core.py
 ```
 
 Expected result:
 
 ```text
-5 files already formatted
+9 files already formatted
 ```
 
 If Ruff reports formatting changes are needed, run:
 
 ```powershell
-uv run ruff format Ortho4XP.py src\O4_Build_Core.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_launcher_core.py
+uv run ruff format Ortho4XP.py src\O4_Build_Core.py src\O4_CLI_Utils.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_build_core_interrupts.py tests\test_build_core_wrapper.py tests\test_cli_utils.py tests\test_launcher_core.py
 ```
 
 Then rerun the `--check` command and proceed only after it passes.
 
-- [ ] **Step 3: Run Ruff lint on the changed Python surface**
+- [x] **Step 3: Run Ruff lint on the changed Python surface**
 
 Run:
 
 ```powershell
-uv run ruff check Ortho4XP.py src\O4_Build_Core.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_launcher_core.py
+uv run ruff check Ortho4XP.py src\O4_Build_Core.py src\O4_CLI_Utils.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_build_core_interrupts.py tests\test_build_core_wrapper.py tests\test_cli_utils.py tests\test_launcher_core.py
 ```
 
 Expected result:
@@ -727,12 +745,12 @@ Expected result:
 All checks passed!
 ```
 
-- [ ] **Step 4: Run ty on changed Python files**
+- [x] **Step 4: Run ty on changed Python files**
 
 Run:
 
 ```powershell
-uv run ty check Ortho4XP.py src\O4_Build_Core.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_launcher_core.py
+uv run ty check Ortho4XP.py src\O4_Build_Core.py src\O4_CLI_Utils.py src\O4_Tile_Utils.py tests\test_build_core.py tests\test_build_core_interrupts.py tests\test_build_core_wrapper.py tests\test_cli_utils.py tests\test_launcher_core.py
 ```
 
 Expected result:
@@ -743,17 +761,17 @@ All checks passed!
 
 If ty reports warnings inherited from the legacy Tk or dynamic config surface, inspect them. Fix issues introduced by this change before proceeding.
 
-- [ ] **Step 5: Run focused regression tests**
+- [x] **Step 5: Run focused regression tests**
 
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_build_core tests.test_launcher_core tests.test_startup tests.test_tile_texture_conversion -q
+uv run python -m unittest tests.test_build_core tests.test_build_core_interrupts tests.test_build_core_wrapper tests.test_cli_utils tests.test_launcher_core tests.test_startup tests.test_tile_texture_conversion -q
 ```
 
-Expected result: output includes `Ran 20 tests` and ends with `OK`.
+Expected result: output includes `Ran 24 tests` and ends with `OK`.
 
-- [ ] **Step 6: Run the full unittest suite**
+- [x] **Step 6: Run the full unittest suite**
 
 Run:
 
@@ -769,7 +787,7 @@ OK
 
 The exact test count and elapsed time may vary. Record the observed test count in the final evidence.
 
-- [ ] **Step 7: Run the repository quality check**
+- [x] **Step 7: Run the repository quality check**
 
 Run:
 
@@ -785,7 +803,7 @@ Quality check passed
 
 If this script prints a different success line, record the exact success line. If it finds unrelated defects, follow the repository directive: fix in-scope defects immediately, and make every remaining defect trackable before completion.
 
-- [ ] **Step 8: Commit completion tracking**
+- [x] **Step 8: Commit completion tracking**
 
 Run:
 
@@ -794,7 +812,7 @@ git add TODO.md
 git commit -m "docs: mark build core task done"
 ```
 
-- [ ] **Step 9: Add GitHub issue evidence and close issue #14**
+- [x] **Step 9: Add GitHub issue evidence and close issue #14**
 
 Run:
 
@@ -805,7 +823,7 @@ gh issue close 14 --repo tvproductions/Ortho4XP --comment "Closing after impleme
 
 If the `gh issue comment` command is unavailable in the local approval rules, request approval for that command. The `gh issue close` prefix is already commonly used in this repository but still verify the command result.
 
-- [ ] **Step 10: Final git status check**
+- [x] **Step 10: Final git status check**
 
 Run:
 
@@ -826,6 +844,6 @@ Expected result:
 
 ## Plan Self-Review
 
-- Spec coverage: Task 1 and Task 2 cover the callable core API, current all-in-one sequence, structured result, interruption behavior, incomplete-imagery retry, and legacy wrapper compatibility. Task 3 covers launcher routing through the core boundary. Task 4 covers tracking, issue evidence, and verification.
+- Spec coverage: Task 1 and Task 2 cover the callable core API, current all-in-one sequence, structured result, interruption behavior, incomplete-imagery retry, and legacy wrapper compatibility. Task 3 covers launcher routing and CLI result formatting through the core boundary. Task 4 covers tracking, issue evidence, and verification.
 - Deferred-work scan: The plan uses no deferred implementation markers. The only queue references are concrete file and issue tracking names.
 - Type consistency: The plan uses one result type, `BuildResult(ok: bool, step: str, message: str = "")`, consistently in tests, implementation, wrapper behavior, and launcher behavior.
