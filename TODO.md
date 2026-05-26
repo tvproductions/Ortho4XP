@@ -489,9 +489,18 @@ Suggested labels: `xp12max`, `performance`, `gpu`
 
 ### TODO-019: Separate GUI, CLI, and Core Build Logic
 
+Status: Done
+
 GitHub Issue: #14
 
 Begin separating presentation, command-line parsing, and build orchestration.
+
+Completed by adding a tested `O4_Build_Core.build_tile_all()` orchestration
+boundary for the current all-in-one tile sequence, preserving
+`O4_Tile_Utils.build_all()` as a compatibility wrapper, and routing the
+launcher's command-line all-in-one path through the same structured core API.
+The GUI all-in-one button continues to target the compatibility wrapper, so GUI
+and CLI all-in-one behavior now share the core build boundary.
 
 Acceptance criteria:
 
