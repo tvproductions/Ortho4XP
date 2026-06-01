@@ -1,13 +1,48 @@
 #!/usr/bin/env python3
-import sys
 import os
+import sys
 
 Ortho4XP_dir = ".." if getattr(sys, "frozen", False) else "."
-cmd_line = "USAGE: Ortho4XP.py lat lon imagery zl (won't read a tile config)\n  OR:  Ortho4XP.py lat lon (with existing tile config file)"
+cmd_line = (
+    "USAGE: Ortho4XP.py lat lon imagery zl (won't read a tile config)\n"
+    "  OR:  Ortho4XP.py lat lon (with existing tile config file)\n"
+    "  OR:  Ortho4XP.py validate-job build_job.toml [--json]\n"
+    "  OR:  Ortho4XP.py build-job build_job.toml [--dry-run] [--json]"
+)
+
+
+def _source_root() -> str:
+    if getattr(sys, "frozen", False):
+        return Ortho4XP_dir
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def _ensure_src_path() -> None:
+    src_path = os.path.join(_source_root(), "src")
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+
+def _is_headless_command(argv: list[str]) -> bool:
+    return len(argv) > 1 and argv[1] in {"validate-job", "build-job"}
+
+
+def _dispatch_headless(argv: list[str]) -> int:
+    cli_argv = list(argv[1:])
+    if len(cli_argv) >= 2:
+        cli_argv[1] = os.path.abspath(cli_argv[1])
+    os.chdir(_source_root())
+    _ensure_src_path()
+    import O4_CLI_Run as CLI_RUN
+
+    return CLI_RUN.main(cli_argv)
 
 if __name__ == "__main__" and len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
     print(cmd_line)
     sys.exit(0)
+
+if __name__ == "__main__" and _is_headless_command(sys.argv):
+    sys.exit(_dispatch_headless(sys.argv))
 
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     _proj_data_path = os.path.join(sys._MEIPASS, "pyproj", "proj_dir", "share", "proj")
@@ -22,7 +57,7 @@ from pyproj import datadir
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     datadir.set_data_dir(_proj_data_path)
 
-sys.path.append(os.path.join(Ortho4XP_dir, "src"))
+_ensure_src_path()
 
 import O4_File_Names as FNAMES
 
