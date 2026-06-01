@@ -10,6 +10,7 @@ except ModuleNotFoundError:
 class ConfigImportSafetyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._orig_env = os.environ.get("ORTHO4XP_SKIP_CONFIG_INIT")
         os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = "1"
         try:
             import O4_UI_Utils as UI
@@ -24,7 +25,10 @@ class ConfigImportSafetyTests(unittest.TestCase):
             cls.IMG = IMG
             cls._cfg = CFG
         finally:
-            del os.environ["ORTHO4XP_SKIP_CONFIG_INIT"]
+            if cls._orig_env is None:
+                del os.environ["ORTHO4XP_SKIP_CONFIG_INIT"]
+            else:
+                os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = cls._orig_env
 
     def test_import_does_not_read_config_file(self):
         """Importing with skip flag should not read Ortho4XP.cfg."""
