@@ -14,6 +14,7 @@ import O4_Mask_Utils as MASK
 import O4_DSF_Utils as DSF
 import O4_Overlay_Utils as OVL
 from O4_Parallel_Utils import parallel_launch, parallel_join
+import O4_Build_Context as BC
 
 max_download_slots: int = 1
 max_convert_slots: int = 4
@@ -173,11 +174,13 @@ def download_textures(
 
 
 ################################################################################
-def build_tile(tile):
-    if UI.is_working:
+def build_tile(tile, ctx=None):
+    if ctx is None:
+        ctx = BC.BuildContext()
+    if ctx.is_working:
         return 0
-    UI.is_working = 1  # ty:ignore[invalid-assignment]
-    UI.red_flag = False
+    ctx.is_working = True
+    ctx.red_flag = False
     UI.logprint("Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
         0,
@@ -216,7 +219,7 @@ def build_tile(tile):
             )
         if not os.path.isdir(os.path.join(tile.build_dir, "textures")):
             os.makedirs(os.path.join(tile.build_dir, "textures"))
-        if UI.cleaning_level > 1 and not tile.grouped:
+        if ctx.cleaning_level > 1 and not tile.grouped:
             for f in os.listdir(os.path.join(tile.build_dir, "textures")):
                 if f[-4:] != ".png":
                     continue
@@ -283,7 +286,7 @@ def build_tile(tile):
             convert_queue.put("quit")
             convert_thread.join()
             TTC.handle_texture_conversion_scheduler_result(tile, convert_result_holder)
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
     UI.vprint(1, " *Activating DSF file.")
@@ -297,10 +300,10 @@ def build_tile(tile):
     except OSError as exc:
         UI.vprint(0, "ERROR : could not rename DSF file, tile is not active.")
         UI.vprint(3, exc)
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
-    if UI.cleaning_level > 1:
+    if ctx.cleaning_level > 1:
         try:
             os.remove(FNAMES.alt_file(tile))
         except OSError as exc:
@@ -313,7 +316,7 @@ def build_tile(tile):
             os.remove(FNAMES.input_poly_file(tile))
         except OSError as exc:
             UI.vprint(3, exc)
-    if UI.cleaning_level > 2:
+    if ctx.cleaning_level > 2:
         try:
             os.remove(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon))
         except OSError as exc:
@@ -322,7 +325,7 @@ def build_tile(tile):
             os.remove(FNAMES.apt_file(tile))
         except OSError as exc:
             UI.vprint(3, exc)
-    if UI.cleaning_level > 1 and not tile.grouped:
+    if ctx.cleaning_level > 1 and not tile.grouped:
         remove_unwanted_textures(tile)
     UI.timings_and_bottom_line(timer)
     UI.logprint("Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")

@@ -13,6 +13,7 @@ import O4_Vector_Utils as VECT
 import O4_OSM_Utils as OSM
 import O4_Subprocess_Utils as SP
 import O4_Version
+import O4_Build_Context as BC
 
 if "dar" in sys.platform:
     Triangle4XP_cmd = SP.resolve_tool("Triangle4XP")
@@ -505,11 +506,13 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
 
 
 ################################################################################
-def build_mesh(tile):
-    if UI.is_working:
+def build_mesh(tile, ctx=None):
+    if ctx is None:
+        ctx = BC.BuildContext()
+    if ctx.is_working:
         return 0
-    UI.is_working = True
-    UI.red_flag = False
+    ctx.is_working = True
+    ctx.red_flag = False
     VECT.scalx = cos((tile.lat + 0.5) * pi / 180)
     UI.logprint("Step 2 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
@@ -595,7 +598,7 @@ def build_mesh(tile):
 
     timer = time.time()
     tri_verbosity = "Q" if UI.verbosity <= 1 else "V"
-    output_poly = "P" if UI.cleaning_level else ""
+    output_poly = "P" if ctx.cleaning_level else ""
     do_refine = "r" if tile.iterate else "A"
     try:
         max_tris = float(tile.limit_tris) * 1e6
@@ -700,19 +703,19 @@ def build_mesh(tile):
             )
             return 0
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
     vertices = post_process_nodes_altitudes(tile)
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
     write_mesh_file(tile, vertices)
     #
-    if UI.cleaning_level:
+    if ctx.cleaning_level:
         try:
             os.remove(FNAMES.weight_file(tile))
         except OSError as exc:
@@ -725,7 +728,7 @@ def build_mesh(tile):
             os.remove(FNAMES.output_ele_file(tile))
         except OSError as exc:
             UI.vprint(3, exc)
-    if UI.cleaning_level > 2:
+    if ctx.cleaning_level > 2:
         try:
             os.remove(FNAMES.alt_file(tile))
         except OSError as exc:

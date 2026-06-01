@@ -16,6 +16,7 @@ import O4_OSM_Utils as OSM
 import O4_Vector_Utils as VECT
 import O4_Mask_Alpha as MA, O4_Mesh_Utils as MESH
 from O4_Parallel_Utils import parallel_execute
+import O4_Build_Context as BC
 
 mask_altitude_above = 0.5
 masks_build_slots = 4
@@ -67,18 +68,19 @@ def needs_mask(tile, til_x_left, til_y_top, zl, *args):
 
 
 ################################################################################
-def build_masks(tile, for_imagery=False):
-
-    if UI.is_working:
+def build_masks(tile, for_imagery=False, ctx=None):
+    if ctx is None:
+        ctx = BC.BuildContext()
+    if ctx.is_working:
         return 0
-    UI.is_working = True
+    ctx.is_working = True
 
     # Which grey level for inland water equivalent ?
     im = Image.open(os.path.join(FNAMES.Utils_dir, "water_transition.png"))
     sea_level = im.getpixel((0, 127 * (1 - min(1, 0.1 + tile.ratio_water))))
     del im
 
-    UI.red_flag = False
+    ctx.red_flag = False
     UI.logprint("Step 2.5 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
         0,

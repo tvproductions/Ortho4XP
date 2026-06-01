@@ -13,16 +13,19 @@ import O4_Vector_Utils as VECT
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Airport_Utils as APT
+import O4_Build_Context as BC
 
 good_imagery_list = ()
 
 
 ################################################################################
-def build_poly_file(tile):
-    if UI.is_working:
+def build_poly_file(tile, ctx=None):
+    if ctx is None:
+        ctx = BC.BuildContext()
+    if ctx.is_working:
         return 0
-    UI.is_working = 1  # ty:ignore[invalid-assignment]
-    UI.red_flag = 0  # ty:ignore[invalid-assignment]
+    ctx.is_working = True
+    ctx.red_flag = False
     # in case that was forgotten by the user
     tile.iterate = 0
     # update the lat/lon scaling factor in VECT
@@ -45,7 +48,7 @@ def build_poly_file(tile):
     poly_file = FNAMES.input_poly_file(tile)
     vector_map = VECT.Vector_Map()
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
@@ -53,7 +56,7 @@ def build_poly_file(tile):
     (apt_array, apt_area) = include_airports(vector_map, tile)
     UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
@@ -62,7 +65,7 @@ def build_poly_file(tile):
     if tile.road_level:
         UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
@@ -70,7 +73,7 @@ def build_poly_file(tile):
     include_sea(vector_map, tile)
     UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
@@ -78,7 +81,7 @@ def build_poly_file(tile):
     include_water(vector_map, tile)
     UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
@@ -116,7 +119,7 @@ def build_poly_file(tile):
         ortho_network, tile.dem.alt_vec, "DUMMY", check=True, skip_cut=True
     )
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
@@ -135,7 +138,7 @@ def build_poly_file(tile):
         gluing_network, tile.dem.alt_vec, "DUMMY", check=True, skip_cut=True
     )
 
-    if UI.red_flag:
+    if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
     UI.vprint(0, "-> Transcription to the files ", poly_file, "and .node")
