@@ -38,6 +38,7 @@ import O4_Mask_Utils as MASK
 import O4_Tile_Utils as TILE
 import O4_UI_Utils as UI
 import O4_Config_Utils as CFG
+import O4_Build_Context as BC
 
 # Set OsX=True if you prefer the OsX way of drawing existing tiles but
 # are on Linux or Windows.
@@ -537,7 +538,10 @@ class Ortho4XP_GUI(tk.Tk):
             UI.vprint(1, "Process aborted.\n")
             UI.log_exception(e)
             return 0
-        self.working_thread = threading.Thread(target=VMAP.build_poly_file, args=[tile])
+        ctx = BC.BuildContext()
+        self.working_thread = threading.Thread(
+            target=VMAP.build_poly_file, args=[tile, ctx]
+        )
         self.working_thread.start()
 
     def build_mesh(self, event):
@@ -551,7 +555,8 @@ class Ortho4XP_GUI(tk.Tk):
             UI.vprint(1, "Process aborted.\n")
             UI.log_exception("Exception on build_mesh")
             return 0
-        self.working_thread = threading.Thread(target=MESH.build_mesh, args=[tile])
+        ctx = BC.BuildContext()
+        self.working_thread = threading.Thread(target=MESH.build_mesh, args=[tile, ctx])
         self.working_thread.start()
 
     def sort_mesh(self, event):
@@ -594,8 +599,9 @@ class Ortho4XP_GUI(tk.Tk):
             UI.vprint(1, "Process aborted.\n")
             UI.log_exception(e)
             return 0
+        ctx = BC.BuildContext()
         self.working_thread = threading.Thread(
-            target=MASK.build_masks, args=[tile, for_imagery]
+            target=MASK.build_masks, args=[tile, for_imagery, ctx]
         )
         self.working_thread.start()
 
@@ -610,7 +616,8 @@ class Ortho4XP_GUI(tk.Tk):
             UI.vprint(1, "Process aborted.\n")
             UI.log_exception(e)
             return 0
-        self.working_thread = threading.Thread(target=TILE.build_tile, args=[tile])
+        ctx = BC.BuildContext()
+        self.working_thread = threading.Thread(target=TILE.build_tile, args=[tile, ctx])
         self.working_thread.start()
 
     def build_all(self):

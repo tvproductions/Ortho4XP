@@ -344,9 +344,10 @@ def build_all(tile):
 def build_tile_list(
     tile, list_lat_lon, do_osm, do_mesh, do_mask, do_dsf, do_ovl, override_cfg
 ):
-    if UI.is_working:
+    ctx = BC.BuildContext()
+    if ctx.is_working:
         return 0
-    UI.red_flag = 0  # ty:ignore[invalid-assignment]
+    ctx.red_flag = False
     timer = time.time()
     UI.lvprint(0, "Batch build launched for a number of", len(list_lat_lon), "tiles.")
     k = 0
@@ -371,23 +372,23 @@ def build_tile_list(
         if do_osm or do_mesh or do_dsf:
             tile.make_dirs()
         if do_osm:
-            VMAP.build_poly_file(tile)
-            if UI.red_flag:
+            VMAP.build_poly_file(tile, ctx)
+            if ctx.red_flag:
                 UI.exit_message_and_bottom_line()
                 return 0
         if do_mesh:
-            MESH.build_mesh(tile)
-            if UI.red_flag:
+            MESH.build_mesh(tile, ctx)
+            if ctx.red_flag:
                 UI.exit_message_and_bottom_line()
                 return 0
         if do_mask:
-            MASK.build_masks(tile)
-            if UI.red_flag:
+            MASK.build_masks(tile, ctx=ctx)
+            if ctx.red_flag:
                 UI.exit_message_and_bottom_line()
                 return 0
         if do_dsf:
             tile_coords = FNAMES.short_latlon(lat, lon)
-            build_tile(tile)
+            build_tile(tile, ctx)
             if tile_coords in IMG.incomplete_imgs:
                 UI.lvprint(
                     1,
@@ -395,20 +396,21 @@ def build_tile_list(
                     f"{IMG.incomplete_texture_file_names(tile_coords)}",
                 )
                 delete_incomplete_imgs(tile)
-                build_tile(tile)
-            if UI.red_flag:
+                build_tile(tile, ctx)
+            if ctx.red_flag:
                 UI.exit_message_and_bottom_line()
                 return 0
         if do_ovl:
             OVL.build_overlay(lat, lon)
-            if UI.red_flag:
+            if ctx.red_flag:
                 UI.exit_message_and_bottom_line()
                 return 0
         try:
-            UI.gui.earth_window.canvas.delete(  # ty:ignore[unresolved-attribute]
-                UI.gui.earth_window.dico_tiles_todo[(lat, lon)]  # ty:ignore[unresolved-attribute]
-            )
-            UI.gui.earth_window.dico_tiles_todo.pop((lat, lon), None)  # ty:ignore[unresolved-attribute]
+            if ctx.gui:
+                ctx.gui.earth_window.canvas.delete(
+                    ctx.gui.earth_window.dico_tiles_todo[(lat, lon)]
+                )
+                ctx.gui.earth_window.dico_tiles_todo.pop((lat, lon), None)
         except (AttributeError, KeyError) as exc:
             UI.vprint(3, exc)
     UI.lvprint(0, "Batch process completed in", UI.nicer_timer(time.time() - timer))
