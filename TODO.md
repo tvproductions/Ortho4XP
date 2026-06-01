@@ -513,9 +513,19 @@ Suggested labels: `architecture`, `refactor`, `long-term`
 
 ### TODO-020: Reduce Global Mutable State
 
+Status: Done
+
 GitHub Issue: #15
 
 Gradually replace global state with explicit context and result objects.
+
+Completed by adding `BuildContext` property facade over UI process-state globals
+(`red_flag`, `is_working`, `verbosity`, `cleaning_level`, `gui`) and threading
+it as an explicit parameter through the build pipeline. Build step functions
+(`build_poly_file`, `build_mesh`, `build_masks`, `build_tile`) accept `ctx=None`
+with internal fallback. `build_tile_all`, GUI handlers, and `build_tile_list`
+construct and pass `BuildContext` explicitly. Sub-delegate functions continue
+reading `UI.*` directly; the facade keeps them consistent.
 
 Acceptance criteria:
 
