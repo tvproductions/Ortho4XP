@@ -1,8 +1,6 @@
 import os
 import unittest
 
-os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = "1"
-
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
@@ -12,16 +10,21 @@ except ModuleNotFoundError:
 class ConfigImportSafetyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        import O4_UI_Utils as UI
-        import O4_Imagery_Utils as IMG
+        os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = "1"
+        try:
+            import O4_UI_Utils as UI
+            import O4_Imagery_Utils as IMG
 
-        UI.verbosity = 99
-        IMG.http_timeout = 999
+            UI.verbosity = 99
+            IMG.http_timeout = 999
 
-        import O4_Config_Utils as CFG  # noqa: F401
+            import O4_Config_Utils as CFG  # noqa: F401
 
-        cls.UI = UI
-        cls.IMG = IMG
+            cls.UI = UI
+            cls.IMG = IMG
+            cls._cfg = CFG
+        finally:
+            del os.environ["ORTHO4XP_SKIP_CONFIG_INIT"]
 
     def test_import_does_not_read_config_file(self):
         """Importing with skip flag should not read Ortho4XP.cfg."""
