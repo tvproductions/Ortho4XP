@@ -96,10 +96,10 @@ commands remain headless.
 
 ## Recommended Architecture
 
-Add a pure job-model and validation module, a headless command module, and a
-batch-oriented core API.
+Add a pure job parser and validation module, neutral build models, a headless
+command module, and a batch-oriented core API.
 
-### Job Model
+### Job Parser And Validator
 
 New module: `src/O4_CLI_Jobs.py`
 
@@ -111,10 +111,15 @@ Responsibilities:
 - validate provider keys against initialized provider dictionaries when the
   caller supplies available provider keys;
 - validate zoom level, output directory, steps, and config override flag;
-- produce `BuildJob` and `BuildPlan` dataclasses;
+- produce neutral build model objects from `O4_Build_Models`;
 - serialize validation output for human and JSON CLI modes.
 
-Public dataclasses:
+The CLI parser must not define build execution models that the core imports.
+That would make the core layer depend on the CLI layer. `O4_CLI_Jobs` may define
+validation-specific error/result helpers, but build plan and result dataclasses
+belong in the neutral build model module described below.
+
+Validation-specific dataclasses:
 
 ```python
 @dataclass(frozen=True)
@@ -124,15 +129,25 @@ class TileCoordinate:
 
 
 @dataclass(frozen=True)
-class BuildJob:
-    provider: str
-    zoom_level: int
-    output_dir: str
-    steps: tuple[str, ...]
-    override_tile_config: bool
-    tiles: tuple[TileCoordinate, ...]
+class ValidationError:
+    field: str
+    message: str
+    value: object | None = None
+```
 
+### Build Models
 
+New module: `src/O4_Build_Models.py`
+
+Responsibilities:
+
+- define the build plan contract consumed by core execution;
+- define per-tile and aggregate build result contracts;
+- remain independent of CLI parsing, GUI widgets, and legacy tile utilities.
+
+Public dataclasses:
+
+```python
 @dataclass(frozen=True)
 class BuildTilePlan:
     lat: int
@@ -148,6 +163,22 @@ class BuildTilePlan:
 @dataclass(frozen=True)
 class BuildPlan:
     tiles: tuple[BuildTilePlan, ...]
+
+
+@dataclass(frozen=True)
+class BuildTileResult:
+    lat: int
+    lon: int
+    ok: bool
+    step: str
+    message: str = ""
+
+
+@dataclass(frozen=True)
+class BuildBatchResult:
+    ok: bool
+    tiles: tuple[BuildTileResult, ...]
+    message: str = ""
 ```
 
 `custom_build_dir` is derived from `output_dir` by guaranteeing trailing path
@@ -184,13 +215,17 @@ lon_max = -79
 Rules:
 
 - `provider` is required and must be a provider or combined-provider key.
-- `zoom_level` is required and must be an integer.
+- `zoom_level` is required, must be an integer greater than zero, and must not
+  exceed a selected normal provider's static `max_zl` when that metadata is
+  present. Combined-provider local layer limits remain enforced by existing
+  build-time provider logic.
 - `output_dir` is required and must be a non-empty string.
 - `steps` is optional and defaults to `["vector", "mesh", "masks", "tile"]`.
 - Allowed steps are `vector`, `mesh`, `masks`, `tile`, and `overlays`.
 - `override_tile_config` is optional and defaults to `false`.
 - At least one `[[tiles]]` entry or `[bounds]` block is required.
 - `[[tiles]]` entries must contain integer `lat` and `lon`.
+- Latitude must be in `[-90, 89]`; longitude must be in `[-180, 179]`.
 - `[bounds]` is inclusive and must contain integer `lat_min`, `lat_max`,
   `lon_min`, and `lon_max`.
 - Bounds must satisfy `lat_min <= lat_max` and `lon_min <= lon_max`.
@@ -202,6 +237,9 @@ Rules:
 ### Output Directory Semantics
 
 `output_dir` always means a base directory for generated tile packages.
+Relative `output_dir` values are resolved relative to the `build_job.toml`
+file's parent directory, not the process current working directory. Absolute
+paths are preserved.
 
 For a job with:
 
@@ -224,6 +262,27 @@ through `build_job.toml`. Internally, the plan may pass a trailing-separator
 `custom_build_dir` into existing `FNAMES.build_dir(...)` behavior so this rule
 stays compatible with current path helpers.
 
+### Resource Root Semantics
+
+Headless validation must be independent of the process current working
+directory.
+
+Early CLI dispatch resolves the repository/application root from
+`Path(__file__).resolve().parent` in source checkouts. In PyInstaller mode it
+uses the existing frozen resource root. The headless path then:
+
+- appends `<root>/src` for source imports;
+- reads `Providers`, `Extents`, `Filters`, `Patches`, and other source assets
+  from the resolved root;
+- validates provider keys from root-relative provider resources;
+- resolves relative `output_dir` values against the job file directory;
+- avoids using CWD-derived `O4_File_Names` resource constants during validation
+  unless they have first been initialized to the resolved root.
+
+Tests must run validation from a temporary non-repo working directory to prove
+that provider/resource lookup is root-relative and that no generated artifacts
+are created in CWD.
+
 ### Provider Semantics
 
 `provider` may name either:
@@ -231,11 +290,12 @@ stays compatible with current path helpers.
 - a normal provider key from `O4_Imagery_Utils.providers_dict`; or
 - a combined provider key from `O4_Imagery_Utils.combined_providers_dict`.
 
-Validation for `validate-job` initializes imagery provider dictionaries but does
-not import GUI modules or construct tiles. Build execution also calls
+Validation for `validate-job` initializes imagery provider dictionaries from the
+resolved resource root, but does not import GUI modules, import
+`O4_Config_Utils`, or construct tiles. Build execution also calls
 `initialize_local_combined_providers_dict(tile)` through the existing tile build
-path when needed. Zone-list-driven provider behavior remains controlled by
-tile config files and is not expressed in `build_job.toml`.
+path when needed. Zone-list-driven provider behavior remains controlled by tile
+config files and is not expressed in `build_job.toml`.
 
 ### CLI Entry Point
 
@@ -276,7 +336,8 @@ Responsibilities:
 
 - parse headless subcommand arguments;
 - load `build_job.toml`;
-- initialize only the provider dictionaries required for validation;
+- initialize only the provider dictionaries required for validation, using the
+  resolved resource root rather than CWD;
 - call `O4_CLI_Jobs` to create a `BuildPlan`;
 - print human validation summaries or JSON validation output;
 - for `build-job`, import runtime build modules after validation succeeds;
@@ -294,30 +355,21 @@ Exit codes:
 
 ### Core Batch API
 
-Extend `src/O4_Build_Core.py` with batch dataclasses and a public batch entry
-point.
+Extend `src/O4_Build_Core.py` with a public batch entry point that consumes
+models from `src/O4_Build_Models.py`.
 
 ```python
-@dataclass(frozen=True)
-class BuildTileResult:
-    lat: int
-    lon: int
-    ok: bool
-    step: str
-    message: str = ""
-
-
-@dataclass(frozen=True)
-class BuildBatchResult:
-    ok: bool
-    tiles: tuple[BuildTileResult, ...]
-    message: str = ""
+TileCompleteCallback = Callable[[BuildTileResult], None]
 ```
 
 Public API:
 
 ```python
-def build_batch(plan: BuildPlan) -> BuildBatchResult:
+def build_batch(
+    plan: BuildPlan,
+    *,
+    on_tile_complete: TileCompleteCallback | None = None,
+) -> BuildBatchResult:
     """Run a validated multi-tile build plan and return aggregate results."""
 ```
 
@@ -334,9 +386,15 @@ Behavior:
    `overlays`.
 8. Preserve the current incomplete-imagery retry behavior after the `tile`
    step.
-9. Stop the batch on interruption or failed tile result and return structured
-   failure details.
-10. Report remaining incomplete imagery through the existing `UI.lvprint`
+9. Map a red-flag interruption to
+   `BuildTileResult(ok=False, step=<current step>, message="interrupted")`.
+10. Map any selected build step that returns a falsey value to
+    `BuildTileResult(ok=False, step=<current step>, message="<step> failed")`.
+11. Stop the batch on interruption or failed tile result and return structured
+    failure details.
+12. Call `on_tile_complete(result)` after each successful tile and after the
+    failed tile that stops the batch, when a callback is supplied.
+13. Report remaining incomplete imagery through the existing `UI.lvprint`
     path.
 
 The API should use existing build step functions and not duplicate their
@@ -355,8 +413,9 @@ through the core batch path, not only from `O4_Tile_Utils.build_tile_list`.
 
 The worker target should be the new core batch API or a small compatibility
 adapter that converts GUI state into a `BuildPlan` and calls the core batch API.
-GUI-specific cleanup of selected red tiles should happen in GUI code after
-successful per-tile completion, not inside the core batch loop.
+GUI-specific cleanup of selected red tiles should happen in an
+`on_tile_complete` callback supplied by GUI code. The core batch loop must not
+read `ctx.gui` or mutate GUI widgets directly.
 
 `O4_Tile_Utils.build_tile_list(...)` may remain as a compatibility wrapper
 during the transition, but the new headless CLI must not call it.
@@ -393,6 +452,21 @@ Human validation output should summarize:
 }
 ```
 
+Validation failure JSON should print a stable error payload and return `2`:
+
+```json
+{
+  "ok": false,
+  "errors": [
+    {
+      "field": "bounds.lat_min",
+      "message": "must be less than or equal to bounds.lat_max",
+      "value": 44
+    }
+  ]
+}
+```
+
 Build output should keep existing human progress messages from the build steps.
 Final CLI result formatting should be deterministic:
 
@@ -400,6 +474,8 @@ Final CLI result formatting should be deterministic:
 - validation failure: print validation errors and return `2`;
 - build failure: print failed tile coordinate, failed step, message, and return
   `1`.
+- build exception: route through `O4_UI_Utils.log_exception`, print a concise
+  CLI failure summary, and return `1`.
 
 Structured build events continue to use the existing `O4_UI_Utils.lvprint` and
 JSON log path where build steps already do so.
@@ -432,9 +508,13 @@ Add focused tests for `O4_CLI_Jobs`:
 - valid explicit tile job parses and normalizes;
 - valid bounds job expands inclusive ranges;
 - explicit tiles plus bounds deduplicate and sort;
+- validation from a non-repo CWD still loads root-relative provider resources;
 - missing provider, zoom level, output directory, and tile selection fail with
   stable validation errors;
 - bounds with reversed min/max fail;
+- latitude and longitude outside valid integer tile ranges fail;
+- non-positive zoom levels fail;
+- normal provider static `max_zl` is enforced when metadata is present;
 - invalid step names fail;
 - provider validation accepts normal providers and combined providers;
 - per-tile overrides are rejected.
@@ -444,7 +524,10 @@ Add tests for headless launcher dispatch:
 - `python Ortho4XP.py validate-job <file>` does not import `O4_GUI_Utils`;
 - validation does not import `O4_Config_Utils`;
 - validation in a temp cwd creates no generated directories or config file;
+- validation in a temp cwd reads provider resources from the repo/application
+  root, not from CWD;
 - `validate-job --json` prints stable JSON and exits `0`;
+- invalid `validate-job --json` prints stable failure JSON and exits `2`;
 - invalid TOML or schema exits `2`;
 - legacy `--help` still exits `0` and includes legacy usage.
 
@@ -456,13 +539,18 @@ Add tests for core batch execution with mocked build steps:
 - `override_tile_config = false` reads tile config fallback behavior for each
   tile;
 - incomplete imagery retry is preserved for the `tile` step;
+- falsey selected step return maps to a failed `BuildTileResult`;
 - interruption returns `BuildBatchResult(ok=False, ...)`;
+- `on_tile_complete` is called with each completed tile result and does not
+  require a GUI object in core code;
 - aggregate success includes one `BuildTileResult` per tile.
 
 Add GUI adapter tests where practical without creating Tk windows:
 
 - selected GUI state is converted to `BuildPlan`;
-- GUI batch path calls the core batch API rather than legacy build internals.
+- GUI batch path calls the core batch API rather than legacy build internals;
+- GUI cleanup is supplied through `on_tile_complete`, not by reading `ctx.gui`
+  in core.
 
 No test should require network access, X-Plane installs, GDAL command-line
 tools, real imagery providers, or native utility execution.
@@ -505,7 +593,8 @@ coverage, and repository quality-check status.
 ## Success Criteria
 
 - `python Ortho4XP.py validate-job build_job.toml` validates a normalized
-  multi-tile plan without GUI/config side effects.
+  multi-tile plan without GUI/config side effects and without CWD-dependent
+  resource lookup.
 - `python Ortho4XP.py build-job build_job.toml --dry-run` validates and prints
   the plan without creating generated directories or config files.
 - `python Ortho4XP.py build-job build_job.toml` executes through
@@ -514,7 +603,7 @@ coverage, and repository quality-check status.
   zoom level, output directory, selected steps, and config override flag.
 - Provider validation accepts normal and combined provider keys.
 - GUI batch work is routed through the same core batch API or a narrow adapter
-  over that API.
+  over that API, with GUI cleanup handled by callback.
 - Legacy positional CLI and GUI launch behavior remain compatible.
 - Exit codes are tested and deterministic.
 - CI validates the minimal job fixture on all supported runner families.
