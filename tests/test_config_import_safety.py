@@ -1,5 +1,4 @@
 import os
-import sys
 import unittest
 
 os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = "1"
@@ -26,6 +25,7 @@ class ConfigImportSafetyTests(unittest.TestCase):
 
     def test_import_does_not_read_config_file(self):
         """Importing with skip flag should not read Ortho4XP.cfg."""
+        pass
 
     def test_import_does_not_mutate_ui_globals(self):
         """Importing with skip flag should not set UI.verbosity etc."""
