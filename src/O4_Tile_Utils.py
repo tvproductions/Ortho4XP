@@ -15,6 +15,7 @@ import O4_DSF_Utils as DSF
 import O4_Overlay_Utils as OVL
 from O4_Parallel_Utils import parallel_launch, parallel_join
 import O4_Build_Context as BC
+import O4_Build_Models as MODELS
 
 max_download_slots: int = 1
 max_convert_slots: int = 4
@@ -344,84 +345,39 @@ def build_all(tile):
 def build_tile_list(
     tile, list_lat_lon, do_osm, do_mesh, do_mask, do_dsf, do_ovl, override_cfg
 ):
-    ctx = BC.BuildContext()
-    if ctx.is_working:
-        return 0
-    ctx.red_flag = False
-    timer = time.time()
-    UI.lvprint(0, "Batch build launched for a number of", len(list_lat_lon), "tiles.")
-    k = 0
-    for lat, lon in list_lat_lon:
-        k += 1
-        UI.vprint(
-            1,
-            "Dealing with tile ",
-            k,
-            "/",
-            len(list_lat_lon),
-            ":",
-            FNAMES.short_latlon(lat, lon),
+    import O4_Build_Core as CORE
+
+    steps = _batch_steps(do_osm, do_mesh, do_mask, do_dsf, do_ovl)
+    plans = tuple(
+        MODELS.BuildTilePlan(
+            lat=lat,
+            lon=lon,
+            provider=getattr(tile, "default_website", ""),
+            zoom_level=getattr(tile, "default_zl", 0),
+            output_dir=tile.custom_build_dir or FNAMES.Tile_dir,
+            custom_build_dir=tile.custom_build_dir,
+            steps=steps,
+            override_tile_config=override_cfg,
         )
-        (tile.lat, tile.lon) = (lat, lon)
-        tile.build_dir = FNAMES.build_dir(tile.lat, tile.lon, tile.custom_build_dir)
-        tile.dem = None
-        if override_cfg:
-            tile.read_from_config(use_global=True)
-        else:
-            tile.read_from_config()
-        if do_osm or do_mesh or do_dsf:
-            tile.make_dirs()
-        if do_osm:
-            VMAP.build_poly_file(tile, ctx)
-            if ctx.red_flag:
-                UI.exit_message_and_bottom_line()
-                return 0
-        if do_mesh:
-            MESH.build_mesh(tile, ctx)
-            if ctx.red_flag:
-                UI.exit_message_and_bottom_line()
-                return 0
-        if do_mask:
-            MASK.build_masks(tile, ctx=ctx)
-            if ctx.red_flag:
-                UI.exit_message_and_bottom_line()
-                return 0
-        if do_dsf:
-            tile_coords = FNAMES.short_latlon(lat, lon)
-            build_tile(tile, ctx)
-            if tile_coords in IMG.incomplete_imgs:
-                UI.lvprint(
-                    1,
-                    f"Attempting to rebuild textures with white squares: "
-                    f"{IMG.incomplete_texture_file_names(tile_coords)}",
-                )
-                delete_incomplete_imgs(tile)
-                build_tile(tile, ctx)
-            if ctx.red_flag:
-                UI.exit_message_and_bottom_line()
-                return 0
-        if do_ovl:
-            OVL.build_overlay(lat, lon)
-            if ctx.red_flag:
-                UI.exit_message_and_bottom_line()
-                return 0
-        try:
-            if ctx.gui:
-                ctx.gui.earth_window.canvas.delete(
-                    ctx.gui.earth_window.dico_tiles_todo[(lat, lon)]
-                )
-                ctx.gui.earth_window.dico_tiles_todo.pop((lat, lon), None)
-        except (AttributeError, KeyError) as exc:
-            UI.vprint(3, exc)
-    UI.lvprint(0, "Batch process completed in", UI.nicer_timer(time.time() - timer))
-    if IMG.incomplete_imgs:
-        UI.lvprint(
-            0,
-            f"\nERROR: Parts of the following images could not be obtained "
-            f"and have been filled with white: "
-            f"{IMG.incomplete_texture_file_names_by_tile()}",
-        )
-    return 1
+        for lat, lon in sorted(list_lat_lon)
+    )
+    result = CORE.build_batch(MODELS.BuildPlan(plans))
+    return 1 if result.ok else 0
+
+
+def _batch_steps(do_osm, do_mesh, do_mask, do_dsf, do_ovl) -> tuple[str, ...]:
+    steps: list[str] = []
+    if do_osm:
+        steps.append("vector")
+    if do_mesh:
+        steps.append("mesh")
+    if do_mask:
+        steps.append("masks")
+    if do_dsf:
+        steps.append("tile")
+    if do_ovl:
+        steps.append("overlays")
+    return tuple(steps)
 
 
 ################################################################################

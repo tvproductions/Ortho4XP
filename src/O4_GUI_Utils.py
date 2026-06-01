@@ -6,6 +6,7 @@ from math import floor, cos, pi
 import queue
 import threading
 import tkinter as tk
+from types import SimpleNamespace
 from tkinter import (
     N,
     S,
@@ -39,10 +40,62 @@ import O4_Tile_Utils as TILE
 import O4_UI_Utils as UI
 import O4_Config_Utils as CFG
 import O4_Build_Context as BC
+import O4_Build_Core as CORE
+import O4_Build_Models as MODELS
 
 # Set OsX=True if you prefer the OsX way of drawing existing tiles but
 # are on Linux or Windows.
 OsX = "dar" in sys.platform
+
+
+def batch_plan_from_state(state) -> MODELS.BuildPlan:
+    steps = _batch_steps_from_state(state)
+    custom_build_dir = state.custom_build_dir
+    if custom_build_dir and not custom_build_dir.endswith(("/", "\\")):
+        custom_build_dir += "/"
+    tiles = tuple(
+        MODELS.BuildTilePlan(
+            lat=lat,
+            lon=lon,
+            provider=state.provider,
+            zoom_level=state.zoom_level,
+            output_dir=custom_build_dir or FNAMES.Tile_dir,
+            custom_build_dir=custom_build_dir,
+            steps=steps,
+            override_tile_config=state.override_cfg,
+        )
+        for lat, lon in sorted(state.list_lat_lon)
+    )
+    return MODELS.BuildPlan(tiles)
+
+
+def _batch_steps_from_state(state) -> tuple[str, ...]:
+    steps: list[str] = []
+    if state.do_osm:
+        steps.append("vector")
+    if state.do_mesh:
+        steps.append("mesh")
+    if state.do_mask:
+        steps.append("masks")
+    if state.do_dsf:
+        steps.append("tile")
+    if state.do_ovl:
+        steps.append("overlays")
+    return tuple(steps)
+
+
+def batch_completion_callback(gui):
+    def _callback(result: MODELS.BuildTileResult) -> None:
+        if not result.ok:
+            return
+        try:
+            tile_id = gui.earth_window.dico_tiles_todo[(result.lat, result.lon)]
+            gui.earth_window.canvas.delete(tile_id)
+            gui.earth_window.dico_tiles_todo.pop((result.lat, result.lon), None)
+        except (AttributeError, KeyError) as exc:
+            UI.vprint(3, exc)
+
+    return _callback
 
 
 ################################################################################
@@ -2099,23 +2152,24 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         if not list_lat_lon:
             UI.vprint(1, "Unable to batch build: No tiles selected.")
             return
-        (lat, lon) = list_lat_lon[0]
-        try:
-            tile = CFG.Tile(lat, lon, self.custom_build_dir)
-        except Exception as e:
-            UI.log_exception(e)
-            return 0
-        args = [
-            tile,
-            list_lat_lon,
-            self.v_["Assemble vector data"].get(),
-            self.v_["Triangulate 3D mesh"].get(),
-            self.v_["Draw water masks"].get(),
-            self.v_["Build imagery/DSF"].get(),
-            self.v_["Extract overlays"].get(),
-            self.v_["Override tile configs"].get(),
-        ]
-        threading.Thread(target=TILE.build_tile_list, args=args).start()
+        state = SimpleNamespace(
+            custom_build_dir=self.custom_build_dir,
+            list_lat_lon=list_lat_lon,
+            do_osm=self.v_["Assemble vector data"].get(),
+            do_mesh=self.v_["Triangulate 3D mesh"].get(),
+            do_mask=self.v_["Draw water masks"].get(),
+            do_dsf=self.v_["Build imagery/DSF"].get(),
+            do_ovl=self.v_["Extract overlays"].get(),
+            override_cfg=self.v_["Override tile configs"].get(),
+            provider=str(self.parent.default_website.get()),
+            zoom_level=int(self.parent.default_zl.get()),
+        )
+        plan = batch_plan_from_state(state)
+        threading.Thread(
+            target=CORE.build_batch,
+            args=[plan],
+            kwargs={"on_tile_complete": batch_completion_callback(self.parent)},
+        ).start()
         return
 
     def scroll_start(self, event):
