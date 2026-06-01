@@ -84,6 +84,39 @@ The specific changes in this forked version:
 
 For installation instructions, refer to the [Installation page](https://github.com/shred86/Ortho4XP/wiki/Installation) in the [Wiki](https://github.com/shred86/Ortho4XP/wiki).
 
+## Headless Build Jobs
+
+Batch automation can validate or run a structured `build_job.toml` file without
+opening the GUI:
+
+```bash
+python Ortho4XP.py validate-job build_job.toml
+python Ortho4XP.py validate-job build_job.toml --json
+python Ortho4XP.py build-job build_job.toml --dry-run
+python Ortho4XP.py build-job build_job.toml
+```
+
+Minimal job file:
+
+```toml
+provider = "BI"
+zoom_level = 16
+output_dir = "Tiles"
+
+[[tiles]]
+lat = 43
+lon = -79
+```
+
+`output_dir` is a base directory. Relative paths are resolved relative to the
+job file. The tile above writes to `Tiles/zOrtho4XP_+43-079` relative to the
+job file directory.
+
+Tile selection can use explicit `[[tiles]]` entries, inclusive `[bounds]`, or
+both. Provider keys may be normal imagery provider keys or combined provider
+keys. Exit codes are `0` for success, `1` for build failure or interruption,
+and `2` for usage or validation errors.
+
 ## Development
 
 Contributor setup and validation details are in [CONTRIBUTING.md](CONTRIBUTING.md).

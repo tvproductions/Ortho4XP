@@ -48,6 +48,9 @@ jobs:
       - name: CLI startup smoke test
         run: uv run python Ortho4XP.py --help
 
+      - name: Headless build job validation smoke test
+        run: uv run python Ortho4XP.py validate-job tests/fixtures/build_job_minimal.toml
+
       - name: Unit tests
         run: uv run python -m unittest discover -s tests
 
@@ -100,6 +103,9 @@ jobs:
       - name: CLI startup smoke test
         run: uv run python Ortho4XP.py --help
 
+      - name: Headless build job validation smoke test
+        run: uv run python Ortho4XP.py validate-job tests/fixtures/build_job_minimal.toml
+
       - name: Unit tests
         run: uv run python -m unittest discover -s tests
 
@@ -151,6 +157,9 @@ jobs:
 
       - name: CLI startup smoke test
         run: uv run python Ortho4XP.py --help
+
+      - name: Headless build job validation smoke test
+        run: uv run python Ortho4XP.py validate-job tests/fixtures/build_job_minimal.toml
 
       - name: Unit tests
         run: uv run python -m unittest discover -s tests

@@ -1,0 +1,7 @@
+provider = "BI"
+zoom_level = 16
+output_dir = "Tiles"
+
+[[tiles]]
+lat = 0
+lon = 0

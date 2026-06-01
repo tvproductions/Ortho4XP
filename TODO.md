@@ -553,7 +553,17 @@ Suggested labels: `imports`, `tests`, `refactor`
 
 ### TODO-022: Execute Headless CLI Transition
 
+Status: Done
+
 GitHub Issue: #17
+
+Completed by adding early-dispatched `validate-job` and `build-job` headless
+subcommands, a tested `build_job.toml` parser, neutral build plan/result
+models, and `O4_Build_Core.build_batch()` for multi-tile execution. Validation
+runs without GUI/config side effects, supports explicit tiles plus inclusive
+bounds, validates normal and combined provider keys, resolves relative output
+directories from the job file, and returns deterministic exit codes. GUI batch
+work now routes through the same core batch API.
 
 Expose a pure, headless CLI engine for batch automation.
 
