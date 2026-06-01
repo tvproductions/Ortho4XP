@@ -127,5 +127,192 @@ class BuildCoreAllInOneTests(unittest.TestCase):
         )
 
 
+def _tile_plan(
+    lat=12,
+    lon=-123,
+    *,
+    steps=("vector", "mesh", "masks", "tile"),
+    override_tile_config=False,
+):
+    import O4_Build_Models as MODELS
+
+    return MODELS.BuildTilePlan(
+        lat=lat,
+        lon=lon,
+        provider="BI",
+        zoom_level=16,
+        output_dir="Tiles",
+        custom_build_dir="Tiles/",
+        steps=steps,
+        override_tile_config=override_tile_config,
+    )
+
+
+class BuildCoreBatchTests(unittest.TestCase):
+    def test_build_batch_runs_selected_steps_in_order(self):
+        import O4_Build_Models as MODELS
+
+        calls = []
+
+        def record(name):
+            def _inner(tile, ctx=None):
+                calls.append((name, tile.lat, tile.lon))
+                return 1
+
+            return _inner
+
+        with (
+            mock.patch.object(CORE.CFG, "Tile") as tile_class,
+            mock.patch.object(
+                CORE.VMAP, "build_poly_file", side_effect=record("vector")
+            ),
+            mock.patch.object(CORE.MESH, "build_mesh", side_effect=record("mesh")),
+            mock.patch.object(CORE.MASK, "build_masks", side_effect=record("masks")),
+            mock.patch.object(CORE.TILE, "build_tile", side_effect=record("tile")),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            tile_class.side_effect = lambda lat, lon, custom: SimpleNamespace(
+                lat=lat,
+                lon=lon,
+                custom_build_dir=custom,
+                build_dir=f"build-{lat}-{lon}",
+                dem=None,
+                default_website="",
+                default_zl=0,
+                make_dirs=mock.Mock(),
+                read_from_config=mock.Mock(return_value=1),
+            )
+            result = CORE.build_batch(MODELS.BuildPlan((_tile_plan(),)))
+
+        self.assertTrue(result.ok)
+        self.assertEqual(
+            calls,
+            [
+                ("vector", 12, -123),
+                ("mesh", 12, -123),
+                ("masks", 12, -123),
+                ("tile", 12, -123),
+            ],
+        )
+
+    def test_build_batch_calls_overlays_step(self):
+        import O4_Build_Models as MODELS
+
+        with (
+            mock.patch.object(CORE.CFG, "Tile") as tile_class,
+            mock.patch.object(CORE.OVL, "build_overlay", return_value=1) as overlay,
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            tile_class.side_effect = lambda lat, lon, custom: SimpleNamespace(
+                lat=lat,
+                lon=lon,
+                custom_build_dir=custom,
+                build_dir=f"build-{lat}-{lon}",
+                dem=None,
+                default_website="",
+                default_zl=0,
+                make_dirs=mock.Mock(),
+                read_from_config=mock.Mock(return_value=1),
+            )
+            result = CORE.build_batch(
+                MODELS.BuildPlan((_tile_plan(steps=("overlays",)),))
+            )
+
+        self.assertTrue(result.ok)
+        overlay.assert_called_once_with(12, -123)
+
+    def test_build_batch_maps_falsey_step_return_to_failure(self):
+        import O4_Build_Models as MODELS
+
+        with (
+            mock.patch.object(CORE.CFG, "Tile") as tile_class,
+            mock.patch.object(CORE.MESH, "build_mesh", return_value=0),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            tile_class.side_effect = lambda lat, lon, custom: SimpleNamespace(
+                lat=lat,
+                lon=lon,
+                custom_build_dir=custom,
+                build_dir=f"build-{lat}-{lon}",
+                dem=None,
+                default_website="",
+                default_zl=0,
+                make_dirs=mock.Mock(),
+                read_from_config=mock.Mock(return_value=1),
+            )
+            result = CORE.build_batch(MODELS.BuildPlan((_tile_plan(steps=("mesh",)),)))
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.tiles[0].step, "mesh")
+        self.assertEqual(result.tiles[0].message, "mesh failed")
+
+    def test_build_batch_uses_override_config_flag(self):
+        import O4_Build_Models as MODELS
+
+        tile = SimpleNamespace(
+            lat=0,
+            lon=0,
+            custom_build_dir="Tiles/",
+            build_dir="build",
+            dem=None,
+            default_website="",
+            default_zl=0,
+            make_dirs=mock.Mock(),
+            read_from_config=mock.Mock(return_value=1),
+        )
+        with (
+            mock.patch.object(CORE.CFG, "Tile", return_value=tile),
+            mock.patch.object(CORE.VMAP, "build_poly_file", return_value=1),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            CORE.build_batch(
+                MODELS.BuildPlan(
+                    (
+                        _tile_plan(
+                            lat=0,
+                            lon=0,
+                            steps=("vector",),
+                            override_tile_config=True,
+                        ),
+                    )
+                )
+            )
+
+        tile.read_from_config.assert_called_once_with(use_global=True)
+
+    def test_build_batch_invokes_completion_callback(self):
+        import O4_Build_Models as MODELS
+
+        completed = []
+        with (
+            mock.patch.object(CORE.CFG, "Tile") as tile_class,
+            mock.patch.object(CORE.VMAP, "build_poly_file", return_value=1),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            tile_class.side_effect = lambda lat, lon, custom: SimpleNamespace(
+                lat=lat,
+                lon=lon,
+                custom_build_dir=custom,
+                build_dir=f"build-{lat}-{lon}",
+                dem=None,
+                default_website="",
+                default_zl=0,
+                make_dirs=mock.Mock(),
+                read_from_config=mock.Mock(return_value=1),
+            )
+            result = CORE.build_batch(
+                MODELS.BuildPlan((_tile_plan(steps=("vector",)),)),
+                on_tile_complete=completed.append,
+            )
+
+        self.assertTrue(result.ok)
+        self.assertEqual(completed, list(result.tiles))
+
+
 if __name__ == "__main__":
     unittest.main()
