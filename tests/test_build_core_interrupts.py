@@ -15,7 +15,7 @@ def _tile():
 
 
 def _step(calls, name, interrupt_step):
-    def _inner(_tile):
+    def _inner(_tile, ctx=None):
         calls.append(name)
         if name == interrupt_step:
             CORE.UI.red_flag = True
@@ -50,7 +50,7 @@ class BuildCoreInterruptTests(unittest.TestCase):
         incomplete = {tile_coords: [{"file_name": "bad.jpg"}]}
         calls = []
 
-        def build_tile(_tile):
+        def build_tile(_tile, ctx=None):
             calls.append("tile")
             if len(calls) == 2:
                 CORE.UI.red_flag = True

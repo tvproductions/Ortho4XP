@@ -15,7 +15,7 @@ def _tile():
 
 
 def _record_step(calls, name):
-    def _inner(_tile):
+    def _inner(_tile, ctx=None):
         calls.append(name)
         return 1
 

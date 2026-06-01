@@ -7,6 +7,7 @@ except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
 import O4_Build_Context as BC
+import O4_Build_Core as CORE
 import O4_UI_Utils as UI
 
 
@@ -80,6 +81,36 @@ class BuildContextVprintTests(unittest.TestCase):
         with mock.patch.object(UI, "vprint") as vprint:
             ctx.vprint(1, "hello", "world")
         vprint.assert_called_once_with(1, "hello", "world")
+
+
+class BuildContextPipelineTests(unittest.TestCase):
+    def test_build_tile_all_constructs_and_passes_context(self):
+        from types import SimpleNamespace
+
+        tile = SimpleNamespace(lat=12, lon=-123, build_dir="build")
+        received_ctx = []
+
+        def capture_ctx(_tile, ctx=None):
+            received_ctx.append(ctx)
+            return 1
+
+        with (
+            mock.patch.object(UI, "red_flag", False),
+            mock.patch.object(UI, "is_working", False),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.VMAP, "build_poly_file", side_effect=capture_ctx),
+            mock.patch.object(CORE.MESH, "build_mesh", side_effect=capture_ctx),
+            mock.patch.object(CORE.MASK, "build_masks", side_effect=capture_ctx),
+            mock.patch.object(CORE.TILE, "build_tile", side_effect=capture_ctx),
+            mock.patch.object(CORE.UI, "lvprint"),
+            mock.patch.object(CORE.UI, "exit_message_and_bottom_line"),
+        ):
+            CORE.build_tile_all(tile)
+
+        self.assertEqual(len(received_ctx), 4)
+        for ctx in received_ctx:
+            self.assertIsInstance(ctx, BC.BuildContext)
+        self.assertTrue(all(c is received_ctx[0] for c in received_ctx))
 
 
 if __name__ == "__main__":
