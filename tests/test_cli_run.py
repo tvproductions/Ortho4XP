@@ -55,7 +55,9 @@ lon = 0
                     "_provider_inventory",
                     return_value=({"BI"}, set(), {"BI": {}}),
                 ),
-                mock.patch.object(RUN.JOBS, "load_build_plan", return_value=self._plan()),
+                mock.patch.object(
+                    RUN.JOBS, "load_build_plan", return_value=self._plan()
+                ),
                 contextlib.redirect_stdout(stdout),
             ):
                 code = RUN.main(["validate-job", str(job_file)])
@@ -73,7 +75,9 @@ lon = 0
                     "_provider_inventory",
                     return_value=({"BI"}, set(), {"BI": {}}),
                 ),
-                mock.patch.object(RUN.JOBS, "load_build_plan", return_value=self._plan()),
+                mock.patch.object(
+                    RUN.JOBS, "load_build_plan", return_value=self._plan()
+                ),
                 contextlib.redirect_stdout(stdout),
             ):
                 code = RUN.main(["validate-job", str(job_file), "--json"])
@@ -112,7 +116,9 @@ lon = 0
                     "_provider_inventory",
                     return_value=({"BI"}, set(), {"BI": {}}),
                 ),
-                mock.patch.object(RUN.JOBS, "load_build_plan", return_value=self._plan()),
+                mock.patch.object(
+                    RUN.JOBS, "load_build_plan", return_value=self._plan()
+                ),
                 mock.patch.object(
                     RUN, "_run_build", side_effect=AssertionError("should not build")
                 ),
@@ -138,7 +144,9 @@ lon = 0
                     "_provider_inventory",
                     return_value=({"BI"}, set(), {"BI": {}}),
                 ),
-                mock.patch.object(RUN.JOBS, "load_build_plan", return_value=self._plan()),
+                mock.patch.object(
+                    RUN.JOBS, "load_build_plan", return_value=self._plan()
+                ),
                 mock.patch.object(RUN, "_run_build", return_value=failed),
                 contextlib.redirect_stdout(stdout),
             ):
@@ -161,7 +169,9 @@ lon = 0
                     "_provider_inventory",
                     return_value=({"BI"}, set(), {"BI": {}}),
                 ),
-                mock.patch.object(RUN.JOBS, "load_build_plan", return_value=self._plan()),
+                mock.patch.object(
+                    RUN.JOBS, "load_build_plan", return_value=self._plan()
+                ),
                 mock.patch.object(RUN, "_run_build", return_value=result),
                 contextlib.redirect_stdout(stdout),
             ):

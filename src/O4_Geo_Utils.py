@@ -5,15 +5,22 @@ earth_radius = 6378137
 lat_to_m = pi * earth_radius / 180
 m_to_lat = 1 / lat_to_m
 
+
 ################################################################################
 def lon_to_m(lat):
     return lat_to_m * cos(pi * lat / 180)
+
+
 ################################################################################
+
 
 ################################################################################
 def m_to_lon(lat):
     return m_to_lat / cos(pi * lat / 180)
+
+
 ################################################################################
+
 
 ################################################################################
 def dist(A, B):
@@ -26,41 +33,60 @@ def dist(A, B):
         * sin((A[0] - B[0]) * pi / 360) ** 2
     )
     return 2 * earth_radius * atan2(sqrt(a), sqrt(1 - a))
+
+
 ################################################################################
+
 
 ################################################################################
 def webmercator_pixel_size(lat, zoomlevel):
     return 2 * pi * earth_radius * cos(pi * lat / 180) / (2 ** (zoomlevel + 8))
+
+
 ################################################################################
 
 epsg = dict()
 epsg[4326] = CRS.from_epsg(4326)
 epsg[3857] = CRS.from_epsg(3857)
 
+
 ################################################################################
 def record_epsg(epsg_code):
-    if (epsg_code not in epsg):
+    if epsg_code not in epsg:
         epsg[int(epsg_code)] = CRS.from_epsg(int(epsg_code))
+
+
 ################################################################################
+
 
 ################################################################################
 def transformer(s_epsg, t_epsg):
-    return Transformer.from_crs(epsg[int(s_epsg)], epsg[int(t_epsg)], 
-                                always_xy = True)
+    return Transformer.from_crs(epsg[int(s_epsg)], epsg[int(t_epsg)], always_xy=True)
+
+
 ################################################################################
+
 
 ################################################################################
 def transform(s_epsg, t_epsg, s_x, s_y):
-    transformer = Transformer.from_crs(epsg[int(s_epsg)], epsg[int(t_epsg)],
-                                       always_xy = True)
+    transformer = Transformer.from_crs(
+        epsg[int(s_epsg)], epsg[int(t_epsg)], always_xy=True
+    )
     return transformer.transform(s_x, s_y)
+
+
 ################################################################################
 
 geo_to_webm_t = transformer(4326, 3857)
+
+
 ################################################################################
 def geo_to_webm(lon, lat):
     return geo_to_webm_t.transform(lon, lat)
+
+
 ################################################################################
+
 
 ################################################################################
 def gtile_to_wgs84(til_x, til_y, zoomlevel):
@@ -74,7 +100,10 @@ def gtile_to_wgs84(til_x, til_y, zoomlevel):
     lon = rat_x * 180
     lat = 360 / pi * atan(exp(pi * rat_y)) - 90
     return (lat, lon)
+
+
 ################################################################################
+
 
 ################################################################################
 def wgs84_to_gtile(lat, lon, zoomlevel):
@@ -85,7 +114,10 @@ def wgs84_to_gtile(lat, lon, zoomlevel):
     til_x = pix_x // 256
     til_y = pix_y // 256
     return (til_x, til_y)
+
+
 ################################################################################
+
 
 ################################################################################
 def wgs84_to_pix(lat, lon, zoomlevel):
@@ -94,7 +126,10 @@ def wgs84_to_pix(lat, lon, zoomlevel):
     pix_x = round((rat_x + 1) * (2 ** (zoomlevel + 7)))
     pix_y = round((1 - rat_y) * (2 ** (zoomlevel + 7)))
     return (pix_x, pix_y)
+
+
 ################################################################################
+
 
 ################################################################################
 def pix_to_wgs84(pix_x, pix_y, zoomlevel):
@@ -103,7 +138,10 @@ def pix_to_wgs84(pix_x, pix_y, zoomlevel):
     lon = rat_x * 180
     lat = 360 / pi * atan(exp(pi * rat_y)) - 90
     return (lat, lon)
+
+
 ################################################################################
+
 
 ################################################################################
 def gtile_to_quadkey(til_x, til_y, zoomlevel):
@@ -121,7 +159,10 @@ def gtile_to_quadkey(til_x, til_y, zoomlevel):
         temp_y = temp_y - b * size
         quadkey = quadkey + str(a + 2 * b)
     return quadkey
+
+
 ################################################################################
+
 
 ################################################################################
 def wgs84_to_orthogrid(lat, lon, zoomlevel):
@@ -131,7 +172,10 @@ def wgs84_to_orthogrid(lat, lon, zoomlevel):
     til_x = int((ratio_x + 1) * mult) * 16
     til_y = int((1 - ratio_y) * mult) * 16
     return (til_x, til_y)
+
+
 ################################################################################
+
 
 ################################################################################
 def st_coord(lat, lon, tex_x, tex_y, zoomlevel, provider_code):
@@ -148,4 +192,6 @@ def st_coord(lat, lon, tex_x, tex_y, zoomlevel, provider_code):
     t = t if t >= 0 else 0
     t = t if t <= 1 else 1
     return (s, t)
+
+
 ################################################################################

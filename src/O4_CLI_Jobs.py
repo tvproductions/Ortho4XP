@@ -289,7 +289,9 @@ def _coordinates(
     return tuple(sorted(coordinates, key=lambda coord: (coord.lat, coord.lon)))
 
 
-def _explicit_tiles(value: object, errors: list[ValidationError]) -> list[TileCoordinate]:
+def _explicit_tiles(
+    value: object, errors: list[ValidationError]
+) -> list[TileCoordinate]:
     if value in (None, []):
         return []
     if not isinstance(value, list):
@@ -327,12 +329,7 @@ def _bounds_tiles(value: object, errors: list[ValidationError]) -> list[TileCoor
     lon_max = _coordinate_field(value_mapping, "bounds.lon_max", "lon_max", errors)
     for key in sorted(set(value) - {"lat_min", "lat_max", "lon_min", "lon_max"}):
         errors.append(ValidationError(f"bounds.{key}", "unknown field", value[key]))
-    if (
-        lat_min is None
-        or lat_max is None
-        or lon_min is None
-        or lon_max is None
-    ):
+    if lat_min is None or lat_max is None or lon_min is None or lon_max is None:
         return []
     if lat_min > lat_max:
         errors.append(
@@ -375,13 +372,17 @@ def _coordinate_field(
     if key.startswith("lat") or field.endswith(".lat"):
         if value < MIN_LAT or value > MAX_LAT:
             errors.append(
-                ValidationError(field, f"must be between {MIN_LAT} and {MAX_LAT}", value)
+                ValidationError(
+                    field, f"must be between {MIN_LAT} and {MAX_LAT}", value
+                )
             )
             return None
     if key.startswith("lon") or field.endswith(".lon"):
         if value < MIN_LON or value > MAX_LON:
             errors.append(
-                ValidationError(field, f"must be between {MIN_LON} and {MAX_LON}", value)
+                ValidationError(
+                    field, f"must be between {MIN_LON} and {MAX_LON}", value
+                )
             )
             return None
     return value

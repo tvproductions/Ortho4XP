@@ -7,14 +7,16 @@ import O4_UI_Utils as UI
 g2xpl_16_prefix = ""
 g2xpl_16_suffix = ""
 
+
 def resource_path(relative_path):
     """Get absolute path to resource."""
     # Required for using pyinstaller
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        base_path = os.path.join(sys._MEIPASS, 'Ortho4XP_Data')
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        base_path = os.path.join(sys._MEIPASS, "Ortho4XP_Data")
     else:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
 
 Preview_dir = resource_path("Previews")
 Provider_dir = resource_path("Providers")
@@ -30,6 +32,7 @@ Utils_dir = resource_path("Utils")
 Tile_dir = resource_path("Tiles")
 Tmp_dir = resource_path("tmp")
 Overlay_dir = resource_path("yOrtho4XP_Overlays")
+
 
 ##############################################################################
 def short_latlon(lat, lon):
@@ -203,9 +206,7 @@ def mesh_file(build_dir, lat, lon):
 
 
 def dsf_file(build_dir, lat, lon):
-    return os.path.join(
-        build_dir, "Earth nav data", long_latlon(lat, lon) + ".dsf"
-    )
+    return os.path.join(build_dir, "Earth nav data", long_latlon(lat, lon) + ".dsf")
 
 
 def obj_file(til_x_left, til_y_top, zoomlevel, provider_code):
@@ -236,6 +237,7 @@ def mtl_file(til_x_left, til_y_top, zoomlevel, provider_code):
 
 ##############################################################################
 
+
 ##############################################################################
 def preview(lat, lon, zoomlevel, provider_code):
     return os.path.join(
@@ -245,6 +247,7 @@ def preview(lat, lon, zoomlevel, provider_code):
 
 
 ##############################################################################
+
 
 ##############################################################################
 def custom_coastline(lat, lon):
@@ -297,12 +300,11 @@ def osm_old_cached(lat, lon, query):
 
 ##############################################################################
 def base_file_name(lat, lon):
-    return os.path.join(
-        Elevation_dir, round_latlon(lat, lon), hem_latlon(lat, lon)
-    )
+    return os.path.join(Elevation_dir, round_latlon(lat, lon), hem_latlon(lat, lon))
 
 
 ##############################################################################
+
 
 ##############################################################################
 def elevation_data(source, lat, lon):
@@ -316,7 +318,10 @@ def elevation_data(source, lat, lon):
         return base_file_name(lat, lon) + "_NED13.tif"
     elif source == "NED1":
         return base_file_name(lat, lon) + "_NED1.tif"
+
+
 ##############################################################################
+
 
 ##############################################################################
 def generic_tif(lat, lon):
@@ -325,12 +330,14 @@ def generic_tif(lat, lon):
 
 ##############################################################################
 
+
 ##############################################################################
 def viewfinderpanorama(lat, lon):
     return base_file_name(lat, lon) + ".hgt"
 
 
 ##############################################################################
+
 
 ##############################################################################
 def SRTM_1sec(lat, lon):
@@ -339,26 +346,25 @@ def SRTM_1sec(lat, lon):
 
 ##############################################################################
 
+
 ##############################################################################
 def legacy_mask(m_til_x_left, m_til_y_top):
     return str(m_til_y_top) + "_" + str(m_til_x_left) + ".png"
+
 
 def distance_mask(m_til_x_left, m_til_y_top):
     return str(m_til_y_top) + "_" + str(m_til_x_left) + "_dist.png"
 
 
 def mask_file(til_x_left, til_y_top, zoomlevel, provider_code):
-    return (
-        str(til_y_top) + "_" + str(til_x_left) + "_ZL" + str(zoomlevel) + ".png"
-    )
+    return str(til_y_top) + "_" + str(til_x_left) + "_ZL" + str(zoomlevel) + ".png"
 
 
 ##############################################################################
 
+
 ##############################################################################
-def jpeg_file_name_from_attributes(
-    til_x_left, til_y_top, zoomlevel, provider_code
-):
+def jpeg_file_name_from_attributes(til_x_left, til_y_top, zoomlevel, provider_code):
     if provider_code == "g2xpl_16":
         file_name = (
             g2xpl_16_prefix
@@ -366,7 +372,7 @@ def jpeg_file_name_from_attributes(
             + "_"
             + str(til_x_left)
             + "_"
-            + str(2 ** zoomlevel - 16 - til_y_top)
+            + str(2**zoomlevel - 16 - til_y_top)
             + g2xpl_16_suffix
             + ".jpg"
         )
@@ -384,6 +390,7 @@ def jpeg_file_name_from_attributes(
 
 
 ##############################################################################
+
 
 ##############################################################################
 def jpeg_file_dir_from_attributes(lat, lon, zoomlevel, provider):
@@ -418,6 +425,7 @@ def jpeg_file_dir_from_attributes(lat, lon, zoomlevel, provider):
 
 ##############################################################################
 
+
 ##############################################################################
 def dds_file_name_from_attributes(
     til_x_left, til_y_top, zoomlevel, provider_code, file_ext="dds"
@@ -429,7 +437,7 @@ def dds_file_name_from_attributes(
             + "_"
             + str(til_x_left)
             + "_"
-            + str(2 ** zoomlevel - 16 - til_y_top)
+            + str(2**zoomlevel - 16 - til_y_top)
             + g2xpl_16_suffix
             + "."
             + file_ext
@@ -450,10 +458,9 @@ def dds_file_name_from_attributes(
 
 ##############################################################################
 
+
 ##############################################################################
-def geotiff_file_name_from_attributes(
-    til_x_left, til_y_top, zoomlevel, provider_code
-):
+def geotiff_file_name_from_attributes(til_x_left, til_y_top, zoomlevel, provider_code):
     return (
         str(til_y_top)
         + "_"

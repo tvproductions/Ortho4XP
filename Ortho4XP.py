@@ -37,6 +37,7 @@ def _dispatch_headless(argv: list[str]) -> int:
 
     return CLI_RUN.main(cli_argv)
 
+
 if __name__ == "__main__" and len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
     print(cmd_line)
     sys.exit(0)

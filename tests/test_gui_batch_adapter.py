@@ -29,7 +29,9 @@ class GuiBatchAdapterTests(unittest.TestCase):
         plan = GUI.batch_plan_from_state(state)
 
         self.assertIsInstance(plan, MODELS.BuildPlan)
-        self.assertEqual([(tile.lat, tile.lon) for tile in plan.tiles], [(1, 4), (2, 3)])
+        self.assertEqual(
+            [(tile.lat, tile.lon) for tile in plan.tiles], [(1, 4), (2, 3)]
+        )
         self.assertEqual(plan.tiles[0].steps, ("vector", "masks", "tile"))
         self.assertTrue(plan.tiles[0].override_tile_config)
 
