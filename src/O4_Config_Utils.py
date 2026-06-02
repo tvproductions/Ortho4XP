@@ -10,6 +10,7 @@ import tkinter.ttk as ttk
 from tkinter import E, N, S, W, filedialog, messagebox
 
 import O4_Cfg_Vars as CFG
+import O4_Config_Runtime as CONFIG_RUNTIME
 from O4_Config_Models import (
     UnsupportedWaterTechError,
     coerce_config_value,
@@ -185,56 +186,17 @@ def config_compatibility(value) -> str:
     return parse_legacy_config_literal(value)
 
 
+def initialize_global_config(*, force: bool = False) -> None:
+    """Initialize process-wide config values from defaults and Ortho4XP.cfg."""
+    CONFIG_RUNTIME.initialize_from_namespace(globals(), force=force)
+
+
 ################################################################################
-# Initialization to default values
+# Runtime initialization to default values
 # Some variables are set using simply their name
 # Others are set using the module name and the variable name because
 # they are defined in a different module and overriden when the config is loaded (below)
-# hence the reason this module is loaded last in O4_GUI_Utils.py
-# Skip config initialization for testing. When ORTHO4XP_SKIP_CONFIG_INIT is
-# set, this module imports cleanly without reading files or mutating globals.
-if not os.environ.get("ORTHO4XP_SKIP_CONFIG_INIT"):
-    for var in cfg_vars:
-        _set_config_value(var, config_default(cfg_vars[var]))
-
-    ############################################################################
-    # Update from Global Ortho4XP.cfg
-    try:
-        f = open(global_cfg_file, "r")
-        for line in f.readlines():
-            line = line.strip()
-            if not line:
-                continue
-            if line[0] == "#":
-                continue
-            try:
-                (var, value) = line.split("=", 1)
-                value = config_compatibility(value)
-                # Set all tile and app config variables
-                set_global_variables(var, value)
-                # Set all global tile config variables
-                var = global_prefix + var
-                set_global_variables(var, value)
-            except UnsupportedWaterTechError as exc:
-                UI.lvprint(0, "Global config file contains an unsupported line:", line)
-                UI.vprint(1, exc)
-            except (KeyError, TypeError, ValueError, SyntaxError) as exc:
-                UI.lvprint(1, "Global config file contains an invalid line:", line)
-                UI.vprint(3, exc)
-        f.close()
-    except FileNotFoundError:
-        # Create a new global config file using default values
-        with open(global_cfg_file, "w") as file:
-            for var, value in cfg_global_tile_vars.items():
-                # Remove global_ prefix from cfg_global_tile_vars since that's not
-                # how they are stored in the global config file
-                _var = var.replace(global_prefix, "")
-                file.write(_var + "=" + str(value["default"]) + "\n")
-            for var, value in cfg_app_vars.items():
-                file.write(var + "=" + str(value["default"]) + "\n")
-        UI.log_event("No global config file found. New config created using defaults.")
-    except OSError:
-        UI.log_exception("Error accessing global config file")
+# hence runtime entry points call initialize_global_config() before using Tile.
 
 
 ################################################################################
@@ -242,6 +204,7 @@ class Tile:
     """Class for building tiles."""
 
     def __init__(self, lat, lon, custom_build_dir):
+        initialize_global_config()
 
         self.lat = lat
         self.lon = lon

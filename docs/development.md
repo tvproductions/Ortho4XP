@@ -2,16 +2,20 @@
 
 ## Testing Without Config Initialization
 
-Set `ORTHO4XP_SKIP_CONFIG_INIT=1` to import `O4_Config_Utils` without
-triggering config file reads or global state mutation. This is useful for
-unit tests that need to control config values explicitly.
+`O4_Config_Utils` is import-safe by default. Importing it validates static
+configuration metadata, but does not read `Ortho4XP.cfg`, create config files,
+or mutate config-backed globals in other modules.
+
+Runtime code that needs user/default config values must call
+`initialize_global_config()` before reading config-backed module globals.
+`CFG.Tile` construction performs this lazily for tile-build workflows.
 
 Example:
 
 ```python
-import os
-os.environ['ORTHO4XP_SKIP_CONFIG_INIT'] = '1'
 import O4_Config_Utils  # No file I/O, no global mutation
+
+O4_Config_Utils.initialize_global_config()
 ```
 
 ## Headless CLI Validation Tests

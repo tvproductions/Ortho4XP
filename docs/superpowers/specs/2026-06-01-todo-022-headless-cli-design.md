@@ -14,10 +14,9 @@ The current launcher and batch build surfaces are not clean enough for that:
 - `Ortho4XP.py` imports `O4_GUI_Utils` and `O4_Config_Utils` at module load.
   That means a new headless subcommand delegated too late would still import
   Tk GUI code and trigger config initialization.
-- `O4_Config_Utils` normally initializes config globals, reads
-  `Ortho4XP.cfg`, or creates `Ortho4XP.cfg` during import. The
-  `ORTHO4XP_SKIP_CONFIG_INIT` guard is useful for tests, but it is not a
-  runtime build strategy because `CFG.Tile` expects initialized config globals.
+- `O4_Config_Utils` imports safely, but runtime builds must call
+  `initialize_global_config()` before constructing `CFG.Tile` because tile
+  objects expect initialized config globals.
 - `O4_Build_Core.build_tile_all(tile)` is the shared all-in-one core boundary
   for one tile, but it does not model multi-tile batches, selected steps,
   overlay extraction, config override behavior, or aggregate results.
@@ -50,7 +49,7 @@ commands remain headless.
 - Do not add package metadata or console scripts. `pyproject.toml` currently
   has `tool.uv.package = false`, so the source-checkout entry point remains
   `python Ortho4XP.py ...`.
-- Do not use `ORTHO4XP_SKIP_CONFIG_INIT` during runtime builds.
+- Do not initialize global config during validation-only headless commands.
 - Do not add per-tile provider, zoom, or output overrides in the first slice.
 - Do not add zone polygon syntax to `build_job.toml`; existing tile config
   `zone_list` support remains file-driven.

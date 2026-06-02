@@ -538,9 +538,17 @@ Suggested labels: `architecture`, `state`, `refactor`
 
 ### TODO-021: Minimize Import-Time Side Effects
 
+Status: Done
+
 GitHub Issue: #16
 
 Move side effects out of module import paths and into explicit initialization functions.
+
+Completed by moving `O4_Config_Utils` runtime configuration initialization
+behind an idempotent `initialize_global_config()` function, preserving direct
+tile construction through lazy initialization in `CFG.Tile`, and adding import
+safety tests that prove plain import no longer reads or creates `Ortho4XP.cfg`
+or mutates config-backed globals.
 
 Acceptance criteria:
 

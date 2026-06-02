@@ -1,5 +1,8 @@
-import os
+import sys
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 try:
     import _path  # noqa: F401
@@ -8,39 +11,47 @@ except ModuleNotFoundError:
 
 
 class ConfigImportSafetyTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls._orig_env = os.environ.get("ORTHO4XP_SKIP_CONFIG_INIT")
-        os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = "1"
-        try:
-            import O4_UI_Utils as UI
-            import O4_Imagery_Utils as IMG
+    def setUp(self):
+        self._orig_config_module = sys.modules.pop("O4_Config_Utils", None)
 
-            UI.verbosity = 99
-            IMG.http_timeout = 999
+    def tearDown(self):
+        sys.modules.pop("O4_Config_Utils", None)
+        if self._orig_config_module is not None:
+            sys.modules["O4_Config_Utils"] = self._orig_config_module
 
-            import O4_Config_Utils as CFG  # noqa: F401
+    def test_plain_import_does_not_read_config_file_or_mutate_globals(self):
+        """Importing config utilities should not initialize runtime config."""
+        import O4_Imagery_Utils as IMG
+        import O4_UI_Utils as UI
 
-            cls.UI = UI
-            cls.IMG = IMG
-            cls._cfg = CFG
-        finally:
-            if cls._orig_env is None:
-                del os.environ["ORTHO4XP_SKIP_CONFIG_INIT"]
-            else:
-                os.environ["ORTHO4XP_SKIP_CONFIG_INIT"] = cls._orig_env
+        UI.verbosity = 99
+        IMG.http_timeout = 999
 
-    def test_import_does_not_read_config_file(self):
-        """Importing with skip flag should not read Ortho4XP.cfg."""
-        pass
+        with mock.patch("builtins.open", side_effect=AssertionError("unexpected I/O")):
+            import O4_Config_Utils as CFG
 
-    def test_import_does_not_mutate_ui_globals(self):
-        """Importing with skip flag should not set UI.verbosity etc."""
-        self.assertEqual(self.UI.verbosity, 99)
+        self.assertNotIn("apt_smoothing_pix", CFG.__dict__)
+        self.assertEqual(UI.verbosity, 99)
+        self.assertEqual(IMG.http_timeout, 999)
 
-    def test_import_does_not_mutate_img_globals(self):
-        """Importing with skip flag should not set IMG.http_timeout etc."""
-        self.assertEqual(self.IMG.http_timeout, 999)
+    def test_explicit_initializer_applies_defaults_and_creates_missing_config(self):
+        import O4_Imagery_Utils as IMG
+        import O4_UI_Utils as UI
+        import O4_Config_Utils as CFG
+
+        UI.verbosity = 99
+        IMG.http_timeout = 999
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir, "Ortho4XP.cfg")
+            with mock.patch.object(CFG, "global_cfg_file", str(config_path)):
+                CFG.initialize_global_config(force=True)
+
+            self.assertTrue(config_path.exists())
+
+        self.assertIn("apt_smoothing_pix", CFG.__dict__)
+        self.assertEqual(UI.verbosity, 1)
+        self.assertEqual(IMG.http_timeout, 10)
 
 
 if __name__ == "__main__":

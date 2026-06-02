@@ -720,192 +720,200 @@
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1047|reset_tile_cfg( self )": {
-      "line": 1047,
+    "lizard_ccn|src/O4_Config_Runtime.py|80|_load_global_config_line( self , line : str )": {
+      "line": 80,
+      "metric": "lizard_ccn",
+      "name": "_load_global_config_line( self , line : str )",
+      "path": "src/O4_Config_Runtime.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|src/O4_Config_Utils.py|1010|reset_tile_cfg( self )": {
+      "line": 1010,
       "metric": "lizard_ccn",
       "name": "reset_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 17.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1094|load_backup_tile_cfg( self )": {
-      "line": 1094,
+    "lizard_ccn|src/O4_Config_Utils.py|1057|load_backup_tile_cfg( self )": {
+      "line": 1057,
       "metric": "lizard_ccn",
       "name": "load_backup_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|109|_active_config_lines( lines )": {
-      "line": 109,
-      "metric": "lizard_ccn",
-      "name": "_active_config_lines( lines )",
-      "path": "src/O4_Config_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "lizard_ccn|src/O4_Config_Utils.py|1130|load_tile_cfg( self )": {
-      "line": 1130,
+    "lizard_ccn|src/O4_Config_Utils.py|1093|load_tile_cfg( self )": {
+      "line": 1093,
       "metric": "lizard_ccn",
       "name": "load_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1169|write_tile_cfg( self )": {
-      "line": 1169,
+    "lizard_ccn|src/O4_Config_Utils.py|110|_active_config_lines( lines )": {
+      "line": 110,
+      "metric": "lizard_ccn",
+      "name": "_active_config_lines( lines )",
+      "path": "src/O4_Config_Utils.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Config_Utils.py|1132|write_tile_cfg( self )": {
+      "line": 1132,
       "metric": "lizard_ccn",
       "name": "write_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|116|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
-      "line": 116,
+    "lizard_ccn|src/O4_Config_Utils.py|117|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
+      "line": 117,
       "metric": "lizard_ccn",
       "name": "_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1232|load_backup_global_tile_cfg( self )": {
-      "line": 1232,
+    "lizard_ccn|src/O4_Config_Utils.py|1195|load_backup_global_tile_cfg( self )": {
+      "line": 1195,
       "metric": "lizard_ccn",
       "name": "load_backup_global_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1251|write_global_cfg( self )": {
-      "line": 1251,
+    "lizard_ccn|src/O4_Config_Utils.py|1214|write_global_cfg( self )": {
+      "line": 1214,
       "metric": "lizard_ccn",
       "name": "write_global_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1292|load_backup_app_cfg( self )": {
-      "line": 1292,
+    "lizard_ccn|src/O4_Config_Utils.py|1255|load_backup_app_cfg( self )": {
+      "line": 1255,
       "metric": "lizard_ccn",
       "name": "load_backup_app_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1315|write_app_cfg( self )": {
-      "line": 1315,
+    "lizard_ccn|src/O4_Config_Utils.py|1278|write_app_cfg( self )": {
+      "line": 1278,
       "metric": "lizard_ccn",
       "name": "write_app_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1345|apply_changes( self , tab : str )": {
-      "line": 1345,
+    "lizard_ccn|src/O4_Config_Utils.py|1308|apply_changes( self , tab : str )": {
+      "line": 1308,
       "metric": "lizard_ccn",
       "name": "apply_changes( self , tab : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 14.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1403|check_unsaved_changes( self , select_tile = False )": {
-      "line": 1403,
+    "lizard_ccn|src/O4_Config_Utils.py|1366|check_unsaved_changes( self , select_tile = False )": {
+      "line": 1366,
       "metric": "lizard_ccn",
       "name": "check_unsaved_changes( self , select_tile = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 39.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1580|cfg_to_dict( self , file : str )": {
-      "line": 1580,
+    "lizard_ccn|src/O4_Config_Utils.py|1543|cfg_to_dict( self , file : str )": {
+      "line": 1543,
       "metric": "lizard_ccn",
       "name": "cfg_to_dict( self , file : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1596|choose_dem( self , global_config = False )": {
-      "line": 1596,
+    "lizard_ccn|src/O4_Config_Utils.py|1559|choose_dem( self , global_config = False )": {
+      "line": 1559,
       "metric": "lizard_ccn",
       "name": "choose_dem( self , global_config = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|1612|add_dem( self , global_config = False )": {
-      "line": 1612,
+    "lizard_ccn|src/O4_Config_Utils.py|1575|add_dem( self , global_config = False )": {
+      "line": 1575,
       "metric": "lizard_ccn",
       "name": "add_dem( self , global_config = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|244|__init__( self , lat , lon , custom_build_dir )": {
-      "line": 244,
+    "lizard_ccn|src/O4_Config_Utils.py|206|__init__( self , lat , lon , custom_build_dir )": {
+      "line": 206,
       "metric": "lizard_ccn",
       "name": "__init__( self , lat , lon , custom_build_dir )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|259|make_dirs( self )": {
-      "line": 259,
+    "lizard_ccn|src/O4_Config_Utils.py|222|make_dirs( self )": {
+      "line": 222,
       "metric": "lizard_ccn",
       "name": "make_dirs( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|282|read_from_config( self , config_file = None , use_global = False )": {
-      "line": 282,
+    "lizard_ccn|src/O4_Config_Utils.py|245|read_from_config( self , config_file = None , use_global = False )": {
+      "line": 245,
       "metric": "lizard_ccn",
       "name": "read_from_config( self , config_file = None , use_global = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|325|write_to_config( self , config_file = None )": {
-      "line": 325,
+    "lizard_ccn|src/O4_Config_Utils.py|288|write_to_config( self , config_file = None )": {
+      "line": 288,
       "metric": "lizard_ccn",
       "name": "write_to_config( self , config_file = None )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 12.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|441|tile_cfg_status( self , * args )": {
-      "line": 441,
+    "lizard_ccn|src/O4_Config_Utils.py|404|tile_cfg_status( self , * args )": {
+      "line": 404,
       "metric": "lizard_ccn",
       "name": "tile_cfg_status( self , * args )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|472|tile_config( self , frame : tk . Frame )": {
-      "line": 472,
+    "lizard_ccn|src/O4_Config_Utils.py|435|tile_config( self , frame : tk . Frame )": {
+      "line": 435,
       "metric": "lizard_ccn",
       "name": "tile_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|688|global_config( self , frame : tk . Frame )": {
-      "line": 688,
+    "lizard_ccn|src/O4_Config_Utils.py|651|global_config( self , frame : tk . Frame )": {
+      "line": 651,
       "metric": "lizard_ccn",
       "name": "global_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|889|app_config( self , frame : tk . Frame )": {
-      "line": 889,
+    "lizard_ccn|src/O4_Config_Utils.py|852|app_config( self , frame : tk . Frame )": {
+      "line": 852,
       "metric": "lizard_ccn",
       "name": "app_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 9.0
     },
-    "lizard_ccn|src/O4_Config_Utils.py|97|_append_legacy_zone_line( line : str , zone_list : list [ Any ] )": {
-      "line": 97,
+    "lizard_ccn|src/O4_Config_Utils.py|98|_append_legacy_zone_line( line : str , zone_list : list [ Any ] )": {
+      "line": 98,
       "metric": "lizard_ccn",
       "name": "_append_legacy_zone_line( line : str , zone_list : list [ Any ] )",
       "path": "src/O4_Config_Utils.py",
@@ -3416,216 +3424,224 @@
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1047|reset_tile_cfg( self )": {
-      "line": 1047,
+    "lizard_nesting_depth|src/O4_Config_Runtime.py|80|_load_global_config_line( self , line : str )": {
+      "line": 80,
+      "metric": "lizard_nesting_depth",
+      "name": "_load_global_config_line( self , line : str )",
+      "path": "src/O4_Config_Runtime.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1010|reset_tile_cfg( self )": {
+      "line": 1010,
       "metric": "lizard_nesting_depth",
       "name": "reset_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 15.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1094|load_backup_tile_cfg( self )": {
-      "line": 1094,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1057|load_backup_tile_cfg( self )": {
+      "line": 1057,
       "metric": "lizard_nesting_depth",
       "name": "load_backup_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|109|_active_config_lines( lines )": {
-      "line": 109,
-      "metric": "lizard_nesting_depth",
-      "name": "_active_config_lines( lines )",
-      "path": "src/O4_Config_Utils.py",
-      "severity": "advise",
-      "value": 2.0
-    },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1130|load_tile_cfg( self )": {
-      "line": 1130,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1093|load_tile_cfg( self )": {
+      "line": 1093,
       "metric": "lizard_nesting_depth",
       "name": "load_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1169|write_tile_cfg( self )": {
-      "line": 1169,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|110|_active_config_lines( lines )": {
+      "line": 110,
+      "metric": "lizard_nesting_depth",
+      "name": "_active_config_lines( lines )",
+      "path": "src/O4_Config_Utils.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1132|write_tile_cfg( self )": {
+      "line": 1132,
       "metric": "lizard_nesting_depth",
       "name": "write_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 11.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|116|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
-      "line": 116,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|117|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
+      "line": 117,
       "metric": "lizard_nesting_depth",
       "name": "_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1232|load_backup_global_tile_cfg( self )": {
-      "line": 1232,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1195|load_backup_global_tile_cfg( self )": {
+      "line": 1195,
       "metric": "lizard_nesting_depth",
       "name": "load_backup_global_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1251|write_global_cfg( self )": {
-      "line": 1251,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1214|write_global_cfg( self )": {
+      "line": 1214,
       "metric": "lizard_nesting_depth",
       "name": "write_global_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1292|load_backup_app_cfg( self )": {
-      "line": 1292,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1255|load_backup_app_cfg( self )": {
+      "line": 1255,
       "metric": "lizard_nesting_depth",
       "name": "load_backup_app_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1315|write_app_cfg( self )": {
-      "line": 1315,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1278|write_app_cfg( self )": {
+      "line": 1278,
       "metric": "lizard_nesting_depth",
       "name": "write_app_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1345|apply_changes( self , tab : str )": {
-      "line": 1345,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1308|apply_changes( self , tab : str )": {
+      "line": 1308,
       "metric": "lizard_nesting_depth",
       "name": "apply_changes( self , tab : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 12.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|136|_iter_loaded_config_values( lines , * , ignored_vars = ( )": {
-      "line": 136,
-      "metric": "lizard_nesting_depth",
-      "name": "_iter_loaded_config_values( lines , * , ignored_vars = ( )",
-      "path": "src/O4_Config_Utils.py",
-      "severity": "advise",
-      "value": 2.0
-    },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1403|check_unsaved_changes( self , select_tile = False )": {
-      "line": 1403,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1366|check_unsaved_changes( self , select_tile = False )": {
+      "line": 1366,
       "metric": "lizard_nesting_depth",
       "name": "check_unsaved_changes( self , select_tile = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 31.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|155|_config_choice_values( registry : dict [ str , dict [ str , Any ] ] , item : str )": {
-      "line": 155,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|137|_iter_loaded_config_values( lines , * , ignored_vars = ( )": {
+      "line": 137,
       "metric": "lizard_nesting_depth",
-      "name": "_config_choice_values( registry : dict [ str , dict [ str , Any ] ] , item : str )",
+      "name": "_iter_loaded_config_values( lines , * , ignored_vars = ( )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1580|cfg_to_dict( self , file : str )": {
-      "line": 1580,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1543|cfg_to_dict( self , file : str )": {
+      "line": 1543,
       "metric": "lizard_nesting_depth",
       "name": "cfg_to_dict( self , file : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1596|choose_dem( self , global_config = False )": {
-      "line": 1596,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1559|choose_dem( self , global_config = False )": {
+      "line": 1559,
       "metric": "lizard_nesting_depth",
       "name": "choose_dem( self , global_config = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|1612|add_dem( self , global_config = False )": {
-      "line": 1612,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|156|_config_choice_values( registry : dict [ str , dict [ str , Any ] ] , item : str )": {
+      "line": 156,
+      "metric": "lizard_nesting_depth",
+      "name": "_config_choice_values( registry : dict [ str , dict [ str , Any ] ] , item : str )",
+      "path": "src/O4_Config_Utils.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Config_Utils.py|1575|add_dem( self , global_config = False )": {
+      "line": 1575,
       "metric": "lizard_nesting_depth",
       "name": "add_dem( self , global_config = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|161|set_global_variables( var : str , value : str )": {
-      "line": 161,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|162|set_global_variables( var : str , value : str )": {
+      "line": 162,
       "metric": "lizard_nesting_depth",
       "name": "set_global_variables( var : str , value : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|244|__init__( self , lat , lon , custom_build_dir )": {
-      "line": 244,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|206|__init__( self , lat , lon , custom_build_dir )": {
+      "line": 206,
       "metric": "lizard_nesting_depth",
       "name": "__init__( self , lat , lon , custom_build_dir )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|259|make_dirs( self )": {
-      "line": 259,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|222|make_dirs( self )": {
+      "line": 222,
       "metric": "lizard_nesting_depth",
       "name": "make_dirs( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|282|read_from_config( self , config_file = None , use_global = False )": {
-      "line": 282,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|245|read_from_config( self , config_file = None , use_global = False )": {
+      "line": 245,
       "metric": "lizard_nesting_depth",
       "name": "read_from_config( self , config_file = None , use_global = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|325|write_to_config( self , config_file = None )": {
-      "line": 325,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|288|write_to_config( self , config_file = None )": {
+      "line": 288,
       "metric": "lizard_nesting_depth",
       "name": "write_to_config( self , config_file = None )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 10.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|441|tile_cfg_status( self , * args )": {
-      "line": 441,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|404|tile_cfg_status( self , * args )": {
+      "line": 404,
       "metric": "lizard_nesting_depth",
       "name": "tile_cfg_status( self , * args )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|472|tile_config( self , frame : tk . Frame )": {
-      "line": 472,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|435|tile_config( self , frame : tk . Frame )": {
+      "line": 435,
       "metric": "lizard_nesting_depth",
       "name": "tile_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|688|global_config( self , frame : tk . Frame )": {
-      "line": 688,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|651|global_config( self , frame : tk . Frame )": {
+      "line": 651,
       "metric": "lizard_nesting_depth",
       "name": "global_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|889|app_config( self , frame : tk . Frame )": {
-      "line": 889,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|852|app_config( self , frame : tk . Frame )": {
+      "line": 852,
       "metric": "lizard_nesting_depth",
       "name": "app_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Config_Utils.py|97|_append_legacy_zone_line( line : str , zone_list : list [ Any ] )": {
-      "line": 97,
+    "lizard_nesting_depth|src/O4_Config_Utils.py|98|_append_legacy_zone_line( line : str , zone_list : list [ Any ] )": {
+      "line": 98,
       "metric": "lizard_nesting_depth",
       "name": "_append_legacy_zone_line( line : str , zone_list : list [ Any ] )",
       "path": "src/O4_Config_Utils.py",
@@ -5496,14 +5512,6 @@
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|tests/test_config_import_safety.py|12|setUpClass( cls )": {
-      "line": 12,
-      "metric": "lizard_nesting_depth",
-      "name": "setUpClass( cls )",
-      "path": "tests/test_config_import_safety.py",
-      "severity": "advise",
-      "value": 2.0
-    },
     "lizard_nesting_depth|tests/test_dsf_header_bridge.py|138|test_unsupported_default_headers_leave_generated_dsf_unchanged( self )": {
       "line": 138,
       "metric": "lizard_nesting_depth",
@@ -6248,192 +6256,200 @@
       "severity": "advise",
       "value": 17.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1047|reset_tile_cfg( self )": {
-      "line": 1047,
+    "lizard_nloc|src/O4_Config_Runtime.py|21|initialize_from_namespace( namespace : dict [ str , Any ] , * , force : bool = False )": {
+      "line": 21,
+      "metric": "lizard_nloc",
+      "name": "initialize_from_namespace( namespace : dict [ str , Any ] , * , force : bool = False )",
+      "path": "src/O4_Config_Runtime.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|src/O4_Config_Utils.py|1010|reset_tile_cfg( self )": {
+      "line": 1010,
       "metric": "lizard_nloc",
       "name": "reset_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 37.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1094|load_backup_tile_cfg( self )": {
-      "line": 1094,
+    "lizard_nloc|src/O4_Config_Utils.py|1057|load_backup_tile_cfg( self )": {
+      "line": 1057,
       "metric": "lizard_nloc",
       "name": "load_backup_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 32.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1130|load_tile_cfg( self )": {
-      "line": 1130,
+    "lizard_nloc|src/O4_Config_Utils.py|1093|load_tile_cfg( self )": {
+      "line": 1093,
       "metric": "lizard_nloc",
       "name": "load_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 36.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1169|write_tile_cfg( self )": {
-      "line": 1169,
+    "lizard_nloc|src/O4_Config_Utils.py|1132|write_tile_cfg( self )": {
+      "line": 1132,
       "metric": "lizard_nloc",
       "name": "write_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 47.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|116|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
-      "line": 116,
+    "lizard_nloc|src/O4_Config_Utils.py|117|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
+      "line": 117,
       "metric": "lizard_nloc",
       "name": "_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 18.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1232|load_backup_global_tile_cfg( self )": {
-      "line": 1232,
+    "lizard_nloc|src/O4_Config_Utils.py|1195|load_backup_global_tile_cfg( self )": {
+      "line": 1195,
       "metric": "lizard_nloc",
       "name": "load_backup_global_tile_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 16.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1251|write_global_cfg( self )": {
-      "line": 1251,
+    "lizard_nloc|src/O4_Config_Utils.py|1214|write_global_cfg( self )": {
+      "line": 1214,
       "metric": "lizard_nloc",
       "name": "write_global_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 24.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1292|load_backup_app_cfg( self )": {
-      "line": 1292,
+    "lizard_nloc|src/O4_Config_Utils.py|1255|load_backup_app_cfg( self )": {
+      "line": 1255,
       "metric": "lizard_nloc",
       "name": "load_backup_app_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 19.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1315|write_app_cfg( self )": {
-      "line": 1315,
+    "lizard_nloc|src/O4_Config_Utils.py|1278|write_app_cfg( self )": {
+      "line": 1278,
       "metric": "lizard_nloc",
       "name": "write_app_cfg( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 19.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1345|apply_changes( self , tab : str )": {
-      "line": 1345,
+    "lizard_nloc|src/O4_Config_Utils.py|1308|apply_changes( self , tab : str )": {
+      "line": 1308,
       "metric": "lizard_nloc",
       "name": "apply_changes( self , tab : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 45.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|136|_iter_loaded_config_values( lines , * , ignored_vars = ( )": {
-      "line": 136,
-      "metric": "lizard_nloc",
-      "name": "_iter_loaded_config_values( lines , * , ignored_vars = ( )",
-      "path": "src/O4_Config_Utils.py",
-      "severity": "advise",
-      "value": 13.0
-    },
-    "lizard_nloc|src/O4_Config_Utils.py|1403|check_unsaved_changes( self , select_tile = False )": {
-      "line": 1403,
+    "lizard_nloc|src/O4_Config_Utils.py|1366|check_unsaved_changes( self , select_tile = False )": {
+      "line": 1366,
       "metric": "lizard_nloc",
       "name": "check_unsaved_changes( self , select_tile = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 124.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1596|choose_dem( self , global_config = False )": {
-      "line": 1596,
+    "lizard_nloc|src/O4_Config_Utils.py|137|_iter_loaded_config_values( lines , * , ignored_vars = ( )": {
+      "line": 137,
+      "metric": "lizard_nloc",
+      "name": "_iter_loaded_config_values( lines , * , ignored_vars = ( )",
+      "path": "src/O4_Config_Utils.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|src/O4_Config_Utils.py|1559|choose_dem( self , global_config = False )": {
+      "line": 1559,
       "metric": "lizard_nloc",
       "name": "choose_dem( self , global_config = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1612|add_dem( self , global_config = False )": {
-      "line": 1612,
+    "lizard_nloc|src/O4_Config_Utils.py|1575|add_dem( self , global_config = False )": {
+      "line": 1575,
       "metric": "lizard_nloc",
       "name": "add_dem( self , global_config = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|1640|popup( self , header : str , input_text : str )": {
-      "line": 1640,
+    "lizard_nloc|src/O4_Config_Utils.py|1603|popup( self , header : str , input_text : str )": {
+      "line": 1603,
       "metric": "lizard_nloc",
       "name": "popup( self , header : str , input_text : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 22.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|244|__init__( self , lat , lon , custom_build_dir )": {
-      "line": 244,
+    "lizard_nloc|src/O4_Config_Utils.py|206|__init__( self , lat , lon , custom_build_dir )": {
+      "line": 206,
       "metric": "lizard_nloc",
       "name": "__init__( self , lat , lon , custom_build_dir )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
-      "value": 13.0
+      "value": 14.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|259|make_dirs( self )": {
-      "line": 259,
+    "lizard_nloc|src/O4_Config_Utils.py|222|make_dirs( self )": {
+      "line": 222,
       "metric": "lizard_nloc",
       "name": "make_dirs( self )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 22.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|282|read_from_config( self , config_file = None , use_global = False )": {
-      "line": 282,
+    "lizard_nloc|src/O4_Config_Utils.py|245|read_from_config( self , config_file = None , use_global = False )": {
+      "line": 245,
       "metric": "lizard_nloc",
       "name": "read_from_config( self , config_file = None , use_global = False )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 32.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|325|write_to_config( self , config_file = None )": {
-      "line": 325,
+    "lizard_nloc|src/O4_Config_Utils.py|288|write_to_config( self , config_file = None )": {
+      "line": 288,
       "metric": "lizard_nloc",
       "name": "write_to_config( self , config_file = None )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 41.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|383|__init__( self , parent )": {
-      "line": 383,
+    "lizard_nloc|src/O4_Config_Utils.py|346|__init__( self , parent )": {
+      "line": 346,
       "metric": "lizard_nloc",
       "name": "__init__( self , parent )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 37.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|441|tile_cfg_status( self , * args )": {
-      "line": 441,
+    "lizard_nloc|src/O4_Config_Utils.py|404|tile_cfg_status( self , * args )": {
+      "line": 404,
       "metric": "lizard_nloc",
       "name": "tile_cfg_status( self , * args )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 27.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|472|tile_config( self , frame : tk . Frame )": {
-      "line": 472,
+    "lizard_nloc|src/O4_Config_Utils.py|435|tile_config( self , frame : tk . Frame )": {
+      "line": 435,
       "metric": "lizard_nloc",
       "name": "tile_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 186.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|688|global_config( self , frame : tk . Frame )": {
-      "line": 688,
+    "lizard_nloc|src/O4_Config_Utils.py|651|global_config( self , frame : tk . Frame )": {
+      "line": 651,
       "metric": "lizard_nloc",
       "name": "global_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 174.0
     },
-    "lizard_nloc|src/O4_Config_Utils.py|889|app_config( self , frame : tk . Frame )": {
-      "line": 889,
+    "lizard_nloc|src/O4_Config_Utils.py|852|app_config( self , frame : tk . Frame )": {
+      "line": 852,
       "metric": "lizard_nloc",
       "name": "app_config( self , frame : tk . Frame )",
       "path": "src/O4_Config_Utils.py",
@@ -8656,13 +8672,13 @@
       "severity": "advise",
       "value": 18.0
     },
-    "lizard_nloc|tests/test_config_import_safety.py|12|setUpClass( cls )": {
-      "line": 12,
+    "lizard_nloc|tests/test_config_import_safety.py|37|test_explicit_initializer_applies_defaults_and_creates_missing_config( self )": {
+      "line": 37,
       "metric": "lizard_nloc",
-      "name": "setUpClass( cls )",
+      "name": "test_explicit_initializer_applies_defaults_and_creates_missing_config( self )",
       "path": "tests/test_config_import_safety.py",
       "severity": "advise",
-      "value": 17.0
+      "value": 14.0
     },
     "lizard_nloc|tests/test_config_models.py|129|test_masks_are_not_treated_as_bathymetry_source( self )": {
       "line": 129,
@@ -9736,64 +9752,64 @@
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|116|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
-      "line": 116,
+    "lizard_param_count|src/O4_Config_Utils.py|117|_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )": {
+      "line": 117,
       "metric": "lizard_param_count",
       "name": "_loaded_config_value( line , ignored_vars , key_transform , legacy_zone_target )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|1555|set_value_type( self , var : str , value )": {
-      "line": 1555,
+    "lizard_param_count|src/O4_Config_Utils.py|1518|set_value_type( self , var : str , value )": {
+      "line": 1518,
       "metric": "lizard_param_count",
       "name": "set_value_type( self , var : str , value )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|1568|dict_to_cfg( self , file : str , cfg_dict : dict )": {
-      "line": 1568,
+    "lizard_param_count|src/O4_Config_Utils.py|1531|dict_to_cfg( self , file : str , cfg_dict : dict )": {
+      "line": 1531,
       "metric": "lizard_param_count",
       "name": "dict_to_cfg( self , file : str , cfg_dict : dict )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|1640|popup( self , header : str , input_text : str )": {
-      "line": 1640,
+    "lizard_param_count|src/O4_Config_Utils.py|1603|popup( self , header : str , input_text : str )": {
+      "line": 1603,
       "metric": "lizard_param_count",
       "name": "popup( self , header : str , input_text : str )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|1680|_log_zones_saved_for_tile( lat , lon , tile_zones )": {
-      "line": 1680,
+    "lizard_param_count|src/O4_Config_Utils.py|1643|_log_zones_saved_for_tile( lat , lon , tile_zones )": {
+      "line": 1643,
       "metric": "lizard_param_count",
       "name": "_log_zones_saved_for_tile( lat , lon , tile_zones )",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|1684|_log_unsaved_config( scope : str , var : str , current_value , config_file_value )": {
-      "line": 1684,
+    "lizard_param_count|src/O4_Config_Utils.py|1647|_log_unsaved_config( scope : str , var : str , current_value , config_file_value )": {
+      "line": 1647,
       "metric": "lizard_param_count",
       "name": "_log_unsaved_config( scope : str , var : str , current_value , config_file_value )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|244|__init__( self , lat , lon , custom_build_dir )": {
-      "line": 244,
+    "lizard_param_count|src/O4_Config_Utils.py|206|__init__( self , lat , lon , custom_build_dir )": {
+      "line": 206,
       "metric": "lizard_param_count",
       "name": "__init__( self , lat , lon , custom_build_dir )",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Config_Utils.py|282|read_from_config( self , config_file = None , use_global = False )": {
-      "line": 282,
+    "lizard_param_count|src/O4_Config_Utils.py|245|read_from_config( self , config_file = None , use_global = False )": {
+      "line": 245,
       "metric": "lizard_param_count",
       "name": "read_from_config( self , config_file = None , use_global = False )",
       "path": "src/O4_Config_Utils.py",
@@ -12144,208 +12160,216 @@
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1047|reset_tile_cfg": {
-      "line": 1047,
+    "radon_cc|src/O4_Config_Runtime.py|80|_load_global_config_line": {
+      "line": 80,
+      "metric": "radon_cc",
+      "name": "_load_global_config_line",
+      "path": "src/O4_Config_Runtime.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|src/O4_Config_Utils.py|1010|reset_tile_cfg": {
+      "line": 1010,
       "metric": "radon_cc",
       "name": "reset_tile_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 17.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1094|load_backup_tile_cfg": {
-      "line": 1094,
+    "radon_cc|src/O4_Config_Utils.py|1057|load_backup_tile_cfg": {
+      "line": 1057,
       "metric": "radon_cc",
       "name": "load_backup_tile_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|src/O4_Config_Utils.py|109|_active_config_lines": {
-      "line": 109,
-      "metric": "radon_cc",
-      "name": "_active_config_lines",
-      "path": "src/O4_Config_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "radon_cc|src/O4_Config_Utils.py|1130|load_tile_cfg": {
-      "line": 1130,
+    "radon_cc|src/O4_Config_Utils.py|1093|load_tile_cfg": {
+      "line": 1093,
       "metric": "radon_cc",
       "name": "load_tile_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1169|write_tile_cfg": {
-      "line": 1169,
+    "radon_cc|src/O4_Config_Utils.py|110|_active_config_lines": {
+      "line": 110,
+      "metric": "radon_cc",
+      "name": "_active_config_lines",
+      "path": "src/O4_Config_Utils.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Config_Utils.py|1132|write_tile_cfg": {
+      "line": 1132,
       "metric": "radon_cc",
       "name": "write_tile_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "radon_cc|src/O4_Config_Utils.py|116|_loaded_config_value": {
-      "line": 116,
+    "radon_cc|src/O4_Config_Utils.py|117|_loaded_config_value": {
+      "line": 117,
       "metric": "radon_cc",
       "name": "_loaded_config_value",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1232|load_backup_global_tile_cfg": {
-      "line": 1232,
+    "radon_cc|src/O4_Config_Utils.py|1195|load_backup_global_tile_cfg": {
+      "line": 1195,
       "metric": "radon_cc",
       "name": "load_backup_global_tile_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1251|write_global_cfg": {
-      "line": 1251,
+    "radon_cc|src/O4_Config_Utils.py|1214|write_global_cfg": {
+      "line": 1214,
       "metric": "radon_cc",
       "name": "write_global_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1292|load_backup_app_cfg": {
-      "line": 1292,
+    "radon_cc|src/O4_Config_Utils.py|1255|load_backup_app_cfg": {
+      "line": 1255,
       "metric": "radon_cc",
       "name": "load_backup_app_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1315|write_app_cfg": {
-      "line": 1315,
+    "radon_cc|src/O4_Config_Utils.py|1278|write_app_cfg": {
+      "line": 1278,
       "metric": "radon_cc",
       "name": "write_app_cfg",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1345|apply_changes": {
-      "line": 1345,
+    "radon_cc|src/O4_Config_Utils.py|1308|apply_changes": {
+      "line": 1308,
       "metric": "radon_cc",
       "name": "apply_changes",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 14.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1403|check_unsaved_changes": {
-      "line": 1403,
+    "radon_cc|src/O4_Config_Utils.py|1366|check_unsaved_changes": {
+      "line": 1366,
       "metric": "radon_cc",
       "name": "check_unsaved_changes",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 39.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1580|cfg_to_dict": {
-      "line": 1580,
+    "radon_cc|src/O4_Config_Utils.py|1543|cfg_to_dict": {
+      "line": 1543,
       "metric": "radon_cc",
       "name": "cfg_to_dict",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1596|choose_dem": {
-      "line": 1596,
+    "radon_cc|src/O4_Config_Utils.py|1559|choose_dem": {
+      "line": 1559,
       "metric": "radon_cc",
       "name": "choose_dem",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|1612|add_dem": {
-      "line": 1612,
+    "radon_cc|src/O4_Config_Utils.py|1575|add_dem": {
+      "line": 1575,
       "metric": "radon_cc",
       "name": "add_dem",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|241|Tile": {
-      "line": 241,
+    "radon_cc|src/O4_Config_Utils.py|203|Tile": {
+      "line": 203,
       "metric": "radon_cc",
       "name": "Tile",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_Config_Utils.py|244|__init__": {
-      "line": 244,
+    "radon_cc|src/O4_Config_Utils.py|206|__init__": {
+      "line": 206,
       "metric": "radon_cc",
       "name": "__init__",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|259|make_dirs": {
-      "line": 259,
+    "radon_cc|src/O4_Config_Utils.py|222|make_dirs": {
+      "line": 222,
       "metric": "radon_cc",
       "name": "make_dirs",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|282|read_from_config": {
-      "line": 282,
+    "radon_cc|src/O4_Config_Utils.py|245|read_from_config": {
+      "line": 245,
       "metric": "radon_cc",
       "name": "read_from_config",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_Config_Utils.py|325|write_to_config": {
-      "line": 325,
+    "radon_cc|src/O4_Config_Utils.py|288|write_to_config": {
+      "line": 288,
       "metric": "radon_cc",
       "name": "write_to_config",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
       "value": 12.0
     },
-    "radon_cc|src/O4_Config_Utils.py|380|Ortho4XP_Config": {
-      "line": 380,
+    "radon_cc|src/O4_Config_Utils.py|343|Ortho4XP_Config": {
+      "line": 343,
       "metric": "radon_cc",
       "name": "Ortho4XP_Config",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|src/O4_Config_Utils.py|441|tile_cfg_status": {
-      "line": 441,
+    "radon_cc|src/O4_Config_Utils.py|404|tile_cfg_status": {
+      "line": 404,
       "metric": "radon_cc",
       "name": "tile_cfg_status",
       "path": "src/O4_Config_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Config_Utils.py|472|tile_config": {
-      "line": 472,
+    "radon_cc|src/O4_Config_Utils.py|435|tile_config": {
+      "line": 435,
       "metric": "radon_cc",
       "name": "tile_config",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_Config_Utils.py|688|global_config": {
-      "line": 688,
+    "radon_cc|src/O4_Config_Utils.py|651|global_config": {
+      "line": 651,
       "metric": "radon_cc",
       "name": "global_config",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_Config_Utils.py|889|app_config": {
-      "line": 889,
+    "radon_cc|src/O4_Config_Utils.py|852|app_config": {
+      "line": 852,
       "metric": "radon_cc",
       "name": "app_config",
       "path": "src/O4_Config_Utils.py",
       "severity": "warn",
       "value": 9.0
     },
-    "radon_cc|src/O4_Config_Utils.py|97|_append_legacy_zone_line": {
-      "line": 97,
+    "radon_cc|src/O4_Config_Utils.py|98|_append_legacy_zone_line": {
+      "line": 98,
       "metric": "radon_cc",
       "name": "_append_legacy_zone_line",
       "path": "src/O4_Config_Utils.py",
@@ -14006,7 +14030,7 @@
       "name": "<module>",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
-      "value": 15.08108108108108
+      "value": 15.283018867924529
     },
     "radon_hal_difficulty|src/O4_DEM_Utils.py||<module>": {
       "line": null,
@@ -14166,7 +14190,7 @@
       "name": "<module>",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
-      "value": 107878.09216850631
+      "value": 104916.63543367454
     },
     "radon_hal_effort|src/O4_DEM_Utils.py||<module>": {
       "line": null,
@@ -14350,7 +14374,7 @@
       "name": "<module>",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
-      "value": 7153.206828377659
+      "value": 6864.915651833026
     },
     "radon_hal_volume|src/O4_DEM_Utils.py||<module>": {
       "line": null,
@@ -14647,6 +14671,14 @@
       "path": "src/O4_Config_Models.py",
       "severity": "block",
       "value": 35.38060403915549
+    },
+    "radon_mi|src/O4_Config_Runtime.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Config_Runtime.py",
+      "severity": "warn",
+      "value": 51.37837420020778
     },
     "radon_mi|src/O4_Config_Utils.py||<module>": {
       "line": null,
@@ -15173,8 +15205,8 @@
       "metric": "radon_mi",
       "name": "<module>",
       "path": "tests/test_config_import_safety.py",
-      "severity": "advise",
-      "value": 73.74051708723525
+      "severity": "warn",
+      "value": 67.73017206224301
     },
     "radon_mi|tests/test_config_loading.py||<module>": {
       "line": null,
@@ -15430,7 +15462,7 @@
       "name": "<module>",
       "path": "src/O4_Config_Utils.py",
       "severity": "block",
-      "value": 878.0
+      "value": 849.0
     },
     "radon_raw_lloc|src/O4_DEM_Utils.py||<module>": {
       "line": null,
@@ -15549,6 +15581,7 @@
     "src/O4_Color_Correction.py",
     "src/O4_Color_Normalization.py",
     "src/O4_Config_Models.py",
+    "src/O4_Config_Runtime.py",
     "src/O4_Config_Utils.py",
     "src/O4_DEM_Utils.py",
     "src/O4_DSF_Header_Bridge.py",
