@@ -8,7 +8,7 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
-from O4_Scenery_Manager import SceneryManager
+from O4_Scenery_Manager import SceneryManager, SceneryError
 
 
 class TestPackageDetection(unittest.TestCase):
@@ -88,3 +88,105 @@ class TestPackageDetection(unittest.TestCase):
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         self.assertEqual(len(mgr.ortho4xp_entries()), 0)
+
+
+class TestSymlinkOperations(unittest.TestCase):
+    def setUp(self):
+        self._temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._temp.cleanup)
+        self.xplane_root = os.path.join(self._temp.name, "X-Plane")
+        self.cs_dir = os.path.join(self.xplane_root, "Custom Scenery")
+        os.makedirs(self.cs_dir)
+        self.build_dir = os.path.join(self._temp.name, "Tiles")
+        os.makedirs(self.build_dir)
+
+    def _make_tile_dir(self, lat, lon):
+        tile_name = "Ortho4XP_Mesh_+{}".format(abs(lat)) + "{:+04d}".format(lon)
+        tile_name = tile_name.replace("+-", "-")
+        path = os.path.join(self.build_dir, tile_name)
+        os.makedirs(os.path.join(path, "Earth nav data"))
+        with open(os.path.join(path, "package.json"), "w") as f:
+            json.dump({"name": tile_name, "type": "mesh", "generation": {"tool": "Ortho4XP"}}, f)
+        return path
+
+    def _ini_path(self):
+        ini_dir = os.path.join(self.xplane_root, "Output", "preferences")
+        os.makedirs(ini_dir, exist_ok=True)
+        return os.path.join(ini_dir, "scenery_packs.ini")
+
+    def _make_mgr(self, cs_dir=None):
+        return SceneryManager(
+            custom_scenery_dir=cs_dir or self.cs_dir,
+            ini_path=self._ini_path(),
+        )
+
+    def test_add_tile_creates_symlink_ini_entry(self):
+        self._make_tile_dir(43, -79)
+        mgr = self._make_mgr()
+        mgr.add_tile(lat=43, lon=-79, build_dir=self.build_dir)
+        link_path = os.path.join(self.cs_dir, "Ortho4XP_Mesh_+43-079")
+        self.assertTrue(os.path.exists(link_path))
+        mgr.refresh()
+        entries = mgr.ortho4xp_entries()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("Ortho4XP_Mesh_+43-079", entries[0].path)
+
+    def test_remove_tile_removes_symlink_ini_entry(self):
+        self._make_tile_dir(43, -79)
+        mgr = self._make_mgr()
+        mgr.add_tile(lat=43, lon=-79, build_dir=self.build_dir)
+        result = mgr.remove_tile(lat=43, lon=-79)
+        self.assertTrue(result)
+        link_path = os.path.join(self.cs_dir, "Ortho4XP_Mesh_+43-079")
+        self.assertFalse(os.path.exists(link_path))
+        mgr.refresh()
+        self.assertEqual(len(mgr.ortho4xp_entries()), 0)
+
+    def test_add_tile_no_symlink_when_same_dir(self):
+        self._make_tile_dir(43, -79)
+        mgr = self._make_mgr(cs_dir=self.build_dir)
+        mgr.add_tile(lat=43, lon=-79, build_dir=self.build_dir)
+        tile_path = os.path.join(self.build_dir, "Ortho4XP_Mesh_+43-079")
+        self.assertTrue(os.path.exists(tile_path))
+        mgr.refresh()
+        self.assertEqual(len(mgr.ortho4xp_entries()), 1)
+
+    def test_add_tile_raises_on_missing_dir(self):
+        mgr = self._make_mgr()
+        with self.assertRaises(SceneryError):
+            mgr.add_tile(lat=99, lon=99, build_dir=self.build_dir)
+
+    def test_add_overlay_creates_symlink_ini_entry(self):
+        overlay_dir = os.path.join(self._temp.name, "Ortho4XP_Overlays")
+        os.makedirs(os.path.join(overlay_dir, "Earth nav data"))
+        mgr = self._make_mgr()
+        mgr.add_overlay(overlay_dir=overlay_dir)
+        link_path = os.path.join(self.cs_dir, "Ortho4XP_Overlays")
+        self.assertTrue(os.path.exists(link_path))
+        mgr.refresh()
+        entries = mgr.ortho4xp_entries()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("Ortho4XP_Overlays", entries[0].path)
+
+    def test_remove_overlay_removes_symlink_ini_entry(self):
+        overlay_dir = os.path.join(self._temp.name, "Ortho4XP_Overlays")
+        os.makedirs(os.path.join(overlay_dir, "Earth nav data"))
+        mgr = self._make_mgr()
+        mgr.add_overlay(overlay_dir=overlay_dir)
+        result = mgr.remove_overlay()
+        self.assertTrue(result)
+        link_path = os.path.join(self.cs_dir, "Ortho4XP_Overlays")
+        self.assertFalse(os.path.exists(link_path))
+
+    def test_remove_nonexistent_returns_false(self):
+        mgr = self._make_mgr()
+        self.assertFalse(mgr.remove_tile(lat=99, lon=99))
+        self.assertFalse(mgr.remove_overlay())
+
+    def test_add_tile_does_not_duplicate_entries(self):
+        self._make_tile_dir(43, -79)
+        mgr = self._make_mgr()
+        mgr.add_tile(lat=43, lon=-79, build_dir=self.build_dir)
+        mgr.add_tile(lat=43, lon=-79, build_dir=self.build_dir)
+        mgr.refresh()
+        self.assertEqual(len(mgr.ortho4xp_entries()), 1)

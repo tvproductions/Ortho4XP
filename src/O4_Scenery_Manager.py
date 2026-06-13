@@ -1,8 +1,10 @@
 import json
 import os
+import platform
 import re
 
 from O4_Scenery_INI import SceneryEntry, SceneryINI
+import O4_Subprocess_Runtime as RUNTIME
 
 
 class SceneryError(Exception):
@@ -46,3 +48,103 @@ class SceneryManager:
         if re.match(r"^zOrtho4XP_[+-]\d+[+-]\d+$", dir_name):
             return True
         return bool(re.match(r"^yOrtho4XP_(?:Overlays?)?$", dir_name))
+
+    def add_tile(self, lat: int, lon: int, build_dir: str | None = None) -> None:
+        tile_name = self._resolve_tile_dir(lat, lon)
+        tile_build_path = self._resolve_build_path(lat, lon, build_dir)
+        if not os.path.isdir(tile_build_path):
+            raise SceneryError("Tile directory not found: " + tile_build_path)
+        if self.custom_scenery_dir and not tile_build_path.startswith(self.custom_scenery_dir):
+            self._create_symlink(tile_build_path, tile_name)
+        ini_path = os.path.join("Custom Scenery", tile_name)
+        self.refresh()
+        if self._ini.find_by_path(ini_path) is None:
+            pos = self._mesh_insertion_position()
+            self._ini.add_entry(ini_path, position=pos)
+            self._ini.write()
+
+    def add_overlay(self, overlay_dir: str | None = None) -> None:
+        overlay_name = "Ortho4XP_Overlays"
+        overlay_build_path = overlay_dir or ""
+        if not overlay_build_path or not os.path.isdir(overlay_build_path):
+            raise SceneryError("Overlay directory not found: " + str(overlay_build_path))
+        if self.custom_scenery_dir and not overlay_build_path.startswith(self.custom_scenery_dir):
+            self._create_symlink(overlay_build_path, overlay_name)
+        ini_path = os.path.join("Custom Scenery", overlay_name)
+        self.refresh()
+        if self._ini.find_by_path(ini_path) is None:
+            pos = self._overlay_insertion_position()
+            self._ini.add_entry(ini_path, position=pos)
+            self._ini.write()
+
+    def remove_tile(self, lat: int, lon: int) -> bool:
+        tile_name = self._resolve_tile_dir(lat, lon)
+        ini_path = os.path.join("Custom Scenery", tile_name)
+        self.refresh()
+        removed_ini = self._ini.remove_entry(ini_path)
+        self._ini.write()
+        symlink_removed = self._remove_symlink(tile_name)
+        return removed_ini or symlink_removed
+
+    def remove_overlay(self) -> bool:
+        overlay_name = "Ortho4XP_Overlays"
+        ini_path = os.path.join("Custom Scenery", overlay_name)
+        self.refresh()
+        removed_ini = self._ini.remove_entry(ini_path)
+        self._ini.write()
+        symlink_removed = self._remove_symlink(overlay_name)
+        return removed_ini or symlink_removed
+
+    def _resolve_tile_dir(self, lat: int, lon: int) -> str:
+        return "Ortho4XP_Mesh_{:+03d}{:+04d}".format(lat, lon)
+
+    def _resolve_build_path(self, lat: int, lon: int, build_dir: str | None) -> str:
+        tile_name = self._resolve_tile_dir(lat, lon)
+        if build_dir:
+            return os.path.join(build_dir, tile_name)
+        raise SceneryError("build_dir required to locate tile: " + tile_name)
+
+    def _create_symlink(self, target: str, link_name: str) -> None:
+        link_path = os.path.join(self.custom_scenery_dir, link_name)
+        if os.path.exists(link_path):
+            return
+        if platform.system() == "Windows":
+            rc, out, err = RUNTIME.run_captured(
+                ["cmd.exe", "/c", "mklink", "/J", link_path, target]
+            )
+            if rc != 0:
+                raise SceneryError(
+                    "Failed to create junction: " + err.strip()
+                )
+        else:
+            os.symlink(target, link_path)
+
+    def _remove_symlink(self, link_name: str) -> bool:
+        link_path = os.path.join(self.custom_scenery_dir, link_name)
+        if not os.path.exists(link_path):
+            return False
+        os.remove(link_path)
+        return True
+
+    def _overlay_insertion_position(self) -> int:
+        entries = self._ini.entries()
+        for i, e in enumerate(entries):
+            if "Overlay" in e.path or "Overlays" in e.path:
+                return i
+        for i, e in enumerate(entries):
+            if "Mesh" in e.path or "zOrtho4XP" in e.path:
+                return i
+        return len(entries)
+
+    def _mesh_insertion_position(self) -> int:
+        entries = self._ini.entries()
+        last_overlay = -1
+        for i, e in enumerate(entries):
+            if "Overlay" in e.path or "Overlays" in e.path:
+                last_overlay = i
+        if last_overlay >= 0:
+            return last_overlay + 1
+        for i, e in enumerate(entries):
+            if "Mesh" in e.path or "zOrtho4XP" in e.path:
+                return i
+        return len(entries)
