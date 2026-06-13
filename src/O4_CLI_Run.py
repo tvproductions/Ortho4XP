@@ -21,6 +21,19 @@ def main(argv: list[str] | None = None) -> int:
             print(f"ERROR: {err}")
         return 1
 
+    if args.command == "upgrade-package":
+        from O4_Package_Upgrader import upgrade_package
+        result = upgrade_package(args.package_dir, dry_run=args.dry_run)
+        if result["upgraded"]:
+            print(f"Would rename: {result['old_name']} -> {result['new_name']}")
+            if not args.dry_run:
+                print(f"Renamed: {result['old_name']} -> {result['new_name']}")
+                if result["metadata_written"]:
+                    print("package.json written")
+        else:
+            print(f"Not a legacy zOrtho4XP_ package: {args.package_dir}")
+        return 0
+
     try:
         provider_keys, combined_provider_keys, provider_metadata = _provider_inventory()
         plan = JOBS.load_build_plan(
@@ -68,6 +81,19 @@ def _parser() -> argparse.ArgumentParser:
     p_validate.add_argument(
         "package_dir", type=str,
         help="Path to the generated package directory",
+    )
+
+    p_upgrade = subparsers.add_parser(
+        "upgrade-package",
+        help="Upgrade a legacy zOrtho4XP_ package to new naming convention",
+    )
+    p_upgrade.add_argument(
+        "package_dir", type=str,
+        help="Path to the legacy zOrtho4XP_ package directory",
+    )
+    p_upgrade.add_argument(
+        "--dry-run", action="store_true",
+        help="Show what would be changed without making changes",
     )
 
     return parser
