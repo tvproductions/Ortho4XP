@@ -22,10 +22,11 @@ traces the end-to-end data flow from provider download through to DDS/GeoTIFF
 output, documents current assumptions about CRS, resampling, compression, and
 alpha handling, and recommends concrete follow-up issues.
 
-Scope is limited to the production pipeline that generates orthophoto textures,
-masks, and GeoTIFFs. DEM/elevation raster handling is covered only where it
-interacts with the imagery pipeline (mask reprojection, bathymetry). The DSF
-encoding layer is out of scope except where it reads texture or mask output.
+Scope covers the production pipeline for orthophoto textures, masks, GeoTIFFs,
+and the raster data they feed into DSF generation (elevation, bathymetry,
+texture references, mask layers). Detailed DSF encoding internals (text format,
+patches, properties) are covered by TODO-017; this document focuses on the
+raster inputs and format constraints that DSF encoding depends on.
 
 ## 2. Active Tools and Libraries
 
@@ -200,6 +201,26 @@ grid of quads, computes 4 corner positions per quad, calls
 - Failed tiles: filled with white (`Image.new("RGB", ..., "white")`)
 - Incomplete textures tracked via `record_incomplete_texture()`
 
+### 3.4 Raster Data Consumed by DSF Generation
+
+The DSF encoding layer (`O4_DSF_Utils.py`) consumes several raster types that
+the imagery and mesh pipelines produce. These types constrain texture and mask
+format decisions:
+
+| Raster | Source | Format in DSF | Pipeline relevance |
+|--------|--------|---------------|-------------------|
+| **Elevation DEM** | `O4_Mesh_Utils.py` / `O4_DEM_Utils.py` | 16-bit signed integer grid (elevation in meters) | GDAL reads; bathymetry validation depends on sea_level raster; nodata handling must match DSF expectations |
+| **Bathymetry DEMS** | `O4_Bathymetry.py` | 16-bit signed integer grid (water depth in meters, negative values) | Required for XP12 3D water; `water_tech = "XP12"` enforced in §7.4 GDAL migration must keep array precision |
+| **Texture references** | DSF header from `build_jpeg_ortho` output paths | Relative path to `.dds` in generated package | Determines DDS naming convention; mask overlay vs. alpha-in-DDS choice affects DSF texture layer encoding |
+| **Overlay mask** | `O4_Mask_Utils.py` | Either separate `.dds` overlay terrain (no alpha in main texture) or alpha channel in main texture DDS (BC3) | The `imprint_masks_to_dds` flag routes between these two; DSF encoding reads it to decide texture layer layout |
+| **Landclass / seasons** | Spliced from default XP12 DSF header (TODO-017) | Inherited header properties | Not a raster output; DSFTool bridge splices these without changing the imagery pipeline |
+
+**Key constraint**: The DSF elevation grid uses 16-bit signed integers with
+either a hardcoded `-32768` nodata sentinel or GDAL-read nodata values. The
+bathymetry raster must use negative values that are valid 16-bit signed
+integers. The texture DDS format (BC1 vs BC3) must match what the DSF texture
+layer expects — DSF does not remap texture formats at load time.
+
 ## 4. CRS and Projection Model
 
 ### 4.1 Active Coordinate Systems
@@ -373,25 +394,22 @@ final GeoTIFF export. Benefits:
 
 ### 7.2 Explicit Resampling Policy (Medium impact, Small effort)
 
-**Observation**: BICUBIC is used uniformly across all resize/reproject
-operations, but the choice is hardcoded with no configuration surface.
+**Decision**: Per-stage defaults with optional config overrides.
 
-**Opportunity**: Define per-stage resampling defaults:
-- Texture resize: LANCZOS (sharper downscale)
-- Mask resize: NEAREST (preserve hard edges) or BILINEAR (smooth transition)
-- Reprojection warp: BICUBIC (current, reasonable for continuous tone)
-- Normalization edge comparison: BILINEAR (acceptable for statistics)
+| Stage | Default | Rationale |
+|-------|---------|-----------|
+| Texture downscale (provider → 4096) | LANCZOS | Sharper than BICUBIC for downscaling continuous-tone imagery |
+| Mask resize (6144 → 4096) | NEAREST | Preserves hard water/land boundaries |
+| Reprojection warp (`gdal.Warp()`) | BICUBIC | Standard for continuous-tone raster reprojection |
+| Normalization edge sampling (32px bands) | BILINEAR | Acceptable smoothness for mean/luminance statistics |
 
-Expose as optional config overrides with safe defaults.
+Exposed per-stage via config with safe defaults.
 
 ### 7.3 Cloud-Optimized GeoTIFF (COG) Exports (Low impact, Small effort)
 
-**Observation**: GeoTIFF export uses `-co COMPRESS=JPEG` only, no overviews or
-tiling.
-
-**Opportunity**: With `osgeo.gdal` in-process, add optional
+**Decision**: Add optional COG mode via config flag. When enabled:
 `gdal.Translate(co=TILED=YES, BLOCKXSIZE=512, BLOCKYSIZE=512)` + internal
-masks + `gdal.AddOverview()` for COG-compatible debug exports.
+masks + `gdal.AddOverview()`. Trivial with `osgeo.gdal` hard dependency.
 
 ### 7.4 GDAL Python Bindings — Hard Dependency (Committed, Large effort)
 
@@ -430,38 +448,28 @@ all current pixel-processing needs:
 - Unsharp mask — Pillow `ImageFilter.UnsharpMask()`
 - sRGB normalization — NumPy array math
 
-**Deferred triggers**: OpenCV becomes worth evaluating when:
-- **Histogram matching / color transfer**: If the current edge-statistic
-  normalization is insufficient and we need per-channel histogram matching
-- **Feature-based tile alignment**: If multi-provider stitching is added (SIFT/ORB
-  feature detection)
-- **GPU acceleration demand**: If per-tile processing time becomes a bottleneck
-  and CUDA is available
+**Gate for adding**: OpenCV is adopted when one of:
+1. Edge-statistic color normalization proves insufficient and per-channel
+   histogram matching is required
+2. Multi-provider tile stitching with feature detection (SIFT/ORB) is added
+3. Per-tile processing becomes a CPU bottleneck AND CUDA is available
 
 **Risk on add**: 100+ MB dependency, mixed Py3.13 wheel availability (especially
 macOS ARM), CUDA runtime requirement for GPU backend.
 
 ### 7.6 Compression-Aware Image QA (Medium impact, Medium effort)
 
-**Observation**: No post-compression quality validation. DDS is generated with
-`-highest` preset (post-decision), but there is still no QA step.
-
-**Opportunity**: Add optional QA step:
+**Decision**: Add optional QA step (disabled by default, toggled via config):
 1. Decode compressed DDS to PNG
 2. Compare with source PNG using PSNR, SSIM, or MSE
-3. Log or warn if quality drops below configurable threshold
-4. Optionally fall back to a different pipeline (e.g., uncompressed RGBA DDS)
+3. Warn if quality drops below configurable threshold
 
 ### 7.7 Sharpening / Post-Processing Pipeline (Medium impact, Medium effort)
 
-**Observation**: No sharpening is applied to downloaded orthophotos. Some
-providers produce soft imagery from JPEG compression or resampling.
-
-**Opportunity**: Add configurable sharpening as a filter operation in the
-`convert_texture()` pipeline:
-- Unsharp mask (Pillow `ImageFilter.UnsharpMask`)
-- Configurable radius / amount / threshold per provider
-- Applied after color filter, before normalization
+**Decision**: Add `"sharpen"` as a supported operation in the color filter
+pipeline (`O4_Imagery_Utils.py:color_transform()`). Parameters `[radius,
+amount, threshold]` mapped to Pillow `ImageFilter.UnsharpMask()`. Applied
+after color filter, before sRGB normalization.
 
 ### 7.8 Overview and Pyramided Output (Low impact, Medium effort)
 
@@ -480,7 +488,25 @@ thread-per-request), connection pooling, backpressure via semaphore, and
 easier cancellation. CPU-bound JPEG decoding dispatched via
 `asyncio.to_thread()`.
 
-### 7.10 Architecture Leap: In-Memory Streaming Pipeline (High impact, Large effort)
+### 7.10 Parallelism Model (Decided)
+
+**Decision**: The async pipeline drives all tile processing as coroutines.
+`asyncio.gather()` runs multiple tiles concurrently, each as a single coroutine:
+
+```
+process_tile() coroutine:
+  1. await tile downloads (aiohttp, async I/O)
+  2. await asyncio.to_thread(gdal_warp)   # offload CPU-bound GDAL
+  3. color processing inline (NumPy/Pillow, fast enough for main thread)
+  4. await asyncio.create_subprocess_exec(nvcompress, ...)  # async subprocess
+```
+
+`ThreadPoolExecutor` is retained only as a fallback for nvcompress on platforms
+where `create_subprocess_exec` has edge cases. GDAL operates on per-dataset
+handles — independent tile warps are safe from multiple coroutines without a
+global lock.
+
+### 7.11 Architecture Leap: In-Memory Streaming Pipeline (High impact, Large effort)
 
 **Current flow** (each arrow writes and re-reads from disk):
 ```
@@ -518,23 +544,35 @@ HTTP tiles (aiohttp)
 
 ## 8. Recommended Follow-Up Issues
 
-| # | Title | Priority | Effort | Reference |
-|---|-------|----------|--------|-----------|
-| 1 | **Replace GDAL CLI with osgeo.gdal hard dependency** | **Critical** | **Large** | §7.4 |
-| 2 | **Implement in-memory VRT streaming pipeline** | **Critical** | **Large** | §7.10 |
-| 3 | Upgrade nvcompress to `-highest -mipfilter kaiser -alpha_dithering` flags (Win/Lin) | High | Small | §2.4 |
-| 4 | Replace requests with aiohttp + asyncio for tile downloads | High | Medium | §7.9 |
-| 5 | Create tool-updating skill for keeping bundled tools current | High | Medium | §9 |
-| 6 | Define explicit per-stage resampling policy with config overrides | Medium | Small | §7.2 |
-| 7 | Add COG-style GeoTIFF export with overviews | Low | Small | §7.3 |
-| 8 | Add compression-aware DDS QA with PSNR/SSIM thresholds | Medium | Medium | §7.6 |
-| 9 | Add configurable unsharp-mask sharpening to post-processing pipeline | Medium | Medium | §7.7 |
-| 10 | Evaluate OpenCV for histogram matching / feature alignment | Low | Large | §7.5 |
+| # | Title | Status | Priority | Effort | Reference |
+|---|-------|--------|----------|--------|-----------|
+| 1 | Replace GDAL CLI with osgeo.gdal hard dependency | **Committed** | Critical | Large | §7.4 |
+| 2 | Implement in-memory VRT streaming pipeline | **Committed** | Critical | Large | §7.11 |
+| 3 | Upgrade nvcompress to `-highest -mipfilter kaiser -alpha_dithering` flags (Win/Lin) | **Committed** | High | Small | §2.4 |
+| 4 | Replace requests with aiohttp + asyncio for tile downloads | **Committed** | High | Medium | §7.9 |
+| 5 | Define per-stage resampling policy with config overrides | **Committed** | Medium | Small | §7.2 |
+| 6 | Add COG-style GeoTIFF export with overviews | **Committed** | Low | Small | §7.3 |
+| 7 | Add compression-aware DDS QA with PSNR/SSIM thresholds | **Committed** | Medium | Medium | §7.6 |
+| 8 | Add configurable unsharp-mask sharpening to post-processing pipeline | **Committed** | Medium | Medium | §7.7 |
+| 9 | Create tool-updating skill for keeping bundled tools current | **Done** | High | Medium | §9 |
+| 10 | Evaluate OpenCV for histogram matching / feature alignment | Deferred | Low | Large | §7.5 |
 
-Issues are ordered by recommended execution priority (highest value per effort
-first), not by section order.
+All committed items are included in the implementation plan for the next phase.
+Items are ordered by recommended execution priority, not by section order.
 
-## 9. Tool Update Management
+## 9. Dependency Management
+
+### 9.1 Two Tracks
+
+| Track | Managing | Update mechanism | Examples |
+|-------|----------|-----------------|---------|
+| **Python packages** | `pyproject.toml` + `uv.lock` | `uv sync --upgrade-package <name>` | skfmm, gdal, aiohttp, pyproj, Pillow, NumPy |
+| **Bundled CLI tools** | `Utils/<platform>/` | `updating-bundled-tools` skill | nvcompress, DSFTool, DDSTool, Triangle4XP, 7z, moulinette |
+
+Both tracks must be kept current. Stale Python packages are tracked by
+renovate/dependabot policy; stale CLI tools require manual checks via the skill.
+
+### 9.2 Tool Update Management
 
 **Observation**: Bundled tools (nvcompress, DDSTool, DSFTool, Triangle4XP, 7z,
 moulinette) have no automated update mechanism. Versions drift as upstream
