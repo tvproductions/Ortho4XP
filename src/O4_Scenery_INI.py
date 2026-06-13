@@ -31,6 +31,8 @@ class SceneryINI:
 
     def write(self, path: str | None = None) -> None:
         out_path = path or self.path
+        if not out_path:
+            return
         with open(out_path, "w", encoding="utf-8", newline="\n") as f:
             f.write("I\n1000 Version\n\n")
             for entry in self._entries:
