@@ -43,6 +43,20 @@ class FileNamesTests(unittest.TestCase):
             os.path.join("D:", "tiles", "Ortho4XP_Mesh_+43-079"),
         )
 
+    def test_overlay_dir_uses_config_driven_naming(self):
+        self.assertEqual(names.overlay_dir_name(), "Ortho4XP_Overlays")
+
+    def test_overlay_dir_name_returns_monolithic_name_by_default(self):
+        self.assertEqual(names.overlay_dir_name(), "Ortho4XP_Overlays")
+
+    def test_overlay_dir_name_with_per_tile_and_coords(self):
+        self.assertEqual(names.overlay_dir_name(43, -79), "Ortho4XP_Overlays")
+
+    def test_overlay_dir_has_no_legacy_y_prefix(self):
+        basename = os.path.basename(names.Overlay_dir)
+        self.assertNotEqual(basename, "yOrtho4XP_Overlays")
+        self.assertEqual(basename, "Ortho4XP_Overlays")
+
     def test_mesh_and_dsf_file_paths_use_tile_naming_conventions(self):
         build_dir = os.path.join("Tiles", "Ortho4XP_Mesh_+43-079")
 

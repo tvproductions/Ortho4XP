@@ -1659,7 +1659,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         if not CFG.custom_scenery_dir:  # ty:ignore[unresolved-attribute]
             UI.vprint(1, "Custom Scenery directory not set.")
             return
-        link = os.path.join(CFG.custom_scenery_dir, "yOrtho4XP_Overlays")  # ty:ignore[unresolved-attribute]
+        link = os.path.join(CFG.custom_scenery_dir, FNAMES.overlay_dir_name())  # ty:ignore[unresolved-attribute]
         # Remove symlink if it already exists
         if os.path.isdir(link) and os.path.samefile(
             os.path.realpath(link), FNAMES.Overlay_dir
@@ -1667,7 +1667,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             os.remove(link)
             UI.vprint(
                 1,
-                f"yOrtho4XP_Overlays link removed from: {CFG.custom_scenery_dir}",  # ty:ignore[unresolved-attribute]
+                f"{FNAMES.overlay_dir_name()} link removed from: {CFG.custom_scenery_dir}",  # ty:ignore[unresolved-attribute]
             )
             return
         # Add symlink if it doesn't exist
@@ -1676,7 +1676,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             os.system("ln -s " + ' "' + FNAMES.Overlay_dir + '" "' + link + '"')
         else:
             os.system('MKLINK /J "' + link + '" "' + FNAMES.Overlay_dir + '"')
-        UI.vprint(1, f"yOrtho4XP_Overlays link added to: {CFG.custom_scenery_dir}")  # ty:ignore[unresolved-attribute]
+        UI.vprint(1, f"{FNAMES.overlay_dir_name()} link added to: {CFG.custom_scenery_dir}")  # ty:ignore[unresolved-attribute]
 
     def set_working_dir(self):
         self.custom_build_dir = self.parent.custom_build_dir.get()

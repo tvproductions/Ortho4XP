@@ -31,7 +31,17 @@ Patch_dir = resource_path("Patches")
 Utils_dir = resource_path("Utils")
 Tile_dir = resource_path("Tiles")
 Tmp_dir = resource_path("tmp")
-Overlay_dir = resource_path("yOrtho4XP_Overlays")
+def _overlay_dir_name():
+    try:
+        import O4_Config_Utils as CFG
+        prefix = getattr(CFG, "package_prefix", "Ortho4XP")
+        sep = getattr(CFG, "package_separator", "_")
+        mono = getattr(CFG, "monolithic_overlay_name", "Overlays")
+    except Exception:
+        prefix, sep, mono = "Ortho4XP", "_", "Overlays"
+    return prefix + sep + mono
+
+Overlay_dir = resource_path(_overlay_dir_name())
 
 
 ##############################################################################
