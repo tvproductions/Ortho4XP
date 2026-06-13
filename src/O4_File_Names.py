@@ -67,8 +67,37 @@ def hem_latlon(lat, lon):
 
 
 ##############################################################################
+def _naming_config():
+    try:
+        import O4_Config_Utils as CFG
+        prefix = getattr(CFG, "package_prefix", "Ortho4XP")
+        sep = getattr(CFG, "package_separator", "_")
+        mesh_token = getattr(CFG, "mesh_purpose_token", "Mesh")
+        overlay_token = getattr(CFG, "overlay_purpose_token", "Overlay")
+        mono_name = getattr(CFG, "monolithic_overlay_name", "Overlays")
+        per_tile = getattr(CFG, "per_tile_overlays", False)
+    except Exception:
+        prefix, sep, mesh_token, overlay_token, mono_name, per_tile = (
+            "Ortho4XP", "_", "Mesh", "Overlay", "Overlays", False
+        )
+    return prefix, sep, mesh_token, overlay_token, mono_name, per_tile
+
+
 def tile_dir(lat, lon):
-    return "zOrtho4XP_" + short_latlon(lat, lon)
+    prefix, sep, mesh_token, _, _, _ = _naming_config()
+    return prefix + sep + mesh_token + sep + short_latlon(lat, lon)
+
+
+def overlay_dir_name(lat=None, lon=None):
+    """Return the overlay package directory name.
+
+    If per_tile_overlays is True and lat/lon provided, returns per-tile name.
+    Otherwise returns the monolithic overlay name.
+    """
+    prefix, sep, _, overlay_token, mono_name, per_tile = _naming_config()
+    if per_tile and lat is not None and lon is not None:
+        return prefix + sep + overlay_token + sep + short_latlon(lat, lon)
+    return prefix + sep + mono_name
 
 
 def build_dir(lat, lon, custom_build_dir):

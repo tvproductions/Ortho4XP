@@ -24,22 +24,27 @@ class FileNamesTests(unittest.TestCase):
         self.assertEqual(names.round_latlon(-1.25, 7.8), "-10+000")
         self.assertEqual(names.hem_latlon(-1.25, 7.8), "S01E008")
 
-    def test_build_dir_uses_default_tile_directory_without_custom_path(self):
+    def test_tile_dir_uses_config_driven_naming(self):
+        self.assertEqual(names.tile_dir(43, -79), "Ortho4XP_Mesh_+43-079")
+
+    def test_tile_dir_is_configurable_via_prefix(self):
+        self.assertTrue(names.tile_dir(43, -79).startswith("Ortho4XP"))
+
+    def test_build_dir_uses_config_driven_tile_dir(self):
         self.assertEqual(
             names.build_dir(43, -79, ""),
-            os.path.join(names.Tile_dir, "zOrtho4XP_+43-079"),
+            os.path.join(names.Tile_dir, "Ortho4XP_Mesh_+43-079"),
         )
 
     def test_build_dir_appends_tile_name_for_directory_like_custom_path(self):
         custom_dir = os.path.join("D:", "tiles") + os.sep
-
         self.assertEqual(
             names.build_dir(43, -79, custom_dir),
-            os.path.join("D:", "tiles", "zOrtho4XP_+43-079"),
+            os.path.join("D:", "tiles", "Ortho4XP_Mesh_+43-079"),
         )
 
     def test_mesh_and_dsf_file_paths_use_tile_naming_conventions(self):
-        build_dir = os.path.join("Tiles", "zOrtho4XP_+43-079")
+        build_dir = os.path.join("Tiles", "Ortho4XP_Mesh_+43-079")
 
         self.assertEqual(
             names.mesh_file(build_dir, 43, -79),
