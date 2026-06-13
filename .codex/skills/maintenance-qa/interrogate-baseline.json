@@ -1,0 +1,5 @@
+{
+  "minimum_coverage": 10.0,
+  "assessed_date": "2026-06-13",
+  "notes": "Baseline established from initial maintenance-qa run. Docstring coverage is low due to legacy codebase. Target: increase to 30% over next 6 months."
+}

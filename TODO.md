@@ -613,9 +613,16 @@ Suggested labels: `repository-health`, `documentation`
 
 ### TODO-024: Publish Release Guidance
 
+Status: Done
+
 GitHub Issue: #19
 
 Document the release process for PyInstaller onedir bundles.
+
+Completed by adding `RELEASE.md` covering per-platform build targets,
+PyInstaller commands, bundled data layout, native tool production and staging,
+packaged vs. source dependency differences, SemVer versioning policy starting at
+`v1.0.0`, release verification steps, and GitHub Release publishing guidance.
 
 Acceptance criteria:
 
@@ -632,10 +639,23 @@ Suggested labels: `release`, `documentation`, `packaging`
 
 ### TODO-025: Decompose Legacy Oversized Python Modules and Classes
 
+Status: Done
+
 GitHub Issue: #29
 
 Reduce the module/class size warnings now surfaced by the gzkit-parity
 quality-check code-quality audit.
+
+Completed by decomposing `O4_Airport_Utils.py` (1382 lines, 14 functions) into
+three focused modules: `O4_Airport_Discovery.py` (OSM parsing, airport
+identification, runway reconstruction, reporting), `O4_Airport_Geometry.py`
+(surface geometry construction, DEM smoothing, boundary updates), and
+`O4_Airport_Encoding.py` (encoding airport features into the vector map).
+The single consumer `O4_Vector_Map.py` was updated to import from the three
+new modules. The broad module-size waiver for `O4_Airport_Utils.py` was
+replaced with a narrower waiver for `O4_Airport_Discovery.py` (667 lines,
+soft warning only; the other two modules are under the 600-line threshold).
+The complexity baseline was regenerated. Import tests were added.
 
 Acceptance criteria:
 

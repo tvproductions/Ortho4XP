@@ -392,109 +392,109 @@
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Airport_Utils.py|1267|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
-      "line": 1267,
-      "metric": "lizard_ccn",
-      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 7.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|1292|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
-      "line": 1292,
-      "metric": "lizard_ccn",
-      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 27.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|172|attach_surfaces_to_airports( airport_layer , dico_airports )": {
-      "line": 172,
-      "metric": "lizard_ccn",
-      "name": "attach_surfaces_to_airports( airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 36.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|19|discover_airport_names( airport_layer , dico_airports )": {
-      "line": 19,
+    "lizard_ccn|src/O4_Airport_Discovery.py|10|discover_airport_names( airport_layer , dico_airports )": {
+      "line": 10,
       "metric": "lizard_ccn",
       "name": "discover_airport_names( airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 35.0
     },
-    "lizard_ccn|src/O4_Airport_Utils.py|321|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
-      "line": 321,
+    "lizard_ccn|src/O4_Airport_Discovery.py|162|attach_surfaces_to_airports( airport_layer , dico_airports )": {
+      "line": 162,
+      "metric": "lizard_ccn",
+      "name": "attach_surfaces_to_airports( airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "block",
+      "value": 36.0
+    },
+    "lizard_ccn|src/O4_Airport_Discovery.py|309|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
+      "line": 309,
       "metric": "lizard_ccn",
       "name": "sort_and_reconstruct_runways( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 53.0
     },
-    "lizard_ccn|src/O4_Airport_Utils.py|646|discard_unwanted_airports( tile , dico_airports )": {
-      "line": 646,
+    "lizard_ccn|src/O4_Airport_Discovery.py|612|discard_unwanted_airports( tile , dico_airports )": {
+      "line": 612,
       "metric": "lizard_ccn",
       "name": "discard_unwanted_airports( tile , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Airport_Utils.py|663|build_hangar_areas( tile , airport_layer , dico_airports )": {
-      "line": 663,
-      "metric": "lizard_ccn",
-      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 6.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|698|build_apron_areas( tile , airport_layer , dico_airports )": {
-      "line": 698,
-      "metric": "lizard_ccn",
-      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 6.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|740|build_taxiway_areas( tile , airport_layer , dico_airports )": {
-      "line": 740,
-      "metric": "lizard_ccn",
-      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|769|update_airport_boundaries( tile , dico_airports )": {
-      "line": 769,
-      "metric": "lizard_ccn",
-      "name": "update_airport_boundaries( tile , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "lizard_ccn|src/O4_Airport_Utils.py|811|list_airports_and_runways( dico_airports )": {
-      "line": 811,
+    "lizard_ccn|src/O4_Airport_Discovery.py|624|list_airports_and_runways( dico_airports )": {
+      "line": 624,
       "metric": "lizard_ccn",
       "name": "list_airports_and_runways( dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 15.0
     },
-    "lizard_ccn|src/O4_Airport_Utils.py|874|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
-      "line": 874,
+    "lizard_ccn|src/O4_Airport_Encoding.py|14|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
+      "line": 14,
+      "metric": "lizard_ccn",
+      "name": "encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 54.0
+    },
+    "lizard_ccn|src/O4_Airport_Encoding.py|272|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
+      "line": 272,
+      "metric": "lizard_ccn",
+      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "advise",
+      "value": 7.0
+    },
+    "lizard_ccn|src/O4_Airport_Encoding.py|296|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
+      "line": 296,
+      "metric": "lizard_ccn",
+      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 27.0
+    },
+    "lizard_ccn|src/O4_Airport_Geometry.py|117|update_airport_boundaries( tile , dico_airports )": {
+      "line": 117,
+      "metric": "lizard_ccn",
+      "name": "update_airport_boundaries( tile , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Airport_Geometry.py|14|build_hangar_areas( tile , airport_layer , dico_airports )": {
+      "line": 14,
+      "metric": "lizard_ccn",
+      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "lizard_ccn|src/O4_Airport_Geometry.py|170|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
+      "line": 170,
       "metric": "lizard_ccn",
       "name": "smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Geometry.py",
       "severity": "block",
       "value": 19.0
     },
-    "lizard_ccn|src/O4_Airport_Utils.py|984|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
-      "line": 984,
+    "lizard_ccn|src/O4_Airport_Geometry.py|48|build_apron_areas( tile , airport_layer , dico_airports )": {
+      "line": 48,
       "metric": "lizard_ccn",
-      "name": "encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 54.0
+      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "lizard_ccn|src/O4_Airport_Geometry.py|89|build_taxiway_areas( tile , airport_layer , dico_airports )": {
+      "line": 89,
+      "metric": "lizard_ccn",
+      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 4.0
     },
     "lizard_ccn|src/O4_Bathymetry.py|16|recut_water_tris( node_coords , tri_idx , tri_types )": {
       "line": 16,
@@ -2080,64 +2080,64 @@
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|207|include_roads( vector_map , tile , apt_array , apt_area )": {
-      "line": 207,
+    "lizard_ccn|src/O4_Vector_Map.py|209|include_roads( vector_map , tile , apt_array , apt_area )": {
+      "line": 209,
       "metric": "lizard_ccn",
       "name": "include_roads( vector_map , tile , apt_array , apt_area )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 14.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|208|include_roads.road_is_too_much_banked( way , filtered_segs )": {
-      "line": 208,
+    "lizard_ccn|src/O4_Vector_Map.py|210|include_roads.road_is_too_much_banked( way , filtered_segs )": {
+      "line": 210,
       "metric": "lizard_ccn",
       "name": "include_roads.road_is_too_much_banked( way , filtered_segs )",
       "path": "src/O4_Vector_Map.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|22|build_poly_file( tile , ctx = None )": {
-      "line": 22,
+    "lizard_ccn|src/O4_Vector_Map.py|24|build_poly_file( tile , ctx = None )": {
+      "line": 24,
       "metric": "lizard_ccn",
       "name": "build_poly_file( tile , ctx = None )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 23.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|338|include_sea( vector_map , tile )": {
-      "line": 338,
+    "lizard_ccn|src/O4_Vector_Map.py|340|include_sea( vector_map , tile )": {
+      "line": 340,
       "metric": "lizard_ccn",
       "name": "include_sea( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 14.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|421|include_water( vector_map , tile )": {
-      "line": 421,
+    "lizard_ccn|src/O4_Vector_Map.py|423|include_water( vector_map , tile )": {
+      "line": 423,
       "metric": "lizard_ccn",
       "name": "include_water( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "warn",
       "value": 9.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|426|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
-      "line": 426,
+    "lizard_ccn|src/O4_Vector_Map.py|428|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
+      "line": 428,
       "metric": "lizard_ccn",
       "name": "include_water.filter_large_lakes( pol , osmid , dicosmtags )",
       "path": "src/O4_Vector_Map.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|598|include_patches( vector_map , tile )": {
-      "line": 598,
+    "lizard_ccn|src/O4_Vector_Map.py|600|include_patches( vector_map , tile )": {
+      "line": 600,
       "metric": "lizard_ccn",
       "name": "include_patches( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 48.0
     },
-    "lizard_ccn|src/O4_Vector_Map.py|835|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
-      "line": 835,
+    "lizard_ccn|src/O4_Vector_Map.py|837|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
+      "line": 837,
       "metric": "lizard_ccn",
       "name": "keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )",
       "path": "src/O4_Vector_Map.py",
@@ -2944,109 +2944,109 @@
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|1267|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
-      "line": 1267,
-      "metric": "lizard_nesting_depth",
-      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 6.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|1292|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
-      "line": 1292,
-      "metric": "lizard_nesting_depth",
-      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 15.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|172|attach_surfaces_to_airports( airport_layer , dico_airports )": {
-      "line": 172,
-      "metric": "lizard_nesting_depth",
-      "name": "attach_surfaces_to_airports( airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 27.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|19|discover_airport_names( airport_layer , dico_airports )": {
-      "line": 19,
+    "lizard_nesting_depth|src/O4_Airport_Discovery.py|10|discover_airport_names( airport_layer , dico_airports )": {
+      "line": 10,
       "metric": "lizard_nesting_depth",
       "name": "discover_airport_names( airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 17.0
     },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|321|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
-      "line": 321,
+    "lizard_nesting_depth|src/O4_Airport_Discovery.py|162|attach_surfaces_to_airports( airport_layer , dico_airports )": {
+      "line": 162,
+      "metric": "lizard_nesting_depth",
+      "name": "attach_surfaces_to_airports( airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "block",
+      "value": 27.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Discovery.py|309|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
+      "line": 309,
       "metric": "lizard_nesting_depth",
       "name": "sort_and_reconstruct_runways( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 42.0
     },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|646|discard_unwanted_airports( tile , dico_airports )": {
-      "line": 646,
+    "lizard_nesting_depth|src/O4_Airport_Discovery.py|612|discard_unwanted_airports( tile , dico_airports )": {
+      "line": 612,
       "metric": "lizard_nesting_depth",
       "name": "discard_unwanted_airports( tile , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|663|build_hangar_areas( tile , airport_layer , dico_airports )": {
-      "line": 663,
-      "metric": "lizard_nesting_depth",
-      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 5.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|698|build_apron_areas( tile , airport_layer , dico_airports )": {
-      "line": 698,
-      "metric": "lizard_nesting_depth",
-      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 5.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|740|build_taxiway_areas( tile , airport_layer , dico_airports )": {
-      "line": 740,
-      "metric": "lizard_nesting_depth",
-      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 3.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|769|update_airport_boundaries( tile , dico_airports )": {
-      "line": 769,
-      "metric": "lizard_nesting_depth",
-      "name": "update_airport_boundaries( tile , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 3.0
-    },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|811|list_airports_and_runways( dico_airports )": {
-      "line": 811,
+    "lizard_nesting_depth|src/O4_Airport_Discovery.py|624|list_airports_and_runways( dico_airports )": {
+      "line": 624,
       "metric": "lizard_nesting_depth",
       "name": "list_airports_and_runways( dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 12.0
     },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|874|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
-      "line": 874,
+    "lizard_nesting_depth|src/O4_Airport_Encoding.py|14|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
+      "line": 14,
+      "metric": "lizard_nesting_depth",
+      "name": "encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 45.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Encoding.py|272|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
+      "line": 272,
+      "metric": "lizard_nesting_depth",
+      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 6.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Encoding.py|296|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
+      "line": 296,
+      "metric": "lizard_nesting_depth",
+      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 15.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Geometry.py|117|update_airport_boundaries( tile , dico_airports )": {
+      "line": 117,
+      "metric": "lizard_nesting_depth",
+      "name": "update_airport_boundaries( tile , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Geometry.py|14|build_hangar_areas( tile , airport_layer , dico_airports )": {
+      "line": 14,
+      "metric": "lizard_nesting_depth",
+      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "block",
+      "value": 5.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Geometry.py|170|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
+      "line": 170,
       "metric": "lizard_nesting_depth",
       "name": "smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Geometry.py",
       "severity": "block",
       "value": 16.0
     },
-    "lizard_nesting_depth|src/O4_Airport_Utils.py|984|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
-      "line": 984,
+    "lizard_nesting_depth|src/O4_Airport_Geometry.py|48|build_apron_areas( tile , airport_layer , dico_airports )": {
+      "line": 48,
       "metric": "lizard_nesting_depth",
-      "name": "encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
+      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
       "severity": "block",
-      "value": 45.0
+      "value": 5.0
+    },
+    "lizard_nesting_depth|src/O4_Airport_Geometry.py|89|build_taxiway_areas( tile , airport_layer , dico_airports )": {
+      "line": 89,
+      "metric": "lizard_nesting_depth",
+      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "warn",
+      "value": 3.0
     },
     "lizard_nesting_depth|src/O4_Bathymetry.py|16|recut_water_tris( node_coords , tri_idx , tri_types )": {
       "line": 16,
@@ -5088,64 +5088,64 @@
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|207|include_roads( vector_map , tile , apt_array , apt_area )": {
-      "line": 207,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|209|include_roads( vector_map , tile , apt_array , apt_area )": {
+      "line": 209,
       "metric": "lizard_nesting_depth",
       "name": "include_roads( vector_map , tile , apt_array , apt_area )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 14.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|208|include_roads.road_is_too_much_banked( way , filtered_segs )": {
-      "line": 208,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|210|include_roads.road_is_too_much_banked( way , filtered_segs )": {
+      "line": 210,
       "metric": "lizard_nesting_depth",
       "name": "include_roads.road_is_too_much_banked( way , filtered_segs )",
       "path": "src/O4_Vector_Map.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|22|build_poly_file( tile , ctx = None )": {
-      "line": 22,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|24|build_poly_file( tile , ctx = None )": {
+      "line": 24,
       "metric": "lizard_nesting_depth",
       "name": "build_poly_file( tile , ctx = None )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 22.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|338|include_sea( vector_map , tile )": {
-      "line": 338,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|340|include_sea( vector_map , tile )": {
+      "line": 340,
       "metric": "lizard_nesting_depth",
       "name": "include_sea( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 11.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|421|include_water( vector_map , tile )": {
-      "line": 421,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|423|include_water( vector_map , tile )": {
+      "line": 423,
       "metric": "lizard_nesting_depth",
       "name": "include_water( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|426|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
-      "line": 426,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|428|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
+      "line": 428,
       "metric": "lizard_nesting_depth",
       "name": "include_water.filter_large_lakes( pol , osmid , dicosmtags )",
       "path": "src/O4_Vector_Map.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|598|include_patches( vector_map , tile )": {
-      "line": 598,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|600|include_patches( vector_map , tile )": {
+      "line": 600,
       "metric": "lizard_nesting_depth",
       "name": "include_patches( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 37.0
     },
-    "lizard_nesting_depth|src/O4_Vector_Map.py|835|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
-      "line": 835,
+    "lizard_nesting_depth|src/O4_Vector_Map.py|837|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
+      "line": 837,
       "metric": "lizard_nesting_depth",
       "name": "keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )",
       "path": "src/O4_Vector_Map.py",
@@ -5968,101 +5968,101 @@
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|src/O4_Airport_Utils.py|1267|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
-      "line": 1267,
-      "metric": "lizard_nloc",
-      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 22.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|1292|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
-      "line": 1292,
-      "metric": "lizard_nloc",
-      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 81.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|172|attach_surfaces_to_airports( airport_layer , dico_airports )": {
-      "line": 172,
-      "metric": "lizard_nloc",
-      "name": "attach_surfaces_to_airports( airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 145.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|19|discover_airport_names( airport_layer , dico_airports )": {
-      "line": 19,
+    "lizard_nloc|src/O4_Airport_Discovery.py|10|discover_airport_names( airport_layer , dico_airports )": {
+      "line": 10,
       "metric": "lizard_nloc",
       "name": "discover_airport_names( airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 150.0
     },
-    "lizard_nloc|src/O4_Airport_Utils.py|321|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
-      "line": 321,
+    "lizard_nloc|src/O4_Airport_Discovery.py|162|attach_surfaces_to_airports( airport_layer , dico_airports )": {
+      "line": 162,
+      "metric": "lizard_nloc",
+      "name": "attach_surfaces_to_airports( airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "block",
+      "value": 145.0
+    },
+    "lizard_nloc|src/O4_Airport_Discovery.py|309|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
+      "line": 309,
       "metric": "lizard_nloc",
       "name": "sort_and_reconstruct_runways( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
-      "value": 299.0
+      "value": 300.0
     },
-    "lizard_nloc|src/O4_Airport_Utils.py|663|build_hangar_areas( tile , airport_layer , dico_airports )": {
-      "line": 663,
-      "metric": "lizard_nloc",
-      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 32.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|698|build_apron_areas( tile , airport_layer , dico_airports )": {
-      "line": 698,
-      "metric": "lizard_nloc",
-      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 39.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|740|build_taxiway_areas( tile , airport_layer , dico_airports )": {
-      "line": 740,
-      "metric": "lizard_nloc",
-      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 26.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|769|update_airport_boundaries( tile , dico_airports )": {
-      "line": 769,
-      "metric": "lizard_nloc",
-      "name": "update_airport_boundaries( tile , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 37.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|811|list_airports_and_runways( dico_airports )": {
-      "line": 811,
+    "lizard_nloc|src/O4_Airport_Discovery.py|624|list_airports_and_runways( dico_airports )": {
+      "line": 624,
       "metric": "lizard_nloc",
       "name": "list_airports_and_runways( dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 44.0
     },
-    "lizard_nloc|src/O4_Airport_Utils.py|874|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
-      "line": 874,
-      "metric": "lizard_nloc",
-      "name": "smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 107.0
-    },
-    "lizard_nloc|src/O4_Airport_Utils.py|984|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
-      "line": 984,
+    "lizard_nloc|src/O4_Airport_Encoding.py|14|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
+      "line": 14,
       "metric": "lizard_nloc",
       "name": "encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Encoding.py",
       "severity": "block",
       "value": 256.0
+    },
+    "lizard_nloc|src/O4_Airport_Encoding.py|272|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
+      "line": 272,
+      "metric": "lizard_nloc",
+      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "advise",
+      "value": 22.0
+    },
+    "lizard_nloc|src/O4_Airport_Encoding.py|296|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
+      "line": 296,
+      "metric": "lizard_nloc",
+      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 81.0
+    },
+    "lizard_nloc|src/O4_Airport_Geometry.py|117|update_airport_boundaries( tile , dico_airports )": {
+      "line": 117,
+      "metric": "lizard_nloc",
+      "name": "update_airport_boundaries( tile , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "block",
+      "value": 37.0
+    },
+    "lizard_nloc|src/O4_Airport_Geometry.py|14|build_hangar_areas( tile , airport_layer , dico_airports )": {
+      "line": 14,
+      "metric": "lizard_nloc",
+      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "warn",
+      "value": 32.0
+    },
+    "lizard_nloc|src/O4_Airport_Geometry.py|170|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
+      "line": 170,
+      "metric": "lizard_nloc",
+      "name": "smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "block",
+      "value": 105.0
+    },
+    "lizard_nloc|src/O4_Airport_Geometry.py|48|build_apron_areas( tile , airport_layer , dico_airports )": {
+      "line": 48,
+      "metric": "lizard_nloc",
+      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "block",
+      "value": 39.0
+    },
+    "lizard_nloc|src/O4_Airport_Geometry.py|89|build_taxiway_areas( tile , airport_layer , dico_airports )": {
+      "line": 89,
+      "metric": "lizard_nloc",
+      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "warn",
+      "value": 26.0
     },
     "lizard_nloc|src/O4_Bathymetry.py|16|recut_water_tris( node_coords , tri_idx , tri_types )": {
       "line": 16,
@@ -7856,72 +7856,72 @@
       "severity": "advise",
       "value": 19.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|161|include_airports( vector_map , tile )": {
-      "line": 161,
+    "lizard_nloc|src/O4_Vector_Map.py|163|include_airports( vector_map , tile )": {
+      "line": 163,
       "metric": "lizard_nloc",
       "name": "include_airports( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 42.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|207|include_roads( vector_map , tile , apt_array , apt_area )": {
-      "line": 207,
+    "lizard_nloc|src/O4_Vector_Map.py|209|include_roads( vector_map , tile , apt_array , apt_area )": {
+      "line": 209,
       "metric": "lizard_nloc",
       "name": "include_roads( vector_map , tile , apt_array , apt_area )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 107.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|208|include_roads.road_is_too_much_banked( way , filtered_segs )": {
-      "line": 208,
+    "lizard_nloc|src/O4_Vector_Map.py|210|include_roads.road_is_too_much_banked( way , filtered_segs )": {
+      "line": 210,
       "metric": "lizard_nloc",
       "name": "include_roads.road_is_too_much_banked( way , filtered_segs )",
       "path": "src/O4_Vector_Map.py",
       "severity": "advise",
       "value": 16.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|22|build_poly_file( tile , ctx = None )": {
-      "line": 22,
+    "lizard_nloc|src/O4_Vector_Map.py|24|build_poly_file( tile , ctx = None )": {
+      "line": 24,
       "metric": "lizard_nloc",
       "name": "build_poly_file( tile , ctx = None )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 105.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|338|include_sea( vector_map , tile )": {
-      "line": 338,
+    "lizard_nloc|src/O4_Vector_Map.py|340|include_sea( vector_map , tile )": {
+      "line": 340,
       "metric": "lizard_nloc",
       "name": "include_sea( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 76.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|421|include_water( vector_map , tile )": {
-      "line": 421,
+    "lizard_nloc|src/O4_Vector_Map.py|423|include_water( vector_map , tile )": {
+      "line": 423,
       "metric": "lizard_nloc",
       "name": "include_water( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 83.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|426|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
-      "line": 426,
+    "lizard_nloc|src/O4_Vector_Map.py|428|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
+      "line": 428,
       "metric": "lizard_nloc",
       "name": "include_water.filter_large_lakes( pol , osmid , dicosmtags )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 43.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|598|include_patches( vector_map , tile )": {
-      "line": 598,
+    "lizard_nloc|src/O4_Vector_Map.py|600|include_patches( vector_map , tile )": {
+      "line": 600,
       "metric": "lizard_nloc",
       "name": "include_patches( vector_map , tile )",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 223.0
     },
-    "lizard_nloc|src/O4_Vector_Map.py|835|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
-      "line": 835,
+    "lizard_nloc|src/O4_Vector_Map.py|837|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
+      "line": 837,
       "metric": "lizard_nloc",
       "name": "keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )",
       "path": "src/O4_Vector_Map.py",
@@ -9416,69 +9416,69 @@
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Airport_Utils.py|1267|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
-      "line": 1267,
-      "metric": "lizard_param_count",
-      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 4.0
-    },
-    "lizard_param_count|src/O4_Airport_Utils.py|1292|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
-      "line": 1292,
-      "metric": "lizard_param_count",
-      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 4.0
-    },
-    "lizard_param_count|src/O4_Airport_Utils.py|321|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
-      "line": 321,
+    "lizard_param_count|src/O4_Airport_Discovery.py|309|sort_and_reconstruct_runways( tile , airport_layer , dico_airports )": {
+      "line": 309,
       "metric": "lizard_param_count",
       "name": "sort_and_reconstruct_runways( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Airport_Utils.py|663|build_hangar_areas( tile , airport_layer , dico_airports )": {
-      "line": 663,
-      "metric": "lizard_param_count",
-      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 3.0
-    },
-    "lizard_param_count|src/O4_Airport_Utils.py|698|build_apron_areas( tile , airport_layer , dico_airports )": {
-      "line": 698,
-      "metric": "lizard_param_count",
-      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 3.0
-    },
-    "lizard_param_count|src/O4_Airport_Utils.py|740|build_taxiway_areas( tile , airport_layer , dico_airports )": {
-      "line": 740,
-      "metric": "lizard_param_count",
-      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 3.0
-    },
-    "lizard_param_count|src/O4_Airport_Utils.py|874|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
-      "line": 874,
-      "metric": "lizard_param_count",
-      "name": "smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 3.0
-    },
-    "lizard_param_count|src/O4_Airport_Utils.py|984|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
-      "line": 984,
+    "lizard_param_count|src/O4_Airport_Encoding.py|14|encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )": {
+      "line": 14,
       "metric": "lizard_param_count",
       "name": "encode_runways_taxiways_and_aprons( tile , airport_layer , dico_airports , vector_map , patches_list )",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Encoding.py",
       "severity": "block",
       "value": 5.0
+    },
+    "lizard_param_count|src/O4_Airport_Encoding.py|272|encode_hangars( tile , dico_airports , vector_map , patches_list )": {
+      "line": 272,
+      "metric": "lizard_param_count",
+      "name": "encode_hangars( tile , dico_airports , vector_map , patches_list )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Airport_Encoding.py|296|flatten_helipads( airport_layer , vector_map , tile , treated_area )": {
+      "line": 296,
+      "metric": "lizard_param_count",
+      "name": "flatten_helipads( airport_layer , vector_map , tile , treated_area )",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Airport_Geometry.py|14|build_hangar_areas( tile , airport_layer , dico_airports )": {
+      "line": 14,
+      "metric": "lizard_param_count",
+      "name": "build_hangar_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Airport_Geometry.py|170|smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )": {
+      "line": 170,
+      "metric": "lizard_param_count",
+      "name": "smooth_raster_over_airports( tile , dico_airports , preserve_boundary = True )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Airport_Geometry.py|48|build_apron_areas( tile , airport_layer , dico_airports )": {
+      "line": 48,
+      "metric": "lizard_param_count",
+      "name": "build_apron_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Airport_Geometry.py|89|build_taxiway_areas( tile , airport_layer , dico_airports )": {
+      "line": 89,
+      "metric": "lizard_param_count",
+      "name": "build_taxiway_areas( tile , airport_layer , dico_airports )",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 3.0
     },
     "lizard_param_count|src/O4_Bathymetry.py|16|recut_water_tris( node_coords , tri_idx , tri_types )": {
       "line": 16,
@@ -10896,24 +10896,24 @@
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Vector_Map.py|207|include_roads( vector_map , tile , apt_array , apt_area )": {
-      "line": 207,
+    "lizard_param_count|src/O4_Vector_Map.py|209|include_roads( vector_map , tile , apt_array , apt_area )": {
+      "line": 209,
       "metric": "lizard_param_count",
       "name": "include_roads( vector_map , tile , apt_array , apt_area )",
       "path": "src/O4_Vector_Map.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Vector_Map.py|426|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
-      "line": 426,
+    "lizard_param_count|src/O4_Vector_Map.py|428|include_water.filter_large_lakes( pol , osmid , dicosmtags )": {
+      "line": 428,
       "metric": "lizard_param_count",
       "name": "include_water.filter_large_lakes( pol , osmid , dicosmtags )",
       "path": "src/O4_Vector_Map.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Vector_Map.py|835|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
-      "line": 835,
+    "lizard_param_count|src/O4_Vector_Map.py|837|keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )": {
+      "line": 837,
       "metric": "lizard_param_count",
       "name": "keep_obj8( lat_anchor , lon_anchor , alt_anchor , heading_anchor , objfile_name , vector_map , tile , )",
       "path": "src/O4_Vector_Map.py",
@@ -11824,109 +11824,109 @@
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Airport_Utils.py|1267|encode_hangars": {
-      "line": 1267,
-      "metric": "radon_cc",
-      "name": "encode_hangars",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 7.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|1292|flatten_helipads": {
-      "line": 1292,
-      "metric": "radon_cc",
-      "name": "flatten_helipads",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 27.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|172|attach_surfaces_to_airports": {
-      "line": 172,
-      "metric": "radon_cc",
-      "name": "attach_surfaces_to_airports",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 36.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|19|discover_airport_names": {
-      "line": 19,
+    "radon_cc|src/O4_Airport_Discovery.py|10|discover_airport_names": {
+      "line": 10,
       "metric": "radon_cc",
       "name": "discover_airport_names",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 35.0
     },
-    "radon_cc|src/O4_Airport_Utils.py|321|sort_and_reconstruct_runways": {
-      "line": 321,
+    "radon_cc|src/O4_Airport_Discovery.py|162|attach_surfaces_to_airports": {
+      "line": 162,
+      "metric": "radon_cc",
+      "name": "attach_surfaces_to_airports",
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "block",
+      "value": 36.0
+    },
+    "radon_cc|src/O4_Airport_Discovery.py|309|sort_and_reconstruct_runways": {
+      "line": 309,
       "metric": "radon_cc",
       "name": "sort_and_reconstruct_runways",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 53.0
     },
-    "radon_cc|src/O4_Airport_Utils.py|646|discard_unwanted_airports": {
-      "line": 646,
+    "radon_cc|src/O4_Airport_Discovery.py|612|discard_unwanted_airports": {
+      "line": 612,
       "metric": "radon_cc",
       "name": "discard_unwanted_airports",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Airport_Utils.py|663|build_hangar_areas": {
-      "line": 663,
-      "metric": "radon_cc",
-      "name": "build_hangar_areas",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 6.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|698|build_apron_areas": {
-      "line": 698,
-      "metric": "radon_cc",
-      "name": "build_apron_areas",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 6.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|740|build_taxiway_areas": {
-      "line": 740,
-      "metric": "radon_cc",
-      "name": "build_taxiway_areas",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|769|update_airport_boundaries": {
-      "line": 769,
-      "metric": "radon_cc",
-      "name": "update_airport_boundaries",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "radon_cc|src/O4_Airport_Utils.py|811|list_airports_and_runways": {
-      "line": 811,
+    "radon_cc|src/O4_Airport_Discovery.py|624|list_airports_and_runways": {
+      "line": 624,
       "metric": "radon_cc",
       "name": "list_airports_and_runways",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
       "value": 15.0
     },
-    "radon_cc|src/O4_Airport_Utils.py|874|smooth_raster_over_airports": {
-      "line": 874,
+    "radon_cc|src/O4_Airport_Encoding.py|14|encode_runways_taxiways_and_aprons": {
+      "line": 14,
+      "metric": "radon_cc",
+      "name": "encode_runways_taxiways_and_aprons",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 54.0
+    },
+    "radon_cc|src/O4_Airport_Encoding.py|272|encode_hangars": {
+      "line": 272,
+      "metric": "radon_cc",
+      "name": "encode_hangars",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "warn",
+      "value": 7.0
+    },
+    "radon_cc|src/O4_Airport_Encoding.py|296|flatten_helipads": {
+      "line": 296,
+      "metric": "radon_cc",
+      "name": "flatten_helipads",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 27.0
+    },
+    "radon_cc|src/O4_Airport_Geometry.py|117|update_airport_boundaries": {
+      "line": 117,
+      "metric": "radon_cc",
+      "name": "update_airport_boundaries",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Airport_Geometry.py|14|build_hangar_areas": {
+      "line": 14,
+      "metric": "radon_cc",
+      "name": "build_hangar_areas",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "radon_cc|src/O4_Airport_Geometry.py|170|smooth_raster_over_airports": {
+      "line": 170,
       "metric": "radon_cc",
       "name": "smooth_raster_over_airports",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Geometry.py",
       "severity": "block",
       "value": 19.0
     },
-    "radon_cc|src/O4_Airport_Utils.py|984|encode_runways_taxiways_and_aprons": {
-      "line": 984,
+    "radon_cc|src/O4_Airport_Geometry.py|48|build_apron_areas": {
+      "line": 48,
       "metric": "radon_cc",
-      "name": "encode_runways_taxiways_and_aprons",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 54.0
+      "name": "build_apron_areas",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 6.0
+    },
+    "radon_cc|src/O4_Airport_Geometry.py|89|build_taxiway_areas": {
+      "line": 89,
+      "metric": "radon_cc",
+      "name": "build_taxiway_areas",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 4.0
     },
     "radon_cc|src/O4_Bathymetry.py|16|recut_water_tris": {
       "line": 16,
@@ -13600,48 +13600,48 @@
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Vector_Map.py|207|include_roads": {
-      "line": 207,
+    "radon_cc|src/O4_Vector_Map.py|209|include_roads": {
+      "line": 209,
       "metric": "radon_cc",
       "name": "include_roads",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 14.0
     },
-    "radon_cc|src/O4_Vector_Map.py|22|build_poly_file": {
-      "line": 22,
+    "radon_cc|src/O4_Vector_Map.py|24|build_poly_file": {
+      "line": 24,
       "metric": "radon_cc",
       "name": "build_poly_file",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 23.0
     },
-    "radon_cc|src/O4_Vector_Map.py|338|include_sea": {
-      "line": 338,
+    "radon_cc|src/O4_Vector_Map.py|340|include_sea": {
+      "line": 340,
       "metric": "radon_cc",
       "name": "include_sea",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 14.0
     },
-    "radon_cc|src/O4_Vector_Map.py|421|include_water": {
-      "line": 421,
+    "radon_cc|src/O4_Vector_Map.py|423|include_water": {
+      "line": 423,
       "metric": "radon_cc",
       "name": "include_water",
       "path": "src/O4_Vector_Map.py",
       "severity": "warn",
       "value": 9.0
     },
-    "radon_cc|src/O4_Vector_Map.py|598|include_patches": {
-      "line": 598,
+    "radon_cc|src/O4_Vector_Map.py|600|include_patches": {
+      "line": 600,
       "metric": "radon_cc",
       "name": "include_patches",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
       "value": 48.0
     },
-    "radon_cc|src/O4_Vector_Map.py|835|keep_obj8": {
-      "line": 835,
+    "radon_cc|src/O4_Vector_Map.py|837|keep_obj8": {
+      "line": 837,
       "metric": "radon_cc",
       "name": "keep_obj8",
       "path": "src/O4_Vector_Map.py",
@@ -14000,13 +14000,21 @@
       "severity": "advise",
       "value": 9.426282051282051
     },
-    "radon_hal_difficulty|src/O4_Airport_Utils.py||<module>": {
+    "radon_hal_difficulty|src/O4_Airport_Discovery.py||<module>": {
       "line": null,
       "metric": "radon_hal_difficulty",
       "name": "<module>",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 12.106609808102345
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "advise",
+      "value": 10.414414414414415
+    },
+    "radon_hal_difficulty|src/O4_Airport_Encoding.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_difficulty",
+      "name": "<module>",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "advise",
+      "value": 10.304
     },
     "radon_hal_difficulty|src/O4_Bathymetry.py||<module>": {
       "line": null,
@@ -14160,13 +14168,29 @@
       "severity": "advise",
       "value": 18851.76280481415
     },
-    "radon_hal_effort|src/O4_Airport_Utils.py||<module>": {
+    "radon_hal_effort|src/O4_Airport_Discovery.py||<module>": {
       "line": null,
       "metric": "radon_hal_effort",
       "name": "<module>",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 110210.20704346076
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "warn",
+      "value": 36423.41743362257
+    },
+    "radon_hal_effort|src/O4_Airport_Encoding.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_effort",
+      "name": "<module>",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "advise",
+      "value": 17876.522723833474
+    },
+    "radon_hal_effort|src/O4_Airport_Geometry.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_effort",
+      "name": "<module>",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 18889.58344381764
     },
     "radon_hal_effort|src/O4_Bathymetry.py||<module>": {
       "line": null,
@@ -14344,13 +14368,29 @@
       "severity": "advise",
       "value": 1999.914993234279
     },
-    "radon_hal_volume|src/O4_Airport_Utils.py||<module>": {
+    "radon_hal_volume|src/O4_Airport_Discovery.py||<module>": {
       "line": null,
       "metric": "radon_hal_volume",
       "name": "<module>",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "block",
-      "value": 9103.308753677897
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "warn",
+      "value": 3497.4042691454197
+    },
+    "radon_hal_volume|src/O4_Airport_Encoding.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_volume",
+      "name": "<module>",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "advise",
+      "value": 1734.9109786329068
+    },
+    "radon_hal_volume|src/O4_Airport_Geometry.py||<module>": {
+      "line": null,
+      "metric": "radon_hal_volume",
+      "name": "<module>",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "advise",
+      "value": 2349.1632825135084
     },
     "radon_hal_volume|src/O4_Bathymetry.py||<module>": {
       "line": null,
@@ -14568,13 +14608,29 @@
       "severity": "block",
       "value": 45.33155272886613
     },
-    "radon_mi|src/O4_Airport_Utils.py||<module>": {
+    "radon_mi|src/O4_Airport_Discovery.py||<module>": {
       "line": null,
       "metric": "radon_mi",
       "name": "<module>",
-      "path": "src/O4_Airport_Utils.py",
+      "path": "src/O4_Airport_Discovery.py",
       "severity": "block",
-      "value": 0.0
+      "value": 2.576462843016622
+    },
+    "radon_mi|src/O4_Airport_Encoding.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Airport_Encoding.py",
+      "severity": "block",
+      "value": 16.24421327477531
+    },
+    "radon_mi|src/O4_Airport_Geometry.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Airport_Geometry.py",
+      "severity": "block",
+      "value": 24.406712283814365
     },
     "radon_mi|src/O4_Bathymetry.py||<module>": {
       "line": null,
@@ -14966,7 +15022,7 @@
       "name": "<module>",
       "path": "src/O4_Vector_Map.py",
       "severity": "block",
-      "value": 16.721497489450076
+      "value": 16.66394471696628
     },
     "radon_mi|src/O4_Vector_Utils.py||<module>": {
       "line": null,
@@ -15448,13 +15504,13 @@
       "severity": "advise",
       "value": 458.0
     },
-    "radon_raw_lloc|src/O4_Airport_Utils.py||<module>": {
+    "radon_raw_lloc|src/O4_Airport_Discovery.py||<module>": {
       "line": null,
       "metric": "radon_raw_lloc",
       "name": "<module>",
-      "path": "src/O4_Airport_Utils.py",
-      "severity": "warn",
-      "value": 608.0
+      "path": "src/O4_Airport_Discovery.py",
+      "severity": "advise",
+      "value": 292.0
     },
     "radon_raw_lloc|src/O4_Config_Utils.py||<module>": {
       "line": null,
@@ -15534,7 +15590,7 @@
       "name": "<module>",
       "path": "src/O4_Vector_Map.py",
       "severity": "advise",
-      "value": 496.0
+      "value": 498.0
     },
     "radon_raw_lloc|src/O4_Vector_Utils.py||<module>": {
       "line": null,
@@ -15563,7 +15619,9 @@
     ".codex/skills/quality-check/scripts/quality_check.py",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     "Ortho4XP.py",
-    "src/O4_Airport_Utils.py",
+    "src/O4_Airport_Discovery.py",
+    "src/O4_Airport_Encoding.py",
+    "src/O4_Airport_Geometry.py",
     "src/O4_Bathymetry.py",
     "src/O4_Bathymetry_DSF_Atoms.py",
     "src/O4_Bathymetry_DSF_Bytes.py",

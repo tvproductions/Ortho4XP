@@ -1,0 +1,5 @@
+{
+  "minimum_coverage": 40,
+  "assessed_date": "2026-06-13",
+  "notes": "Baseline established from initial maintenance-qa run. Coverage is low due to legacy codebase. Target: increase to 60% over next 6 months."
+}

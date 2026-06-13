@@ -9,7 +9,7 @@ MODULE_SOFT_LINE_LIMIT = 600
 MODULE_HARD_LINE_LIMIT = 1000
 CLASS_LINE_LIMIT = 300
 MODULE_SIZE_WAIVERS = {
-    "src/O4_Airport_Utils.py": "Legacy airport parser/generator module; decomposition tracked through TODO queue.",
+    "src/O4_Airport_Discovery.py": "Decomposed airport discovery module; sort_and_reconstruct_runways is 322 lines and resists further splitting without coupling overhead.",
     "src/O4_Config_Utils.py": "Legacy config persistence and GUI bridge module; schema split tracked separately.",
     "src/O4_DSF_Utils.py": "Legacy DSF writer module; phased extraction tracked separately.",
     "src/O4_GUI_Utils.py": "Legacy Tk GUI module; GUI modernization tracked separately.",

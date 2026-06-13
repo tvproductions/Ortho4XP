@@ -21,10 +21,14 @@ dependencies = [
 [dependency-groups]
 dev = [
   "cohesion>=1.0,<2.0",
+  "coverage>=7.0,<8.0",
+  "interrogate>=1.7,<2.0",
   "lizard>=1.17,<2.0",
+  "mutmut>=3.0,<4.0",
   "radon>=6.0,<7.0",
   "ruff",
   "ty",
+  "vulture>=2.11,<3.0",
   "xenon>=0.9,<1.0",
 ]
 
@@ -35,7 +39,22 @@ package = false
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E722", "E9", "F63", "F7", "F82"]
+select = ["E722", "E9", "F63", "F7", "F82", "I", "UP", "B", "SIM", "C4", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/O4_Imagery_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_GUI_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Config_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Vector_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_DSF_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Mask_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_DEM_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Mesh_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_OSM_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Tile_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Airport_Discovery.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Airport_Geometry.py" = ["I", "UP", "B", "SIM", "C4", "S"]
+"src/O4_Airport_Encoding.py" = ["I", "UP", "B", "SIM", "C4", "S"]
 
 [tool.ruff.format]
 quote-style = "double"

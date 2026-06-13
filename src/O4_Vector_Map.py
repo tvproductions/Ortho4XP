@@ -12,7 +12,9 @@ import O4_OSM_Utils as OSM
 import O4_Vector_Utils as VECT
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
-import O4_Airport_Utils as APT
+import O4_Airport_Discovery as APT_DISC
+import O4_Airport_Geometry as APT_GEOM
+import O4_Airport_Encoding as APT_ENC
 import O4_Build_Context as BC
 
 good_imagery_list = ()
@@ -173,15 +175,15 @@ def include_airports(vector_map, tile):
     ):
         return (0, 0)
     dico_airports = {}
-    APT.discover_airport_names(airport_layer, dico_airports)
-    APT.attach_surfaces_to_airports(airport_layer, dico_airports)
-    APT.sort_and_reconstruct_runways(tile, airport_layer, dico_airports)
-    APT.discard_unwanted_airports(tile, dico_airports)
-    APT.build_hangar_areas(tile, airport_layer, dico_airports)
-    APT.build_apron_areas(tile, airport_layer, dico_airports)
-    APT.build_taxiway_areas(tile, airport_layer, dico_airports)
-    APT.update_airport_boundaries(tile, dico_airports)
-    APT.list_airports_and_runways(dico_airports)
+    APT_DISC.discover_airport_names(airport_layer, dico_airports)
+    APT_DISC.attach_surfaces_to_airports(airport_layer, dico_airports)
+    APT_DISC.sort_and_reconstruct_runways(tile, airport_layer, dico_airports)
+    APT_DISC.discard_unwanted_airports(tile, dico_airports)
+    APT_GEOM.build_hangar_areas(tile, airport_layer, dico_airports)
+    APT_GEOM.build_apron_areas(tile, airport_layer, dico_airports)
+    APT_GEOM.build_taxiway_areas(tile, airport_layer, dico_airports)
+    APT_GEOM.update_airport_boundaries(tile, dico_airports)
+    APT_DISC.list_airports_and_runways(dico_airports)
     UI.vprint(1, "   Loading elevation data and smoothing it over airports.")
     tile.dem = DEM.DEM(
         tile.lat,
@@ -190,16 +192,16 @@ def include_airports(vector_map, tile):
         tile.fill_nodata or "to zero",
         info_only=False,
     )
-    APT.smooth_raster_over_airports(tile, dico_airports)
+    APT_GEOM.smooth_raster_over_airports(tile, dico_airports)
     (patches_area, patches_list) = include_patches(vector_map, tile)
-    runway_taxiway_apron_area = APT.encode_runways_taxiways_and_aprons(
+    runway_taxiway_apron_area = APT_ENC.encode_runways_taxiways_and_aprons(
         tile, airport_layer, dico_airports, vector_map, patches_list
     )
     treated_area = ops.unary_union([patches_area, runway_taxiway_apron_area])
-    APT.encode_hangars(tile, dico_airports, vector_map, patches_list)
-    APT.flatten_helipads(airport_layer, vector_map, tile, treated_area)
+    APT_ENC.encode_hangars(tile, dico_airports, vector_map, patches_list)
+    APT_ENC.flatten_helipads(airport_layer, vector_map, tile, treated_area)
     # APT.encode_aprons(tile,dico_airports,vector_map)
-    apt_array = APT.build_airport_array(tile, dico_airports)
+    apt_array = APT_GEOM.build_airport_array(tile, dico_airports)
     return (apt_array, treated_area)
 
 
