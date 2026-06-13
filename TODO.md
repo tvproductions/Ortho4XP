@@ -588,9 +588,17 @@ Suggested labels: `breakaway`, `architecture`, `headless`
 
 ### TODO-023: Add or Verify Repository Metadata
 
+Status: Done
+
 GitHub Issue: #18
 
 Add standard repository metadata and community files.
+
+Completed by adding a root `LICENSE` (GPL v3, same text as `Licence/gpl.txt`),
+`SECURITY.md` pointing to GitHub Security Advisories, bug report and feature
+request issue templates with community contact links, and a pull request
+template. GitHub topics (`x-plane`, `scenery`, `orthophoto`, `gis`,
+`flight-simulator`) should be set in the repository settings.
 
 Acceptance criteria:
 

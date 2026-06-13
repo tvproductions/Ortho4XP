@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: X-Plane.org Ortho4XP Forum
+    url: https://forums.x-plane.org/index.php?/forums/forum/322-ortho4xp/
+    about: Ask questions and get community support on the X-Plane.org Ortho4XP forum.
+  - name: Wiki FAQ
+    url: https://github.com/shred86/Ortho4XP/wiki/FAQ
+    about: Check the FAQ for common issues and troubleshooting steps.
