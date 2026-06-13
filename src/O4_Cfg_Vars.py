@@ -126,6 +126,49 @@ cfg_app_vars = {
         "default": "",
         "hint": "If sceneries with overlays are not found in custom_overlay_src, set an alternate directory to search.",
     },
+    # Package naming
+    "package_prefix": {
+        "module": "Naming",
+        "type": str,
+        "default": "Ortho4XP",
+        "hint": "Prefix for all generated scenery package directory names.",
+    },
+    "package_separator": {
+        "module": "Naming",
+        "type": str,
+        "default": "_",
+        "hint": "Separator character between naming components.",
+    },
+    "mesh_purpose_token": {
+        "module": "Naming",
+        "type": str,
+        "default": "Mesh",
+        "hint": "Purpose token for mesh/ortho tile packages.",
+    },
+    "overlay_purpose_token": {
+        "module": "Naming",
+        "type": str,
+        "default": "Overlay",
+        "hint": "Purpose token for overlay packages.",
+    },
+    "monolithic_overlay_name": {
+        "module": "Naming",
+        "type": str,
+        "default": "Overlays",
+        "hint": "Directory name for the monolithic overlay package.",
+    },
+    "latlon_format": {
+        "module": "Naming",
+        "type": str,
+        "default": "short",
+        "hint": "Lat/lon formatting: short (+43-079), hem (N43W079), long (+40-080/+43-079).",
+    },
+    "per_tile_overlays": {
+        "module": "Naming",
+        "type": bool,
+        "default": False,
+        "hint": "Generate per-tile overlay packages instead of monolithic.",
+    },
 }
 
 cfg_tile_vars = {

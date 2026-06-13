@@ -13,7 +13,7 @@ try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
-from O4_Cfg_Vars import cfg_vars, list_app_vars
+from O4_Cfg_Vars import cfg_app_vars, cfg_vars, list_app_vars
 from O4_Config_Models import (
     UnsupportedWaterTechError,
     coerce_config_value,
@@ -141,6 +141,33 @@ class ConfigModelTests(unittest.TestCase):
         self.assertNotIn("distance_masks_too", bathy_source)
         self.assertNotIn("ratio_bathy", bathy_source)
         self.assertNotIn("node_bathy", bathy_source)
+
+
+    def test_package_naming_config_keys_have_valid_definitions(self):
+        from O4_Config_Models import ConfigVariableDefinition
+        for key in (
+            "package_prefix", "package_separator", "mesh_purpose_token",
+            "overlay_purpose_token", "monolithic_overlay_name",
+            "latlon_format", "per_tile_overlays",
+        ):
+            definition = cfg_app_vars[key]
+            ConfigVariableDefinition.model_validate(definition)
+
+    def test_package_naming_config_defaults(self):
+        prefix = cfg_app_vars["package_prefix"]["default"]
+        self.assertEqual(prefix, "Ortho4XP")
+        sep = cfg_app_vars["package_separator"]["default"]
+        self.assertEqual(sep, "_")
+        mesh = cfg_app_vars["mesh_purpose_token"]["default"]
+        self.assertEqual(mesh, "Mesh")
+        overlay = cfg_app_vars["overlay_purpose_token"]["default"]
+        self.assertEqual(overlay, "Overlay")
+        mononame = cfg_app_vars["monolithic_overlay_name"]["default"]
+        self.assertEqual(mononame, "Overlays")
+        latlon = cfg_app_vars["latlon_format"]["default"]
+        self.assertEqual(latlon, "short")
+        per_tile = cfg_app_vars["per_tile_overlays"]["default"]
+        self.assertEqual(per_tile, False)
 
 
 if __name__ == "__main__":
