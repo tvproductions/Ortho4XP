@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import re
+from dataclasses import dataclass
 
 from O4_Scenery_INI import SceneryEntry, SceneryINI
 import O4_Subprocess_Runtime as RUNTIME
@@ -9,6 +10,13 @@ import O4_Subprocess_Runtime as RUNTIME
 
 class SceneryError(Exception):
     pass
+
+
+@dataclass
+class ValidationIssue:
+    severity: str
+    message: str
+    entry_path: str | None = None
 
 
 class SceneryManager:
@@ -48,6 +56,89 @@ class SceneryManager:
         if re.match(r"^zOrtho4XP_[+-]\d+[+-]\d+$", dir_name):
             return True
         return bool(re.match(r"^yOrtho4XP_(?:Overlays?)?$", dir_name))
+
+    def reorder(self) -> None:
+        self.refresh()
+        entries = self._ini.entries()
+        ortho_indices = sorted(self._ortho4xp_indices)
+        if not ortho_indices:
+            return
+
+        ortho_entries = [entries[i] for i in ortho_indices]
+        non_ortho_front = [entries[i] for i in range(ortho_indices[0]) if i not in ortho_indices]
+        non_ortho_back = [entries[i] for i in range(ortho_indices[-1] + 1, len(entries)) if i not in ortho_indices]
+
+        overlays = sorted(
+            [e for e in ortho_entries if "Overlay" in e.path or "Overlays" in e.path],
+            key=lambda e: e.path,
+        )
+        meshes = sorted(
+            [e for e in ortho_entries if "Mesh" in e.path or "zOrtho4XP" in e.path],
+            key=lambda e: e.path,
+        )
+
+        new_entries = non_ortho_front + overlays + meshes + non_ortho_back
+        self._ini._entries = new_entries
+        self._ini.write()
+        self.refresh()
+
+    def validate(self) -> list[ValidationIssue]:
+        self.refresh()
+        issues: list[ValidationIssue] = []
+        entries = self._ini.entries()
+
+        if not self.custom_scenery_dir:
+            issues.append(ValidationIssue(
+                severity="error",
+                message="custom_scenery_dir is not set",
+            ))
+            return issues
+
+        for i in sorted(self._ortho4xp_indices):
+            entry = entries[i]
+            dir_name = os.path.basename(entry.path.rstrip("/\\"))
+            full_path = os.path.join(self.custom_scenery_dir, dir_name)
+            if not os.path.isdir(full_path):
+                issues.append(ValidationIssue(
+                    severity="error",
+                    message="Directory not found: " + full_path,
+                    entry_path=entry.path,
+                ))
+
+        last_overlay_pos = -1
+        first_mesh_pos = len(entries)
+        for i in sorted(self._ortho4xp_indices):
+            entry = entries[i]
+            if "Overlay" in entry.path or "Overlays" in entry.path:
+                last_overlay_pos = max(last_overlay_pos, i)
+            if "Mesh" in entry.path or "zOrtho4XP" in entry.path:
+                first_mesh_pos = min(first_mesh_pos, i)
+        if last_overlay_pos > first_mesh_pos:
+            issues.append(ValidationIssue(
+                severity="warning",
+                message="Overlay entries should appear above mesh entries in scenery_packs.ini. Run 'reorder' to fix.",
+            ))
+
+        for i in sorted(self._ortho4xp_indices):
+            if entries[i].disabled:
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    message="Entry is disabled: " + entries[i].path,
+                    entry_path=entries[i].path,
+                ))
+
+        seen: set[str] = set()
+        for i in sorted(self._ortho4xp_indices):
+            dir_name = os.path.basename(entries[i].path.rstrip("/\\"))
+            if dir_name in seen:
+                issues.append(ValidationIssue(
+                    severity="error",
+                    message="Duplicate entry: " + entries[i].path,
+                    entry_path=entries[i].path,
+                ))
+            seen.add(dir_name)
+
+        return issues
 
     def add_tile(self, lat: int, lon: int, build_dir: str | None = None) -> None:
         tile_name = self._resolve_tile_dir(lat, lon)

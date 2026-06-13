@@ -189,3 +189,177 @@ class TestSymlinkOperations(unittest.TestCase):
         mgr.add_tile(lat=43, lon=-79, build_dir=self.build_dir)
         mgr.refresh()
         self.assertEqual(len(mgr.ortho4xp_entries()), 1)
+
+
+class TestReorder(unittest.TestCase):
+    def setUp(self):
+        self._temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._temp.cleanup)
+        self.cs_dir = os.path.join(self._temp.name, "Custom Scenery")
+        os.makedirs(self.cs_dir)
+
+    def _make_ini(self, entries: list[str]) -> str:
+        ini_path = os.path.join(self._temp.name, "scenery_packs.ini")
+        with open(ini_path, "w", newline="\n") as f:
+            f.write("I\n1000 Version\n\n")
+            for e in entries:
+                f.write(f"SCENERY_PACK Custom Scenery/{e}/\n")
+        return ini_path
+
+    def _content(self, ini_path: str) -> list[str]:
+        with open(ini_path) as f:
+            return [line.strip() for line in f if "SCENERY_PACK" in line]
+
+    def test_reorder_moves_overlays_above_meshes(self):
+        ini_path = self._make_ini([
+            "Ortho4XP_Mesh_+43-079",
+            "Ortho4XP_Overlays",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        lines = self._content(ini_path)
+        overlay_idx = next(i for i, l in enumerate(lines) if "Overlays" in l)
+        mesh_idx = next(i for i, l in enumerate(lines) if "Mesh" in l)
+        self.assertLess(overlay_idx, mesh_idx)
+
+    def test_reorder_preserves_non_ortho4xp(self):
+        ini_path = self._make_ini([
+            "Global Airports",
+            "Ortho4XP_Mesh_+44-080",
+            "Ortho4XP_Mesh_+43-079",
+            "simHeaven_X-World",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        lines = self._content(ini_path)
+        self.assertIn("Global Airports", lines[0])
+        self.assertIn("simHeaven_X-World", lines[-1])
+
+    def test_reorder_sorts_mesh_entries(self):
+        ini_path = self._make_ini([
+            "Ortho4XP_Mesh_+44-080",
+            "Ortho4XP_Mesh_+43-079",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        lines = self._content(ini_path)
+        self.assertIn("+43-079", lines[0])
+        self.assertIn("+44-080", lines[1])
+
+    def test_reorder_no_ortho4xp_does_nothing(self):
+        ini_path = self._make_ini([
+            "Global Airports",
+            "simHeaven_X-World",
+        ])
+        original = list(self._content(ini_path))
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        self.assertEqual(self._content(ini_path), original)
+
+    def test_reorder_multiple_overlays_and_meshes(self):
+        ini_path = self._make_ini([
+            "Ortho4XP_Mesh_+45-081",
+            "Ortho4XP_Overlay_+44-080",
+            "Ortho4XP_Overlays",
+            "Ortho4XP_Mesh_+43-079",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        lines = self._content(ini_path)
+        overlays = [l for l in lines if "Overlay" in l or "Overlays" in l]
+        meshes = [l for l in lines if "Mesh" in l]
+        self.assertEqual(len(overlays), 2)
+        self.assertEqual(len(meshes), 2)
+        overlay_indices = [i for i, l in enumerate(lines) if "Overlay" in l or "Overlays" in l]
+        mesh_indices = [i for i, l in enumerate(lines) if "Mesh" in l]
+        self.assertLess(max(overlay_indices), min(mesh_indices))
+
+
+class TestValidate(unittest.TestCase):
+    def setUp(self):
+        self._temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._temp.cleanup)
+        self.cs_dir = os.path.join(self._temp.name, "Custom Scenery")
+        os.makedirs(self.cs_dir)
+
+    def _make_package_dir(self, name):
+        p = os.path.join(self.cs_dir, name)
+        os.makedirs(os.path.join(p, "Earth nav data"))
+        return p
+
+    def _make_ini(self, entries: list[str]) -> str:
+        ini_path = os.path.join(self._temp.name, "scenery_packs.ini")
+        with open(ini_path, "w", newline="\n") as f:
+            f.write("I\n1000 Version\n\n")
+            for e in entries:
+                f.write(f"SCENERY_PACK Custom Scenery/{e}/\n")
+        return ini_path
+
+    def test_validate_missing_directory(self):
+        ini_path = self._make_ini(["Ortho4XP_Mesh_+43-079"])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        issues = mgr.validate()
+        missing = [i for i in issues if "not found" in i.message.lower()]
+        self.assertTrue(len(missing) >= 1)
+
+    def test_validate_wrong_order_is_warning(self):
+        self._make_package_dir("Ortho4XP_Overlays")
+        self._make_package_dir("Ortho4XP_Mesh_+43-079")
+        ini_path = self._make_ini([
+            "Ortho4XP_Mesh_+43-079",
+            "Ortho4XP_Overlays",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        issues = mgr.validate()
+        order_issues = [i for i in issues if "order" in i.message.lower()]
+        self.assertTrue(len(order_issues) >= 1)
+
+    def test_validate_disabled_entry_is_warning(self):
+        self._make_package_dir("Ortho4XP_Mesh_+43-079")
+        ini_path = os.path.join(self._temp.name, "scenery_packs.ini")
+        with open(ini_path, "w", newline="\n") as f:
+            f.write("I\n1000 Version\n\n")
+            f.write("SCENERY_PACK_DISABLED Custom Scenery/Ortho4XP_Mesh_+43-079/\n")
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        issues = mgr.validate()
+        disabled = [i for i in issues if "disabled" in i.message.lower()]
+        self.assertTrue(len(disabled) >= 1)
+
+    def test_validate_clean_returns_no_issues(self):
+        self._make_package_dir("Ortho4XP_Overlays")
+        self._make_package_dir("Ortho4XP_Mesh_+43-079")
+        ini_path = self._make_ini([
+            "Ortho4XP_Overlays",
+            "Ortho4XP_Mesh_+43-079",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        issues = mgr.validate()
+        self.assertEqual(len(issues), 0)
+
+    def test_validate_duplicate_entries(self):
+        self._make_package_dir("Ortho4XP_Mesh_+43-079")
+        ini_path = self._make_ini([
+            "Ortho4XP_Mesh_+43-079",
+            "Ortho4XP_Mesh_+43-079",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        issues = mgr.validate()
+        dup = [i for i in issues if "duplicate" in i.message.lower()]
+        self.assertTrue(len(dup) >= 1)
+
+    def test_validate_empty_cs_dir(self):
+        mgr = SceneryManager(custom_scenery_dir="", ini_path=self._make_ini([]))
+        mgr.refresh()
+        issues = mgr.validate()
+        cs_issues = [i for i in issues if "custom_scenery_dir" in i.message.lower()]
+        self.assertTrue(len(cs_issues) >= 1)
