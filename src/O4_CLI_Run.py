@@ -10,6 +10,17 @@ import O4_CLI_Jobs as JOBS
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
+
+    if args.command == "validate-package":
+        from O4_Package_Validator import validate_package
+        result = validate_package(args.package_dir)
+        if result["valid"]:
+            print(f"Package validated: {args.package_dir}")
+            return 0
+        for err in result["errors"]:
+            print(f"ERROR: {err}")
+        return 1
+
     try:
         provider_keys, combined_provider_keys, provider_metadata = _provider_inventory()
         plan = JOBS.load_build_plan(
@@ -49,6 +60,15 @@ def _parser() -> argparse.ArgumentParser:
     build.add_argument("job_file")
     build.add_argument("--dry-run", action="store_true")
     build.add_argument("--json", action="store_true")
+
+    p_validate = subparsers.add_parser(
+        "validate-package",
+        help="Validate a generated scenery package's metadata and structure",
+    )
+    p_validate.add_argument(
+        "package_dir", type=str,
+        help="Path to the generated package directory",
+    )
 
     return parser
 

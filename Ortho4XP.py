@@ -7,7 +7,8 @@ cmd_line = (
     "USAGE: Ortho4XP.py lat lon imagery zl (won't read a tile config)\n"
     "  OR:  Ortho4XP.py lat lon (with existing tile config file)\n"
     "  OR:  Ortho4XP.py validate-job build_job.toml [--json]\n"
-    "  OR:  Ortho4XP.py build-job build_job.toml [--dry-run] [--json]"
+    "  OR:  Ortho4XP.py build-job build_job.toml [--dry-run] [--json]\n"
+    "  OR:  Ortho4XP.py validate-package <package_dir>"
 )
 
 
@@ -24,12 +25,12 @@ def _ensure_src_path() -> None:
 
 
 def _is_headless_command(argv: list[str]) -> bool:
-    return len(argv) > 1 and argv[1] in {"validate-job", "build-job"}
+    return len(argv) > 1 and argv[1] in {"validate-job", "build-job", "validate-package"}
 
 
 def _dispatch_headless(argv: list[str]) -> int:
     cli_argv = list(argv[1:])
-    if len(cli_argv) >= 2:
+    if len(cli_argv) >= 2 and not cli_argv[1].startswith("-"):
         cli_argv[1] = os.path.abspath(cli_argv[1])
     os.chdir(_source_root())
     _ensure_src_path()
