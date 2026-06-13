@@ -46,7 +46,7 @@
 
 ## Superpowers Workflow
 
-Superpowers skills are vendored under `.agents/skills/superpowers/`.
+Superpowers skills are vendored under `.agents/skills/superpowers/skills/`.
 Use them as mandatory workflow guidance when their trigger conditions apply.
 
 Core workflow:
