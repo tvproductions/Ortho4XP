@@ -54,7 +54,7 @@ class SceneryManager:
         tile_build_path = self._resolve_build_path(lat, lon, build_dir)
         if not os.path.isdir(tile_build_path):
             raise SceneryError("Tile directory not found: " + tile_build_path)
-        if self.custom_scenery_dir and not tile_build_path.startswith(self.custom_scenery_dir):
+        if self.custom_scenery_dir and os.path.commonpath([tile_build_path, self.custom_scenery_dir]) != self.custom_scenery_dir:
             self._create_symlink(tile_build_path, tile_name)
         ini_path = os.path.join("Custom Scenery", tile_name)
         self.refresh()
@@ -68,7 +68,7 @@ class SceneryManager:
         overlay_build_path = overlay_dir or ""
         if not overlay_build_path or not os.path.isdir(overlay_build_path):
             raise SceneryError("Overlay directory not found: " + str(overlay_build_path))
-        if self.custom_scenery_dir and not overlay_build_path.startswith(self.custom_scenery_dir):
+        if self.custom_scenery_dir and os.path.commonpath([overlay_build_path, self.custom_scenery_dir]) != self.custom_scenery_dir:
             self._create_symlink(overlay_build_path, overlay_name)
         ini_path = os.path.join("Custom Scenery", overlay_name)
         self.refresh()
@@ -101,7 +101,7 @@ class SceneryManager:
     def _resolve_build_path(self, lat: int, lon: int, build_dir: str | None) -> str:
         tile_name = self._resolve_tile_dir(lat, lon)
         if build_dir:
-            return os.path.join(build_dir, tile_name)
+            return os.path.join(os.path.normpath(build_dir), tile_name)
         raise SceneryError("build_dir required to locate tile: " + tile_name)
 
     def _create_symlink(self, target: str, link_name: str) -> None:
@@ -123,7 +123,7 @@ class SceneryManager:
         link_path = os.path.join(self.custom_scenery_dir, link_name)
         if not os.path.exists(link_path):
             return False
-        os.remove(link_path)
+        os.rmdir(link_path)
         return True
 
     def _overlay_insertion_position(self) -> int:

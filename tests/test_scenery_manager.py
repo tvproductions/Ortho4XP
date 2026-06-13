@@ -101,8 +101,7 @@ class TestSymlinkOperations(unittest.TestCase):
         os.makedirs(self.build_dir)
 
     def _make_tile_dir(self, lat, lon):
-        tile_name = "Ortho4XP_Mesh_+{}".format(abs(lat)) + "{:+04d}".format(lon)
-        tile_name = tile_name.replace("+-", "-")
+        tile_name = "Ortho4XP_Mesh_{:+03d}{:+04d}".format(lat, lon)
         path = os.path.join(self.build_dir, tile_name)
         os.makedirs(os.path.join(path, "Earth nav data"))
         with open(os.path.join(path, "package.json"), "w") as f:
