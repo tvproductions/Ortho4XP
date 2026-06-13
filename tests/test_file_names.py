@@ -52,6 +52,10 @@ class FileNamesTests(unittest.TestCase):
     def test_overlay_dir_name_with_per_tile_and_coords(self):
         self.assertEqual(names.overlay_dir_name(43, -79), "Ortho4XP_Overlays")
 
+    def test_no_legacy_z_prefix_remains_in_tile_dir(self):
+        result = names.tile_dir(43, -79)
+        self.assertNotIn("zOrtho4XP", result)
+
     def test_overlay_dir_has_no_legacy_y_prefix(self):
         basename = os.path.basename(names.Overlay_dir)
         self.assertNotEqual(basename, "yOrtho4XP_Overlays")

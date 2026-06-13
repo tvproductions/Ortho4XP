@@ -98,6 +98,11 @@ def tile_dir(lat, lon):
     return prefix + sep + mesh_token + sep + short_latlon(lat, lon)
 
 
+def tile_name_from_basename(basename):
+    prefix, sep, mesh_token, _, _, _ = _naming_config()
+    return prefix + sep + mesh_token + sep + basename
+
+
 def overlay_dir_name(lat=None, lon=None):
     """Return the overlay package directory name.
 

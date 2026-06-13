@@ -1559,7 +1559,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         if not self.grouped:
             link = os.path.join(
                 CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
-                "zOrtho4XP_" + FNAMES.short_latlon(lat, lon),
+                FNAMES.tile_dir(lat, lon),
             )
             target = os.path.realpath(
                 os.path.join(self.working_dir, self.dico_tiles_done[(lat, lon)][-1])
@@ -1567,7 +1567,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         elif self.grouped:
             link = os.path.join(
                 CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
-                "zOrtho4XP_" + os.path.basename(self.working_dir),
+                FNAMES.tile_name_from_basename(os.path.basename(self.working_dir)),
             )
             target = os.path.realpath(self.working_dir)
         if ("dar" in sys.platform) or ("win" not in sys.platform):
@@ -1608,7 +1608,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         if not self.grouped:
             link = os.path.join(
                 CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
-                "zOrtho4XP_" + FNAMES.short_latlon(lat, lon),
+                FNAMES.tile_dir(lat, lon),
             )
             target = os.path.realpath(
                 os.path.join(self.working_dir, self.dico_tiles_done[(lat, lon)][-1])
@@ -1629,7 +1629,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
         elif self.grouped:
             link = os.path.join(
                 CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
-                "zOrtho4XP_" + os.path.basename(self.working_dir),
+                FNAMES.tile_name_from_basename(os.path.basename(self.working_dir)),
             )
             target = os.path.realpath(self.working_dir)
             if os.path.isdir(link) and os.path.samefile(
@@ -1819,7 +1819,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                         )
                         link = os.path.join(
                             CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
-                            "zOrtho4XP_" + FNAMES.short_latlon(lat, lon),
+                            FNAMES.tile_dir(lat, lon),
                         )
                         if os.path.isdir(link):
                             if os.path.samefile(
@@ -1911,7 +1911,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                     )
             link = os.path.join(
                 CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
-                "zOrtho4XP_" + os.path.basename(self.working_dir),
+                FNAMES.tile_name_from_basename(os.path.basename(self.working_dir)),
             )
             if os.path.isdir(link):
                 if os.path.samefile(
