@@ -27,7 +27,7 @@ class SceneryManager:
         return self._ini.entries()
 
     def ortho4xp_entries(self) -> list[SceneryEntry]:
-        return [e for i, e in enumerate(self._ini.entries()) if i in self._ortho4xp_indices]
+        return [e for i, e in enumerate(self.entries()) if i in self._ortho4xp_indices]
 
     def _is_ortho4xp(self, entry: SceneryEntry) -> bool:
         dir_name = os.path.basename(entry.path.rstrip("/\\"))
@@ -45,4 +45,4 @@ class SceneryManager:
             return True
         if re.match(r"^zOrtho4XP_[+-]\d+[+-]\d+$", dir_name):
             return True
-        return bool(re.match(r"^yOrtho4XP_?.*$", dir_name))
+        return bool(re.match(r"^yOrtho4XP_(?:Overlays?)?$", dir_name))
