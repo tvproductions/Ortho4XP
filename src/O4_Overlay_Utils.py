@@ -2,9 +2,11 @@ import time
 import os
 import shutil
 import sys
+from types import SimpleNamespace
 import O4_File_Names as FNAMES
 import O4_Subprocess_Utils as SP
 import O4_UI_Utils as UI
+import O4_Package_Metadata as PKG
 
 # the following is meant to be modified directly by users who need it (in the
 # config window, not here!)
@@ -249,5 +251,9 @@ def build_overlay(lat, lon):
         )
     except OSError as exc:
         UI.vprint(3, exc)
+    overlay_package_dir = os.path.dirname(os.path.dirname(dest_dir))
+    PKG.write_package_metadata(
+        overlay_package_dir, SimpleNamespace(lat=lat, lon=lon), "overlay"
+    )
     UI.timings_and_bottom_line(timer)
     return 1

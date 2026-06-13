@@ -16,6 +16,7 @@ import O4_Overlay_Utils as OVL
 from O4_Parallel_Utils import parallel_launch, parallel_join
 import O4_Build_Context as BC
 import O4_Build_Models as MODELS
+import O4_Package_Metadata as PKG
 
 max_download_slots: int = 1
 max_convert_slots: int = 4
@@ -328,6 +329,7 @@ def build_tile(tile, ctx=None):
             UI.vprint(3, exc)
     if ctx.cleaning_level > 1 and not tile.grouped:
         remove_unwanted_textures(tile)
+    PKG.write_package_metadata(tile.build_dir, tile, "mesh")
     UI.timings_and_bottom_line(timer)
     UI.logprint("Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")
     return 1
