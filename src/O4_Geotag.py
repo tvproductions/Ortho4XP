@@ -1,11 +1,11 @@
 import os
-from math import pi, exp, atan
+from math import atan, exp, pi
 
+from osgeo import gdal
 from pyproj import Transformer
 
-import O4_Subprocess_Utils as SP
-
 geo_to_webm = Transformer.from_crs("epsg:4326", "epsg:3857", always_xy=True)
+gdal.UseExceptions()
 
 
 def gtile_to_wgs84(til_x, til_y, zoomlevel):
@@ -16,10 +16,8 @@ def gtile_to_wgs84(til_x, til_y, zoomlevel):
     return (lat, lon)
 
 
-for f in os.listdir():
-    if not f[-4:] == ".jpg":
-        continue
-    items = f.split("_")
+def geotag_jpeg(file_name):
+    items = file_name.split("_")
     til_y_top = int(items[0])
     til_x_left = int(items[1])
     zoomlevel = int(items[-1][-6:-4])
@@ -27,40 +25,35 @@ for f in os.listdir():
     (latmin, lonmax) = gtile_to_wgs84(til_x_left + 16, til_y_top + 16, zoomlevel)
     (xmin, ymin) = geo_to_webm.transform(lonmin, latmin)
     (xmax, ymax) = geo_to_webm.transform(lonmax, latmax)
-    SP.run_external_tool(
-        "gdal_translate",
-        [
-            "-of",
-            "Gtiff",
-            "-co",
-            "COMPRESS=JPEG",
-            "-a_ullr",
-            str(xmin),
-            str(ymax),
-            str(xmax),
-            str(ymin),
-            "-a_srs",
-            "epsg:3857",
-            f,
-            f.replace(".jpg", "_tmp.tif"),
-        ],
+    tmp_tif = file_name.replace(".jpg", "_tmp.tif")
+    out_tif = file_name.replace(".jpg", ".tif")
+    gdal.Translate(
+        tmp_tif,
+        file_name,
+        format="GTiff",
+        creationOptions=["COMPRESS=JPEG"],
+        outputBounds=[xmin, ymin, xmax, ymax],
+        outputSRS="EPSG:3857",
     )
-    SP.run_external_tool(
-        "gdalwarp",
-        [
-            "-of",
-            "Gtiff",
-            "-co",
-            "COMPRESS=JPEG",
-            "-s_srs",
-            "epsg:3857",
-            "-t_srs",
-            "epsg:4326",
-            "-ts",
-            "4096",
-            "4096",
-            "-rb",
-            f.replace(".jpg", "_tmp.tif"),
-            f.replace(".jpg", ".tif"),
-        ],
+    gdal.Warp(
+        out_tif,
+        tmp_tif,
+        format="GTiff",
+        creationOptions=["COMPRESS=JPEG"],
+        srcSRS="EPSG:3857",
+        dstSRS="EPSG:4326",
+        width=4096,
+        height=4096,
+        resampleAlg="bilinear",
     )
+    os.remove(tmp_tif)
+
+
+def main():
+    for file_name in os.listdir():
+        if file_name[-4:] == ".jpg":
+            geotag_jpeg(file_name)
+
+
+if __name__ == "__main__":
+    main()

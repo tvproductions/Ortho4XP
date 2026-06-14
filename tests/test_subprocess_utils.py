@@ -138,7 +138,7 @@ class SubprocessUtilsTests(unittest.TestCase):
                     SP.resolve_tool("Triangle4XP"),
                     os.path.join("root", "Utils", "win", "Triangle4XP.exe"),
                 )
-                self.assertEqual(SP.resolve_tool("gdalwarp"), "gdalwarp.exe")
+                self.assertEqual(SP.resolve_tool("gdalwarp"), "gdalwarp")
 
             with (
                 mock.patch.object(PATHS.sys, "platform", "darwin"),

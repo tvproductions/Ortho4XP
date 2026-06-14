@@ -37,8 +37,6 @@ def _platform_tools() -> dict[str, str]:
             "moulinette": _tool_path("win", "moulinette.exe"),
             "nvcompress": nvcompress_win,
             "ddstool": nvcompress_win,
-            "gdal_translate": "gdal_translate.exe",
-            "gdalwarp": "gdalwarp.exe",
             "7z": _tool_path("win", "7z.exe"),
             "dsftool": _tool_path("win", "DSFTool.exe"),
         },
@@ -55,10 +53,7 @@ def _platform_tools() -> dict[str, str]:
 
 
 def _common_tools() -> dict[str, str]:
-    return {
-        "gdal_translate": "gdal_translate",
-        "gdalwarp": "gdalwarp",
-    }
+    return {}
 
 
 def _tool_path(*parts: str) -> str:

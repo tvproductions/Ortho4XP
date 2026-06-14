@@ -373,8 +373,8 @@ def build_dem_pre_mask(til_x, til_y, tile):
         del demarr4326
         s_bbox = (lonmin, latmax, lonmax, latmin)
         t_bbox = (x03857, y03857, x13857, y13857)
-        demim3857 = IMG.gdalwarp_alternative(
-            s_bbox, "4326", demim4326, t_bbox, "3857", (6144, 6144)
+        demim3857 = IMG.warp_image_with_gdal(
+            demim4326, s_bbox, 4326, t_bbox, 3857, (6144, 6144)
         )
         demim3857 = demim3857.filter(
             ImageFilter.GaussianBlur(0.3 * 2 ** (tile.mask_zl - 14))

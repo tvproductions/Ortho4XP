@@ -32,7 +32,6 @@ class GdalGeotiffSmallTileTests(unittest.TestCase):
                 self.tile,
                 (32, 48, 16, "PROV"),
                 ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                ("gdal_translate", "gdalwarp"),
             )
 
         gdal_mock.Translate.assert_called_once_with(
@@ -65,7 +64,6 @@ class GdalGeotiffSmallTileTests(unittest.TestCase):
                 self.tile,
                 (32, 48, 16, "PROV"),
                 ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                ("gdal_translate", "gdalwarp"),
             )
 
         self.assertEqual(gdal_mock.Translate.call_count, 10)
@@ -93,7 +91,6 @@ class GdalGeotiffLargeTileTests(unittest.TestCase):
                 self.tile,
                 (32, 48, 16, "PROV"),
                 ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                ("gdal_translate", "gdalwarp"),
             )
 
         gdal_mock.Translate.assert_called_once_with(
@@ -135,7 +132,6 @@ class GdalGeotiffLargeTileTests(unittest.TestCase):
                 self.tile,
                 (32, 48, 16, "PROV"),
                 ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                ("gdal_translate", "gdalwarp"),
             )
 
         gdal_mock.Warp.assert_not_called()
@@ -162,7 +158,6 @@ class GdalGeotiffLargeTileTests(unittest.TestCase):
                 self.tile,
                 (32, 48, 16, "PROV"),
                 ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                ("gdal_translate", "gdalwarp"),
             )
 
         self.assertEqual(gdal_mock.Warp.call_count, 10)
@@ -188,34 +183,9 @@ class GdalGeotiffLargeTileTests(unittest.TestCase):
                 self.tile,
                 (32, 48, 16, "PROV"),
                 ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                ("gdal_translate", "gdalwarp"),
             )
 
         cleanup.assert_called_once_with(True, "out.png", "/work/tmp.tif")
-
-
-class GdalGeotiffGdalCommandsIgnoredTests(unittest.TestCase):
-    def test_gdal_commands_parameter_is_ignored(self):
-        tile = SimpleNamespace(build_dir="/build")
-        with (
-            mock.patch.object(
-                TCU.GEO,
-                "gtile_to_wgs84",
-                side_effect=[(1.0, 2.0), (0.99, 2.01)],
-            ),
-            mock.patch.object(TCU.GEO, "geo_to_webm", return_value=(0, 0)),
-            mock.patch.object(TCU, "gdal"),
-            mock.patch.object(TCU.FNAMES, "Geotiff_dir", "/geotiffs"),
-            mock.patch.object(TCU, "cleanup_conversion_temps"),
-        ):
-            result = TCU.convert_geotiff_texture(
-                tile,
-                (32, 48, 16, "PROV"),
-                ("/input.tif", "out.tif", True, "out.png", "/work/tmp.tif"),
-                (None, None),
-            )
-
-        self.assertTrue(result.ok)
 
 
 if __name__ == "__main__":

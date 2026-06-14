@@ -8,16 +8,12 @@ from math import sqrt
 import array
 import numpy
 
-try:
-    from osgeo import gdal
-
-    has_gdal = True
-    gdal.UseExceptions()
-except ImportError:
-    has_gdal = False
+from osgeo import gdal
 from PIL import Image
 import O4_UI_Utils as UI
 import O4_File_Names as FNAMES
+
+gdal.UseExceptions()
 
 available_sources = (
     "View",
@@ -468,7 +464,7 @@ def read_elevation_from_file(file_name, lat, lon, info_only=False, base_if_error
         x1 = y1 = 1
         epsg = 4326
         nodata = -32768
-    elif has_gdal:
+    else:
         try:
             ds = gdal.Open(file_name)
             rs = ds.GetRasterBand(1)
@@ -536,20 +532,6 @@ def read_elevation_from_file(file_name, lat, lon, info_only=False, base_if_error
             x1 = y1 = 1
             epsg = 4326
             nodata = -32768
-    elif not has_gdal:
-        UI.lvprint(
-            1,
-            "   WARNING: unsupported raster (install Gdal):",
-            file_name,
-            "-> replaced with zero altitude.",
-        )
-        nxdem = nydem = base_if_error
-        if not info_only:
-            alt_dem = numpy.zeros((base_if_error, base_if_error), dtype=numpy.float32)
-        x0 = y0 = 0
-        x1 = y1 = 1
-        epsg = 4326
-        nodata = -32768
     return (epsg, x0, y0, x1, y1, nodata, nxdem, nydem, alt_dem)
 
 

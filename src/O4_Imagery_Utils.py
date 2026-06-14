@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy
+from osgeo import gdal
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
 import requests
 
@@ -33,7 +34,7 @@ from O4_Source_Data_Models import (
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
 from O4_Parallel_Utils import parallel_execute
-from O4_Subprocess_Utils import resolve_tool, run_external_command
+from O4_Subprocess_Utils import resolve_tool
 from O4_Texture_Conversion_Utils import (
     convert_dds_texture,
     convert_geotiff_texture,
@@ -41,6 +42,7 @@ from O4_Texture_Conversion_Utils import (
 from pydantic import ValidationError
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
+gdal.UseExceptions()
 
 has_URL = False
 URL: Any = None
@@ -100,16 +102,6 @@ dds_convert_cmd = resolve_tool("DDSTool" if is_macos else "nvcompress")
 # The command flags below still branch by platform.
 # The single resolver call keeps platform branching out of command execution.
 # Existing module-level names are preserved for legacy callers.
-# GDAL executable resolution stays centralized with the shared subprocess helper.
-# Keep these module-level command variables for legacy call-site compatibility.
-# The helper adds .exe on Windows and uses PATH on macOS/Linux.
-# DDS conversion still switches flags below because DDSTool and nvcompress differ.
-# Structured UI logging is handled by the shared runner.
-# External tool retries remain local to the existing call sites.
-# Existing texture conversion branches keep their original command arguments.
-gdal_transl_cmd = resolve_tool("gdal_translate")
-gdalwarp_cmd = resolve_tool("gdalwarp")
-
 ################################################################################
 #
 #  PART I : Initialization of providers, extents, and color filters
@@ -1519,10 +1511,10 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
     # We modify big_image if necessary
     if warp_needed:
         UI.vprint(3, "Warp needed")
-        big_image = gdalwarp_alternative(
+        big_image = warp_image_with_gdal(
+            big_image,
             (s_ulx, s_uly, s_lrx, s_lry),
             provider["epsg_code"],
-            big_image,
             t_bbox,
             t_epsg,
             t_size,
@@ -2055,50 +2047,81 @@ def create_tile_preview(lat, lon, zoomlevel, provider_code):
 
 
 ################################################################################
-def gdalwarp_alternative(s_bbox, s_epsg, s_im, t_bbox, t_epsg, t_size):
-    [s_ulx, s_uly, s_lrx, s_lry] = s_bbox
-    [t_ulx, t_uly, t_lrx, t_lry] = t_bbox
-    (s_w, s_h) = s_im.size
-    (t_w, t_h) = t_size
-    t_quad = (0, 0, t_w, t_h)
-    meshes = []
+def warp_image_with_gdal(source_im, s_bbox, s_epsg, t_bbox, t_epsg, t_size):
+    source_im = _gdal_warp_supported_image(source_im)
+    source_array = numpy.asarray(source_im)
+    source_bands = _gdal_band_count_for_image(source_im)
 
-    def cut_quad_into_grid(quad, steps):
-        w = quad[2] - quad[0]
-        h = quad[3] - quad[1]
-        x_step = w / float(steps)
-        y_step = h / float(steps)
-        y = quad[1]
-        for k in range(steps):
-            x = quad[0]
-            for l in range(steps):
-                yield (int(x), int(y), int(x + x_step), int(y + y_step))
-                x += x_step
-            y += y_step
+    source_ds = _memory_raster_from_image(source_im, source_array, source_bands, s_bbox)
+    source_ds.SetProjection(f"EPSG:{s_epsg}")
 
-    inv_proj = GEO.transformer(t_epsg, s_epsg)
-
-    for quad in cut_quad_into_grid(t_quad, 8):
-        s_quad = []
-        for t_pixx, t_pixy in [
-            (quad[0], quad[1]),
-            (quad[0], quad[3]),
-            (quad[2], quad[3]),
-            (quad[2], quad[1]),
-        ]:
-            t_x = t_ulx + t_pixx / t_w * (t_lrx - t_ulx)
-            t_y = t_uly - t_pixy / t_h * (t_uly - t_lry)
-            (s_x, s_y) = inv_proj.transform(t_x, t_y)
-            s_pixx = int(round((s_x - s_ulx) / (s_lrx - s_ulx) * s_w))
-            s_pixy = int(round((s_uly - s_y) / (s_uly - s_lry) * s_h))
-            s_quad.extend((s_pixx, s_pixy))
-        meshes.append((quad, s_quad))
-    return s_im.transform(
-        t_size,
-        Image.Transform.MESH,
-        meshes,
-        Image.Resampling.BICUBIC,
+    t_ulx, t_uly, t_lrx, t_lry = t_bbox
+    t_w, t_h = t_size
+    warped_ds = gdal.Warp(
+        "",
+        source_ds,
+        format="MEM",
+        srcSRS=f"EPSG:{s_epsg}",
+        dstSRS=f"EPSG:{t_epsg}",
+        outputBounds=[t_ulx, t_lry, t_lrx, t_uly],
+        width=t_w,
+        height=t_h,
+        resampleAlg="cubic",
     )
+    if warped_ds is None:
+        raise RuntimeError("GDAL warp failed")
+    return _image_from_memory_raster(warped_ds, source_im.mode)
+
+
+def _gdal_warp_supported_image(source_im):
+    if source_im.mode in ("L", "RGB", "RGBA"):
+        return source_im
+    return source_im.convert("RGB")
+
+
+def _gdal_band_count_for_image(source_im):
+    if source_im.mode == "L":
+        return 1
+    return len(source_im.getbands())
+
+
+def _memory_raster_from_image(source_im, source_array, source_bands, bbox):
+    s_ulx, s_uly, s_lrx, s_lry = bbox
+    source_ds = gdal.GetDriverByName("MEM").Create(
+        "",
+        source_im.width,
+        source_im.height,
+        source_bands,
+        gdal.GDT_Byte,
+    )
+    source_ds.SetGeoTransform(
+        [
+            s_ulx,
+            (s_lrx - s_ulx) / source_im.width,
+            0,
+            s_uly,
+            0,
+            (s_lry - s_uly) / source_im.height,
+        ]
+    )
+    if source_bands == 1:
+        source_ds.GetRasterBand(1).WriteArray(source_array)
+    else:
+        for band_index in range(source_bands):
+            source_ds.GetRasterBand(band_index + 1).WriteArray(
+                source_array[:, :, band_index]
+            )
+    return source_ds
+
+
+def _image_from_memory_raster(raster, mode):
+    if mode == "L":
+        return Image.fromarray(raster.GetRasterBand(1).ReadAsArray(), "L")
+    bands = [
+        raster.GetRasterBand(band_index + 1).ReadAsArray()
+        for band_index in range(len(mode))
+    ]
+    return Image.fromarray(numpy.dstack(bands), mode)
 
 
 ################################################################################
@@ -2468,7 +2491,6 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             png_file_name,
             tmp_tif_file_name,
         ),
-        (gdal_transl_cmd, gdalwarp_cmd),
     )
 
 
@@ -2493,26 +2515,20 @@ def geotag(input_file_name):
     zoomlevel = int(items[-1][-6:-4])
     (latmax, lonmin) = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
     (latmin, lonmax) = GEO.gtile_to_wgs84(til_x_left + 16, til_y_top + 16, zoomlevel)
-    conv_cmd = [
-        gdal_transl_cmd,
-        "-of",
-        "Gtiff",
-        "-co",
-        "COMPRESS=JPEG",
-        "-a_ullr",
-        str(lonmin),
-        str(latmax),
-        str(lonmax),
-        str(latmin),
-        "-a_srs",
-        "epsg:4326",
-        input_file_name,
-        out_file_name,
-    ]
     tentative = 0
     while True:
-        if run_external_command(conv_cmd).ok:
+        try:
+            gdal.Translate(
+                out_file_name,
+                input_file_name,
+                format="GTiff",
+                creationOptions=["COMPRESS=JPEG"],
+                outputBounds=[lonmin, latmin, lonmax, latmax],
+                outputSRS="EPSG:4326",
+            )
             break
+        except Exception:
+            pass
         tentative += 1
         if tentative == 10:
             print("ERROR: Could not convert texture", out_file_name, "(10 tries)")

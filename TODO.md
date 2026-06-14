@@ -306,7 +306,9 @@ Create a shared helper for external tool execution.
 
 Acceptance criteria:
 
-- Supports `Triangle4XP`, `triangle`, `moulinette`, `nvcompress`, `DDSTool`, `gdal_translate`, `gdalwarp`, and `7z`.
+- Supports `Triangle4XP`, `triangle`, `moulinette`, `nvcompress`, `DDSTool`,
+  and `7z`. GDAL CLI subprocess support was retired by TODO-028; GDAL raster
+  work now uses `osgeo.gdal` Python bindings.
 - Captures stdout and stderr.
 - Logs command, return code, and a short error summary.
 - Handles platform-specific environment setup.
@@ -682,13 +684,15 @@ toolchain before adding more visual processing features.
 Acceptance criteria:
 
 - Inventories active GIS/raster/imagery tools and libraries, including
-  `gdal_translate`, `gdalwarp`, Pillow, NumPy, DDS encoders, provider color
-  filters, mask generation, GeoTIFF export, and XP12 DSF raster handling.
+  historical `gdal_translate`/`gdalwarp` use, current GDAL bindings, Pillow,
+  NumPy, DDS encoders, provider color filters, mask generation, GeoTIFF export,
+  and XP12 DSF raster handling.
 - Traces imagery and raster data flow from provider download/cache through
   crop/warp, masks, color filters, optional normalization, GeoTIFF export, and
   DDS handoff.
-- Documents CRS/projection assumptions, current GDAL command options, and where
-  internal/Pillow paths are used instead of GDAL.
+- Documents CRS/projection assumptions, GDAL command options that existed before
+  the bindings migration, and where internal/Pillow paths were used instead of
+  GDAL.
 - Documents current resampling, nodata, alpha, mask, and compression
   assumptions, including known gaps or undefined behavior.
 - Evaluates staged opportunities such as GDAL VRT use, explicit resampling
@@ -742,7 +746,12 @@ Suggested labels: `documentation`, `architecture`, `xp12max`, `scenery-stack`
 
 ### TODO-028: GDAL Python Bindings Migration
 
-Status: Pending
+Status: Done
+
+Verification note: implemented in Wave 1. Focused GDAL binding tests, full
+`unittest` discovery, changed-file Ruff/format, and changed-file `ty` passed.
+The full repository quality gate is blocked by TODO-049 / GHI #32 due existing
+repo-wide Ruff baseline drift outside this migration.
 
 Replace all GDAL CLI subprocess calls (`gdal_translate`, `gdalwarp`) with
 `osgeo.gdal` Python bindings. Remove `gdalwarp_alternative()` Pillow-based
@@ -765,7 +774,11 @@ Suggested labels: `gdal`, `dependencies`, `refactor`
 
 ### TODO-029: Upgrade nvcompress Flags
 
-Status: Pending
+Status: Done
+
+Verification note: implemented in Wave 1. Encoder command tests were updated in
+the Wave 1 commits. The full repository quality gate is blocked by TODO-049 /
+GHI #32 due existing repo-wide Ruff baseline drift outside this flag upgrade.
 
 Upgrade nvcompress commands on Windows/Linux to use `-highest -mipfilter kaiser
 -alpha_dithering` for maximum BC1/BC3 quality.
@@ -1109,3 +1122,44 @@ Acceptance criteria:
 - Adds tests for theme loading and persistence
 
 Suggested labels: `gui`, `developer-experience`
+
+### TODO-049: Repair Repo-Wide Ruff Quality Gate Baseline
+
+Status: Pending
+
+GitHub Issue: #32
+
+The maintained quality gate currently fails at its repo-wide Ruff step before it
+can reach later quality stages. Wave 1 verification showed:
+
+- `uv run python -m unittest discover -s tests` passes with 320 tests.
+- Changed-file Ruff check passes for the Wave 1 touched files.
+- Changed-file Ruff format check passes for the Wave 1 touched files.
+- Changed-file `ty` passes for the Wave 1 touched source files.
+- `uv run python .codex/skills/quality-check/scripts/quality_check.py` fails at
+  `uv run ruff check ...` with 198 findings outside the Wave 1 changes.
+
+Aggregate failing Ruff findings:
+
+- 61 `I001` import ordering findings
+- 44 `UP032` format-call modernization findings
+- 15 `S603` subprocess audit findings
+- 14 `S101` assert findings
+- 11 `SIM115` open-file context-manager findings
+- Remaining findings span `UP035`, `SIM118`, `UP015`, `B010`, `SIM117`,
+  `C405`, `SIM105`, `B006`, `B009`, and related modernization rules.
+
+Acceptance criteria:
+
+- Makes `uv run python .codex/skills/quality-check/scripts/quality_check.py`
+  reach later quality stages instead of failing at repo-wide Ruff lint.
+- Either fixes the repo-wide Ruff findings or introduces an explicit,
+  documented baseline/target policy for legacy debt.
+- Keeps changed-file Ruff, Ruff format, `ty`, and `unittest` checks strict for
+  new work.
+- Handles `src/Unused` and `.codex/skills` intentionally and documents the
+  chosen policy.
+- Adds or updates tests for quality-check target selection if script behavior
+  changes.
+
+Suggested labels: `quality`

@@ -47,7 +47,7 @@ def convert_dds_texture(tile, texture_attrs, conversion_input, cleanup_input):
         cleanup_conversion_temps(*cleanup_input)
 
 
-def convert_geotiff_texture(tile, texture_attrs, conversion_input, gdal_commands):
+def convert_geotiff_texture(tile, texture_attrs, conversion_input):
     provider_code = texture_attrs[3]
     out_file_name = conversion_input[1]
     file_to_convert, _, erase_tmp_png, png_file_name, tmp_tif = conversion_input

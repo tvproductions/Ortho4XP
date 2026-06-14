@@ -44,7 +44,8 @@ Step 3 texture work is split across `src/O4_Tile_Utils.py` and
 - applies optional neighbor color normalization;
 - applies provider color filters;
 - writes temporary PNG/TIFF inputs;
-- builds `nvcompress`, `DDSTool`, `gdal_translate`, or `gdalwarp` commands;
+- builds `nvcompress` or `DDSTool` commands and routes GeoTIFF work through
+  `osgeo.gdal` bindings;
 - retries failed external conversions up to ten times;
 - removes temporary files.
 
