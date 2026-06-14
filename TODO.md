@@ -672,6 +672,8 @@ Suggested labels: `quality`, `architecture`, `refactor`
 
 ### TODO-026: Document GIS/Raster/Imagery Technology Map
 
+Status: Done
+
 GitHub Issue: #30
 
 Harvest the current project understanding of the GIS, raster, and imagery
@@ -735,3 +737,375 @@ Acceptance criteria:
   generated scenery output in this issue.
 
 Suggested labels: `documentation`, `architecture`, `xp12max`, `scenery-stack`
+
+## Phase 7: Implementation Waves (from TODO-026 roadmap)
+
+### TODO-028: GDAL Python Bindings Migration
+
+Status: Pending
+
+Replace all GDAL CLI subprocess calls (`gdal_translate`, `gdalwarp`) with
+`osgeo.gdal` Python bindings. Remove `gdalwarp_alternative()` Pillow-based
+reprojection. Make GDAL a hard runtime dependency.
+
+Acceptance criteria:
+
+- Adds `gdal` to `pyproject.toml` dependencies
+- Replaces `gdal_translate`/`gdalwarp` subprocess calls in
+  `O4_Texture_Conversion_Utils.py` with `gdal.Translate()`/`gdal.Warp()`
+- Replaces `gdalwarp_alternative()` in `O4_Imagery_Utils.py` with `gdal.Warp()`
+- Replaces `gdalwarp_alternative()` in `O4_Mask_Utils.py` with `gdal.Warp()`
+- Makes `osgeo.gdal` import unconditional in `O4_DEM_Utils.py`
+- Removes `resolve_tool("gdal_translate")` and `resolve_tool("gdalwarp")` from
+  `O4_External_Tool_Paths.py`
+- Adds GDAL to PyInstaller packaging for all three platforms
+- Updates tests
+
+Suggested labels: `gdal`, `dependencies`, `refactor`
+
+### TODO-029: Upgrade nvcompress Flags
+
+Status: Pending
+
+Upgrade nvcompress commands on Windows/Linux to use `-highest -mipfilter kaiser
+-alpha_dithering` for maximum BC1/BC3 quality.
+
+Acceptance criteria:
+
+- Updates `O4_Native_Texture_Encoder.py` BC1 command to:
+  `nvcompress -bc1 -highest -alpha_dithering -mipfilter kaiser <input> <output>`
+- Updates BC3 command to:
+  `nvcompress -bc3 -highest -alpha_dithering -mipfilter kaiser -alpha <input> <output>`
+- Preserves DDSTool commands on macOS (already optimal)
+- Adds tests for command construction
+
+Suggested labels: `textures`, `quality`, `quick-win`
+
+### TODO-030: aiohttp + asyncio Tile Downloads
+
+Status: Pending
+
+Replace `requests` + `ThreadPoolExecutor` with `aiohttp` + `asyncio` for tile
+downloads. Provides native async I/O, connection pooling, backpressure via
+semaphore, and easier cancellation.
+
+Acceptance criteria:
+
+- Adds `aiohttp` to `pyproject.toml` dependencies
+- Replaces `http_request_to_image()` with async `aiohttp` implementation
+- Replaces `ThreadPoolExecutor` download workers with `asyncio.gather()`
+- Dispatches CPU-bound JPEG decoding via `asyncio.to_thread()`
+- Maintains retry logic and failure tracking
+- Adds tests for async download behavior
+
+Suggested labels: `async`, `network`, `performance`
+
+### TODO-031: Per-Stage Resampling Policy
+
+Status: Pending
+
+Define per-stage resampling defaults with optional config overrides.
+
+Acceptance criteria:
+
+- Adds config keys for resampling method per stage:
+  - Texture downscale (provider → 4096): LANCZOS default
+  - Mask resize (6144 → 4096): NEAREST default
+  - Reprojection warp (`gdal.Warp()`): BICUBIC default
+  - Normalization edge sampling: BILINEAR default
+- Replaces hardcoded `BICUBIC` throughout codebase with config-driven methods
+- Documents resampling choices in config hints
+- Adds tests for config-driven resampling selection
+
+Suggested labels: `config`, `quality`, `quick-win`
+
+### TODO-032: In-Memory VRT Pipeline
+
+Status: Pending
+
+Implement zero-intermediate-files streaming pipeline: HTTP tiles → VRT stitch →
+warp → color → normalize → DDS, eliminating all intermediate JPEG/PNG/GeoTIFF
+writes.
+
+Acceptance criteria:
+
+- Builds VRT in-memory from tile BytesIOs via `gdal.BuildVRT()`
+- Streams through `gdal.Warp()` for reprojection
+- Passes NumPy array to color filter and normalization
+- Writes temp PNG only for nvcompress (or investigates stdin support)
+- Removes intermediate cache-write paths from `O4_File_Names.py`
+- Adds tests for VRT assembly and streaming
+
+Suggested labels: `performance`, `architecture`, `gdal`
+
+### TODO-033: COG-Style GeoTIFF Export
+
+Status: Pending
+
+Add optional Cloud-Optimized GeoTIFF mode with tiling and overviews.
+
+Acceptance criteria:
+
+- Adds `cog_export` config flag (default False)
+- When enabled: `gdal.Translate(co=TILED=YES, BLOCKXSIZE=512, BLOCKYSIZE=512)`
+- Adds `gdal.AddOverview()` for pyramid levels
+- Documents COG benefits (streaming, progressive loading)
+- Adds tests for COG export
+
+Suggested labels: `geotiff`, `quality`
+
+### TODO-034: DDS Compression QA
+
+Status: Pending
+
+Add optional compression-aware quality assurance step comparing source PNG with
+compressed DDS using PSNR/SSIM metrics.
+
+Acceptance criteria:
+
+- Adds `dds_qa_enabled` config flag (default False)
+- Decodes compressed DDS back to PNG
+- Computes PSNR, SSIM, or MSE between source and decoded
+- Warns if quality drops below configurable threshold
+- Adds tests for QA metrics computation
+
+Suggested labels: `quality`, `textures`
+
+### TODO-035: Unsharp Mask Sharpening
+
+Status: Pending
+
+Add `"sharpen"` as a supported operation in the color filter pipeline.
+
+Acceptance criteria:
+
+- Adds `"sharpen"` operation to `color_transform()` with parameters
+  `[radius, amount, threshold]` mapped to Pillow `ImageFilter.UnsharpMask()`
+- Applies after color filter, before sRGB normalization
+- Documents sharpening parameters in filter schema
+- Adds tests for sharpening operation
+
+Suggested labels: `imagery`, `quality`
+
+### TODO-036: Event Bus
+
+Status: Pending
+
+Add event-driven architecture for module communication. Reference:
+ORTHO4XP_V3 `O4_EventBus`.
+
+Acceptance criteria:
+
+- Implements singleton `EventBus` with thread-safe publish/subscribe
+- Defines events: `TILE_START`, `TILE_PROGRESS`, `TILE_COMPLETE`, `TILE_ERROR`,
+  `PIPELINE_STEP`, `CACHE_HIT`
+- Emits events from build pipeline stages
+- Adds tests for event emission and subscription
+
+Suggested labels: `architecture`, `events`
+
+### TODO-037: Pipeline Orchestrator
+
+Status: Pending
+
+Add named-step pipeline orchestration with timing, status tracking, and clean
+failure handling. Reference: ORTHO4XP_V3 `O4_Pipeline`.
+
+Acceptance criteria:
+
+- Implements `Pipeline` class with named steps
+- Tracks step timing and status (pending/running/complete/error)
+- Publishes `PIPELINE_STEP` events
+- Stops cleanly on step failure without file corruption
+- Adds tests for pipeline execution and failure handling
+
+Suggested labels: `architecture`, `pipeline`
+
+### TODO-038: Smart Cache
+
+Status: Pending
+
+Add SHA256-based tile parameter caching to skip rebuilds when parameters are
+unchanged. Reference: ORTHO4XP_V3 `O4_Dependency`.
+
+Acceptance criteria:
+
+- Computes SHA256 hash of tile build parameters
+- Stores hash in `tile_meta.json` after successful build
+- Skips rebuild if hash matches cached value
+- Adds tests for cache hit/miss behavior
+
+Suggested labels: `performance`, `cache`
+
+### TODO-039: Provider Scoring
+
+Status: Pending
+
+Add automatic quality scoring for downloaded imagery. Reference: ORTHO4XP_V3
+`O4_Provider_Score`.
+
+Acceptance criteria:
+
+- Scores each downloaded image on 5 criteria: noise, JPEG compression, clouds,
+  color drift, seam risk
+- Computes global score 0-100 with quality label
+- Logs scores per provider
+- Adds tests for scoring algorithms
+
+Suggested labels: `imagery`, `quality`
+
+### TODO-040: Provider Failover
+
+Status: Pending
+
+Add automatic provider failover with blacklist. Reference: ORTHO4XP_V3
+`O4_Provider_Abstraction`.
+
+Acceptance criteria:
+
+- Implements provider abstraction layer between pipeline and imagery providers
+- Blacklists provider after 3 consecutive failures (5-minute timeout)
+- Auto-selects next active provider by priority order
+- Thread-safe for parallel builds
+- Adds tests for failover behavior
+
+Suggested labels: `reliability`, `network`
+
+### TODO-041: AI Cloud/Seam Detection
+
+Status: Pending
+
+Add AI-based cloud and seam detection for imagery quality control. Reference:
+ORTHO4XP_V3 `O4_Provider_Score` enhanced.
+
+Acceptance criteria:
+
+- Detects clouds via 3 criteria: dense clouds, atmospheric veil, blue sky exclusion
+- Tolerates up to 5% cloud coverage (avoids false positives)
+- Detects fog/veil via local variance
+- Analyzes seam risk on 4 independent edges
+- Detects directional seams (1 problematic edge) and abrupt gradients
+- Adds tests for detection algorithms
+
+Suggested labels: `imagery`, `quality`, `ai`
+
+### TODO-042: XP12 Materials
+
+Status: Pending
+
+Add automatic XP12 material property generation from imagery analysis.
+Reference: ORTHO4XP_V3 `O4_XP12_Materials`.
+
+Acceptance criteria:
+
+- Detects ground type from imagery: forest, water, snow, urban, field, bare soil, beach
+- Generates XP12 parameters: `WET`, `ROUGHNESS`, `SPECULAR`, `NORMAL_SCALE`
+- Injects parameters into `.ter` terrain files
+- Idempotent (re-application updates without duplication)
+- Calibrates profiles per ground type (e.g., water: wet=1.0, specular=0.80)
+- Adds tests for ground type detection and parameter generation
+
+Suggested labels: `xp12max`, `materials`
+
+### TODO-043: Night Continuity
+
+Status: Pending
+
+Add emissive mask generation from OSM semantic data for night-time visual
+continuity. Reference: XP-Ortho-NC.
+
+Acceptance criteria:
+
+- Generates emissive mask from OSM roads (corridor lighting), land use (urban
+  density), and places (settlement anchors)
+- Produces semantic layers: `emissive_mask.png`, `road_energy.png`, `urban_density.png`
+- Deterministic (same input → same output)
+- Non-destructive (does not alter daytime imagery)
+- Aligns with X-Plane scenery layering
+- Adds tests for mask generation
+
+Suggested labels: `xp12max`, `night`, `osm`
+
+### TODO-044: GPU Backend
+
+Status: Pending
+
+Add GPU-accelerated texture processing with silent CPU fallback. Reference:
+ORTHO4XP_V3 `O4_GPU_Backend` + TODO-018.
+
+Acceptance criteria:
+
+- Detects GPU availability (NVIDIA CUDA via CuPy or PyTorch)
+- Routes histogram, color transfer, and feathering operations to GPU when available
+- Falls back silently to CPU when no GPU
+- Benchmarks CPU vs GPU performance
+- Adds tests for GPU/CPU path selection
+
+Suggested labels: `performance`, `gpu`
+
+### TODO-045: Automatic Backups + Rollback
+
+Status: Pending
+
+Add timestamped automatic backups with 1-click rollback. Reference:
+ORTHO4XP_V3 `O4_Backup_Manager`.
+
+Acceptance criteria:
+
+- Backs up critical files (`.py`, `.comb`, `.ccorr`, `.dds`, `.cfg`) before modification
+- Stores timestamped backups with reason metadata
+- Maximum 10 backups per file (auto-purge oldest)
+- Provides `rollback.py` script for 1-click restore
+- Adds tests for backup/rollback behavior
+
+Suggested labels: `reliability`, `developer-experience`
+
+### TODO-046: RAM Protection
+
+Status: Pending
+
+Add real-time RAM monitoring with automatic cleanup. Reference: ORTHO4XP_V3
+`O4_Memory_Manager`.
+
+Acceptance criteria:
+
+- Monitors system RAM via `psutil` (graceful degradation if unavailable)
+- Triggers cleanup when threshold exceeded (default: 80% system RAM)
+- Configurable cache size limit (default: 8 GB)
+- Provides `check_and_cleanup_memory()` for heavy loops
+- Adds tests for memory monitoring
+
+Suggested labels: `reliability`, `performance`
+
+### TODO-047: Debug Visualizations
+
+Status: Pending
+
+Add diagnostic visualization outputs for build quality analysis. Reference:
+ORTHO4XP_V3 `O4_Benchmark`.
+
+Acceptance criteria:
+
+- Generates `seam_risk_map.png` highlighting problematic zones in red
+- Generates `color_transfer_compare.png` showing before/after side-by-side
+- Generates `blur_map.png` showing sharpness (green=sharp, blue=blur)
+- Outputs to `_debug_viz/` directory
+- Adds tests for visualization generation
+
+Suggested labels: `debug`, `quality`
+
+### TODO-048: Theme Manager
+
+Status: Pending
+
+Add GUI theme management with multiple presets. Reference: ORTHO4XP_V3
+`O4_Theme_Manager`.
+
+Acceptance criteria:
+
+- Implements 5 themes: default, slate, desert sand, deep ocean, custom
+- Persists theme selection between sessions
+- Cross-platform compatible (Windows, macOS, Linux)
+- Adds tests for theme loading and persistence
+
+Suggested labels: `gui`, `developer-experience`
