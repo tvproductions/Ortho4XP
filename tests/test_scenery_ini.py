@@ -95,10 +95,7 @@ class TestSceneryINIWrite(unittest.TestCase):
         self.assertIn("SCENERY_PACK Custom Scenery/Test/\n", content)
 
     def test_add_entry_at_end(self):
-        ini = self._read_ini(
-            "I\n1000 Version\n\n"
-            "SCENERY_PACK Custom Scenery/A/\n"
-        )
+        ini = self._read_ini("I\n1000 Version\n\nSCENERY_PACK Custom Scenery/A/\n")
         ini.add_entry("Custom Scenery/B/")
         self.assertEqual(len(ini.entries()), 2)
         self.assertEqual(ini.entries()[-1].path, "Custom Scenery/B/")
@@ -123,10 +120,7 @@ class TestSceneryINIWrite(unittest.TestCase):
         self.assertEqual(ini.entries()[0].path, "Custom Scenery/B/")
 
     def test_remove_nonexistent_returns_false(self):
-        ini = self._read_ini(
-            "I\n1000 Version\n\n"
-            "SCENERY_PACK Custom Scenery/A/\n"
-        )
+        ini = self._read_ini("I\n1000 Version\n\nSCENERY_PACK Custom Scenery/A/\n")
         self.assertFalse(ini.remove_entry("Custom Scenery/NotHere/"))
 
     def test_remove_entry_and_write(self):
@@ -151,11 +145,11 @@ class TestSceneryINIWrite(unittest.TestCase):
         self.assertIsNone(ini.find_by_path("Custom Scenery/C/"))
 
     def test_disable_entry(self):
-        ini = self._read_ini(
-            "I\n1000 Version\n\n"
-            "SCENERY_PACK Custom Scenery/A/\n"
-        )
+        ini = self._read_ini("I\n1000 Version\n\nSCENERY_PACK Custom Scenery/A/\n")
         idx = ini.find_by_path("Custom Scenery/A/")
+        self.assertIsNotNone(idx)
+        if idx is None:
+            self.fail("expected Custom Scenery/A/ to exist")
         ini.entries()[idx].disabled = True
         content = self._written_content(ini)
         self.assertIn("SCENERY_PACK_DISABLED Custom Scenery/A/", content)

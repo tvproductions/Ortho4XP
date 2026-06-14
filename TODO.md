@@ -707,7 +707,26 @@ Suggested labels: `documentation`, `imagery`, `gis`, `color-pipeline`
 
 ### TODO-027: Define XP12-Native Scenery Compiler/Workbench Strategy
 
-GitHub Issue: #31
+Status: Done
+
+Inventory / completion note: the TODO-027 strategy work is represented by
+`docs/superpowers/specs/2026-06-13-xp12-native-scenery-compiler-audit.md`
+and
+`docs/superpowers/specs/2026-06-13-xp12-native-scenery-compiler-phase2-naming.md`.
+The audit documents legacy `zOrtho4XP_` / `yOrtho4XP_` assumptions, XP12
+scenery-stack interaction, SimHeaven/X-WORLD architectural patterns, project
+ownership boundaries, first-phase non-goals, and concrete follow-up slices.
+The naming/layout design defines the XP12-native package naming, metadata,
+validation, and migration strategy. Follow-up implementation work has also
+landed: package naming config, `package.json` generation, `validate-package`,
+`upgrade-package`, `SceneryINI`, `SceneryManager`, `scenery` CLI commands, and
+`upgrade-package --update-scenery`.
+
+Verification note: TODO-027-focused tests passed with 92 tests, and full
+`unittest` discovery passed with 320 tests. The remaining full quality gate is
+tracked separately by TODO-049 / GHI #32 for repo-wide Ruff baseline drift.
+
+GitHub Issue: #31 (closed 2026-06-14)
 
 Define the beyond-ortho direction for the fork as an XP12-native scenery
 compiler/workbench. The goal is to understand public scenery-stack techniques
