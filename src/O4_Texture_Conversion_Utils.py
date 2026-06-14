@@ -1,11 +1,14 @@
 import os
 import time
 
+from osgeo import gdal
+
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Texture_Encoder as TEX
 import O4_UI_Utils as UI
-from O4_Subprocess_Utils import run_external_command
+
+gdal.UseExceptions()
 
 
 # Conversion helpers own external encoder/GDAL cleanup once imagery has prepared
@@ -47,54 +50,39 @@ def convert_dds_texture(tile, texture_attrs, conversion_input, cleanup_input):
 def convert_geotiff_texture(tile, texture_attrs, conversion_input, gdal_commands):
     provider_code = texture_attrs[3]
     out_file_name = conversion_input[1]
-    command_result = _geotiff_conversion_command(
-        tile,
-        texture_attrs,
-        conversion_input,
-        gdal_commands,
-    )
-    if isinstance(command_result, TEX.TextureConversionResult):
-        return command_result
-    conv_cmd, tmp_tif_to_cleanup = command_result
-    result = _run_geotiff_conversion(tile, conv_cmd, out_file_name)
-    cleanup_conversion_temps(
-        conversion_input[2],
-        conversion_input[3],
-        tmp_tif_to_cleanup,
-    )
-    if result.ok:
-        return TEX.TextureConversionResult.success(out_file_name, provider_code)
-    return TEX.TextureConversionResult.failure(
-        out_file_name,
-        provider_code,
-        _geotiff_error_summary(result),
-    )
-
-
-def _geotiff_conversion_command(tile, texture_attrs, conversion_input, gdal_commands):
-    file_to_convert, out_file_name, erase_tmp_png, png_file_name, tmp_tif = (
-        conversion_input
-    )
+    file_to_convert, _, erase_tmp_png, png_file_name, tmp_tif = conversion_input
     bounds = _geotiff_bounds(texture_attrs)
-    gdal_transl_cmd, gdalwarp_cmd = gdal_commands
-    if bounds[0] - bounds[2] < 0.04:
-        return (
-            _gdal_translate_command(
-                gdal_transl_cmd, bounds, file_to_convert, out_file_name
-            ),
-            None,
-        )
-    geotag_cmd = _gdal_geotag_command(
-        gdal_transl_cmd,
-        bounds,
-        file_to_convert,
-        tmp_tif,
-    )
-    geotag_result = run_external_command(geotag_cmd)
-    if not geotag_result.ok:
+    output_path = os.path.join(FNAMES.Geotiff_dir, out_file_name)
+    tmp_tif_to_cleanup = None
+    try:
+        if bounds[0] - bounds[2] < 0.04:
+            _run_translate_with_retry(
+                output_path,
+                file_to_convert,
+                output_bounds=[bounds[1], bounds[2], bounds[3], bounds[0]],
+                output_srs="EPSG:4326",
+                tile=tile,
+                out_file_name=out_file_name,
+            )
+        else:
+            _run_geotag(bounds, file_to_convert, tmp_tif)
+            tmp_tif_to_cleanup = tmp_tif
+            _run_warp_with_retry(
+                output_path,
+                tmp_tif,
+                tile=tile,
+                out_file_name=out_file_name,
+            )
+    except _GeotagFailure:
         cleanup_conversion_temps(erase_tmp_png, png_file_name, tmp_tif)
-        return _geotag_failure_result(tile, texture_attrs[3], out_file_name)
-    return _gdalwarp_command(gdalwarp_cmd, tmp_tif, out_file_name), tmp_tif
+        return _geotag_failure_result(tile, provider_code, out_file_name)
+    except _GeotiffFailure as exc:
+        cleanup_conversion_temps(erase_tmp_png, png_file_name, tmp_tif_to_cleanup)
+        return TEX.TextureConversionResult.failure(
+            out_file_name, provider_code, str(exc)
+        )
+    cleanup_conversion_temps(erase_tmp_png, png_file_name, tmp_tif_to_cleanup)
+    return TEX.TextureConversionResult.success(out_file_name, provider_code)
 
 
 def _geotiff_bounds(texture_attrs):
@@ -106,64 +94,90 @@ def _geotiff_bounds(texture_attrs):
     return latmax, lonmin, latmin, lonmax, xmin, ymin, xmax, ymax
 
 
-def _gdal_translate_command(gdal_transl_cmd, bounds, file_to_convert, out_file_name):
-    latmax, lonmin, latmin, lonmax, _xmin, _ymin, _xmax, _ymax = bounds
-    return [
-        gdal_transl_cmd,
-        "-of",
-        "Gtiff",
-        "-co",
-        "COMPRESS=JPEG",
-        "-a_ullr",
-        str(lonmin),
-        str(latmax),
-        str(lonmax),
-        str(latmin),
-        "-a_srs",
-        "epsg:4326",
-        file_to_convert,
-        os.path.join(FNAMES.Geotiff_dir, out_file_name),
-    ]
+class _GeotagFailure(Exception):
+    pass
 
 
-def _gdal_geotag_command(gdal_transl_cmd, bounds, file_to_convert, tmp_tif):
+class _GeotiffFailure(Exception):
+    pass
+
+
+def _run_geotag(bounds, file_to_convert, tmp_tif):
     _latmax, _lonmin, _latmin, _lonmax, xmin, ymin, xmax, ymax = bounds
-    return [
-        gdal_transl_cmd,
-        "-of",
-        "Gtiff",
-        "-co",
-        "COMPRESS=JPEG",
-        "-a_ullr",
-        str(xmin),
-        str(ymax),
-        str(xmax),
-        str(ymin),
-        "-a_srs",
-        "epsg:3857",
-        file_to_convert,
-        tmp_tif,
-    ]
+    try:
+        gdal.Translate(
+            tmp_tif,
+            file_to_convert,
+            format="GTiff",
+            creationOptions=["COMPRESS=JPEG"],
+            outputBounds=[xmin, ymin, xmax, ymax],
+            outputSRS="EPSG:3857",
+        )
+    except Exception:
+        raise _GeotagFailure("Could not geotag texture") from None
 
 
-def _gdalwarp_command(gdalwarp_cmd, tmp_tif, out_file_name):
-    return [
-        gdalwarp_cmd,
-        "-of",
-        "Gtiff",
-        "-co",
-        "COMPRESS=JPEG",
-        "-s_srs",
-        "epsg:3857",
-        "-t_srs",
-        "epsg:4326",
-        "-ts",
-        "4096",
-        "4096",
-        "-rb",
-        tmp_tif,
-        os.path.join(FNAMES.Geotiff_dir, out_file_name),
-    ]
+def _run_translate_with_retry(
+    output_path, file_to_convert, *, output_bounds, output_srs, tile, out_file_name
+):
+    for tentative in range(1, 11):
+        try:
+            gdal.Translate(
+                output_path,
+                file_to_convert,
+                format="GTiff",
+                creationOptions=["COMPRESS=JPEG"],
+                outputBounds=output_bounds,
+                outputSRS=output_srs,
+            )
+            return
+        except Exception:
+            if tentative == 10:
+                UI.lvprint(
+                    1,
+                    "ERROR: Could not convert texture",
+                    os.path.join(tile.build_dir, "textures", out_file_name),
+                    "(10 tries)",
+                )
+                raise _GeotiffFailure("Could not convert texture") from None
+            UI.lvprint(
+                1,
+                "WARNING: Could not convert texture",
+                os.path.join(tile.build_dir, "textures", out_file_name),
+            )
+            time.sleep(1)
+
+
+def _run_warp_with_retry(output_path, tmp_tif, *, tile, out_file_name):
+    for tentative in range(1, 11):
+        try:
+            gdal.Warp(
+                output_path,
+                tmp_tif,
+                format="GTiff",
+                creationOptions=["COMPRESS=JPEG"],
+                srcSRS="EPSG:3857",
+                dstSRS="EPSG:4326",
+                width=4096,
+                height=4096,
+                resampleAlg="bilinear",
+            )
+            return
+        except Exception:
+            if tentative == 10:
+                UI.lvprint(
+                    1,
+                    "ERROR: Could not convert texture",
+                    os.path.join(tile.build_dir, "textures", out_file_name),
+                    "(10 tries)",
+                )
+                raise _GeotiffFailure("Could not convert texture") from None
+            UI.lvprint(
+                1,
+                "WARNING: Could not convert texture",
+                os.path.join(tile.build_dir, "textures", out_file_name),
+            )
+            time.sleep(1)
 
 
 def _geotag_failure_result(tile, provider_code, out_file_name):
@@ -177,35 +191,6 @@ def _geotag_failure_result(tile, provider_code, out_file_name):
         provider_code,
         "Could not geotag texture",
     )
-
-
-def _run_geotiff_conversion(tile, conv_cmd, out_file_name):
-    for tentative in range(1, 11):
-        result = run_external_command(conv_cmd)
-        if result.ok:
-            return result
-        if tentative == 10:
-            UI.lvprint(
-                1,
-                "ERROR: Could not convert texture",
-                os.path.join(tile.build_dir, "textures", out_file_name),
-                "(10 tries)",
-            )
-            return result
-        UI.lvprint(
-            1,
-            "WARNING: Could not convert texture",
-            os.path.join(tile.build_dir, "textures", out_file_name),
-        )
-        time.sleep(1)
-    return result
-
-
-def _geotiff_error_summary(result):
-    error_summary = getattr(result, "error_summary", "")
-    if error_summary:
-        return f"Could not convert texture: {error_summary}"
-    return "Could not convert texture"
 
 
 def _remove_conversion_temp(path):

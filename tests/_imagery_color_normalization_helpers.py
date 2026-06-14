@@ -118,7 +118,7 @@ def _conversion_core_patch():
 def _conversion_patches(settings, provider_code, jpeg_dir, tmp_dir):
     return SimpleNamespace(
         core=_conversion_core_patch(),
-        command=mock.patch.object(TCU, "run_external_command"),
+        gdal_mock=mock.patch.object(TCU, "gdal"),
         encode=mock.patch.object(TCU.TEX, "encode_texture"),
         normalize=mock.patch.object(TCN, "normalize_texture_image_if_enabled"),
         data=[
@@ -165,8 +165,7 @@ class ConvertTexturePatchContext:
 
     def __enter__(self):
         multiple_mocks = self.stack.enter_context(self.patches.core)
-        self.run_external_command = self.stack.enter_context(self.patches.command)
-        self.run_external_command.return_value = self.command_result
+        self.gdal = self.stack.enter_context(self.patches.gdal_mock)
         self.color_transform = multiple_mocks["color_transform"]
         self.combine_textures = multiple_mocks["combine_textures"]
         self.encode_texture = self.stack.enter_context(self.patches.encode)
@@ -179,6 +178,10 @@ class ConvertTexturePatchContext:
 
     def __exit__(self, exc_type, exc, traceback):
         self.stack.close()
+
+    @property
+    def run_external_command(self):
+        return self.gdal.Translate
 
     @property
     def encode_request(self):

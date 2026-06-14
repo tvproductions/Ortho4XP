@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest import mock
 
 import O4_File_Names as FNAMES
@@ -22,10 +21,7 @@ def convert_geotiff_with_failed_final_conversion(testcase):
         mock.patch.object(IMG.UI, "lvprint"),
         mock.patch.object(TCU.time, "sleep"),
     ):
-        conversion.run_external_command.return_value = SimpleNamespace(
-            ok=False,
-            error_summary="gdal translate failed",
-        )
+        conversion.gdal.Translate.side_effect = Exception("gdal translate failed")
         result = IMG.convert_texture(tile, 32, 48, 16, "TIFFAIL", type="tif")
 
     return result, conversion, expected_name
@@ -53,10 +49,7 @@ def convert_geotiff_with_failed_geotag(testcase):
         mock.patch.object(IMG.os, "remove") as remove,
     ):
         conversion.color_transform.side_effect = lambda image, _: image
-        conversion.run_external_command.return_value = SimpleNamespace(
-            ok=False,
-            error_summary="gdal geotag failed",
-        )
+        conversion.gdal.Translate.side_effect = Exception("gdal geotag failed")
         result = IMG.convert_texture(tile, 32, 48, 16, "GEOTAGFAIL", type="tif")
 
     return result, remove, conversion.tmp_dir, expected_name
