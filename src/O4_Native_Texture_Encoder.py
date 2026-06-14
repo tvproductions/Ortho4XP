@@ -59,16 +59,17 @@ class NativeTextureEncoderBackend(TextureEncoderBackend):
                 request.source_path,
                 request.output_path,
             ]
-        return [
+        base_flags = [
             self.executable,
             f"-{request.codec}",
             "-highest",
             "-alpha_dithering",
             "-mipfilter",
             "kaiser",
-            request.source_path,
-            request.output_path,
         ]
+        if request.codec == "bc3":
+            base_flags.append("-alpha")
+        return base_flags + [request.source_path, request.output_path]
 
     def encode(self, request: TextureEncodeRequest) -> TextureEncodeResult:
         command = self.build_command(request)

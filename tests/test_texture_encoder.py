@@ -70,7 +70,7 @@ class NativeTextureEncoderTests(unittest.TestCase):
 
         self.assertEqual(
             backend.build_command(_request("bc3")),
-            ["nvcompress", "-bc3", "-highest", "-alpha_dithering", "-mipfilter", "kaiser", "input.png", "output.dds"],
+            ["nvcompress", "-bc3", "-highest", "-alpha_dithering", "-mipfilter", "kaiser", "-alpha", "input.png", "output.dds"],
         )
 
     def test_default_windows_linux_executable_uses_repo_tool_resolver(self):
