@@ -1,6 +1,6 @@
 # GIS, Raster, and Imagery Technology Map
 
-Date: 2026-06-13
+Date: 2026-06-14 (revised; original 2026-06-13)
 Issue: TODO-026 / GHI #30
 
 ## Tool Selection Decisions (made during TODO-026 review)
@@ -542,23 +542,96 @@ HTTP tiles (aiohttp)
 4. Stream to nvcompress from temp PNG or investigate stdin support
 5. Remove intermediate cache-write paths from `O4_File_Names.py`
 
-## 8. Recommended Follow-Up Issues
+## 8. Implementation Roadmap (9 Waves)
 
-| # | Title | Status | Priority | Effort | Reference |
-|---|-------|--------|----------|--------|-----------|
-| 1 | Replace GDAL CLI with osgeo.gdal hard dependency | **Committed** | Critical | Large | §7.4 |
-| 2 | Implement in-memory VRT streaming pipeline | **Committed** | Critical | Large | §7.11 |
-| 3 | Upgrade nvcompress to `-highest -mipfilter kaiser -alpha_dithering` flags (Win/Lin) | **Committed** | High | Small | §2.4 |
-| 4 | Replace requests with aiohttp + asyncio for tile downloads | **Committed** | High | Medium | §7.9 |
-| 5 | Define per-stage resampling policy with config overrides | **Committed** | Medium | Small | §7.2 |
-| 6 | Add COG-style GeoTIFF export with overviews | **Committed** | Low | Small | §7.3 |
-| 7 | Add compression-aware DDS QA with PSNR/SSIM thresholds | **Committed** | Medium | Medium | §7.6 |
-| 8 | Add configurable unsharp-mask sharpening to post-processing pipeline | **Committed** | Medium | Medium | §7.7 |
-| 9 | Create tool-updating skill for keeping bundled tools current | **Done** | High | Medium | §9 |
-| 10 | Evaluate OpenCV for histogram matching / feature alignment | Deferred | Low | Large | §7.5 |
+The full implementation plan spans 9 waves, ordered by dependency. Each wave
+builds on the previous. Within a wave, TODOs can be parallelized where
+dependencies allow.
 
-All committed items are included in the implementation plan for the next phase.
-Items are ordered by recommended execution priority, not by section order.
+### Wave 1: Foundation
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 028 | GDAL Python bindings migration | §7.4 | Critical | Large |
+| 029 | nvcompress `-highest -mipfilter kaiser -alpha_dithering` flags | §2.4 | High | Small |
+
+### Wave 2: Async + Config
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 030 | aiohttp + asyncio tile downloads | §7.9 | High | Medium |
+| 031 | Per-stage resampling policy with config overrides | §7.2 | Medium | Small |
+
+### Wave 3: Streaming Pipeline
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 032 | In-memory VRT pipeline (zero intermediate files) | §7.11 | Critical | Large |
+| 033 | COG-style GeoTIFF export with overviews | §7.3 | Low | Small |
+
+### Wave 4: Quality
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 034 | DDS compression QA (PSNR/SSIM thresholds) | §7.6 | Medium | Medium |
+| 035 | Unsharp mask sharpening in post-processing | §7.7 | Medium | Medium |
+
+### Wave 5: Architecture
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 036 | Event Bus (TILE_START/PROGRESS/COMPLETE/ERROR/PIPELINE_STEP/CACHE_HIT) | V3 `O4_EventBus` | High | Medium |
+| 037 | Pipeline Orchestrator (named steps, timing, status, clean failure) | V3 `O4_Pipeline` | High | Medium |
+| 038 | Smart Cache (SHA256 tile params, skip-rebuild if unchanged) | V3 `O4_Dependency` | Medium | Small |
+
+### Wave 6: Intelligence
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 039 | Provider Scoring (noise, compression, clouds, color drift, seam risk) | V3 `O4_Provider_Score` | High | Medium |
+| 040 | Provider Failover + blacklist (auto-switch on consecutive failures) | V3 `O4_Provider_Abstraction` | High | Medium |
+| 041 | AI Cloud/Seam Detection (3-criteria cloud, 4-edge seam analysis) | V3 `O4_Provider_Score` enhanced | Medium | Medium |
+
+### Wave 7: XP12 Native Features
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 042 | XP12 Materials (auto WET/ROUGHNESS/SPECULAR from imagery analysis) | V3 `O4_XP12_Materials` | High | Medium |
+| 043 | Night Continuity (emissive mask from OSM roads/landuse/places) | XP-Ortho-NC | Medium | Large |
+
+### Wave 8: GPU Backend
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 044 | GPU Backend (CUDA via CuPy/PyTorch, silent CPU fallback) | V3 `O4_GPU_Backend` + TODO-018 | High | Large |
+
+### Wave 9: Developer Experience
+
+| TODO | Title | Source | Priority | Effort |
+|------|-------|--------|----------|--------|
+| 045 | Automatic Backups + Rollback (timestamped, 1-click restore) | V3 `O4_Backup_Manager` | Low | Small |
+| 046 | RAM Protection (psutil monitoring, auto-cleanup, cache limits) | V3 `O4_Memory_Manager` | Low | Small |
+| 047 | Debug Visualizations (seam risk maps, color compare, blur maps) | V3 `O4_Benchmark` | Low | Medium |
+| 048 | Theme Manager (5 themes + customization, cross-platform) | V3 `O4_Theme_Manager` | Low | Small |
+
+### Deferred
+
+| Item | Source | Gate for adoption |
+|------|--------|-------------------|
+| OpenCV integration | §7.5 | Histogram matching or feature alignment needed, or CUDA GPU backend |
+| V3 installer/launcher | V3 | Out of scope — PyInstaller onedir + `uv` toolchain cover distribution |
+
+### Reference Projects
+
+| Project | URL | License | Strategic value |
+|---------|-----|---------|----------------|
+| ORTHO4XP_V3 (Ypsos/Roland) | `tvproductions/ORTHO4XP_V3` | GPL v3 | Event bus, pipeline orchestrator, smart cache, provider scoring/failover, XP12 materials, GPU backend, backups, RAM protection, debug viz, themes |
+| XP-Ortho-NC | `tvproductions/XP-Ortho-NC` | GPL v3 (inherits) | Night Continuity emissive mask pipeline from OSM semantic data |
+
+Both are GPL v3 — license-compatible with this project. Features are onboarded
+when the foundation work (GDAL bindings, async pipeline) they depend on is in
+place. Where our implementation is superior, we keep ours; where they are ahead,
+we borrow and adapt to our architecture.
 
 ## 9. Dependency Management
 
@@ -583,3 +656,356 @@ or how to check for updates.
 the update process for every bundled tool. The skill defines per-tool source
 URLs, version detection commands, staging procedures, and verification steps,
 so any agent can audit and refresh the bundled tooling on demand.
+
+## 10. DEM Processing Pipeline
+
+### 10.1 Sources
+
+| Source | Format | Resolution | Download | Notes |
+|--------|--------|------------|----------|-------|
+| ViewFinderPanoramas (J. de Ferranti) | `.hgt` (big-endian int16) | 1" or 3" per region | Auto | Mostly worldwide coverage |
+| SRTMv3 (OpenTopography) | `.hgt` | 1" (3601×3601) | Manual only | Requires user download |
+| ALOS 3W30 (OpenTopography) | `.tif` (GeoTIFF) | ~1" (3600×3600) | Manual only | Requires user download |
+| NED 1" (USGS) | `.tif` (GeoTIFF) | 1" | Auto | USA, Canada, Mexico |
+| NED 1/3" (USGS) | `.tif` (GeoTIFF) | 1/3" | Auto | USA only |
+| Custom DEM | User-provided file | Varies | N/A | Path or `;`-separated composite |
+
+Composite DEMs: Source strings containing `;` create composite DEMs. The first
+source is the base (`alt_nostrict`, clamps to boundary); subsequent sources are
+sub-DEMs overlaid in reverse order (`alt_strict`, returns nodata outside extent).
+
+### 10.2 Grid
+
+Standard grid: **3601×3601** (1 arc-second SRTM: 3600 intervals + 1 shared
+endpoint per axis). 3" SRTM data (1201×1201) is bilinearly upsampled to
+3601×3601 for uniform processing. ALOS uses 3600×3600.
+
+Extended raster: 36-pixel padding on each side (3673×3673 for View/SRTM,
+3672×3672 for ALOS) from 3×3 tile neighborhood stitching. Coordinate range:
+`x0=-0.01, x1=1.01, y0=-0.01, y1=1.01` (fractional degrees relative to tile
+corner). Data type: `numpy.float32`. Nodata sentinel: `-32768`.
+
+### 10.3 Reading
+
+| Format | Method | Details |
+|--------|--------|---------|
+| `.hgt` | `numpy.fromfile(dtype=">i2")` | Big-endian signed 16-bit; size determines resolution |
+| `.raw` | `array.array("h")` + row reversal | Legacy format |
+| GeoTIFF/other | `gdal.Open().ReadAsArray()` | Requires GDAL; reads EPSG from projection, GeoTransform for coordinates |
+
+GDAL coordinate handling assumes AREA_OR_POINT = area. Only EPSG 4326 and 4269
+are explicitly supported; other CRS codes produce a warning. Nodata values from
+any source are normalized to `-32768` for uniform downstream processing.
+
+### 10.4 Nodata Fill
+
+Controlled by `fill_nodata` config:
+- `True` (default): Iterative nearest-neighbor dilation via `numpy.roll`
+  (4 cardinal neighbors, 20 iterations max, bails out at ≥10,000 nodata cells,
+  remaining nodata forced to 0)
+- `"to zero"`: Replace all nodata with 0
+- `False`: No fill applied
+
+### 10.5 Interpolation
+
+| Method | Usage | Behavior |
+|--------|-------|----------|
+| `alt_nostrict(node)` | Mesh vertex assignment | Bilinear interpolation; clamps to `[x0, x1]`, `[y0, y1]` |
+| `alt_strict(node)` | Sub-DEM overlays | Nearest-neighbor; returns nodata if outside bounds |
+| `alt_composite(node)` | Composite DEMs | Iterates sub-DEMs reverse-order via `alt_strict`; falls back to base `alt_nostrict` |
+| Vector variants | Batch processing | Same algorithms on numpy coordinate arrays |
+
+### 10.6 Airport DEM Smoothing
+
+`O4_Airport_Geometry.smooth_raster_over_airports()`: Triangular-kernel
+convolution (`DEM.smoothen()`) over airport polygons (boundary + runways +
+hangars + taxiways + aprons) with boundary preservation blending. Saves boundary
+strips before smoothing, blends smoothed edges back with original boundary using
+linear ramp. Writes smoothed DEM to `.alt` file for Triangle4XP.
+
+### 10.7 Water Smoothing
+
+**Inland water**: 10-pass iterative Laplacian mean. Each pass sets all 3 vertex
+altitudes of every water triangle to their mean. Controlled by
+`tile.water_smoothing` (default: 10).
+
+**Sea water** (`sea_smoothing_mode`):
+- `"zero"` (default): All sea triangle vertices set to altitude 0
+- `"mean"`: Triangle vertices leveled to their mean altitude
+- `"none"`: Only negative altitudes clamped to 0, positive kept
+
+### 10.8 Triangle4XP Integration
+
+Triangle4XP is a project-owned C utility (`Utils/src/Triangle4XP.c`) — a modified
+Shewchuk Triangle with terrain-specific curvature refinement. Built via CMake as
+a native executable, invoked as a subprocess.
+
+**Input**: `.alt` float32 binary (written by `DEM.write_to_file()`), `.poly`
+constrained Delaunay input, weight map, curvature tolerance.
+
+**Per-vertex processing**:
+- `altitude(x, y)`: Bilinear interpolation from DEM grid; returns nodata if any
+  of 4 surrounding cells is nodata
+- `set_normal(x, y)`: Gradient-based normal from finite differences on altitude
+  grid; uses upper/lower triangle for directional gradient
+- Curvature precomputation: Hessian matrix eigenvalues at each interior grid
+  point, weighted by geographic weight map (airports/coastline curvature
+  tolerance overrides)
+
+**Refinement**: `testriangle()` tests each triangle against curvature threshold
+(`maxedge² × scalx² × maxcurv² / curv_tol² > 1`) and minimum angle. Adds more
+triangles where ground curves sharply, fewer where flat.
+
+### 10.9 DSF Elevation Encoding
+
+Adaptive 16-bit unsigned quantization per quadtree pool:
+
+| Altitude Range | `scale_z` | `inv_stp` | Precision |
+|---------------|-----------|-----------|-----------|
+| < 770m | 771 | 85 | ~0.012m |
+| < 1284m | 1285 | 51 | ~0.020m |
+| < 4368m | 4369 | 15 | ~0.067m |
+| ≥ 4368m | 13107 | 5 | ~0.200m |
+
+Each altitude stored as: `round((altitude - altmin) * inv_stp)`.
+
+## 11. Combined Provider Compositing
+
+### 11.1 Overview
+
+Combined providers composite multiple imagery layers into a single 4096×4096
+texture using priority-based alpha blending. Defined in `.comb.json` files,
+validated by Pydantic `CombinedProviderDefinition`. This is shared infrastructure
+with no XP-version branching, but all output is XP12 since the entire pipeline
+is XP12-only (`water_tech = "XP12"` enforced, `min_xplane_version: "12.0.0"`).
+
+### 11.2 Layer Priority
+
+| Priority | Compositing Behavior | `mask_weight_below` Effect |
+|----------|---------------------|---------------------------|
+| `low` | Blends softly beneath higher layers; mask normalized against combined weight | Not increased |
+| `medium` | Proportional blending; mask normalized as `255 * mask / mask_weight_below` | Increased by mask |
+| `high` | Full overprint where extent is opaque; raw mask used directly | Increased by mask |
+| `mask` | Same as high, plus sea-mask multiplication and optional Gaussian blur | Increased by mask |
+
+### 11.3 Compositing Algorithm (`combine_textures()`)
+
+1. Initialize 4096×4096 RGBA canvas and `mask_weight_below` uint16 accumulator
+2. Iterate layers in **reverse order** (bottom-first, so higher-priority layers
+   composite on top)
+3. For each layer:
+   - Get extent mask via `has_data(return_mask=True)`
+   - Load source JPEG, apply `color_transform()`
+   - Apply mask-priority Gaussian blur if `sea_texture_blur` is set
+   - White/black pixel suppression: zero mask where source sum ≥735 or ≤35
+     (prevents fringe artifacts at extent boundaries)
+   - Priority-based mask weighting (see §11.2)
+   - `Image.composite(layer, accumulated, mask)` to blend
+4. Return final RGBA image
+
+Single-layer fast path: No blending needed; load, transform, return directly.
+
+### 11.4 Extent Codes
+
+| Code | Behavior |
+|------|----------|
+| Positive (e.g., `"France"`) | Mask active inside extent boundary |
+| Negative `!` prefix (e.g., `"!France"`) | Mask inverted — active outside boundary |
+| `"global"` | Fully white mask (covers everything) |
+| `"default"` | Resolved to provider's own default extent |
+
+LowRes extents generate per-tile auto-masks from OSM data: triangulate OSM
+polygons → rasterize → apply buffer (dilate/erode) and feather (smooth edge) →
+save to `Extents/Auto/<code>_<latlon>.png`.
+
+### 11.5 Inline Color Codes
+
+Format: `[L|D]<BB>C<CC>[S<SS>]`
+
+| Token | Meaning | Example |
+|-------|---------|---------|
+| `L`/`D` | Lighten/Darken (brightness sign) | `L` |
+| `<BB>` | Brightness magnitude | `20` |
+| `C` | Literal separator | `C` |
+| `<CC>` | Contrast value | `10` |
+| `S<SS>` | Optional saturation | `S30` |
+
+Examples: `L20C10` → brightness +20, contrast 10. `D15C05S30` → brightness -15,
+contrast 5, saturation 30. Parsed and registered into `color_filters_dict`.
+
+### 11.6 `has_data()` Function
+
+Tests whether a provider has coverage for a given bbox:
+
+1. Global extent shortcut: returns `True` or white mask immediately
+2. Negative extent: strip `!`, set inversion flag
+3. Bounding box check: no overlap → return `negative` (False for positive, True for negative)
+4. Load extent PNG, crop to query region, optionally invert, resize to `mask_size`
+5. Mask-layer path: multiply extent mask with inverted sea mask (land=255, sea=0)
+6. Return bool or mask image
+
+## 12. GeoTIFF Export Path
+
+### 12.1 Overview
+
+GeoTIFF export is an alternative output to DDS, controlled by the `build_geotiffs`
+config flag. When enabled, textures are written as georeferenced GeoTIFFs instead
+of (or in addition to) DDS files.
+
+### 12.2 Target Implementation (post-GDAL bindings migration)
+
+**Small tiles** (longitude span < 0.04°):
+Direct `gdal.Translate()` with EPSG:4326 corner coordinates and JPEG compression.
+At small spans, the EPSG:4326 approximation error is negligible.
+
+**Large tiles**:
+Two-step via in-memory datasets:
+1. `gdal.Translate()` to EPSG:3857 with meter-based corners
+2. `gdal.Warp()` from EPSG:3857 to EPSG:4326 at 4096×4096, bilinear resampling
+
+Both paths produce `-co COMPRESS=JPEG` output to the `Geotiffs/` directory.
+
+### 12.3 Standalone Script
+
+`O4_Geotag.py` batch-geotags cached JPEGs using the same pipeline. Will be
+migrated to use `osgeo.gdal` bindings directly alongside the main migration.
+
+### 12.4 Current Implementation
+
+Currently uses `gdal_translate`/`gdalwarp` CLI subprocess calls via
+`O4_Texture_Conversion_Utils.py`. This is what §7.4 replaces with in-process
+Python bindings.
+
+## 13. water_transition.png
+
+### 13.1 Overview
+
+A grayscale PNG lookup table at `Utils/water_transition.png` that maps the
+`ratio_water` config value (0.0–1.0) to a `sea_level` grey value (0–255).
+
+### 13.2 Usage
+
+Loaded unconditionally in `build_masks()`:
+
+```python
+im = Image.open(os.path.join(FNAMES.Utils_dir, "water_transition.png"))
+sea_level = im.getpixel((0, 127 * (1 - min(1, 0.1 + tile.ratio_water))))
+```
+
+### 13.3 Effect
+
+The `sea_level` value controls inland water transparency in the mask:
+- 0 = fully transparent (XP12 water shader shows through completely)
+- 255 = fully opaque (orthophoto visible, no water blending)
+- Intermediate values = partial blend
+
+### 13.4 DSF Integration
+
+Also copied into generated scenery as a terrain texture reference
+(`BORDER_TEX ../textures/water_transition.png`) for constant-transparency
+water paths in XP12 `.ter` terrain files.
+
+### 13.5 XP12 Compliance
+
+This is XP12-compliant infrastructure: the mask system feeds XP12's water shader
+via BC3/DXT5 alpha channels (when `imprint_masks_to_dds=True`) or overlay
+terrain masks (when `imprint_masks_to_dds=False`). The `WATER_COLOR_MASK`
+terrain directive and `ratio_water * 65535` pool encoding are XP12 features.
+
+## 14. gdalwarp_alternative() Accuracy
+
+### 14.1 Overview
+
+A Pillow-based CRS reprojection fallback at `O4_Imagery_Utils.py:2058`. Uses
+`pyproj.Transformer` (inverse) to map target pixels to source coordinates,
+splits into an 8×8 grid of quadrilaterals, computes 4 corner positions per quad,
+and calls `Image.transform(Image.Transform.MESH, ..., BICUBIC)`.
+
+### 14.2 Callers
+
+| Location | Context |
+|----------|---------|
+| `O4_Imagery_Utils.py:1522` | Imagery download when provider EPSG differs from target |
+| `O4_Mask_Utils.py:376` | DEM pre-mask reprojection (EPSG 4326 → 3857) |
+
+Both are core imagery/mask processing paths that run regardless of XP version.
+
+### 14.3 Accuracy Limitations
+
+- No geolocation error bounds computed or logged
+- Accuracy degrades at high latitudes (Web Mercator distortion increases)
+- 8×8 grid is coarse for large tiles or complex projections
+- No rigorous datum transformation beyond pyproj's defaults
+- BICUBIC resampling is fixed; no per-stage method selection
+
+### 14.4 Replacement Plan
+
+Being replaced by `gdal.Warp()` via Python bindings (§7.4), which handles any
+CRS pair with proper datum transformations, configurable resampling methods, and
+no intermediate Pillow approximation. The Pillow path will be removed entirely
+once the GDAL bindings migration is complete.
+
+## 15. Extent Data
+
+### 15.1 Directory Structure
+
+```
+Extents/
+├── Austria/          High-res regional (Tirol)
+├── Belgium/          High-res regional (Vlanderen, Wallonie)
+├── Italy/            High-res regional (AltoAdige, Trentino, Veneto)
+├── Switzerland/      High-res regional (Zurich, Valais)
+├── LowRes/           27 country-level extents (Andorra through UK)
+└── Auto/             Per-tile masks generated at runtime from LowRes OSM data
+```
+
+### 15.2 File Triplet
+
+Each extent has three associated files:
+
+| File | Format | Purpose |
+|------|--------|---------|
+| `<code>.ext.json` | JSON metadata | `mask_bounds`, `buffer_width`, `mask_width`, `epsg_code` |
+| `<code>.png` | Grayscale PNG | Mask image (white=inside, black=outside) |
+| `<code>.osm.bz2` | Compressed OSM | Source data for auto-mask regeneration |
+
+### 15.3 Extent JSON Schema
+
+Validated by Pydantic `ExtentDefinition`:
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `epsg_code` | `int \| null` | EPSG code for mask coordinate system (optional) |
+| `mask_bounds` | `[float, float, float, float] \| null` | `[xmin, ymin, xmax, ymax]` bounding box |
+| `buffer_width` | `float \| null` | Buffer distance (meters); positive=dilate, negative=erode |
+| `mask_width` | `float \| null` | Feather width (meters) for smooth mask edges |
+| `blur_width` | `float \| null` | Blur radius for mask (schema-defined, rarely consumed) |
+
+### 15.4 Auto-Extent Mask Generation
+
+For LowRes extents, `initialize_local_combined_providers_dict()` generates
+per-tile masks:
+
+1. New extent code: `<name>_<short_latlon>` (e.g., `France_+47+002`)
+2. Load OSM data from `Extents/LowRes/<name>.osm.bz2`
+3. Convert to MultiPolygon via `OSM.OSM_to_MultiPolygon()`
+4. Encode into `Vector_Map`, write `.node`/`.poly`, triangulate with `MESH.triangulate()`
+5. Rasterize via `MASK.triangulation_to_image()`
+6. Apply `buffer_width` (Gaussian blur + threshold for dilate/erode)
+7. Apply `mask_width` (feathered edge via convolution)
+8. Save to `Extents/Auto/<new_code>.png` for reuse
+
+### 15.5 CRS and Datum Support
+
+Extent masks are in EPSG:4326 by default. The `epsg_code` field allows
+provider-specific CRS but is rarely used in practice.
+
+**Current limitation**: The pipeline only transforms between EPSG:4326 and
+EPSG:3857 reliably. Provider-declared EPSG codes outside this pair (e.g.,
+EPSG:4269 NAD83, EPSG:3003 Italy Gauss-Boaga, EPSG:2154 France Lambert-93)
+go through `gdalwarp_alternative()` which has accuracy limitations (§14).
+
+**Resolution**: The GDAL bindings migration (§7.4) replaces `gdalwarp_alternative()`
+with `gdal.Warp()`, which handles any CRS pair natively with proper datum
+transformations. This will enable full multi-datum support for extent masks
+without additional work.
