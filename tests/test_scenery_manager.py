@@ -260,6 +260,35 @@ class TestReorder(unittest.TestCase):
         mgr.reorder()
         self.assertEqual(self._content(ini_path), original)
 
+    def test_reorder_preserves_interleaved_non_ortho4xp(self):
+        ini_path = self._make_ini([
+            "Global Airports",
+            "Ortho4XP_Mesh_+44-080",
+            "simHeaven_X-World",
+            "Ortho4XP_Mesh_+43-079",
+        ])
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        lines = self._content(ini_path)
+        self.assertIn("Global Airports", lines[0])
+        self.assertIn("simHeaven_X-World", lines[-1])
+        self.assertEqual(len(lines), 4)
+
+    def test_reorder_preserves_disabled_entry(self):
+        ini_path = os.path.join(self._temp.name, "scenery_packs.ini")
+        with open(ini_path, "w", newline="\n") as f:
+            f.write("I\n1000 Version\n\n")
+            f.write("SCENERY_PACK Custom Scenery/Global Airports/\n")
+            f.write("SCENERY_PACK_DISABLED Custom Scenery/Ortho4XP_Mesh_+43-079/\n")
+        mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
+        mgr.refresh()
+        mgr.reorder()
+        with open(ini_path) as f:
+            content = f.read()
+        self.assertIn("SCENERY_PACK_DISABLED", content)
+        self.assertIn("Ortho4XP_Mesh_+43-079", content)
+
     def test_reorder_multiple_overlays_and_meshes(self):
         ini_path = self._make_ini([
             "Ortho4XP_Mesh_+45-081",

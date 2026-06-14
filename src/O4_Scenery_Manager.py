@@ -65,19 +65,31 @@ class SceneryManager:
             return
 
         ortho_entries = [entries[i] for i in ortho_indices]
-        non_ortho_front = [entries[i] for i in range(ortho_indices[0]) if i not in ortho_indices]
-        non_ortho_back = [entries[i] for i in range(ortho_indices[-1] + 1, len(entries)) if i not in ortho_indices]
+        non_ortho = [e for i, e in enumerate(entries) if i not in ortho_indices]
 
-        overlays = sorted(
-            [e for e in ortho_entries if "Overlay" in e.path or "Overlays" in e.path],
-            key=lambda e: e.path,
-        )
-        meshes = sorted(
-            [e for e in ortho_entries if "Mesh" in e.path or "zOrtho4XP" in e.path],
-            key=lambda e: e.path,
-        )
+        overlays = []
+        meshes = []
+        other_ortho = []
+        for e in ortho_entries:
+            if "Overlay" in e.path or "Overlays" in e.path:
+                overlays.append(e)
+            elif "Mesh" in e.path or "zOrtho4XP" in e.path:
+                meshes.append(e)
+            else:
+                other_ortho.append(e)
 
-        new_entries = non_ortho_front + overlays + meshes + non_ortho_back
+        overlays.sort(key=lambda e: e.path)
+        meshes.sort(key=lambda e: e.path)
+        other_ortho.sort(key=lambda e: e.path)
+
+        insert_pos = ortho_indices[0]
+        new_entries = (
+            non_ortho[:insert_pos]
+            + overlays
+            + meshes
+            + other_ortho
+            + non_ortho[insert_pos:]
+        )
         self._ini._entries = new_entries
         self._ini.write()
         self.refresh()
