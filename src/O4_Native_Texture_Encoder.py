@@ -1,19 +1,18 @@
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
+import O4_Subprocess_Utils as SP
+import O4_UI_Utils as UI
 from O4_External_Command_Result import ExternalCommandResult
 from O4_Texture_Models import (
     TextureCodec,
+    TextureEncoderBackend,
     TextureEncodeRequest,
     TextureEncodeResult,
-    TextureEncoderBackend,
 )
-import O4_Subprocess_Utils as SP
-import O4_UI_Utils as UI
-
 
 # Native backend policy:
 # - Keep platform tool selection isolated from the public encoder facade.
@@ -63,7 +62,10 @@ class NativeTextureEncoderBackend(TextureEncoderBackend):
         return [
             self.executable,
             f"-{request.codec}",
-            "-fast",
+            "-highest",
+            "-alpha_dithering",
+            "-mipfilter",
+            "kaiser",
             request.source_path,
             request.output_path,
         ]
