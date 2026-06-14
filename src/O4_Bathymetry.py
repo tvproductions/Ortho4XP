@@ -1,9 +1,16 @@
-import os
 import array
+import os
+
 import numpy
 from PIL import Image
+
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
+
+
+def _require(condition, message):
+    if not condition:
+        raise ValueError(message)
 
 
 def set_depth_ratio(n, node_is_coast, node_bathy, tile):
@@ -15,10 +22,13 @@ def set_depth_ratio(n, node_is_coast, node_bathy, tile):
 
 def recut_water_tris(node_coords, tri_idx, tri_types):
 
-    assert len(node_coords) % 5 == 0
+    _require(len(node_coords) % 5 == 0, "node_coords length must be a multiple of 5")
     nbr_nodes = len(node_coords) // 5
-    assert len(tri_idx) % 3 == 0
-    assert len(tri_idx) // 3 == len(tri_types)
+    _require(len(tri_idx) % 3 == 0, "tri_idx length must be a multiple of 3")
+    _require(
+        len(tri_idx) // 3 == len(tri_types),
+        "tri_idx triangle count must match tri_types length",
+    )
     nbr_tris = len(tri_types)
 
     # Fill node types using a boolean or on a bit field.
@@ -170,13 +180,13 @@ def recut_water_tris(node_coords, tri_idx, tri_types):
                 next_t += 3
 
     nbr_nodes = next_n
-    assert node_max_count >= nbr_nodes
+    _require(node_max_count >= nbr_nodes, "recut node capacity exceeded")
     node_coords = numpy.resize(node_coords, 5 * nbr_nodes)
     node_types = numpy.resize(node_types, nbr_nodes)
     node_is_coast = numpy.resize(node_is_coast, nbr_nodes)
 
     nbr_tris = next_t
-    assert tri_max_count >= nbr_tris
+    _require(tri_max_count >= nbr_tris, "recut triangle capacity exceeded")
     tri_idx = numpy.resize(tri_idx, 3 * nbr_tris)
     tri_types = numpy.resize(tri_types, nbr_tris)
 

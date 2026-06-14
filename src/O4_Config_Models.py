@@ -4,7 +4,6 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator
 
-
 _ALLOWED_CONFIG_TYPES = {bool, float, int, list, str}
 _TYPE_ADAPTERS = {
     bool: TypeAdapter(bool),

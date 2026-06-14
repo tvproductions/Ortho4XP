@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import threading
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse

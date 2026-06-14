@@ -4,8 +4,8 @@ import platform
 import re
 from dataclasses import dataclass
 
-from O4_Scenery_INI import SceneryEntry, SceneryINI
 import O4_Subprocess_Runtime as RUNTIME
+from O4_Scenery_INI import SceneryEntry, SceneryINI
 
 
 class SceneryError(Exception):
@@ -21,7 +21,9 @@ class ValidationIssue:
 
 class SceneryManager:
     def __init__(self, custom_scenery_dir: str = "", ini_path: str | None = None):
-        self.custom_scenery_dir = os.path.normpath(custom_scenery_dir) if custom_scenery_dir else ""
+        self.custom_scenery_dir = (
+            os.path.normpath(custom_scenery_dir) if custom_scenery_dir else ""
+        )
         self._ini_path = ini_path or ""
         self._ini = SceneryINI(self._ini_path)
         self._ortho4xp_indices: set[int] = set()
@@ -51,7 +53,9 @@ class SceneryManager:
                     return True
             except (json.JSONDecodeError, OSError):
                 pass
-        if re.match(r"^Ortho4XP_(?:Mesh|Overlay|Overlays)(?:_[+-]\d+[+-]\d+)?$", dir_name):
+        if re.match(
+            r"^Ortho4XP_(?:Mesh|Overlay|Overlays)(?:_[+-]\d+[+-]\d+)?$", dir_name
+        ):
             return True
         if re.match(r"^zOrtho4XP_[+-]\d+[+-]\d+$", dir_name):
             return True
@@ -100,10 +104,12 @@ class SceneryManager:
         entries = self._ini.entries()
 
         if not self.custom_scenery_dir:
-            issues.append(ValidationIssue(
-                severity="error",
-                message="custom_scenery_dir is not set",
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity="error",
+                    message="custom_scenery_dir is not set",
+                )
+            )
             return issues
 
         for i in sorted(self._ortho4xp_indices):
@@ -111,11 +117,13 @@ class SceneryManager:
             dir_name = os.path.basename(entry.path.rstrip("/\\"))
             full_path = os.path.join(self.custom_scenery_dir, dir_name)
             if not os.path.isdir(full_path):
-                issues.append(ValidationIssue(
-                    severity="error",
-                    message="Directory not found: " + full_path,
-                    entry_path=entry.path,
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity="error",
+                        message="Directory not found: " + full_path,
+                        entry_path=entry.path,
+                    )
+                )
 
         last_overlay_pos = -1
         first_mesh_pos = len(entries)
@@ -126,28 +134,34 @@ class SceneryManager:
             if "Mesh" in entry.path or "zOrtho4XP" in entry.path:
                 first_mesh_pos = min(first_mesh_pos, i)
         if last_overlay_pos > first_mesh_pos:
-            issues.append(ValidationIssue(
-                severity="warning",
-                message="Overlay entries should appear above mesh entries in scenery_packs.ini. Run 'reorder' to fix.",
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity="warning",
+                    message="Overlay entries should appear above mesh entries in scenery_packs.ini. Run 'reorder' to fix.",
+                )
+            )
 
         for i in sorted(self._ortho4xp_indices):
             if entries[i].disabled:
-                issues.append(ValidationIssue(
-                    severity="warning",
-                    message="Entry is disabled: " + entries[i].path,
-                    entry_path=entries[i].path,
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity="warning",
+                        message="Entry is disabled: " + entries[i].path,
+                        entry_path=entries[i].path,
+                    )
+                )
 
         seen: set[str] = set()
         for i in sorted(self._ortho4xp_indices):
             dir_name = os.path.basename(entries[i].path.rstrip("/\\"))
             if dir_name in seen:
-                issues.append(ValidationIssue(
-                    severity="error",
-                    message="Duplicate entry: " + entries[i].path,
-                    entry_path=entries[i].path,
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity="error",
+                        message="Duplicate entry: " + entries[i].path,
+                        entry_path=entries[i].path,
+                    )
+                )
             seen.add(dir_name)
 
         return issues
@@ -157,7 +171,11 @@ class SceneryManager:
         tile_build_path = self._resolve_build_path(lat, lon, build_dir)
         if not os.path.isdir(tile_build_path):
             raise SceneryError("Tile directory not found: " + tile_build_path)
-        if self.custom_scenery_dir and os.path.commonpath([tile_build_path, self.custom_scenery_dir]) != self.custom_scenery_dir:
+        if (
+            self.custom_scenery_dir
+            and os.path.commonpath([tile_build_path, self.custom_scenery_dir])
+            != self.custom_scenery_dir
+        ):
             self._create_symlink(tile_build_path, tile_name)
         ini_path = os.path.join("Custom Scenery", tile_name)
         self.refresh()
@@ -170,8 +188,14 @@ class SceneryManager:
         overlay_name = "Ortho4XP_Overlays"
         overlay_build_path = overlay_dir or ""
         if not overlay_build_path or not os.path.isdir(overlay_build_path):
-            raise SceneryError("Overlay directory not found: " + str(overlay_build_path))
-        if self.custom_scenery_dir and os.path.commonpath([overlay_build_path, self.custom_scenery_dir]) != self.custom_scenery_dir:
+            raise SceneryError(
+                "Overlay directory not found: " + str(overlay_build_path)
+            )
+        if (
+            self.custom_scenery_dir
+            and os.path.commonpath([overlay_build_path, self.custom_scenery_dir])
+            != self.custom_scenery_dir
+        ):
             self._create_symlink(overlay_build_path, overlay_name)
         ini_path = os.path.join("Custom Scenery", overlay_name)
         self.refresh()
@@ -199,7 +223,7 @@ class SceneryManager:
         return removed_ini or symlink_removed
 
     def _resolve_tile_dir(self, lat: int, lon: int) -> str:
-        return "Ortho4XP_Mesh_{:+03d}{:+04d}".format(lat, lon)
+        return f"Ortho4XP_Mesh_{lat:+03d}{lon:+04d}"
 
     def _resolve_build_path(self, lat: int, lon: int, build_dir: str | None) -> str:
         tile_name = self._resolve_tile_dir(lat, lon)
@@ -216,9 +240,7 @@ class SceneryManager:
                 ["cmd.exe", "/c", "mklink", "/J", link_path, target]
             )
             if rc != 0:
-                raise SceneryError(
-                    "Failed to create junction: " + err.strip()
-                )
+                raise SceneryError("Failed to create junction: " + err.strip())
         else:
             os.symlink(target, link_path)
 

@@ -5,9 +5,9 @@ of legacy water-tech branches and prevent bathymetry input from drifting back
 into mask-derived data paths.
 """
 
-from pathlib import Path
 import re
 import unittest
+from pathlib import Path
 
 try:
     import _path  # noqa: F401
@@ -77,12 +77,14 @@ class ConfigModelTests(unittest.TestCase):
 
     def test_legacy_water_tech_values_are_rejected(self):
         for value in ("XP11", "XP11 + bathy"):
-            with self.subTest(value=value):
-                with self.assertRaisesRegex(
+            with (
+                self.subTest(value=value),
+                self.assertRaisesRegex(
                     UnsupportedWaterTechError,
                     rf"{re.escape(f'water_tech={value!r}')}.*water_tech=XP12",
-                ):
-                    coerce_config_value("water_tech", value, cfg_vars)
+                ),
+            ):
+                coerce_config_value("water_tech", value, cfg_vars)
 
     def test_legacy_water_tech_global_value_is_rejected(self):
         with self.assertRaisesRegex(
@@ -142,13 +144,17 @@ class ConfigModelTests(unittest.TestCase):
         self.assertNotIn("ratio_bathy", bathy_source)
         self.assertNotIn("node_bathy", bathy_source)
 
-
     def test_package_naming_config_keys_have_valid_definitions(self):
         from O4_Config_Models import ConfigVariableDefinition
+
         for key in (
-            "package_prefix", "package_separator", "mesh_purpose_token",
-            "overlay_purpose_token", "monolithic_overlay_name",
-            "latlon_format", "per_tile_overlays",
+            "package_prefix",
+            "package_separator",
+            "mesh_purpose_token",
+            "overlay_purpose_token",
+            "monolithic_overlay_name",
+            "latlon_format",
+            "per_tile_overlays",
         ):
             definition = cfg_app_vars[key]
             ConfigVariableDefinition.model_validate(definition)

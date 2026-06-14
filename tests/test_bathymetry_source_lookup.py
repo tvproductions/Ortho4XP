@@ -19,19 +19,21 @@ from tests.test_bathymetry_provider import (
 
 class BathymetrySourceLookupTests(unittest.TestCase):
     def test_missing_global_scenery_dsf_is_rejected(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaisesRegex(
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            self.assertRaisesRegex(
                 BathymetryInputError,
                 r"custom_overlay_src.*custom_overlay_src_alternate.*XP12 Global Scenery",
-            ):
-                extract_validated_global_scenery_rasters(
-                    raster_source(
-                        tmp,
-                        primary=Path(tmp) / "primary",
-                        alternate=Path(tmp) / "alternate",
-                        run_external_tool=lambda *args, **kwargs: None,
-                    )
+            ),
+        ):
+            extract_validated_global_scenery_rasters(
+                raster_source(
+                    tmp,
+                    primary=Path(tmp) / "primary",
+                    alternate=Path(tmp) / "alternate",
+                    run_external_tool=lambda *args, **kwargs: None,
                 )
+            )
 
     def test_reads_uncompressed_global_scenery_dsf(self):
         with tempfile.TemporaryDirectory() as tmp:

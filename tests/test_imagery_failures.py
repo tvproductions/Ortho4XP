@@ -14,8 +14,8 @@ except ModuleNotFoundError:
 
 import requests
 
-import O4_Imagery_Utils as IMG
 import O4_Imagery_Failures as IFAIL
+import O4_Imagery_Utils as IMG
 import O4_Tile_Utils as TILE
 import O4_UI_Utils as UI
 

@@ -14,8 +14,8 @@ Keeping byte extraction separate from source lookup lets tests validate tiny DSF
 fixtures without depending on an X-Plane install or the 7z executable.
 """
 
-from dataclasses import dataclass
 import io
+from dataclasses import dataclass
 
 from O4_Bathymetry_DSF_Atoms import AtomReadContext, read_atom
 from O4_Bathymetry_Models import BathymetryErrorContext, ValidatedRasterBytes

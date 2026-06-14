@@ -8,11 +8,11 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
+import O4_Imagery_Utils as IMG
+import O4_Texture_Color_Normalization as TCN
 from tests._imagery_color_normalization_helpers import (
     ImageryColorNormalizationTestCase,
 )
-import O4_Imagery_Utils as IMG
-import O4_Texture_Color_Normalization as TCN
 
 
 class DownloadJpegColorNormalizationTests(ImageryColorNormalizationTestCase):

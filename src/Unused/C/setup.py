@@ -1,6 +1,5 @@
 import importlib
 
-
 setuptools = importlib.import_module("setuptools")
 
 setuptools.setup(

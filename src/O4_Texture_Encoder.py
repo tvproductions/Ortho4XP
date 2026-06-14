@@ -2,9 +2,9 @@ from O4_Native_Texture_Encoder import NativeTextureEncoderBackend, TextureEncode
 from O4_Texture_Models import (
     TextureCodec,
     TextureConversionResult,
+    TextureEncoderBackend,
     TextureEncodeRequest,
     TextureEncodeResult,
-    TextureEncoderBackend,
 )
 
 

@@ -27,12 +27,22 @@ def _ensure_src_path() -> None:
 
 
 def _is_headless_command(argv: list[str]) -> bool:
-    return len(argv) > 1 and argv[1] in {"validate-job", "build-job", "validate-package", "upgrade-package", "scenery"}
+    return len(argv) > 1 and argv[1] in {
+        "validate-job",
+        "build-job",
+        "validate-package",
+        "upgrade-package",
+        "scenery",
+    }
 
 
 def _dispatch_headless(argv: list[str]) -> int:
     cli_argv = list(argv[1:])
-    if cli_argv[0] != "scenery" and len(cli_argv) >= 2 and not cli_argv[1].startswith("-"):
+    if (
+        cli_argv[0] != "scenery"
+        and len(cli_argv) >= 2
+        and not cli_argv[1].startswith("-")
+    ):
         cli_argv[1] = os.path.abspath(cli_argv[1])
     os.chdir(_source_root())
     _ensure_src_path()
@@ -66,11 +76,11 @@ _ensure_src_path()
 import O4_File_Names as FNAMES
 
 sys.path.append(FNAMES.Provider_dir)
-import O4_Imagery_Utils as IMG
 import O4_Build_Core as CORE
 import O4_CLI_Utils as CLI
-import O4_GUI_Utils as GUI
 import O4_Config_Utils as CFG  # CFG imported last because it can modify other modules variables
+import O4_GUI_Utils as GUI
+import O4_Imagery_Utils as IMG
 
 runtime_dirs = (
     FNAMES.Preview_dir,
@@ -136,8 +146,8 @@ if __name__ == "__main__":
                 provider_code = sys.argv[3]
                 zoomlevel = int(sys.argv[4])
                 tile = CFG.Tile(lat, lon, "")
-                setattr(tile, "default_website", provider_code)
-                setattr(tile, "default_zl", zoomlevel)
+                tile.default_website = provider_code
+                tile.default_zl = zoomlevel
             except (IndexError, ValueError):
                 print(cmd_line)
                 sys.exit()

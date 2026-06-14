@@ -16,13 +16,18 @@ class PackageMetadataTests(unittest.TestCase):
 
     def tearDown(self):
         import shutil
+
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_write_mesh_package_metadata_creates_json(self):
         from O4_Package_Metadata import write_package_metadata
+
         tile = SimpleNamespace(
-            lat=43, lon=-79, zoomlevel=17,
-            provider_code="BI", build_dir=self.tmpdir,
+            lat=43,
+            lon=-79,
+            zoomlevel=17,
+            provider_code="BI",
+            build_dir=self.tmpdir,
         )
         write_package_metadata(self.tmpdir, tile, "mesh")
         meta_file = os.path.join(self.tmpdir, "package.json")
@@ -30,9 +35,13 @@ class PackageMetadataTests(unittest.TestCase):
 
     def test_mesh_metadata_has_required_fields(self):
         from O4_Package_Metadata import write_package_metadata
+
         tile = SimpleNamespace(
-            lat=43, lon=-79, zoomlevel=17,
-            provider_code="BI", build_dir=self.tmpdir,
+            lat=43,
+            lon=-79,
+            zoomlevel=17,
+            provider_code="BI",
+            build_dir=self.tmpdir,
         )
         write_package_metadata(self.tmpdir, tile, "mesh")
         with open(os.path.join(self.tmpdir, "package.json")) as f:
@@ -45,9 +54,13 @@ class PackageMetadataTests(unittest.TestCase):
 
     def test_overlay_metadata_has_type_overlay(self):
         from O4_Package_Metadata import write_package_metadata
+
         tile = SimpleNamespace(
-            lat=43, lon=-79, zoomlevel=17,
-            provider_code="BI", build_dir=self.tmpdir,
+            lat=43,
+            lon=-79,
+            zoomlevel=17,
+            provider_code="BI",
+            build_dir=self.tmpdir,
         )
         write_package_metadata(self.tmpdir, tile, "overlay")
         with open(os.path.join(self.tmpdir, "package.json")) as f:
@@ -56,9 +69,13 @@ class PackageMetadataTests(unittest.TestCase):
 
     def test_metadata_includes_generation_timestamp(self):
         from O4_Package_Metadata import write_package_metadata
+
         tile = SimpleNamespace(
-            lat=43, lon=-79, zoomlevel=17,
-            provider_code="BI", build_dir=self.tmpdir,
+            lat=43,
+            lon=-79,
+            zoomlevel=17,
+            provider_code="BI",
+            build_dir=self.tmpdir,
         )
         write_package_metadata(self.tmpdir, tile, "mesh")
         with open(os.path.join(self.tmpdir, "package.json")) as f:

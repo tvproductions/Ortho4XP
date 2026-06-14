@@ -1,47 +1,51 @@
 import ast
+import contextlib
 import os
-import sys
-import shutil
-from math import floor, cos, pi
 import queue
+import shutil
+import sys
 import threading
 import tkinter as tk
-from types import SimpleNamespace
+import tkinter.ttk as ttk
+from math import cos, floor, pi
 from tkinter import (
+    ALL,
+    CENTER,
+    END,
+    HORIZONTAL,
+    LEFT,
+    NW,
+    RIGHT,
+    E,
     N,
     S,
-    E,
     W,
-    NW,
-    ALL,
-    END,
-    LEFT,
-    RIGHT,
-    CENTER,
-    HORIZONTAL,
     filedialog,
 )
-import tkinter.ttk as ttk
+from types import SimpleNamespace
+
 from PIL import Image, ImageTk
+
+import O4_Build_Context as BC
+import O4_Build_Core as CORE
+import O4_Build_Models as MODELS
+import O4_Config_Utils as CFG
+import O4_File_Names as FNAMES
+import O4_Geo_Utils as GEO
+import O4_Imagery_Utils as IMG
+import O4_Mask_Utils as MASK
+import O4_Mesh_Utils as MESH
+import O4_Subprocess_Utils as SP
+import O4_Tile_Utils as TILE
+import O4_UI_Utils as UI
+import O4_Vector_Map as VMAP
+import O4_Vector_Utils as VECT
+import O4_Version
 from O4_Cfg_Vars import (
     global_prefix,
     list_global_tile_vars,
     list_tile_vars,
 )
-import O4_Version
-import O4_Imagery_Utils as IMG
-import O4_File_Names as FNAMES
-import O4_Geo_Utils as GEO
-import O4_Vector_Utils as VECT
-import O4_Vector_Map as VMAP
-import O4_Mesh_Utils as MESH
-import O4_Mask_Utils as MASK
-import O4_Tile_Utils as TILE
-import O4_UI_Utils as UI
-import O4_Config_Utils as CFG
-import O4_Build_Context as BC
-import O4_Build_Core as CORE
-import O4_Build_Models as MODELS
 
 # Set OsX=True if you prefer the OsX way of drawing existing tiles but
 # are on Linux or Windows.
@@ -404,15 +408,14 @@ class Ortho4XP_GUI(tk.Tk):
 
         # reinitialization from last visit
         try:
-            f = open(FNAMES.resource_path(".last_gui_params.txt"), "r")
-            (lat, lon, default_website, default_zl) = f.readline().split()
-            custom_build_dir = f.readline().strip()
+            with open(FNAMES.resource_path(".last_gui_params.txt")) as f:
+                (lat, lon, default_website, default_zl) = f.readline().split()
+                custom_build_dir = f.readline().strip()
             self.lat.set(lat)
             self.lon.set(lon)
             self.default_website.set(default_website)
             self.default_zl.set(default_zl)
             self.custom_build_dir.set(custom_build_dir)
-            f.close()
         except (OSError, ValueError):
             self.lat.set(48)  # ty:ignore[invalid-argument-type]
             self.lon.set(-6)  # ty:ignore[invalid-argument-type]
@@ -482,9 +485,9 @@ class Ortho4XP_GUI(tk.Tk):
         )
 
         if os.path.exists(tile_cfg_file):
-            with open(tile_cfg_file, "r") as f:
+            with open(tile_cfg_file) as f:
                 try:
-                    zone_list = getattr(CFG, "zone_list")
+                    zone_list = CFG.zone_list
                     values = CFG._iter_loaded_config_values(
                         f, legacy_zone_target=zone_list
                     )
@@ -577,8 +580,8 @@ class Ortho4XP_GUI(tk.Tk):
         try:
             (lat, lon) = self.get_lat_lon()
             return CFG.Tile(lat, lon, str(self.custom_build_dir.get()))
-        except TypeError:
-            raise Exception
+        except TypeError as exc:
+            raise Exception from exc
 
     def build_poly_file(self):
         try:
@@ -749,19 +752,18 @@ class Ortho4XP_GUI(tk.Tk):
             if result == "cancel":
                 return
         try:
-            f = open(FNAMES.resource_path(".last_gui_params.txt"), "w")
-            f.write(
-                self.lat.get()
-                + " "
-                + self.lon.get()
-                + " "
-                + self.default_website.get()
-                + " "
-                + self.default_zl.get()
-                + "\n"
-            )
-            f.write(self.custom_build_dir.get())
-            f.close()
+            with open(FNAMES.resource_path(".last_gui_params.txt"), "w") as f:
+                f.write(
+                    self.lat.get()
+                    + " "
+                    + self.lon.get()
+                    + " "
+                    + self.default_website.get()
+                    + " "
+                    + self.default_zl.get()
+                    + "\n"
+                )
+                f.write(self.custom_build_dir.get())
         except OSError as exc:
             UI.vprint(3, exc)
         self.after_cancel(self.callback_pgrb)
@@ -1090,7 +1092,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             self.boundary = self.canvas.create_polygon(
                 bdpoints, outline="black", fill="", width=2
             )
-            for zone in CFG.zone_list:  # ty:ignore[unresolved-attribute]
+            for zone in CFG.zone_list:
                 self.coords = zone[0][0:-2]
                 self.zlpol.set(zone[1])
                 self.zmap_combo.set(zone[2])
@@ -1254,7 +1256,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
                 * 2 ** (2 * (int(polygon[2]) - 17))
                 / 1024
             )
-        self.gb.set("{:.1f}".format(total_size) + "Gb")
+        self.gb.set(f"{total_size:.1f}" + "Gb")
         return
 
     def save_zone_cmd(self):
@@ -1285,7 +1287,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             fake_zone_list.append(("", "", provider_code))
         UI.vprint(1, "\nBuilding geotiffs.\n------------------\n")
         tile = CFG.Tile(self.lat, self.lon, "")
-        tile.zone_list = fake_zone_list  # ty:ignore[unresolved-attribute]
+        tile.zone_list = fake_zone_list
         IMG.initialize_local_combined_providers_dict(tile)
         fargs_build_geotiffs = [tile, texture_attributes_list]
         build_geotiffs_thread = threading.Thread(
@@ -1353,7 +1355,7 @@ class Ortho4XP_Custom_ZL(tk.Toplevel):
             for pt in item[1][0:2]:  # repeat first point for point_in_polygon algo
                 tmp.append(pt)
             zone_list.append([tmp, item[2], item[3]])
-        CFG.zone_list = zone_list  # ty:ignore[unresolved-attribute]
+        CFG.zone_list = zone_list
         # self.destroy()
         return
 
@@ -1550,7 +1552,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
     def add_symlink(self, lat: int, lon: int) -> None:
         """Add symlink to custom_scenery_dir."""
-        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)  # ty:ignore[unresolved-attribute]
+        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)
         custom_build_dir = os.path.normpath(self.custom_build_dir)
         # Check if scenery and build directory are the same (symlinks not applicable)
         if custom_scenery_dir == custom_build_dir:
@@ -1558,7 +1560,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
         if not self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
+                CFG.custom_scenery_dir,
                 FNAMES.tile_dir(lat, lon),
             )
             target = os.path.realpath(
@@ -1566,15 +1568,17 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             )
         elif self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
+                CFG.custom_scenery_dir,
                 FNAMES.tile_name_from_basename(os.path.basename(self.working_dir)),
             )
             target = os.path.realpath(self.working_dir)
         if ("dar" in sys.platform) or ("win" not in sys.platform):
             # Mac and Linux
-            os.system("ln -s " + ' "' + target + '" "' + link + '"')
+            SP.run_external_command(["ln", "-s", target, link], tool_name="ln")
         else:
-            os.system('MKLINK /J "' + link + '" "' + target + '"')
+            SP.run_external_command(
+                ["cmd", "/c", "MKLINK", "/J", link, target], tool_name="MKLINK"
+            )
         if not self.grouped:
             if not OsX:
                 self.canvas.itemconfig(
@@ -1599,7 +1603,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
     def remove_symlink(self, lat: int, lon: int) -> None:
         """Remove symlink from custom_scenery_dir."""
-        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)  # ty:ignore[unresolved-attribute]
+        custom_scenery_dir = os.path.normpath(CFG.custom_scenery_dir)
         custom_build_dir = os.path.normpath(self.custom_build_dir)
         # Check if scenery and build directory are the same (symlinks not applicable)
         if custom_scenery_dir == custom_build_dir:
@@ -1607,7 +1611,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
         if not self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
+                CFG.custom_scenery_dir,
                 FNAMES.tile_dir(lat, lon),
             )
             target = os.path.realpath(
@@ -1628,7 +1632,7 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
         elif self.grouped:
             link = os.path.join(
-                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
+                CFG.custom_scenery_dir,
                 FNAMES.tile_name_from_basename(os.path.basename(self.working_dir)),
             )
             target = os.path.realpath(self.working_dir)
@@ -1656,10 +1660,10 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
 
     def add_overlay_symlink(self, *args) -> None:
         """Add/remove symlink for overlays to custom_scenery_dir."""
-        if not CFG.custom_scenery_dir:  # ty:ignore[unresolved-attribute]
+        if not CFG.custom_scenery_dir:
             UI.vprint(1, "Custom Scenery directory not set.")
             return
-        link = os.path.join(CFG.custom_scenery_dir, FNAMES.overlay_dir_name())  # ty:ignore[unresolved-attribute]
+        link = os.path.join(CFG.custom_scenery_dir, FNAMES.overlay_dir_name())
         # Remove symlink if it already exists
         if os.path.isdir(link) and os.path.samefile(
             os.path.realpath(link), FNAMES.Overlay_dir
@@ -1667,16 +1671,23 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             os.remove(link)
             UI.vprint(
                 1,
-                f"{FNAMES.overlay_dir_name()} link removed from: {CFG.custom_scenery_dir}",  # ty:ignore[unresolved-attribute]
+                f"{FNAMES.overlay_dir_name()} link removed from: {CFG.custom_scenery_dir}",
             )
             return
         # Add symlink if it doesn't exist
         if ("dar" in sys.platform) or ("win" not in sys.platform):
             # Mac and Linux
-            os.system("ln -s " + ' "' + FNAMES.Overlay_dir + '" "' + link + '"')
+            SP.run_external_command(
+                ["ln", "-s", FNAMES.Overlay_dir, link], tool_name="ln"
+            )
         else:
-            os.system('MKLINK /J "' + link + '" "' + FNAMES.Overlay_dir + '"')
-        UI.vprint(1, f"{FNAMES.overlay_dir_name()} link added to: {CFG.custom_scenery_dir}")  # ty:ignore[unresolved-attribute]
+            SP.run_external_command(
+                ["cmd", "/c", "MKLINK", "/J", link, FNAMES.Overlay_dir],
+                tool_name="MKLINK",
+            )
+        UI.vprint(
+            1, f"{FNAMES.overlay_dir_name()} link added to: {CFG.custom_scenery_dir}"
+        )
 
     def set_working_dir(self):
         self.custom_build_dir = self.parent.custom_build_dir.get()
@@ -1713,10 +1724,8 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
             18: "orange",
             19: "red",
         }
-        try:
+        with contextlib.suppress(tk.TclError):
             self._preview_existing_tiles_inner(dico_color)
-        except tk.TclError:
-            pass
 
     def _preview_existing_tiles_inner(self, dico_color):
         if self.dico_tiles_done:
@@ -1751,8 +1760,9 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                     ):
                         color = "blue"
                         content = ""
+                        config_lines = []
                         try:
-                            tmpf = open(
+                            with open(
                                 os.path.join(
                                     self.working_dir,
                                     dir_name,
@@ -1760,26 +1770,26 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                                     + FNAMES.short_latlon(lat, lon)
                                     + ".cfg",
                                 ),
-                                "r",
-                            )
+                            ) as tmpf:
+                                config_lines = tmpf.readlines()
                             found_config = True
                         except OSError:
                             try:
-                                tmpf = open(
+                                with open(
                                     os.path.join(
                                         self.working_dir,
                                         dir_name,
                                         "Ortho4XP.cfg",
                                     ),
-                                    "r",
-                                )
+                                ) as tmpf:
+                                    config_lines = tmpf.readlines()
                                 found_config = True
                             except OSError:
                                 found_config = False
                         if found_config:
                             prov = zl = ""
                             zone_list_exists = False
-                            for line in tmpf.readlines():
+                            for line in config_lines:
                                 if line[:15] == "default_website":
                                     prov = line.strip().split("=")[1][:4]
                                 elif line[:10] == "default_zl":
@@ -1787,7 +1797,6 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                                 elif line[:9] == "zone_list" and len(line[10:]) > 3:
                                     zone_list_exists = True
                                     break
-                            tmpf.close()
                             if not prov:
                                 prov = "?"
                             if zl:
@@ -1818,30 +1827,27 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                             dir_name,
                         )
                         link = os.path.join(
-                            CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
+                            CFG.custom_scenery_dir,
                             FNAMES.tile_dir(lat, lon),
                         )
-                        if os.path.isdir(link):
-                            if os.path.samefile(
-                                os.path.realpath(link),
-                                os.path.realpath(
-                                    os.path.join(self.working_dir, dir_name)
-                                ),
-                            ):
-                                if not OsX:
-                                    self.canvas.itemconfig(
-                                        self.dico_tiles_done[(lat, lon)][0],
-                                        stipple="gray50",
-                                    )
-                                else:
-                                    self.canvas.itemconfig(
-                                        self.dico_tiles_done[(lat, lon)][1],
-                                        font=(
-                                            "Helvetica",
-                                            "12",
-                                            "bold underline",
-                                        ),
-                                    )
+                        if os.path.isdir(link) and os.path.samefile(
+                            os.path.realpath(link),
+                            os.path.realpath(os.path.join(self.working_dir, dir_name)),
+                        ):
+                            if not OsX:
+                                self.canvas.itemconfig(
+                                    self.dico_tiles_done[(lat, lon)][0],
+                                    stipple="gray50",
+                                )
+                            else:
+                                self.canvas.itemconfig(
+                                    self.dico_tiles_done[(lat, lon)][1],
+                                    font=(
+                                        "Helvetica",
+                                        "12",
+                                        "bold underline",
+                                    ),
+                                )
         elif self.grouped and os.path.isdir(
             os.path.join(self.working_dir, "Earth nav data")
         ):
@@ -1862,26 +1868,26 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                     [x1, y1] = GEO.wgs84_to_pix(lat, lon + 1, self.earthzl)
                     color = "blue"
                     content = ""
+                    config_lines = []
                     try:
-                        tmpf = open(
+                        with open(
                             os.path.join(
                                 self.working_dir,
                                 "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg",
                             ),
-                            "r",
-                        )
+                        ) as tmpf:
+                            config_lines = tmpf.readlines()
                         found_config = True
                     except OSError:
                         found_config = False
                     if found_config:
                         prov = zl = ""
-                        for line in tmpf.readlines():
+                        for line in config_lines:
                             if line[:15] == "default_website":
                                 prov = line.strip().split("=")[1][:4]
                             elif line[:10] == "default_zl":
                                 zl = int(line.strip().split("=")[1])
                                 break
-                        tmpf.close()
                         if not prov:
                             prov = "?"
                         if zl:
@@ -1910,24 +1916,23 @@ class Ortho4XP_Earth_Preview(tk.Toplevel):
                         dir_name,
                     )
             link = os.path.join(
-                CFG.custom_scenery_dir,  # ty:ignore[unresolved-attribute]
+                CFG.custom_scenery_dir,
                 FNAMES.tile_name_from_basename(os.path.basename(self.working_dir)),
             )
-            if os.path.isdir(link):
-                if os.path.samefile(
-                    os.path.realpath(link), os.path.realpath(self.working_dir)
-                ):
-                    for lat0, lon0 in self.dico_tiles_done:
-                        if "dar" not in sys.platform:
-                            self.canvas.itemconfig(
-                                self.dico_tiles_done[(lat, lon)][0],
-                                stipple="gray50",
-                            )
-                        else:
-                            self.canvas.itemconfig(
-                                self.dico_tiles_done[(lat, lon)][1],
-                                font=("Helvetica", "12", "bold underline"),
-                            )
+            if os.path.isdir(link) and os.path.samefile(
+                os.path.realpath(link), os.path.realpath(self.working_dir)
+            ):
+                for _lat0, _lon0 in self.dico_tiles_done:
+                    if "dar" not in sys.platform:
+                        self.canvas.itemconfig(
+                            self.dico_tiles_done[(lat, lon)][0],
+                            stipple="gray50",
+                        )
+                    else:
+                        self.canvas.itemconfig(
+                            self.dico_tiles_done[(lat, lon)][1],
+                            font=("Helvetica", "12", "bold underline"),
+                        )
         for lat, lon in self.dico_tiles_todo:
             [x0, y0] = GEO.wgs84_to_pix(lat + 1, lon, self.earthzl)
             [x1, y1] = GEO.wgs84_to_pix(lat, lon + 1, self.earthzl)

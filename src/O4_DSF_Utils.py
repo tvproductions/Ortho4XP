@@ -1,13 +1,16 @@
 import array
 import hashlib
-import numpy
 import os
 import pickle
 import shutil
 import struct
 from collections import defaultdict
 from math import ceil, floor
+from typing import cast
+
+import numpy
 from PIL import Image, ImageDraw
+
 import O4_Bathymetry as BATHY
 import O4_Bathymetry_Input as BATHY_INPUT
 import O4_File_Names as FNAMES
@@ -129,9 +132,8 @@ def zone_list_to_ortho_dico(tile):
     if tile.cover_airports_with_highres in ("True", "ICAO"):
         UI.vprint(1, "-> Checking airport locations for upgraded zoomlevel.")
         try:
-            f = open(FNAMES.apt_file(tile), "rb")
-            dico_airports = pickle.load(f)
-            f.close()
+            with open(FNAMES.apt_file(tile), "rb") as f:
+                dico_airports = pickle.load(f)  # noqa: S301
         except (OSError, EOFError, pickle.UnpicklingError):
             UI.vprint(
                 1,
@@ -206,7 +208,7 @@ def zone_list_to_ortho_dico(tile):
         dico_tmp[i] = (region[1], region[2])
         pol = [
             (round((x - tile.lon) * 4095), round((tile.lat + 1 - y) * 4095))
-            for (x, y) in zip(region[0][1::2], region[0][::2])
+            for (x, y) in zip(region[0][1::2], region[0][::2], strict=False)
         ]
         masks_draw.polygon(pol, fill=i)
         i += 1
@@ -217,7 +219,8 @@ def zone_list_to_ortho_dico(tile):
             latp = max(min(latp, tile.lat + 1), tile.lat)
             x = round((lonp - tile.lon) * 4095)
             y = round((tile.lat + 1 - latp) * 4095)
-            (zoomlevel, provider_code) = dico_tmp[masks_im.getpixel((x, y))]
+            mask_index = cast(int, masks_im.getpixel((x, y)))
+            (zoomlevel, provider_code) = dico_tmp[mask_index]
             if airport_array[y, x]:
                 zoomlevel = max(zoomlevel, tile.cover_zl)
             til_x_text = 16 * (int(til_x / 2 ** (tile.mesh_zl - zoomlevel)) // 16)
@@ -292,9 +295,9 @@ def create_terrain_file(
         texture_approx_size = int(GEO.webmercator_pixel_size(lat_med, zoomlevel) * 4096)
         f.write(
             "LOAD_CENTER "
-            + "{:.5f}".format(lat_med)
+            + f"{lat_med:.5f}"
             + " "
-            + "{:.5f}".format(lon_med)
+            + f"{lon_med:.5f}"
             + " "
             + str(texture_approx_size)
             + " 4096\n"
@@ -320,9 +323,9 @@ def create_terrain_file(
             # border_tex mask
             f.write(
                 "LOAD_CENTER_BORDER "
-                + "{:.5f}".format(lat_med)
+                + f"{lat_med:.5f}"
                 + " "
-                + "{:.5f}".format(lon_med)
+                + f"{lon_med:.5f}"
                 + " "
                 + str(texture_approx_size)
                 + " "
@@ -447,18 +450,16 @@ def build_dsf(tile, download_queue):
     # 6 Compute pool params
     pool_nbr = len(pool_quadtree)
     idx_node_to_idx_pool = {}
-    idx_pool = 0
     key_to_idx_pool = {}
-    for key in pool_quadtree:
+    for idx_pool, key in enumerate(pool_quadtree):
         key_to_idx_pool[key] = idx_pool
         for idx_node in pool_quadtree[key]["idx_nodes"]:
             idx_node_to_idx_pool[idx_node] = idx_pool
-        idx_pool += 1
     pool_param = {}
     node_icoords = numpy.zeros(5 * nbr_nodes, dtype=numpy.uint16)
     for key in pool_quadtree:
         level = len(key[0])
-        plist = sorted(list(pool_quadtree[key]["idx_nodes"]))
+        plist = sorted(pool_quadtree[key]["idx_nodes"])
         node_icoords[[5 * idx_node for idx_node in plist]] = [
             int(pool_quadtree.nodes[idx_node][0][level : level + 16], 2)
             if pool_quadtree.nodes[idx_node][0][level : level + 16]
@@ -538,7 +539,7 @@ def build_dsf(tile, download_queue):
     dsf_pool_plane[pool_nbr : 2 * pool_nbr] = 9
     # Regular XP water
     dsf_pool_plane[2 * pool_nbr : 3 * pool_nbr] = 7
-    textured_nodes = {}
+    textured_nodes: dict[tuple[int, ...], tuple[int, int]] = {}
     len_textured_nodes = 0
     textured_tris = {}
     total_cross_pool = 0
@@ -694,9 +695,10 @@ def build_dsf(tile, download_queue):
             for n in (n1, n3, n2):  # beware of ordering for orientation !
                 idx_pool = idx_node_to_idx_pool[n]
                 node_hash = (
-                    idx_pool,
-                    *node_icoords[5 * n : 5 * n + 2],
-                    terrain_idx,
+                    int(idx_pool),
+                    int(node_icoords[5 * n]),
+                    int(node_icoords[5 * n + 1]),
+                    int(terrain_idx),
                 )
                 if node_hash in textured_nodes:
                     (idx_dsfpool, pos_in_pool) = textured_nodes[node_hash]
@@ -765,7 +767,7 @@ def build_dsf(tile, download_queue):
                     idx_dsfpool = idx_node_to_idx_pool[n] + 2 * pool_nbr
                     len_textured_nodes += 1
                     pos_in_pool = dsf_pool_length[idx_dsfpool]
-                    textured_nodes[node_hash] = [idx_dsfpool, pos_in_pool]
+                    textured_nodes[node_hash] = (idx_dsfpool, pos_in_pool)
                     # in some cases we might prefer to use normal shading for
                     # some sea triangles too (albedo continuity with elevation
                     # derived masks)
@@ -854,9 +856,10 @@ def build_dsf(tile, download_queue):
         for n in (n1, n3, n2):  # beware of ordering for orientation !
             idx_pool = idx_node_to_idx_pool[n]
             node_hash = (
-                idx_pool,
-                *node_icoords[5 * n : 5 * n + 2],
-                terrain_idx,
+                int(idx_pool),
+                int(node_icoords[5 * n]),
+                int(node_icoords[5 * n + 1]),
+                int(terrain_idx),
             )
             if node_hash in textured_nodes:
                 (idx_dsfpool, pos_in_pool) = textured_nodes[node_hash]
@@ -912,7 +915,7 @@ def build_dsf(tile, download_queue):
                     idx_dsfpool = idx_node_to_idx_pool[n] + 2 * pool_nbr
                     len_textured_nodes += 1
                     pos_in_pool = dsf_pool_length[idx_dsfpool]
-                    textured_nodes[node_hash] = [idx_dsfpool, pos_in_pool]
+                    textured_nodes[node_hash] = (idx_dsfpool, pos_in_pool)
                     # in some cases we might prefer to use normal shading for
                     # some sea triangles too (albedo continuity with elevation
                     # derived masks)
@@ -984,7 +987,7 @@ def build_dsf(tile, download_queue):
             size_of_geod_atom += 21 + dsf_pool_plane[k] * (9 + 2 * dsf_pool_length[k])
     UI.vprint(2, "     Size of DEFN atom : " + str(size_of_defn_atom) + " bytes.")
     UI.vprint(2, "     Size of GEOD atom : " + str(size_of_geod_atom) + " bytes.")
-    f = open(dsf_file_name + ".tmp", "wb")
+    f = open(dsf_file_name + ".tmp", "wb")  # noqa: SIM115
     f.write(b"XPLNEDSF")
     f.write(struct.pack("<I", 1))
 

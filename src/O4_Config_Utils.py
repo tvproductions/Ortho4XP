@@ -2,23 +2,14 @@
 
 import ast
 import os
-from math import ceil
-from typing import Any, cast
-
 import tkinter as tk
 import tkinter.ttk as ttk
+from math import ceil
 from tkinter import E, N, S, W, filedialog, messagebox
+from typing import Any, cast
 
 import O4_Cfg_Vars as CFG
 import O4_Config_Runtime as CONFIG_RUNTIME
-from O4_Config_Models import (
-    UnsupportedWaterTechError,
-    coerce_config_value,
-    config_default,
-    parse_legacy_config_literal,
-    parse_legacy_zone_append,
-    validate_config_registry,
-)
 import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
@@ -48,6 +39,14 @@ from O4_Cfg_Vars import (
     list_tile_vars,
     list_vector_vars,
 )
+from O4_Config_Models import (
+    UnsupportedWaterTechError,
+    coerce_config_value,
+    config_default,
+    parse_legacy_config_literal,
+    parse_legacy_zone_append,
+    validate_config_registry,
+)
 
 cfg_app_vars = cast(dict[str, dict[str, Any]], cfg_app_vars)
 cfg_tile_vars = cast(dict[str, dict[str, Any]], cfg_tile_vars)
@@ -58,6 +57,9 @@ global_cfg_file = FNAMES.resource_path("Ortho4XP.cfg")
 global_cfg_bak_file = FNAMES.resource_path("Ortho4XP.cfg.bak")
 
 validate_config_registry(cfg_vars)
+
+custom_scenery_dir: str = config_default(cfg_app_vars["custom_scenery_dir"])
+zone_list: list[Any] = config_default(cfg_tile_vars["zone_list"])
 
 
 def _config_target(var: str):
@@ -209,13 +211,15 @@ class Tile:
         self.lat = lat
         self.lon = lon
         self.custom_build_dir = custom_build_dir
-        self.grouped = (
-            True
-            if custom_build_dir and not custom_build_dir.endswith(("/", "\\"))
-            else False
+        self.grouped = bool(
+            custom_build_dir and not custom_build_dir.endswith(("/", "\\"))
         )
         self.build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
         self.dem = None
+        self.default_website = globals()["default_website"]
+        self.default_zl = globals()["default_zl"]
+        self.water_tech = globals()["water_tech"]
+        self.zone_list = globals()["zone_list"]
         for var in list_tile_vars:
             setattr(self, var, globals()[var])
 
@@ -240,7 +244,7 @@ class Tile:
                     " check file permissions.",
                 )
                 UI.vprint(3, exc)
-                raise Exception
+                raise Exception from exc
 
     def read_from_config(self, config_file=None, use_global=False):
         """
@@ -268,9 +272,9 @@ class Tile:
                     )
                     return 0
         try:
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 for var, value in _iter_loaded_config_values(
-                    f, legacy_zone_target=getattr(self, "zone_list")
+                    f, legacy_zone_target=self.zone_list
                 ):
                     setattr(self, var, _coerce_config_value(var, value))
             return 1
@@ -305,26 +309,25 @@ class Tile:
         except OSError as exc:
             UI.vprint(3, exc)
         try:
-            f = open(config_file, "w")
-            for var in list_tile_vars:
-                tile_zones = []
-                lat = self.lat
-                lon = self.lon
-                if lat < 0:
-                    lat = lat + 1
-                if lon < 0:
-                    lon = lon + 1
-                for zone in globals()["zone_list"]:
-                    _zone_list = [int(coord) for coord in zone[0]]
-                    _zone_list = set(_zone_list)
-                    if lat in _zone_list and lon in _zone_list:
-                        tile_zones.append(zone)
-                        _log_zones_in_tile(tile_zones)
-                if var == "zone_list":
-                    f.write(var + "=" + str(tile_zones) + "\n")
-                else:
-                    f.write(var + "=" + str(getattr(self, var)) + "\n")
-            f.close()
+            with open(config_file, "w") as f:
+                for var in list_tile_vars:
+                    tile_zones = []
+                    lat = self.lat
+                    lon = self.lon
+                    if lat < 0:
+                        lat = lat + 1
+                    if lon < 0:
+                        lon = lon + 1
+                    for zone in globals()["zone_list"]:
+                        _zone_list = [int(coord) for coord in zone[0]]
+                        _zone_list = set(_zone_list)
+                        if lat in _zone_list and lon in _zone_list:
+                            tile_zones.append(zone)
+                            _log_zones_in_tile(tile_zones)
+                    if var == "zone_list":
+                        f.write(var + "=" + str(tile_zones) + "\n")
+                    else:
+                        f.write(var + "=" + str(getattr(self, var)) + "\n")
             return 1
         except OSError as e:
             UI.vprint(2, e)
@@ -503,11 +506,7 @@ class Ortho4XP_Config(tk.Toplevel):
             )
             row = 2
             for item in sub_list:
-                text = str(
-                    item
-                    if "short_name" not in cfg_tile_vars[item]
-                    else cfg_tile_vars[item]["short_name"]
-                )
+                text = str(cfg_tile_vars[item].get("short_name", item))
                 ttk.Button(
                     frame_cfg,
                     text=text,
@@ -708,11 +707,7 @@ class Ortho4XP_Config(tk.Toplevel):
             )
             row = 1
             for item in sub_list:
-                text = str(
-                    item
-                    if "short_name" not in cfg_global_tile_vars[item]
-                    else cfg_global_tile_vars[item]["short_name"]
-                )
+                text = str(cfg_global_tile_vars[item].get("short_name", item))
                 text = text.replace(global_prefix, "")
                 ttk.Button(
                     frame_cfg,
@@ -887,16 +882,10 @@ class Ortho4XP_Config(tk.Toplevel):
 
         l = ceil((len(gui_app_vars_short)) / 4)
         this_row = row
-        j = 0
-
-        for item in gui_app_vars_short:
+        for j, item in enumerate(gui_app_vars_short):
             col = 2 * (j // l)
             row = this_row + j % l
-            text = str(
-                item
-                if "short_name" not in cfg_app_vars[item]
-                else cfg_app_vars[item]["short_name"]
-            )
+            text = str(cfg_app_vars[item].get("short_name", item))
             ttk.Button(
                 frame_cfg,
                 text=text,
@@ -930,7 +919,6 @@ class Ortho4XP_Config(tk.Toplevel):
             self.app_entry_[item].grid(
                 row=row, column=col + 1, padx=(0, 20), pady=2, sticky=N + S + W
             )
-            j += 1
 
         row = this_row + l
 
@@ -1064,31 +1052,27 @@ class Ortho4XP_Config(tk.Toplevel):
         custom_build_dir = self.parent.custom_build_dir_entry.get()
         build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
         try:
-            f = open(
+            with open(
                 os.path.join(
                     build_dir,
                     "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg.bak",
                 ),
-                "r",
-            )
+            ) as f:
+                try:
+                    for var, value in _iter_loaded_config_values(
+                        f, legacy_zone_target=zone_list
+                    ):
+                        self.v_[var].set(value)
+                except UnsupportedWaterTechError:
+                    return 0
         except FileNotFoundError:
             messagebox.showinfo("Not found", "No backup tile configuration found.")
             return
-
-        try:
-            for var, value in _iter_loaded_config_values(
-                f, legacy_zone_target=zone_list
-            ):
-                self.v_[var].set(value)
-        except UnsupportedWaterTechError:
-            f.close()
-            return 0
         if zone_list and not self.v_["zone_list"].get():
             self.v_["zone_list"].set(str(zone_list))
         # Apply changes to update global variables
         self.apply_changes("tile")
         UI.vprint(0, f"Backup configuration loaded for tile at {lat} {lon}")
-        f.close()
 
     def load_tile_cfg(self) -> int | None:
         """Load tile configuration settings for active tile."""
@@ -1099,27 +1083,24 @@ class Ortho4XP_Config(tk.Toplevel):
             return 0
         custom_build_dir = self.parent.custom_build_dir_entry.get()
         build_dir = FNAMES.build_dir(lat, lon, custom_build_dir)
+        config_path = os.path.join(
+            build_dir,
+            "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg",
+        )
+        fallback_config_path = os.path.join(build_dir, "Ortho4XP.cfg")
+        if not os.path.isfile(config_path):
+            config_path = fallback_config_path
         try:
-            f = open(
-                os.path.join(
-                    build_dir,
-                    "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg",
-                ),
-                "r",
-            )
+            with open(config_path) as f:
+                try:
+                    for var, value in _iter_loaded_config_values(
+                        f, legacy_zone_target=zone_list
+                    ):
+                        self.v_[var].set(value)
+                except UnsupportedWaterTechError:
+                    return 0
         except OSError:
-            try:
-                f = open(os.path.join(build_dir, "Ortho4XP.cfg"), "r")
-            except OSError:
-                messagebox.showinfo("Not found", "No tile configuration found.")
-                return 0
-        try:
-            for var, value in _iter_loaded_config_values(
-                f, legacy_zone_target=zone_list
-            ):
-                self.v_[var].set(value)
-        except UnsupportedWaterTechError:
-            f.close()
+            messagebox.showinfo("Not found", "No tile configuration found.")
             return 0
         if not self.v_["zone_list"].get():
             self.v_["zone_list"].set(str(zone_list))
@@ -1127,7 +1108,6 @@ class Ortho4XP_Config(tk.Toplevel):
         # Apply changes to update global variables
         self.apply_changes("tile")
         UI.vprint(0, f"Configuration loaded for tile at {lat} {lon}")
-        f.close()
 
     def write_tile_cfg(self) -> int | None:
         """Save tile configuration settings for active tile."""
@@ -1195,7 +1175,7 @@ class Ortho4XP_Config(tk.Toplevel):
     def load_backup_global_tile_cfg(self) -> None:
         """Load backup global tile configuration settings."""
         try:
-            with open(global_cfg_bak_file, "r") as f:
+            with open(global_cfg_bak_file) as f:
                 for var, value in _iter_loaded_config_values(
                     f,
                     ignored_vars=list_app_vars,
@@ -1255,7 +1235,7 @@ class Ortho4XP_Config(tk.Toplevel):
     def load_backup_app_cfg(self) -> None:
         """Load backup app configuration settings."""
         try:
-            with open(global_cfg_bak_file, "r") as f:
+            with open(global_cfg_bak_file) as f:
                 for line in f.readlines():
                     line = line.strip()
                     if not line or line[0] == "#":
@@ -1387,7 +1367,6 @@ class Ortho4XP_Config(tk.Toplevel):
                 os.path.join(
                     build_dir, "Ortho4XP_" + FNAMES.short_latlon(lat, lon) + ".cfg"
                 ),
-                "r",
             ) as f:
                 file_dict = dict(line.strip().split("=") for line in f if line.strip())
                 for var in list_tile_vars:
@@ -1413,7 +1392,7 @@ class Ortho4XP_Config(tk.Toplevel):
         except FileNotFoundError:
             # Check Tile Config tab values against tile config values in the global config file
             try:
-                with open(global_cfg_file, "r") as f:
+                with open(global_cfg_file) as f:
                     file_dict = dict(
                         line.strip().split("=") for line in f if line.strip()
                     )
@@ -1443,7 +1422,7 @@ class Ortho4XP_Config(tk.Toplevel):
         if not select_tile:
             # Check Global Config tab values against the global config file
             try:
-                with open(global_cfg_file, "r") as f:
+                with open(global_cfg_file) as f:
                     file_dict = dict(
                         line.strip().split("=") for line in f if line.strip()
                     )
@@ -1548,7 +1527,7 @@ class Ortho4XP_Config(tk.Toplevel):
         :return: dict
         """
         config_dict = {}
-        with open(file, "r") as config_file:
+        with open(file) as config_file:
             for line in config_file:
                 line = line.strip()
                 if line and "=" in line:

@@ -1,6 +1,7 @@
 from math import atan2, pi
+
 import numpy
-from shapely import geometry, affinity
+from shapely import affinity, geometry
 
 
 ##############################################################################

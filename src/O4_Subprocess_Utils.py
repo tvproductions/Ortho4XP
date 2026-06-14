@@ -1,12 +1,11 @@
 import os
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Callable, Sequence
 
-from O4_External_Command_Result import ExternalCommandResult, make_result
-from O4_External_Tool_Paths import resolve_tool
 import O4_Subprocess_Runtime as RUNTIME
 import O4_UI_Utils as UI
-
+from O4_External_Command_Result import ExternalCommandResult, make_result
+from O4_External_Tool_Paths import resolve_tool
 
 CommandArg = str | os.PathLike[str]
 StdoutHandler = Callable[[str], None]

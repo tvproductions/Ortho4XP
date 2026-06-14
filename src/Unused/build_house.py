@@ -1,4 +1,5 @@
-from math import cos, sin, tan, pi
+from math import cos, pi, sin, tan
+
 import numpy
 
 #
@@ -100,102 +101,99 @@ def build_simple_house(L, l, h, angle, dtL=0, dtl=0, id_toit=1):
 
 def faces_to_obj(faces, objfilename):
     rounding = 3
-    f = open(objfilename, "w")
     vtot = 1
-    f.write("mtllib house_1.mtl\n")
-    f.write("usemtl house_1\n")
-    for i in range(len(faces)):
-        face = faces[i]
-        for v in face:
-            f.write(
-                "v "
-                + str(numpy.round(v[0], rounding))
-                + " "
-                + str(numpy.round(v[1], rounding))
-                + " "
-                + str(numpy.round(v[2], rounding))
-                + "\n"
-            )
-            f.write(
-                "vn "
-                + str(numpy.round(v[3], rounding))
-                + " "
-                + str(numpy.round(v[4], rounding))
-                + " "
-                + str(numpy.round(v[5], rounding))
-                + "\n"
-            )
-            f.write(
-                "vt "
-                + str(numpy.round(v[6], rounding))
-                + " "
-                + str(numpy.round(v[7], rounding))
-                + "\n"
-            )
-        f.write("f")
-        for j in range(len(face)):
-            f.write(" " + str(j + vtot) + "/" + str(j + vtot) + "/" + str(j + vtot))
-        f.write("\n")
-        vtot += len(face)
-    f.close()
-    f = open("house_1.mtl", "w")
-    f.write("newmtl house_1\n")
-    f.write("map_Ka house_1.png\n")
-    f.close()
+    with open(objfilename, "w") as f:
+        f.write("mtllib house_1.mtl\n")
+        f.write("usemtl house_1\n")
+        for i in range(len(faces)):
+            face = faces[i]
+            for v in face:
+                f.write(
+                    "v "
+                    + str(numpy.round(v[0], rounding))
+                    + " "
+                    + str(numpy.round(v[1], rounding))
+                    + " "
+                    + str(numpy.round(v[2], rounding))
+                    + "\n"
+                )
+                f.write(
+                    "vn "
+                    + str(numpy.round(v[3], rounding))
+                    + " "
+                    + str(numpy.round(v[4], rounding))
+                    + " "
+                    + str(numpy.round(v[5], rounding))
+                    + "\n"
+                )
+                f.write(
+                    "vt "
+                    + str(numpy.round(v[6], rounding))
+                    + " "
+                    + str(numpy.round(v[7], rounding))
+                    + "\n"
+                )
+            f.write("f")
+            for j in range(len(face)):
+                f.write(" " + str(j + vtot) + "/" + str(j + vtot) + "/" + str(j + vtot))
+            f.write("\n")
+            vtot += len(face)
+    with open("house_1.mtl", "w") as f:
+        f.write("newmtl house_1\n")
+        f.write("map_Ka house_1.png\n")
 
 
 def faces_to_obj8(faces, objfilename, texturefilename):
     rounding = 3
-    f = open(objfilename, "w")
     vttot = numpy.sum([len(face) for face in faces])
     idxtot = 3 * numpy.sum([len(face) - 2 for face in faces])
-    f.write("I\n800\nOBJ\n\nTEXTURE " + texturefilename + "\n")
-    f.write("POINT_COUNTS    ")
-    f.write(str(vttot))
-    f.write(" 0 0 ")
-    f.write(str(idxtot))
-    f.write("\n\n")
-    for i in range(len(faces)):
-        face = faces[i]
-        for v in face:
-            f.write(
-                "VT "
-                + str(numpy.round(v[0], rounding))
-                + " "
-                + str(numpy.round(v[2], rounding))
-                + " "
-                + str(-numpy.round(v[1], rounding))
-                + " "
-                # + "0 1 0 "
-                + str(numpy.round(v[3], rounding))
-                + " "
-                + str(numpy.round(v[5], rounding))
-                + " "
-                + str(-numpy.round(v[4], rounding))
-                + " "
-                + str(numpy.round(v[6], rounding))
-                + " "
-                + str(numpy.round(v[7], rounding))
-                + "\n"
-            )
-    idxtmp = 0
-    idxlist = []
-    for face in faces:
-        for j in range(1, len(face) - 1):
-            idxlist.append(idxtmp)
-            idxlist.append(idxtmp + j + 1)
-            idxlist.append(idxtmp + j)
-        idxtmp += len(face)
-    idx10 = len(idxlist) // 10
-    for i in range(0, idx10):
-        f.write("IDX10 ")
-        for j in range(0, 10):
-            f.write(str(idxlist[10 * i + j]) + " ")
+    with open(objfilename, "w") as f:
+        f.write("I\n800\nOBJ\n\nTEXTURE " + texturefilename + "\n")
+        f.write("POINT_COUNTS    ")
+        f.write(str(vttot))
+        f.write(" 0 0 ")
+        f.write(str(idxtot))
+        f.write("\n\n")
+        for i in range(len(faces)):
+            face = faces[i]
+            for v in face:
+                f.write(
+                    "VT "
+                    + str(numpy.round(v[0], rounding))
+                    + " "
+                    + str(numpy.round(v[2], rounding))
+                    + " "
+                    + str(-numpy.round(v[1], rounding))
+                    + " "
+                    # + "0 1 0 "
+                    + str(numpy.round(v[3], rounding))
+                    + " "
+                    + str(numpy.round(v[5], rounding))
+                    + " "
+                    + str(-numpy.round(v[4], rounding))
+                    + " "
+                    + str(numpy.round(v[6], rounding))
+                    + " "
+                    + str(numpy.round(v[7], rounding))
+                    + "\n"
+                )
+        idxtmp = 0
+        idxlist = []
+        for face in faces:
+            for j in range(1, len(face) - 1):
+                idxlist.append(idxtmp)
+                idxlist.append(idxtmp + j + 1)
+                idxlist.append(idxtmp + j)
+            idxtmp += len(face)
+        idx10 = len(idxlist) // 10
+        for i in range(0, idx10):
+            f.write("IDX10 ")
+            for j in range(0, 10):
+                f.write(str(idxlist[10 * i + j]) + " ")
+            f.write("\n")
+        for j in range(0, (len(idxlist) % 10)):
+            f.write("IDX ")
+            f.write(str(idxlist[idx10 * 10 + j]))
+            f.write("\n")
         f.write("\n")
-    for j in range(0, (len(idxlist) % 10)):
-        f.write("IDX ")
-        f.write(str(idxlist[idx10 * 10 + j]))
-        f.write("\n")
-    f.write("\n")
-    f.write("TRIS 0 " + str(len(idxlist)))
-    f.close()
+        f.write("TRIS 0 " + str(len(idxlist)))

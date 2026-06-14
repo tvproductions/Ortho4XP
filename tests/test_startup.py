@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 class StartupSmokeTests(unittest.TestCase):
     def test_cli_help_exits_before_runtime_setup(self):
         with tempfile.TemporaryDirectory() as temp_dir:
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [sys.executable, str(_path.ROOT_DIR / "Ortho4XP.py"), "--help"],
                 cwd=temp_dir,
                 check=False,

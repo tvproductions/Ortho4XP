@@ -1,22 +1,26 @@
+import ast
 import json
 import os
+import queue
 import sys
 import time
-import queue
 from math import atan, ceil, floor
+
 import numpy
-from PIL import Image, ImageDraw, ImageFilter, ImageOps
 import skfmm
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
+
+import O4_Build_Context as BC
 import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
-import O4_UI_Utils as UI
 import O4_Geo_Utils as GEO
 import O4_Imagery_Utils as IMG
+import O4_Mask_Alpha as MA
+import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
+import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
-import O4_Mask_Alpha as MA, O4_Mesh_Utils as MESH
 from O4_Parallel_Utils import parallel_execute
-import O4_Build_Context as BC
 
 mask_altitude_above = 0.5
 masks_build_slots = 4
@@ -448,7 +452,7 @@ def record_water_tris(tile):
     UI.vprint(1, "-> Reading mesh data")
     for mesh_file_name in mesh_list:
         try:
-            f_mesh = open(mesh_file_name, "r")
+            f_mesh = open(mesh_file_name)  # noqa: SIM115
             UI.vprint(1, "   * ", mesh_file_name)
         except OSError as exc:
             UI.lvprint(1, "Mesh file ", mesh_file_name, " could not be read. Skipped.")
@@ -456,19 +460,19 @@ def record_water_tris(tile):
             continue
         mesh_version = float(f_mesh.readline().strip().split()[-1])
         has_water = 7 if mesh_version >= 1.3 else 3
-        for i in range(3):
+        for _i in range(3):
             f_mesh.readline()
         nbr_pt_in = int(f_mesh.readline())
         pt_in = numpy.zeros(5 * nbr_pt_in, "float")
         for i in range(0, nbr_pt_in):
             pt_in[5 * i : 5 * i + 3] = [float(x) for x in f_mesh.readline().split()[:3]]
-        for i in range(0, 3):
+        for _i in range(0, 3):
             f_mesh.readline()
         for i in range(0, nbr_pt_in):
             pt_in[5 * i + 3 : 5 * i + 5] = [
                 float(x) for x in f_mesh.readline().split()[:2]
             ]
-        for i in range(0, 2):  # skip 2 lines
+        for _i in range(0, 2):  # skip 2 lines
             f_mesh.readline()
         nbr_tri_in = int(f_mesh.readline())  # read nbr of tris
         step_stones = nbr_tri_in // 100
@@ -591,11 +595,11 @@ def record_water_tris(tile):
         f_mesh.close()
         if not tile.use_masks_for_inland:
             UI.vprint(2, "   Taking care of inland water near shoreline")
-            f_mesh = open(mesh_file_name, "r")
-            for i in range(0, 4):
+            f_mesh = open(mesh_file_name)  # noqa: SIM115
+            for _i in range(0, 4):
                 f_mesh.readline()
             nbr_pt_in = int(f_mesh.readline())
-            for i in range(0, 2 * nbr_pt_in + 5):
+            for _i in range(0, 2 * nbr_pt_in + 5):
                 f_mesh.readline()
             nbr_tri_in = int(f_mesh.readline())  # read nbr of tris
             step_stones = nbr_tri_in // 100
@@ -611,7 +615,7 @@ def record_water_tris(tile):
                     int(x) - 1 for x in f_mesh.readline().split()[:4]
                 ]
                 tri_type += 1
-                if not (tri_type & has_water) == 1:
+                if tri_type & has_water != 1:
                     continue
                 (lon1, lat1) = pt_in[5 * n1 : 5 * n1 + 2]
                 (lon2, lat2) = pt_in[5 * n2 : 5 * n2 + 2]
@@ -819,13 +823,14 @@ def blur_mask(img_array, tile, sea_level):
 
 ################################################################################
 def triangulation_to_image(name, pixel_size, grid_size_or_bbox):
-    f_node = open(name + ".1.node", "r")
-    nbr_pt = int(f_node.readline().split()[0])
-    vertices = numpy.zeros(2 * nbr_pt)
-    for i in range(0, nbr_pt):
-        # Triangle .node files have the node number in front
-        vertices[2 * i : 2 * i + 2] = [float(x) for x in f_node.readline().split()[1:3]]
-    f_node.close()
+    with open(name + ".1.node") as f_node:
+        nbr_pt = int(f_node.readline().split()[0])
+        vertices = numpy.zeros(2 * nbr_pt)
+        for i in range(0, nbr_pt):
+            # Triangle .node files have the node number in front
+            vertices[2 * i : 2 * i + 2] = [
+                float(x) for x in f_node.readline().split()[1:3]
+            ]
     xmin = vertices[::2].min()
     xmax = vertices[::2].max()
     ymin = vertices[1::2].min()
@@ -843,33 +848,32 @@ def triangulation_to_image(name, pixel_size, grid_size_or_bbox):
         "1", (int((xmax - xmin) / pixel_size), int((ymax - ymin) / pixel_size))
     )
     mask_draw = ImageDraw.Draw(mask_im)
-    f_ele = open(name + ".1.ele", "r")
-    nbr_tri = int(f_ele.readline().split()[0])
-    for i in range(nbr_tri):
-        (n1, n2, n3, tritype) = [int(x) - 1 for x in f_ele.readline().split()[1:5]]
-        tritype += 1
-        if not tritype:
-            continue
-        (x1, y1) = vertices[2 * n1 : 2 * n1 + 2]
-        (x2, y2) = vertices[2 * n2 : 2 * n2 + 2]
-        (x3, y3) = vertices[2 * n3 : 2 * n3 + 2]
-        (px1, py1) = [
-            round((x1 - xmin) / pixel_size),
-            round((y1 - ymin) / pixel_size),
-        ]
-        (px2, py2) = [
-            round((x2 - xmin) / pixel_size),
-            round((y2 - ymin) / pixel_size),
-        ]
-        (px3, py3) = [
-            round((x3 - xmin) / pixel_size),
-            round((y3 - ymin) / pixel_size),
-        ]
-        try:
-            mask_draw.polygon([(px1, py1), (px2, py2), (px3, py3)], fill="white")
-        except (TypeError, ValueError) as exc:
-            UI.vprint(3, exc)
-    f_ele.close()
+    with open(name + ".1.ele") as f_ele:
+        nbr_tri = int(f_ele.readline().split()[0])
+        for _i in range(nbr_tri):
+            (n1, n2, n3, tritype) = [int(x) - 1 for x in f_ele.readline().split()[1:5]]
+            tritype += 1
+            if not tritype:
+                continue
+            (x1, y1) = vertices[2 * n1 : 2 * n1 + 2]
+            (x2, y2) = vertices[2 * n2 : 2 * n2 + 2]
+            (x3, y3) = vertices[2 * n3 : 2 * n3 + 2]
+            (px1, py1) = [
+                round((x1 - xmin) / pixel_size),
+                round((y1 - ymin) / pixel_size),
+            ]
+            (px2, py2) = [
+                round((x2 - xmin) / pixel_size),
+                round((y2 - ymin) / pixel_size),
+            ]
+            (px3, py3) = [
+                round((x3 - xmin) / pixel_size),
+                round((y3 - ymin) / pixel_size),
+            ]
+            try:
+                mask_draw.polygon([(px1, py1), (px2, py2), (px3, py3)], fill="white")
+            except (TypeError, ValueError) as exc:
+                UI.vprint(3, exc)
     return ((xmin, ymin, xmax, ymax), ImageOps.flip(mask_im).convert("L"))
 
 
@@ -913,12 +917,9 @@ if __name__ == "__main__":
                 query += char
     else:
         query = None
-    if nargs in (7, 8):
-        epsg_code = sys.argv[6]
-    else:
-        epsg_code = "4326"
+    epsg_code = sys.argv[6] if nargs in (7, 8) else "4326"
     if nargs == 8:
-        grid_size_or_bbox = eval(sys.argv[7])
+        grid_size_or_bbox = ast.literal_eval(sys.argv[7])
     else:
         grid_size_or_bbox = 0.02 if epsg_code == "4326" else 2000
     pixel_size = float(sys.argv[2])

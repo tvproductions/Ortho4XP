@@ -18,20 +18,33 @@ from typing import Literal
 import numpy
 
 from O4_Color_Correction import (
-    ColorCorrection as ColorCorrection,
     DEFAULT_CORRECTION_STRENGTH as DEFAULT_CORRECTION_STRENGTH,
+)
+from O4_Color_Correction import (
     MAX_CHANNEL_SCALE as MAX_CHANNEL_SCALE,
+)
+from O4_Color_Correction import (
     MAX_EXPOSURE_SCALE as MAX_EXPOSURE_SCALE,
+)
+from O4_Color_Correction import (
     MIN_CHANNEL_SCALE as MIN_CHANNEL_SCALE,
+)
+from O4_Color_Correction import (
     MIN_EXPOSURE_SCALE as MIN_EXPOSURE_SCALE,
+)
+from O4_Color_Correction import (
+    ColorCorrection as ColorCorrection,
+)
+from O4_Color_Correction import (
     apply_color_correction,
     derive_color_correction,
 )
 from O4_Srgb_Color import (
     linear_to_srgb_array as linear_to_srgb_array,
+)
+from O4_Srgb_Color import (
     srgb_to_linear_array as srgb_to_linear_array,
 )
-
 
 EdgeName = Literal["north", "south", "east", "west"]
 

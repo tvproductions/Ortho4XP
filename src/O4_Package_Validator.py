@@ -1,10 +1,14 @@
 import json
 import os
 
-
 REQUIRED_FIELDS = [
-    "name", "version", "author", "description", "type",
-    "compatibility", "generation",
+    "name",
+    "version",
+    "author",
+    "description",
+    "type",
+    "compatibility",
+    "generation",
 ]
 
 REQUIRED_GENERATION_FIELDS = ["tool", "tool_version", "timestamp"]

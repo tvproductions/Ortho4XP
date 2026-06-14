@@ -7,7 +7,6 @@ import shutil
 import subprocess
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[4]
 TY_BASELINE = ["tests", "src/O4_Geo_Utils.py", "src/O4_File_Names.py"]
 NATIVE_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
@@ -60,7 +59,7 @@ def _forbidden_pattern_regex(pattern: str) -> str:
 
 def run(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
     print("+ " + " ".join(args))
-    return subprocess.run(
+    return subprocess.run(  # noqa: S603
         args,
         cwd=ROOT,
         check=check,
@@ -69,7 +68,7 @@ def run(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[s
 
 
 def capture(args: list[str]) -> str:
-    return subprocess.check_output(args, cwd=ROOT, text=True).strip()
+    return subprocess.check_output(args, cwd=ROOT, text=True).strip()  # noqa: S603
 
 
 def capture_lines(args: list[str]) -> list[str]:

@@ -1,4 +1,5 @@
-from math import log, tan, pi, atan, exp, cos, sin, sqrt, atan2
+from math import atan, atan2, cos, exp, log, pi, sin, sqrt, tan
+
 from pyproj import CRS, Transformer
 
 earth_radius = 6378137
@@ -45,9 +46,10 @@ def webmercator_pixel_size(lat, zoomlevel):
 
 ################################################################################
 
-epsg = dict()
-epsg[4326] = CRS.from_epsg(4326)
-epsg[3857] = CRS.from_epsg(3857)
+epsg = {
+    4326: CRS.from_epsg(4326),
+    3857: CRS.from_epsg(3857),
+}
 
 
 ################################################################################

@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import os
 import tomllib
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping, cast
+from typing import Any, cast
 
 import O4_Build_Models as MODELS
-
 
 MIN_LAT = -90
 MAX_LAT = 89
@@ -100,9 +100,9 @@ def build_plan_from_mapping(
     if errors:
         raise JobValidationError(errors)
 
-    assert output_dir is not None
-    assert provider is not None
-    assert zoom_level is not None
+    output_dir = _validated_required(output_dir, "output_dir")
+    provider = _validated_required(provider, "provider")
+    zoom_level = _validated_required(zoom_level, "zoom_level")
     resolved_output_dir = _resolve_output_dir(str(output_dir), job_dir)
     custom_build_dir = _as_base_custom_build_dir(resolved_output_dir)
     tile_plans = tuple(
@@ -369,22 +369,26 @@ def _coordinate_field(
     if not isinstance(value, int):
         errors.append(ValidationError(field, "must be an integer", value))
         return None
-    if key.startswith("lat") or field.endswith(".lat"):
-        if value < MIN_LAT or value > MAX_LAT:
-            errors.append(
-                ValidationError(
-                    field, f"must be between {MIN_LAT} and {MAX_LAT}", value
-                )
-            )
-            return None
-    if key.startswith("lon") or field.endswith(".lon"):
-        if value < MIN_LON or value > MAX_LON:
-            errors.append(
-                ValidationError(
-                    field, f"must be between {MIN_LON} and {MAX_LON}", value
-                )
-            )
-            return None
+    if (key.startswith("lat") or field.endswith(".lat")) and (
+        value < MIN_LAT or value > MAX_LAT
+    ):
+        errors.append(
+            ValidationError(field, f"must be between {MIN_LAT} and {MAX_LAT}", value)
+        )
+        return None
+    if (key.startswith("lon") or field.endswith(".lon")) and (
+        value < MIN_LON or value > MAX_LON
+    ):
+        errors.append(
+            ValidationError(field, f"must be between {MIN_LON} and {MAX_LON}", value)
+        )
+        return None
+    return value
+
+
+def _validated_required[T](value: T | None, field: str) -> T:
+    if value is None:
+        raise AssertionError(f"validated required build job field is missing: {field}")
     return value
 
 

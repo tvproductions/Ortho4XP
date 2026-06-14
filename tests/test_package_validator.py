@@ -15,6 +15,7 @@ class PackageValidatorTests(unittest.TestCase):
 
     def tearDown(self):
         import shutil
+
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def _write_package_json(self, data):
@@ -25,6 +26,7 @@ class PackageValidatorTests(unittest.TestCase):
 
     def test_valid_mesh_package_passes_validation(self):
         from O4_Package_Validator import validate_package
+
         data = {
             "name": "Ortho4XP_Mesh_+43-079",
             "version": "1.0.0",
@@ -46,6 +48,7 @@ class PackageValidatorTests(unittest.TestCase):
 
     def test_missing_required_field_fails_validation(self):
         from O4_Package_Validator import validate_package
+
         data = {
             "name": "Ortho4XP_Mesh_+43-079",
             "type": "mesh",
@@ -57,6 +60,7 @@ class PackageValidatorTests(unittest.TestCase):
 
     def test_invalid_type_fails_validation(self):
         from O4_Package_Validator import validate_package
+
         data = {
             "name": "Test",
             "version": "1.0.0",
@@ -76,6 +80,7 @@ class PackageValidatorTests(unittest.TestCase):
 
     def test_missing_package_json_file_fails(self):
         from O4_Package_Validator import validate_package
+
         result = validate_package(self.tmpdir)
         self.assertFalse(result["valid"])
 

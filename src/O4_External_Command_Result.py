@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 CommandOutcome = tuple[int, str, str]
 
 

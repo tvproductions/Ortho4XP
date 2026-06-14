@@ -59,7 +59,16 @@ class NativeTextureEncoderTests(unittest.TestCase):
 
         self.assertEqual(
             backend.build_command(_request("bc1")),
-            ["nvcompress", "-bc1", "-highest", "-alpha_dithering", "-mipfilter", "kaiser", "input.png", "output.dds"],
+            [
+                "nvcompress",
+                "-bc1",
+                "-highest",
+                "-alpha_dithering",
+                "-mipfilter",
+                "kaiser",
+                "input.png",
+                "output.dds",
+            ],
         )
 
     def test_windows_linux_bc3_command_uses_nvcompress(self):
@@ -70,7 +79,17 @@ class NativeTextureEncoderTests(unittest.TestCase):
 
         self.assertEqual(
             backend.build_command(_request("bc3")),
-            ["nvcompress", "-bc3", "-highest", "-alpha_dithering", "-mipfilter", "kaiser", "-alpha", "input.png", "output.dds"],
+            [
+                "nvcompress",
+                "-bc3",
+                "-highest",
+                "-alpha_dithering",
+                "-mipfilter",
+                "kaiser",
+                "-alpha",
+                "input.png",
+                "output.dds",
+            ],
         )
 
     def test_default_windows_linux_executable_uses_repo_tool_resolver(self):
@@ -151,7 +170,16 @@ class NativeTextureEncoderTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.error_summary, "")
         runner.assert_called_once_with(
-            ["nvcompress", "-bc1", "-highest", "-alpha_dithering", "-mipfilter", "kaiser", "input.png", "output.dds"],
+            [
+                "nvcompress",
+                "-bc1",
+                "-highest",
+                "-alpha_dithering",
+                "-mipfilter",
+                "kaiser",
+                "input.png",
+                "output.dds",
+            ],
             tool_name="nvcompress",
         )
 

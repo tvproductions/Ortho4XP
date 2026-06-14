@@ -12,15 +12,15 @@ branches.  The helpers return original images and paths unchanged when the
 feature is disabled, so callers can use them without adding extra control flow.
 """
 
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 
 from PIL import Image, UnidentifiedImageError
 
-from O4_Color_Normalization import normalize_image_with_neighbors
 import O4_File_Names as FNAMES
 import O4_Imagery_Failures as IFAIL
 import O4_UI_Utils as UI
+from O4_Color_Normalization import normalize_image_with_neighbors
 
 
 @dataclass(frozen=True)

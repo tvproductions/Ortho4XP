@@ -8,6 +8,8 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
+import O4_File_Names as FNAMES
+import O4_Imagery_Utils as IMG
 from tests._imagery_color_normalization_helpers import (
     ConvertTexturePatchMixin,
 )
@@ -15,8 +17,6 @@ from tests._imagery_geotiff_conversion_helpers import (
     convert_geotiff_with_failed_final_conversion,
     convert_geotiff_with_failed_geotag,
 )
-import O4_File_Names as FNAMES
-import O4_Imagery_Utils as IMG
 
 
 class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):

@@ -12,7 +12,6 @@ from io import StringIO
 from pathlib import Path
 from typing import Any
 
-
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -27,6 +26,7 @@ from code_quality_audits import (  # noqa: E402
     audit_type_ignores,
     collect_code_quality_findings,
 )
+from code_quality_targets import filter_changed_complexity_targets  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[4]
 SKILL_DIR = Path(__file__).resolve().parents[1]
@@ -37,20 +37,12 @@ RUFF_LINT_PATHS = [
     "Ortho4XP.py",
     "src",
     "tests",
-    ".codex/skills/quality-check/scripts/quality_check.py",
-    ".codex/skills/quality-check/scripts/code_quality_audits.py",
-    ".codex/skills/quality-check/scripts/code_quality_models.py",
-    ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
-    ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+    ".codex/skills/quality-check/scripts",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
 ]
 FORMAT_BASELINE = [
-    ".codex/skills/quality-check/scripts/quality_check.py",
-    ".codex/skills/quality-check/scripts/code_quality_audits.py",
-    ".codex/skills/quality-check/scripts/code_quality_models.py",
-    ".codex/skills/quality-check/scripts/code_quality_policy_audits.py",
-    ".codex/skills/quality-check/scripts/code_quality_size_audits.py",
+    ".codex/skills/quality-check/scripts",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
 ]
@@ -68,6 +60,7 @@ XENON_QUALITY_TARGETS = [
 ]
 NATIVE_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
 NATIVE_PATHS = ["Utils/src"]
+NON_SOURCE_PYTHON_PATHS = {".codex/skills/maintenance-qa/vulture.whitelist.py"}
 LLVM_TOOL_DIRS = [
     Path("C:/Program Files/LLVM/bin"),
     Path("/opt/homebrew/opt/llvm/bin"),
@@ -107,7 +100,7 @@ def run(
     args: list[str], *, check: bool = True, capture: bool = False
 ) -> subprocess.CompletedProcess[str]:
     print("+ " + " ".join(args))
-    return subprocess.run(
+    return subprocess.run(  # noqa: S603
         args,
         cwd=ROOT,
         check=check,
@@ -155,21 +148,27 @@ def all_python_files() -> list[str]:
     for base in existing_paths(["Ortho4XP.py", "src", "tests", ".codex/skills"]):
         base_path = ROOT / base
         if base_path.is_file() and base_path.suffix == ".py":
-            paths.append(base)
+            if base not in NON_SOURCE_PYTHON_PATHS:
+                paths.append(base)
         elif base_path.is_dir():
             for item in base_path.rglob("*.py"):
                 if "__pycache__" not in item.parts:
-                    paths.append(item.relative_to(ROOT).as_posix())
+                    path = item.relative_to(ROOT).as_posix()
+                    if path not in NON_SOURCE_PYTHON_PATHS:
+                        paths.append(path)
     return sorted(dict.fromkeys(paths))
 
 
 def complexity_targets(scope: str) -> list[str]:
     if scope == "all":
         return all_python_files()
-    changed = changed_python_files()
-    if ".codex/skills/quality-check/scripts/quality_check.py" not in changed:
-        changed.append(".codex/skills/quality-check/scripts/quality_check.py")
-    return existing_paths(changed)
+    return existing_paths(
+        filter_changed_complexity_targets(
+            changed_python_files(),
+            all_python_files(),
+            ".codex/skills/quality-check/scripts/quality_check.py",
+        )
+    )
 
 
 def format_check_targets(changed: list[str]) -> list[str]:
@@ -444,7 +443,13 @@ def is_worse(value: float, baseline_value: float, polarity: str) -> bool:
 
 
 def stable_finding_key(finding: Finding) -> tuple[str, str, str]:
-    return (finding.metric, finding.path, finding.name)
+    return (finding.metric, finding.path, stable_finding_name(finding.name))
+
+
+def stable_finding_name(name: str) -> str:
+    if "(" not in name:
+        return name
+    return name.split("(", 1)[0].strip()
 
 
 def baseline_by_stable_key(
@@ -454,7 +459,11 @@ def baseline_by_stable_key(
     for prior in baseline.values():
         if not {"metric", "path", "name"} <= set(prior):
             continue
-        key = (str(prior["metric"]), str(prior["path"]), str(prior["name"]))
+        key = (
+            str(prior["metric"]),
+            str(prior["path"]),
+            stable_finding_name(str(prior["name"])),
+        )
         if key not in indexed:
             indexed[key] = prior
     return indexed
@@ -724,7 +733,7 @@ def print_completed_output(proc: subprocess.CompletedProcess[str]) -> None:
 
 def run_native_command(args: list[str]) -> subprocess.CompletedProcess[str]:
     print("+ " + " ".join(args))
-    proc = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+    proc = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)  # noqa: S603
     if proc.returncode:
         print_completed_output(proc)
         raise subprocess.CalledProcessError(

@@ -1,21 +1,22 @@
-from dataclasses import dataclass
 import importlib
 import importlib.util
 import io
 import json
 import os
 import queue
-import random
+import secrets
 import sys
 import time
+from dataclasses import dataclass
 from math import ceil, log, pi, tan
 from pathlib import Path
 from typing import Any
 
 import numpy
+import requests
 from osgeo import gdal
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
-import requests
+from pydantic import ValidationError
 
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
@@ -24,6 +25,9 @@ import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
 import O4_Texture_Color_Normalization as TCN
+import O4_UI_Utils as UI
+import O4_Vector_Utils as VECT
+from O4_Parallel_Utils import parallel_execute
 from O4_Source_Data_Models import (
     ColorFilterDefinition,
     CombinedProviderDefinition,
@@ -31,15 +35,11 @@ from O4_Source_Data_Models import (
     ProviderDefinition,
     source_code_from_path,
 )
-import O4_UI_Utils as UI
-import O4_Vector_Utils as VECT
-from O4_Parallel_Utils import parallel_execute
 from O4_Subprocess_Utils import resolve_tool
 from O4_Texture_Conversion_Utils import (
     convert_dds_texture,
     convert_geotiff_texture,
 )
-from pydantic import ValidationError
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
 gdal.UseExceptions()
@@ -607,7 +607,7 @@ def initialize_local_combined_providers_dict(tile):
     global local_combined_providers_dict, extents_dict
     UI.vprint(1, "-> Initializing providers with potential data on this tile.")
     local_combined_providers_dict = {}
-    test_set = set([tile.default_website])
+    test_set = {tile.default_website}
     for region in tile.zone_list[:]:
         test_set.add(region[2])
     for provider_code in test_set.intersection(combined_providers_dict):
@@ -781,40 +781,38 @@ def initialize_local_combined_providers_dict(tile):
 
 ################################################################################
 def read_tilematrixsets(file_name):
-    f = open(file_name, "r")
-
     def xml_decode(line):
         field = line.split("<")[1].split(">")[0]
         str_value = line.split(">")[1].split("<")[0]
         return [field, str_value]
 
     tilematrixsets = []
-    line = f.readline()
-    while line:
-        if line.strip() == "<TileMatrixSet>":
-            tilematrixset = {}
-            tilematrixset["tilematrices"] = []
-            line = f.readline()
-            while not line.strip() == "</TileMatrixSet>":
-                if line.strip() == "<TileMatrix>":
-                    tilematrix = {}
-                    line = f.readline()
-                    while not line.strip() == "</TileMatrix>":
-                        field, str_value = xml_decode(line)
-                        if "Identifier" in field:
-                            field = "identifier"
-                        tilematrix[field] = str_value
-                        line = f.readline()
-                    tilematrixset["tilematrices"].append(tilematrix)
-                elif "Identifier" in line:
-                    field, str_value = xml_decode(line)
-                    tilematrixset["identifier"] = str_value
-                line = f.readline()
-            tilematrixsets.append(tilematrixset)
-        else:
-            pass
+    with open(file_name) as f:
         line = f.readline()
-    f.close()
+        while line:
+            if line.strip() == "<TileMatrixSet>":
+                tilematrixset = {}
+                tilematrixset["tilematrices"] = []
+                line = f.readline()
+                while line.strip() != "</TileMatrixSet>":
+                    if line.strip() == "<TileMatrix>":
+                        tilematrix = {}
+                        line = f.readline()
+                        while line.strip() != "</TileMatrix>":
+                            field, str_value = xml_decode(line)
+                            if "Identifier" in field:
+                                field = "identifier"
+                            tilematrix[field] = str_value
+                            line = f.readline()
+                        tilematrixset["tilematrices"].append(tilematrix)
+                    elif "Identifier" in line:
+                        field, str_value = xml_decode(line)
+                        tilematrixset["identifier"] = str_value
+                    line = f.readline()
+                tilematrixsets.append(tilematrixset)
+            else:
+                pass
+            line = f.readline()
     return tilematrixsets
 
 
@@ -1196,7 +1194,7 @@ def get_wmts_image(tilematrix, til_x, til_y, provider, http_session):
                 (url_0, tmp) = url.split("{switch:")
                 (tmp, url_2) = tmp.split("}")
                 server_list = tmp.split(",")
-                url_1 = random.choice(server_list).strip()
+                url_1 = secrets.choice(server_list).strip()
                 url = url_0 + url_1 + url_2
         elif provider["request_type"] == "wmts":  # WMTS
             url = (
@@ -1366,10 +1364,7 @@ def build_texture_from_tilbox(tilbox, zoomlevel, provider, progress=None):
             )
             download_queue.put(fargs)
     # then the number of workers
-    if "max_threads" in provider:
-        max_threads = int(provider["max_threads"])
-    else:
-        max_threads = 16
+    max_threads = int(provider["max_threads"]) if "max_threads" in provider else 16
     # and finally activate them
     success = parallel_execute(
         get_and_paste_wmts_part, download_queue, max_threads, progress
@@ -1500,10 +1495,7 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
                 ]
             download_queue.put(fargs)
     # We execute the downloads and subimage pastes
-    if "max_threads" in provider:
-        max_threads = int(provider["max_threads"])
-    else:
-        max_threads = 16
+    max_threads = int(provider["max_threads"]) if "max_threads" in provider else 16
     if provider["request_type"] == "wms":
         success = parallel_execute(get_and_paste_wms_part, download_queue, max_threads)
     elif provider["request_type"] in ["wmts", "tms", "local_tms"]:
@@ -1912,9 +1904,8 @@ def build_geotiffs(tile, texture_attributes_list):
     initialize_color_filters_dict()
     initialize_providers_dict()
     initialize_combined_providers_dict()
-    done = 0
     todo = len(texture_attributes_list)
-    for texture_attributes in texture_attributes_list:
+    for done, texture_attributes in enumerate(texture_attributes_list, start=1):
         (til_x_left, til_y_top, zoomlevel, provider_code) = texture_attributes
         if build_jpeg_ortho(tile, til_x_left, til_y_top, zoomlevel, provider_code):
             convert_texture(
@@ -1925,7 +1916,6 @@ def build_geotiffs(tile, texture_attributes_list):
                 provider_code,
                 type="tif",
             )
-        done += 1
         UI.progress_bar(1, int(100 * done / todo))
         if UI.red_flag:
             UI.exit_message_and_bottom_line()
@@ -2138,7 +2128,7 @@ def color_transform(im, color_code):
                 (brightness, contrast) = color_filter[1:3]
                 if brightness >= 0:
                     im = im.point(
-                        lambda i: (
+                        lambda i, brightness=brightness, contrast=contrast: (
                             128
                             + tan(pi / 4 * (1 + contrast / 128))
                             * (brightness + (255 - brightness) / 255 * i - 128)
@@ -2146,7 +2136,7 @@ def color_transform(im, color_code):
                     )
                 else:
                     im = im.point(
-                        lambda i: (
+                        lambda i, brightness=brightness, contrast=contrast: (
                             128
                             + tan(pi / 4 * (1 + contrast / 128))
                             * ((255 + brightness) / 255 * i - 128)
@@ -2169,7 +2159,7 @@ def color_transform(im, color_code):
                     ]
                     bands[j].paste(
                         bands[j].point(
-                            lambda i: (
+                            lambda i, in_min=in_min, gamma=gamma, in_max=in_max, out_min=out_min, out_max=out_max: (
                                 out_min
                                 + (out_max - out_min)
                                 * (
@@ -2527,8 +2517,8 @@ def geotag(input_file_name):
                 outputSRS="EPSG:4326",
             )
             break
-        except Exception:
-            pass
+        except Exception as exc:
+            UI.vprint(3, exc)
         tentative += 1
         if tentative == 10:
             print("ERROR: Could not convert texture", out_file_name, "(10 tries)")

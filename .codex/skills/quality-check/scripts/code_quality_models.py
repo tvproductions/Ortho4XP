@@ -4,7 +4,6 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 MODULE_SOFT_LINE_LIMIT = 600
 MODULE_HARD_LINE_LIMIT = 1000
 CLASS_LINE_LIMIT = 300

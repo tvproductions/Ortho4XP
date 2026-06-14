@@ -15,9 +15,9 @@ bytes-per-pixel, payload length, required layer names, and shape compatibility.
 Source paths and DSF envelope checks are handled by adjacent modules.
 """
 
-from dataclasses import dataclass
 import io
 import struct
+from dataclasses import dataclass
 
 from O4_Bathymetry_DSF_Atoms import AtomReadContext, read_atom
 from O4_Bathymetry_Models import (

@@ -31,9 +31,12 @@ Patch_dir = resource_path("Patches")
 Utils_dir = resource_path("Utils")
 Tile_dir = resource_path("Tiles")
 Tmp_dir = resource_path("tmp")
+
+
 def _overlay_dir_name():
     try:
         import O4_Config_Utils as CFG
+
         prefix = getattr(CFG, "package_prefix", "Ortho4XP")
         sep = getattr(CFG, "package_separator", "_")
         mono = getattr(CFG, "monolithic_overlay_name", "Overlays")
@@ -41,27 +44,28 @@ def _overlay_dir_name():
         prefix, sep, mono = "Ortho4XP", "_", "Overlays"
     return prefix + sep + mono
 
+
 Overlay_dir = resource_path(_overlay_dir_name())
 
 
 ##############################################################################
 def short_latlon(lat, lon):
-    strlat = "{:+.0f}".format(lat).zfill(3)
-    strlon = "{:+.0f}".format(lon).zfill(4)
+    strlat = f"{lat:+.0f}".zfill(3)
+    strlon = f"{lon:+.0f}".zfill(4)
     return strlat + strlon
 
 
 def round_latlon(lat, lon):
-    strlatround = "{:+.0f}".format(floor(lat / 10) * 10).zfill(3)
-    strlonround = "{:+.0f}".format(floor(lon / 10) * 10).zfill(4)
+    strlatround = f"{floor(lat / 10) * 10:+.0f}".zfill(3)
+    strlonround = f"{floor(lon / 10) * 10:+.0f}".zfill(4)
     return strlatround + strlonround
 
 
 def long_latlon(lat, lon):
-    strlat = "{:+.0f}".format(lat).zfill(3)
-    strlon = "{:+.0f}".format(lon).zfill(4)
-    strlatround = "{:+.0f}".format(floor(lat / 10) * 10).zfill(3)
-    strlonround = "{:+.0f}".format(floor(lon / 10) * 10).zfill(4)
+    strlat = f"{lat:+.0f}".zfill(3)
+    strlon = f"{lon:+.0f}".zfill(4)
+    strlatround = f"{floor(lat / 10) * 10:+.0f}".zfill(3)
+    strlonround = f"{floor(lon / 10) * 10:+.0f}".zfill(4)
     return os.path.join(strlatround + strlonround, strlat + strlon)
 
 
@@ -70,9 +74,9 @@ def hem_latlon(lat, lon):
     greenwichside = "E" if lon >= 0 else "W"
     return (
         hemisphere
-        + "{:.0f}".format(abs(lat)).zfill(2)
+        + f"{abs(lat):.0f}".zfill(2)
         + greenwichside
-        + "{:.0f}".format(abs(lon)).zfill(3)
+        + f"{abs(lon):.0f}".zfill(3)
     )
 
 
@@ -80,6 +84,7 @@ def hem_latlon(lat, lon):
 def _naming_config():
     try:
         import O4_Config_Utils as CFG
+
         prefix = getattr(CFG, "package_prefix", "Ortho4XP")
         sep = getattr(CFG, "package_separator", "_")
         mesh_token = getattr(CFG, "mesh_purpose_token", "Mesh")
@@ -88,7 +93,12 @@ def _naming_config():
         per_tile = getattr(CFG, "per_tile_overlays", False)
     except Exception:
         prefix, sep, mesh_token, overlay_token, mono_name, per_tile = (
-            "Ortho4XP", "_", "Mesh", "Overlay", "Overlays", False
+            "Ortho4XP",
+            "_",
+            "Mesh",
+            "Overlay",
+            "Overlays",
+            False,
         )
     return prefix, sep, mesh_token, overlay_token, mono_name, per_tile
 

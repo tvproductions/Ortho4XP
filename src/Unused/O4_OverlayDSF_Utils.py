@@ -1,13 +1,17 @@
 import os
+
 from shapely import geometry
-import O4_UI_Utils as UI
+
 import O4_OSM_Utils as OSM
+import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
 
 
 def write_text_dsf(
-    lat, lon, dsf_txt_filename, dico_overlay, shift_latlon=True, exclusions=[]
+    lat, lon, dsf_txt_filename, dico_overlay, shift_latlon=True, exclusions=None
 ):
+    if exclusions is None:
+        exclusions = []
     if not os.path.isdir(os.path.dirname(dsf_txt_filename)):
         try:
             os.makedirs(os.path.dirname(dsf_txt_filename))
@@ -18,7 +22,7 @@ def write_text_dsf(
             )
             return 0
     try:
-        f = open(dsf_txt_filename, "w")
+        f = open(dsf_txt_filename, "w")  # noqa: SIM115
     except OSError:
         UI.exit_message_and_bottom_line(
             "   ERROR: could not open file", dsf_txt_filename, "for writing."
@@ -45,21 +49,18 @@ def write_text_dsf(
             + "\n"
         )
     for key in sorted(
-        [x for x in dico_overlay.keys() if dico_overlay[x]["type"] == "polygon"]
+        [x for x in dico_overlay if dico_overlay[x]["type"] == "polygon"]
     ):
         f.write("POLYGON_DEF " + dico_overlay[key]["def"] + "\n")
     for key in sorted(
-        [x for x in dico_overlay.keys() if dico_overlay[x]["type"] == "linestring"]
+        [x for x in dico_overlay if dico_overlay[x]["type"] == "linestring"]
     ):
         f.write("POLYGON_DEF " + dico_overlay[key]["def"] + "\n")
-    for key in sorted(
-        [x for x in dico_overlay.keys() if dico_overlay[x]["type"] == "point"]
-    ):
+    for key in sorted([x for x in dico_overlay if dico_overlay[x]["type"] == "point"]):
         f.write("OBJECT_DEF " + dico_overlay[key]["def"] + "\n")
     polyidx = 0
-    objectidx = 0
     for key in sorted(
-        [x for x in dico_overlay.keys() if dico_overlay[x]["type"] == "polygon"]
+        [x for x in dico_overlay if dico_overlay[x]["type"] == "polygon"]
     ):
         is_facade = ".fac" in dico_overlay[key]["def"]
         for j in range(len(dico_overlay[key]["geoms"])):
@@ -77,19 +78,13 @@ def write_text_dsf(
                 if shift_latlon:
                     f.write(
                         "POLYGON_POINT "
-                        + "{:7f}".format(x + lon)
+                        + f"{x + lon:7f}"
                         + " "
-                        + "{:7f}".format(y + lat)
+                        + f"{y + lat:7f}"
                         + "\n"
                     )
                 else:
-                    f.write(
-                        "POLYGON_POINT "
-                        + "{:7f}".format(x)
-                        + " "
-                        + "{:7f}".format(y)
-                        + "\n"
-                    )
+                    f.write("POLYGON_POINT " + f"{x:7f}" + " " + f"{y:7f}" + "\n")
             f.write("END_WINDING\n")
             if not is_facade:
                 for wind in pol.interiors:
@@ -99,18 +94,14 @@ def write_text_dsf(
                         if shift_latlon:
                             f.write(
                                 "POLYGON_POINT "
-                                + "{:7f}".format(x + lon)
+                                + f"{x + lon:7f}"
                                 + " "
-                                + "{:7f}".format(y + lat)
+                                + f"{y + lat:7f}"
                                 + "\n"
                             )
                         else:
                             f.write(
-                                "POLYGON_POINT "
-                                + "{:7f}".format(x)
-                                + " "
-                                + "{:7f}".format(y)
-                                + "\n"
+                                "POLYGON_POINT " + f"{x:7f}" + " " + f"{y:7f}" + "\n"
                             )
                     f.write("END_WINDING\n")
             f.write("END_POLYGON\n")
@@ -118,7 +109,7 @@ def write_text_dsf(
                 print("Alert ! Too much holes :", windings)
         polyidx += 1
     for key in sorted(
-        [x for x in dico_overlay.keys() if dico_overlay[x]["type"] == "linestring"]
+        [x for x in dico_overlay if dico_overlay[x]["type"] == "linestring"]
     ):
         for linestring in dico_overlay[key]["geoms"]:
             f.write(
@@ -133,24 +124,18 @@ def write_text_dsf(
                 if shift_latlon:
                     f.write(
                         "POLYGON_POINT "
-                        + "{:7f}".format(x + lon)
+                        + f"{x + lon:7f}"
                         + " "
-                        + "{:7f}".format(y + lat)
+                        + f"{y + lat:7f}"
                         + "\n"
                     )
                 else:
-                    f.write(
-                        "POLYGON_POINT "
-                        + "{:7f}".format(x)
-                        + " "
-                        + "{:7f}".format(y)
-                        + "\n"
-                    )
+                    f.write("POLYGON_POINT " + f"{x:7f}" + " " + f"{y:7f}" + "\n")
             f.write("END_WINDING\n")
             f.write("END_POLYGON\n")
         polyidx += 1
-    for key in sorted(
-        [x for x in dico_overlay.keys() if dico_overlay[x]["type"] == "point"]
+    for objectidx, key in enumerate(
+        sorted([x for x in dico_overlay if dico_overlay[x]["type"] == "point"])
     ):
         print("Key : ", key)
         for j in range(len(dico_overlay[key]["geoms"])):
@@ -160,18 +145,13 @@ def write_text_dsf(
             f.write("OBJECT " + str(objectidx) + " ")
             if shift_latlon:
                 f.write(
-                    "{:7f}".format(point.coords[0][0] + lon)
+                    f"{point.coords[0][0] + lon:7f}"
                     + " "
-                    + "{:7f}".format(point.coords[0][1] + lat)
+                    + f"{point.coords[0][1] + lat:7f}"
                 )
             else:
-                f.write(
-                    "{:7f}".format(point.coords[0][0])
-                    + " "
-                    + "{:7f}".format(point.coords[0][1])
-                )
+                f.write(f"{point.coords[0][0]:7f}" + " " + f"{point.coords[0][1]:7f}")
             f.write(" " + str(rot) + "\n")
-        objectidx += 1
     f.close()
     return 1
 
@@ -184,7 +164,7 @@ def build_road_exclusion(lat, lon, road_level):
         return 1
     UI.vprint(0, "Building roads multipolygon")
     tags_of_interest = ["bridge", "tunnel"]
-    tags_for_exclusion = set(["tunnel"])
+    tags_for_exclusion = {"tunnel"}
     road_layer = OSM.OSM_layer()
     queries = [
         'way["highway"="motorway"]',

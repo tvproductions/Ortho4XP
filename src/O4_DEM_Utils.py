@@ -1,17 +1,18 @@
-import os
-import io
-import time
-import requests
-import zipfile
-import itertools
-from math import sqrt
 import array
-import numpy
+import io
+import itertools
+import os
+import time
+import zipfile
+from math import sqrt
 
+import numpy
+import requests
 from osgeo import gdal
 from PIL import Image
-import O4_UI_Utils as UI
+
 import O4_File_Names as FNAMES
+import O4_UI_Utils as UI
 
 gdal.UseExceptions()
 
@@ -48,13 +49,14 @@ class DEM:
             return
         if fill_nodata == "to zero":
             self.nodata_to_zero()
-        elif fill_nodata:
-            if not fill_nodata_values_with_nearest_neighbor(self.alt_dem, self.nodata):
-                UI.vprint(
-                    1,
-                    "   INFO: Dataset contains too much no_data to be filled.",
-                )
-                self.nodata_to_zero()
+        elif fill_nodata and not fill_nodata_values_with_nearest_neighbor(
+            self.alt_dem, self.nodata
+        ):
+            UI.vprint(
+                1,
+                "   INFO: Dataset contains too much no_data to be filled.",
+            )
+            self.nodata_to_zero()
 
         UI.vprint(
             1,
@@ -146,7 +148,7 @@ class DEM:
             ) = read_elevation_from_file(file_name, self.lat, self.lon, info_only)
         if not local_sources:
             return
-        self.subdems = tuple()
+        self.subdems = ()
         for local_source in local_sources:
             self.subdems += (DEM(self.lat, self.lon, local_source, False, info_only),)
             self.subdems[-1].alt = self.subdems[-1].alt_strict  # ty:ignore[invalid-assignment]
@@ -277,19 +279,25 @@ class DEM:
         Nminusny = Ny - py.astype(numpy.uint16)
         rx = px - nx
         ry = py + Nminusny - Ny
-        t1 = [self.alt_dem[i][j] for i, j in zip(Nminusny, nx)]
+        t1 = [self.alt_dem[i][j] for i, j in zip(Nminusny, nx, strict=False)]
         t2 = [
             self.alt_dem[i][j]
             for i, j in zip(
                 (Nminusny - 1) * (Nminusny >= 1),
                 (nx + 1) * (nx < Nx) + Nx * (nx == Nx),
+                strict=False,
             )
         ]
         t3 = [
             self.alt_dem[i][j]
-            for i, j in zip(Nminusny, (nx + 1) * (nx < Nx) + Nx * (nx == Nx))
+            for i, j in zip(
+                Nminusny, (nx + 1) * (nx < Nx) + Nx * (nx == Nx), strict=False
+            )
         ]
-        t4 = [self.alt_dem[i][j] for i, j in zip((Nminusny - 1) * (Nminusny >= 1), nx)]
+        t4 = [
+            self.alt_dem[i][j]
+            for i, j in zip((Nminusny - 1) * (Nminusny >= 1), nx, strict=False)
+        ]
         return ((1 - rx) * t1 + ry * t2 + (rx - ry) * t3) * (rx >= ry) + (
             (1 - ry) * t1 + rx * t2 + (ry - rx) * t4
         ) * (rx < ry)
@@ -306,7 +314,7 @@ class DEM:
         return numpy.array(
             [
                 self.alt_dem[i][j] if k else self.nodata
-                for i, j, k in zip(Nminusny, nx, mask)
+                for i, j, k in zip(Nminusny, nx, mask, strict=False)
             ]
         )
 
@@ -348,7 +356,7 @@ def build_combined_raster(source, lat, lon, info_only):
     for lat0, lon0 in itertools.product(
         (lat, lat - 1, lat + 1), (lon, lon - 1, lon + 1)
     ):
-        verbose = True if (lat0 == lat and lon0 == lon) else False
+        verbose = bool(lat0 == lat and lon0 == lon)
         x = (180 + lon0) % 360
         y = 89 - lat0
         if not world_tiles[y, x]:
@@ -440,10 +448,9 @@ def read_elevation_from_file(file_name, lat, lon, info_only=False, base_if_error
     elif file_name[-4:].lower() == ".raw":
         try:
             nxdem = nydem = int(round(sqrt(os.path.getsize(file_name) / 2)))
-            f = open(file_name, "rb")
             alt = array.array("h")
-            alt.fromfile(f, nxdem * nydem)
-            f.close()
+            with open(file_name, "rb") as f:
+                alt.fromfile(f, nxdem * nydem)
             if not info_only:
                 alt_dem = numpy.asarray(alt, dtype=numpy.float32).reshape(
                     (nxdem, nydem)

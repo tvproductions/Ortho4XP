@@ -13,8 +13,8 @@ def add_to_index(iterable, bounds_of_items, rtree_idx, dico_idx):
 
 ########################################################################
 def aggregate_elems(rtree_idx, dico_idx):
-    dico_groups = {}
-    dico_tmp = {}
+    dico_groups: dict[int, set[int]] = {}
+    dico_tmp: dict[int, int] = {}
     for id_pol in range(len(dico_idx)):
         if id_pol % 100 == 0:
             print(id_pol)
@@ -38,7 +38,7 @@ def aggregate_elems(rtree_idx, dico_idx):
             dico_groups[min_id] = tmp
         else:
             dico_tmp[id_pol] = id_pol
-            dico_groups[id_pol] = set([id_pol])
+            dico_groups[id_pol] = {id_pol}
     return dico_groups
 
 

@@ -72,8 +72,10 @@ def raster_source(
     *,
     primary: Path | str,
     alternate: Path | str = "",
-    run_external_tool=mock.Mock(),
+    run_external_tool=None,
 ) -> GlobalSceneryRasterSource:
+    if run_external_tool is None:
+        run_external_tool = mock.Mock()
     return GlobalSceneryRasterSource(
         lat=12,
         lon=-123,

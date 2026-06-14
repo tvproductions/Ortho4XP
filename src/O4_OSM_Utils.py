@@ -1,14 +1,16 @@
-import os
-import time
-import io
 import bz2
-import random
-import requests
+import io
+import os
+import secrets
+import time
+
 import numpy
+import requests
 from shapely import geometry, ops
 from shapely.errors import GEOSException
-import O4_UI_Utils as UI
+
 import O4_File_Names as FNAMES
+import O4_UI_Utils as UI
 from O4_Version import version as O4XP_VERSION
 
 # Default overpass_server_choice if not in config
@@ -20,7 +22,7 @@ def _load_overpass_servers() -> dict:
     """Create dictionary from overpass_servers.txt."""
     servers = {}
     try:
-        with open(FNAMES.resource_path("overpass_servers.txt"), "r") as f:
+        with open(FNAMES.resource_path("overpass_servers.txt")) as f:
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -80,9 +82,9 @@ class OSM_layer:
             osm_file_name = osm_input
             try:
                 if osm_file_name[-4:] == ".bz2":
-                    pfile = bz2.open(osm_file_name, "rt", encoding="utf-8")
+                    pfile = bz2.open(osm_file_name, "rt", encoding="utf-8")  # noqa: SIM115
                 else:
-                    pfile = open(osm_file_name, "r", encoding="utf-8")
+                    pfile = open(osm_file_name, encoding="utf-8")  # noqa: SIM115
             except OSError as exc:
                 UI.vprint(
                     1,
@@ -300,9 +302,9 @@ class OSM_layer:
     def write_to_file(self, filename):
         try:
             if filename[-4:] == ".bz2":
-                fout = bz2.open(filename, "wt", encoding="utf-8")
+                fout = bz2.open(filename, "wt", encoding="utf-8")  # noqa: SIM115
             else:
-                fout = open(filename, "w", encoding="utf-8")
+                fout = open(filename, "w", encoding="utf-8")  # noqa: SIM115
         except OSError as exc:
             UI.vprint(1, "    Could not open", filename, "for writing.")
             UI.vprint(3, exc)
@@ -317,9 +319,9 @@ class OSM_layer:
                     '  <node id="'
                     + str(nodeid)
                     + '" lat="'
-                    + "{:.7f}".format(latp)
+                    + f"{latp:.7f}"
                     + '" lon="'
-                    + "{:.7f}".format(lonp)
+                    + f"{lonp:.7f}"
                     + '" version="1"/>\n'
                 )
         else:
@@ -329,9 +331,9 @@ class OSM_layer:
                         '  <node id="'
                         + str(nodeid)
                         + '" lat="'
-                        + "{:.7f}".format(latp)
+                        + f"{latp:.7f}"
                         + '" lon="'
-                        + "{:.7f}".format(lonp)
+                        + f"{lonp:.7f}"
                         + '" version="1"/>\n'
                     )
                 else:
@@ -339,9 +341,9 @@ class OSM_layer:
                         '  <node id="'
                         + str(nodeid)
                         + '" lat="'
-                        + "{:.7f}".format(latp)
+                        + f"{latp:.7f}"
                         + '" lon="'
-                        + "{:.7f}".format(lonp)
+                        + f"{lonp:.7f}"
                         + '" version="1">\n'
                     )
                     for tag in self.dicosmtags["n"][nodeid]:
@@ -359,9 +361,7 @@ class OSM_layer:
             fout.write('  <way id="' + str(wayid) + '" version="1">\n')
             for nodeid in self.dicosmw[wayid]:
                 fout.write('    <nd ref="' + str(nodeid) + '"/>\n')
-            for tag in (
-                self.dicosmtags["w"][wayid] if wayid in self.dicosmtags["w"] else []
-            ):
+            for tag in self.dicosmtags["w"].get(wayid, []):
                 fout.write(
                     '    <tag k="'
                     + tag
@@ -382,9 +382,7 @@ class OSM_layer:
                 fout.write(
                     '    <member type="way" ref="' + str(wayid) + '" role="inner"/>\n'
                 )
-            for tag in (
-                self.dicosmtags["r"][relid] if relid in self.dicosmtags["r"] else []
-            ):
+            for tag in self.dicosmtags["r"].get(relid, []):
                 fout.write(
                     '    <tag k="'
                     + tag
@@ -403,11 +401,13 @@ def OSM_queries_to_OSM_layer(
     osm_layer,
     lat,
     lon,
-    tags_of_interest=[],
+    tags_of_interest=None,
     cached_suffix="",
 ):
     # this one is a bit complicated by a few checks of existing cached data
     # which had different filenames is versions prior to 1.30
+    if tags_of_interest is None:
+        tags_of_interest = []
     target_tags = {"n": [], "w": [], "r": []}
     input_tags = {"n": [], "w": [], "r": []}
     for query in queries:
@@ -470,10 +470,12 @@ def OSM_query_to_OSM_layer(
     query,
     bbox,
     osm_layer,
-    tags_of_interest=[],
+    tags_of_interest=None,
     cached_file_name="",
 ):
     # this one is simpler and does not depend on the notion of tile
+    if tags_of_interest is None:
+        tags_of_interest = []
     target_tags = {"n": [], "w": [], "r": []}
     input_tags = {"n": [], "w": [], "r": []}
     for tag in [query] if isinstance(query, str) else query:
@@ -536,7 +538,7 @@ def get_overpass_data(query: str, bbox: tuple) -> bytes:
             else:
                 last_used = getattr(get_overpass_data, "last_key", None)
                 other_keys = [k for k in server_keys if k != last_used]
-                current_key = random.choice(other_keys if other_keys else server_keys)
+                current_key = secrets.choice(other_keys if other_keys else server_keys)
         elif overpass_server_choice in server_keys:
             current_key = overpass_server_choice
         else:
@@ -600,7 +602,9 @@ def get_overpass_data(query: str, bbox: tuple) -> bytes:
     return 0  # ty:ignore[invalid-return-type]
 
 
-def OSM_to_MultiLineString(osm_layer, lat, lon, tags_for_exclusion=set(), filter=None):
+def OSM_to_MultiLineString(osm_layer, lat, lon, tags_for_exclusion=None, filter=None):
+    if tags_for_exclusion is None:
+        tags_for_exclusion = set()
     multiline = []
     multiline_reject = []
     todo = len(osm_layer.dicosmfirst["w"])

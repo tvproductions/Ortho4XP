@@ -1,8 +1,7 @@
 import json
 import os
 import re
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime, timezone
 
 LEGACY_Z_PATTERN = re.compile(r"^zOrtho4XP_([+-]\d+)([+-]\d+)$")
 
@@ -51,7 +50,7 @@ def upgrade_package(package_dir, dry_run=True):
         "generation": {
             "tool": "Ortho4XP",
             "tool_version": "1.0.0",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         },
         "tile": {"lat": lat, "lon": lon},
     }

@@ -117,8 +117,8 @@ def _build_tile_plan(
     tile_plan: MODELS.BuildTilePlan, ctx: BC.BuildContext
 ) -> MODELS.BuildTileResult:
     tile = CFG.Tile(tile_plan.lat, tile_plan.lon, tile_plan.custom_build_dir)
-    setattr(tile, "default_website", tile_plan.provider)
-    setattr(tile, "default_zl", tile_plan.zoom_level)
+    tile.default_website = tile_plan.provider
+    tile.default_zl = tile_plan.zoom_level
     tile.custom_build_dir = tile_plan.custom_build_dir
     tile.dem = None
     if tile_plan.override_tile_config:

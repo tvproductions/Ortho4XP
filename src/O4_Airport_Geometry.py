@@ -1,14 +1,16 @@
 import pickle
-from math import floor, ceil
+from math import ceil, floor
+
 import numpy
-from shapely import geometry, affinity, ops
-from shapely.errors import GEOSException
 from PIL import Image, ImageDraw
-import O4_UI_Utils as UI
-import O4_Vector_Utils as VECT
-import O4_Geo_Utils as GEO
+from shapely import affinity, geometry, ops
+from shapely.errors import GEOSException
+
 import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
+import O4_Geo_Utils as GEO
+import O4_UI_Utils as UI
+import O4_Vector_Utils as VECT
 
 
 def build_hangar_areas(tile, airport_layer, dico_airports):

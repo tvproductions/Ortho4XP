@@ -8,7 +8,7 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
-from O4_Scenery_Manager import SceneryManager, SceneryError
+from O4_Scenery_Manager import SceneryError, SceneryManager
 
 
 class TestPackageDetection(unittest.TestCase):
@@ -18,14 +18,20 @@ class TestPackageDetection(unittest.TestCase):
         self.cs_dir = os.path.join(self._temp.name, "Custom Scenery")
         os.makedirs(self.cs_dir)
 
-    def _make_package(self, name: str, with_json: bool = True, json_data: dict | None = None) -> str:
+    def _make_package(
+        self, name: str, with_json: bool = True, json_data: dict | None = None
+    ) -> str:
         pkg_dir = os.path.join(self.cs_dir, name)
         os.makedirs(os.path.join(pkg_dir, "Earth nav data"))
         if with_json:
             data = json_data or {
                 "name": name,
                 "type": "mesh",
-                "generation": {"tool": "Ortho4XP", "tool_version": "1.0.0", "timestamp": "2026-06-13T00:00:00Z"},
+                "generation": {
+                    "tool": "Ortho4XP",
+                    "tool_version": "1.0.0",
+                    "timestamp": "2026-06-13T00:00:00Z",
+                },
                 "compatibility": {"min_xplane_version": "12.0.0"},
             }
             with open(os.path.join(pkg_dir, "package.json"), "w") as f:
@@ -101,11 +107,14 @@ class TestSymlinkOperations(unittest.TestCase):
         os.makedirs(self.build_dir)
 
     def _make_tile_dir(self, lat, lon):
-        tile_name = "Ortho4XP_Mesh_{:+03d}{:+04d}".format(lat, lon)
+        tile_name = f"Ortho4XP_Mesh_{lat:+03d}{lon:+04d}"
         path = os.path.join(self.build_dir, tile_name)
         os.makedirs(os.path.join(path, "Earth nav data"))
         with open(os.path.join(path, "package.json"), "w") as f:
-            json.dump({"name": tile_name, "type": "mesh", "generation": {"tool": "Ortho4XP"}}, f)
+            json.dump(
+                {"name": tile_name, "type": "mesh", "generation": {"tool": "Ortho4XP"}},
+                f,
+            )
         return path
 
     def _ini_path(self):
@@ -211,10 +220,12 @@ class TestReorder(unittest.TestCase):
             return [line.strip() for line in f if "SCENERY_PACK" in line]
 
     def test_reorder_moves_overlays_above_meshes(self):
-        ini_path = self._make_ini([
-            "Ortho4XP_Mesh_+43-079",
-            "Ortho4XP_Overlays",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Ortho4XP_Mesh_+43-079",
+                "Ortho4XP_Overlays",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         mgr.reorder()
@@ -224,12 +235,14 @@ class TestReorder(unittest.TestCase):
         self.assertLess(overlay_idx, mesh_idx)
 
     def test_reorder_preserves_non_ortho4xp(self):
-        ini_path = self._make_ini([
-            "Global Airports",
-            "Ortho4XP_Mesh_+44-080",
-            "Ortho4XP_Mesh_+43-079",
-            "simHeaven_X-World",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Global Airports",
+                "Ortho4XP_Mesh_+44-080",
+                "Ortho4XP_Mesh_+43-079",
+                "simHeaven_X-World",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         mgr.reorder()
@@ -238,10 +251,12 @@ class TestReorder(unittest.TestCase):
         self.assertIn("simHeaven_X-World", lines[-1])
 
     def test_reorder_sorts_mesh_entries(self):
-        ini_path = self._make_ini([
-            "Ortho4XP_Mesh_+44-080",
-            "Ortho4XP_Mesh_+43-079",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Ortho4XP_Mesh_+44-080",
+                "Ortho4XP_Mesh_+43-079",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         mgr.reorder()
@@ -250,10 +265,12 @@ class TestReorder(unittest.TestCase):
         self.assertIn("+44-080", lines[1])
 
     def test_reorder_no_ortho4xp_does_nothing(self):
-        ini_path = self._make_ini([
-            "Global Airports",
-            "simHeaven_X-World",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Global Airports",
+                "simHeaven_X-World",
+            ]
+        )
         original = list(self._content(ini_path))
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
@@ -261,12 +278,14 @@ class TestReorder(unittest.TestCase):
         self.assertEqual(self._content(ini_path), original)
 
     def test_reorder_preserves_interleaved_non_ortho4xp(self):
-        ini_path = self._make_ini([
-            "Global Airports",
-            "Ortho4XP_Mesh_+44-080",
-            "simHeaven_X-World",
-            "Ortho4XP_Mesh_+43-079",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Global Airports",
+                "Ortho4XP_Mesh_+44-080",
+                "simHeaven_X-World",
+                "Ortho4XP_Mesh_+43-079",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         mgr.reorder()
@@ -290,12 +309,14 @@ class TestReorder(unittest.TestCase):
         self.assertIn("Ortho4XP_Mesh_+43-079", content)
 
     def test_reorder_multiple_overlays_and_meshes(self):
-        ini_path = self._make_ini([
-            "Ortho4XP_Mesh_+45-081",
-            "Ortho4XP_Overlay_+44-080",
-            "Ortho4XP_Overlays",
-            "Ortho4XP_Mesh_+43-079",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Ortho4XP_Mesh_+45-081",
+                "Ortho4XP_Overlay_+44-080",
+                "Ortho4XP_Overlays",
+                "Ortho4XP_Mesh_+43-079",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         mgr.reorder()
@@ -304,7 +325,9 @@ class TestReorder(unittest.TestCase):
         meshes = [l for l in lines if "Mesh" in l]
         self.assertEqual(len(overlays), 2)
         self.assertEqual(len(meshes), 2)
-        overlay_indices = [i for i, l in enumerate(lines) if "Overlay" in l or "Overlays" in l]
+        overlay_indices = [
+            i for i, l in enumerate(lines) if "Overlay" in l or "Overlays" in l
+        ]
         mesh_indices = [i for i, l in enumerate(lines) if "Mesh" in l]
         self.assertLess(max(overlay_indices), min(mesh_indices))
 
@@ -340,10 +363,12 @@ class TestValidate(unittest.TestCase):
     def test_validate_wrong_order_is_warning(self):
         self._make_package_dir("Ortho4XP_Overlays")
         self._make_package_dir("Ortho4XP_Mesh_+43-079")
-        ini_path = self._make_ini([
-            "Ortho4XP_Mesh_+43-079",
-            "Ortho4XP_Overlays",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Ortho4XP_Mesh_+43-079",
+                "Ortho4XP_Overlays",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         issues = mgr.validate()
@@ -365,10 +390,12 @@ class TestValidate(unittest.TestCase):
     def test_validate_clean_returns_no_issues(self):
         self._make_package_dir("Ortho4XP_Overlays")
         self._make_package_dir("Ortho4XP_Mesh_+43-079")
-        ini_path = self._make_ini([
-            "Ortho4XP_Overlays",
-            "Ortho4XP_Mesh_+43-079",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Ortho4XP_Overlays",
+                "Ortho4XP_Mesh_+43-079",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         issues = mgr.validate()
@@ -376,10 +403,12 @@ class TestValidate(unittest.TestCase):
 
     def test_validate_duplicate_entries(self):
         self._make_package_dir("Ortho4XP_Mesh_+43-079")
-        ini_path = self._make_ini([
-            "Ortho4XP_Mesh_+43-079",
-            "Ortho4XP_Mesh_+43-079",
-        ])
+        ini_path = self._make_ini(
+            [
+                "Ortho4XP_Mesh_+43-079",
+                "Ortho4XP_Mesh_+43-079",
+            ]
+        )
         mgr = SceneryManager(custom_scenery_dir=self.cs_dir, ini_path=ini_path)
         mgr.refresh()
         issues = mgr.validate()

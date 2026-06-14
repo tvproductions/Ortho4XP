@@ -13,12 +13,13 @@ provider selection, copy/read behavior, and actionable source-path errors.
 """
 
 import os
-from pathlib import Path
 import shutil
+from contextlib import suppress
+from pathlib import Path
 
+import O4_File_Names as FNAMES
 from O4_Bathymetry_DSF_Bytes import extract_validated_rasters_from_dsf_bytes
 from O4_Bathymetry_Models import BathymetryErrorContext
-import O4_File_Names as FNAMES
 
 
 def extract_validated_global_scenery_rasters(source):
@@ -95,10 +96,8 @@ def _validate_7z_result(result, tmp_path, errors):
 def _remove_temp_dsf_files(tmp_path):
     for suffix in ("", ".7z"):
         candidate = Path(str(tmp_path) + suffix)
-        try:
+        with suppress(OSError):
             candidate.unlink()
-        except OSError:
-            pass
 
 
 def _external_tool_failure_detail(result):

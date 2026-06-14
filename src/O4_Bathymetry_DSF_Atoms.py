@@ -8,9 +8,9 @@ payload parsers all report malformed headers, lengths, and payloads with the
 same tile/source context.
 """
 
-from dataclasses import dataclass
 import io
 import struct
+from dataclasses import dataclass
 
 from O4_Bathymetry_Models import BathymetryErrorContext
 

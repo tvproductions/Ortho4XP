@@ -9,12 +9,12 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
-from tests._imagery_color_normalization_helpers import (
-    ImageryColorNormalizationTestCase,
-)
 import O4_File_Names as FNAMES
 import O4_Imagery_Failures as IFAIL
 import O4_Texture_Color_Normalization as TCN
+from tests._imagery_color_normalization_helpers import (
+    ImageryColorNormalizationTestCase,
+)
 
 
 class IncompleteNeighborColorNormalizationTests(ImageryColorNormalizationTestCase):

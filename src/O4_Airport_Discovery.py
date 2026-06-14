@@ -1,10 +1,11 @@
 import numpy
 from shapely import geometry, ops
 from shapely.errors import GEOSException
+
+import O4_File_Names as FNAMES
+import O4_Geo_Utils as GEO
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
-import O4_Geo_Utils as GEO
-import O4_File_Names as FNAMES
 
 
 def discover_airport_names(airport_layer, dico_airports):
@@ -118,18 +119,15 @@ def discover_airport_names(airport_layer, dico_airports):
                     if osmtype == "w"
                     else ops.unary_union(
                         [
-                            geom
-                            for geom in [
-                                geometry.Polygon(
-                                    numpy.array(
-                                        [
-                                            airport_layer.dicosmn[nodeid]
-                                            for nodeid in nodelist
-                                        ]
-                                    )
+                            geometry.Polygon(
+                                numpy.array(
+                                    [
+                                        airport_layer.dicosmn[nodeid]
+                                        for nodeid in nodelist
+                                    ]
                                 )
-                                for nodelist in airport_layer.dicosmr[osmid]["outer"]
-                            ]
+                            )
+                            for nodelist in airport_layer.dicosmr[osmid]["outer"]
                         ]
                     )
                     if osmtype == "r"
@@ -566,7 +564,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                         break
                 if not runway_parts_are_grouped:
                     break
-        for nodeid_list, width in zip(linear, linear_width):
+        for nodeid_list, width in zip(linear, linear_width, strict=False):
             runway_start = airport_layer.dicosmn[nodeid_list[0]]
             runway_end = airport_layer.dicosmn[nodeid_list[-1]]
             runway_length = GEO.dist(runway_start, runway_end)
@@ -584,8 +582,7 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                 VECT.buffer_simple_way(numpy.vstack((runway_start, runway_end)), width)
             )
             keep_this = True
-            i = 0
-            for pol2 in runways_as_area:
+            for i, pol2 in enumerate(runways_as_area):
                 if (pol2[0].intersection(pol)).area > 0.6 * min(pol.area, pol2[0].area):
                     runways_as_area[i] = (
                         pol2[0],
@@ -595,7 +592,6 @@ def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
                     )
                     keep_this = False
                     break
-                i += 1
             if keep_this:
                 runways_as_line.append((pol, runway_start, runway_end, width))
         runway_area = VECT.ensure_MultiPolygon(
@@ -644,7 +640,7 @@ def list_airports_and_runways(dico_airports):
             UI.vprint(
                 1,
                 "  ",
-                "{:6s}".format(airport),
+                f"{airport:6s}",
                 "{:60s}".format(dico_airports[airport]["name"]),
                 runway_str,
                 "lat=",

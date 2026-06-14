@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal
 
-
 # Texture model policy:
 # - Data classes stay backend-neutral so CPU and GPU encoders share contracts.
 # - Conversion results preserve legacy truthy behavior at the facade boundary.

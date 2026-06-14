@@ -6,14 +6,13 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[4]
 CEREMONY_TRAILER = "Sync: git-sync"
 
 
 def git(args: list[str], *, check: bool = False) -> tuple[int, str, str]:
-    proc = subprocess.run(
-        ["git", *args],
+    proc = subprocess.run(  # noqa: S603
+        ["git", *args],  # noqa: S607
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -28,7 +27,7 @@ def git(args: list[str], *, check: bool = False) -> tuple[int, str, str]:
 
 def run(args: list[str]) -> None:
     print("+ " + " ".join(args))
-    subprocess.run(args, cwd=ROOT, check=True, text=True)
+    subprocess.run(args, cwd=ROOT, check=True, text=True)  # noqa: S603
 
 
 def current_branch() -> tuple[str | None, str | None]:

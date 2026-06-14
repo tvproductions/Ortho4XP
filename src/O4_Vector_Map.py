@@ -1,21 +1,23 @@
 import os
 import time
-from math import pi, sin, cos, sqrt, atan, exp
+from math import atan, cos, exp, pi, sin, sqrt
+
 import numpy
 from shapely import geometry, ops
 from shapely.errors import GEOSException
 
+import O4_Airport_Discovery as APT_DISC
+import O4_Airport_Encoding as APT_ENC
+import O4_Airport_Geometry as APT_GEOM
+import O4_Build_Context as BC
+
 # from PIL import Image, ImageDraw, ImageFilter
 import O4_DEM_Utils as DEM
-import O4_UI_Utils as UI
-import O4_OSM_Utils as OSM
-import O4_Vector_Utils as VECT
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
-import O4_Airport_Discovery as APT_DISC
-import O4_Airport_Geometry as APT_GEOM
-import O4_Airport_Encoding as APT_ENC
-import O4_Build_Context as BC
+import O4_OSM_Utils as OSM
+import O4_UI_Utils as UI
+import O4_Vector_Utils as VECT
 
 good_imagery_list = ()
 
@@ -110,8 +112,8 @@ def build_poly_file(tile, ctx=None):
     xgrid.add(1)
     ygrid.add(0)
     ygrid.add(1)
-    xgrid = list(sorted(xgrid))
-    ygrid = list(sorted(ygrid))
+    xgrid = sorted(xgrid)
+    ygrid = sorted(ygrid)
     eps = 2**-5
     ortho_network = geometry.MultiLineString(
         [geometry.LineString([(x, 0.0 - eps), (x, 1.0 + eps)]) for x in xgrid]
@@ -232,7 +234,7 @@ def include_roads(vector_map, tile, apt_array, apt_area):
     UI.vprint(0, "-> Dealing with roads")
     tags_of_interest = ["bridge", "tunnel"]
     # Need to evaluate if including bridges is better or worse
-    tags_for_exclusion = set(["bridge", "tunnel"])
+    tags_for_exclusion = {"bridge", "tunnel"}
     # tags_for_exclusion=set(["tunnel"])
     road_layer = OSM.OSM_layer()
     queries = [
@@ -321,7 +323,7 @@ def include_roads(vector_map, tile, apt_array, apt_area):
         if UI.red_flag:
             return 0
     # Hack (23/02/2024 : seems better without actually, keep it just in case)
-    if False and not road_network_flat.is_empty:
+    if False:
         road_network_flat = road_network_flat.difference(road_network_banked)
         road_network_flat = road_network_flat.difference(
             VECT.improved_buffer(apt_area, 15, 0, 0)
@@ -460,9 +462,9 @@ def include_water(vector_map, tile):
                 1,
                 "      * ",
                 "Some large OSM water patch close to lat=",
-                "{:.2f}".format(pt[1] + tile.lon),
+                f"{pt[1] + tile.lon:.2f}",
                 "lon=",
-                "{:.2f}".format(pt[0] + tile.lat),
+                f"{pt[0] + tile.lat:.2f}",
                 "will be masked due to its large area of",
                 area,
                 "km^2.",
@@ -693,7 +695,7 @@ def include_patches(vector_map, tile):
                     except (KeyError, TypeError, ValueError):
                         alpha = 2
                     if "tanh" in rnw_profile:
-                        rnw_profile = lambda x: tanh_profile(alpha, x)
+                        rnw_profile = lambda x, alpha=alpha: tanh_profile(alpha, x)
                     elif rnw_profile == "spline":
                         rnw_profile = spline_profile
                     else:
@@ -786,10 +788,10 @@ def include_patches(vector_map, tile):
         for pfile_name in os.listdir(os.path.join(patch_dir, pdir_name)):
             pfile_namelong = os.path.join(patch_dir, pdir_name, pfile_name)
             try:
-                pfile = open(pfile_namelong, "r")
+                with open(pfile_namelong) as pfile:
+                    firstline = pfile.readline()
             except OSError:
                 continue
-            firstline = pfile.readline()
             if not "ANCHOR" in firstline:
                 UI.vprint(
                     1,
@@ -798,7 +800,6 @@ def include_patches(vector_map, tile):
                     " is missing and ANCHOR in first line, skipping it.",
                 )
                 continue
-            pfile.close()
             try:
                 (lon_anchor, lat_anchor, alt_anchor, heading_anchor) = [
                     float(x) for x in firstline.split()[1:]
@@ -849,8 +850,9 @@ def keep_obj8(
     index = 0
     latscale = GEO.m_to_lat
     lonscale = latscale / cos(lat_anchor * pi / 180)
-    f = open(objfile_name, "r")
-    for line in f.readlines():
+    with open(objfile_name) as f:
+        lines = f.readlines()
+    for line in lines:
         if line[0:2] == "VT":
             (xo, yo, zo) = [float(s) for s in line.split()[1:4]]
             Xo = xo * cos(heading_anchor * pi / 180) - zo * sin(
@@ -879,7 +881,7 @@ def keep_obj8(
                     offset += 1
                 for j in range(count // 3):
                     (a, b, c) = [dico_idx_nodes[x] for x in list[3 * j : 3 * j + 3]]
-                    if a == b or a == c or b == c:
+                    if a in (b, c) or b == c:
                         continue
                     for initp, endp in ((a, b), (b, c), (c, a)):
                         vector_map.insert_edge(
@@ -910,5 +912,4 @@ def keep_obj8(
                 multipol = VECT.ensure_MultiPolygon(ops.unary_union(polist))
             except (TypeError, ValueError, GEOSException) as exc:
                 UI.vprint(3, exc)
-    f.close()
     return multipol

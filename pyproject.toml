@@ -37,57 +37,10 @@ package = false
 
 [tool.ruff]
 target-version = "py313"
+extend-exclude = [".codex/skills/maintenance-qa/vulture.whitelist.py"]
 
 [tool.ruff.lint]
 select = ["E722", "E9", "F63", "F7", "F82", "I", "UP", "B", "SIM", "C4", "S"]
-
-[tool.ruff.lint.per-file-ignores]
-"Ortho4XP.py" = ["B010", "I001"]
-"src/O4_*.py" = ["I001"]
-"src/O4_Imagery_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_GUI_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Config_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Vector_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_DSF_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Mask_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_DEM_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Mesh_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_OSM_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Tile_Utils.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Airport_Discovery.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Airport_Geometry.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Airport_Encoding.py" = ["I", "UP", "B", "SIM", "C4", "S"]
-"src/O4_Bathymetry.py" = ["S101"]
-"src/O4_Bathymetry_Source.py" = ["SIM105"]
-"src/O4_Build_Core.py" = ["B010"]
-"src/O4_CLI_Jobs.py" = ["S101", "SIM102", "UP035"]
-"src/O4_CLI_Run.py" = ["B009", "UP035"]
-"src/O4_Config_Runtime.py" = ["UP015", "UP035"]
-"src/O4_DSF_Header_Bridge.py" = ["SIM105"]
-"src/O4_File_Names.py" = ["UP032"]
-"src/O4_Geo_Utils.py" = ["C408"]
-"src/O4_Overlay_Utils.py" = ["SIM114", "SIM115", "UP015"]
-"src/O4_Package_Metadata.py" = ["UP017"]
-"src/O4_Package_Upgrader.py" = ["UP017"]
-"src/O4_Parallel_Utils.py" = ["B006"]
-"src/O4_Recut_Water.py" = ["S101"]
-"src/O4_Scenery_Manager.py" = ["UP032"]
-"src/O4_Scenery_Utils.py" = ["SIM113", "SIM115", "UP032"]
-"src/O4_Subprocess_Runtime.py" = ["S101", "S603", "UP035"]
-"src/O4_Subprocess_Utils.py" = ["UP035"]
-"src/O4_Texture_Conversion_Scheduler.py" = ["UP035"]
-"src/O4_UI_Utils.py" = ["SIM105", "UP032"]
-"src/O4_Vector_Map.py" = [
-  "B023",
-  "C405",
-  "C413",
-  "SIM109",
-  "SIM115",
-  "SIM223",
-  "UP015",
-  "UP032",
-]
-"src/Unused/**/*.py" = ["I", "UP", "B", "SIM", "C4", "S"]
 
 [tool.ruff.format]
 quote-style = "double"

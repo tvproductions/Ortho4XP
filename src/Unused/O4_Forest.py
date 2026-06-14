@@ -1,14 +1,18 @@
-import os, sys, subprocess, time
-import numpy
+import os
+import sys
+import time
 from math import cos, pi
-import O4_UI_Utils as UI
+
+import numpy
+import O4_Copernicus as COP
+from shapely import geometry, ops
+
+import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
 import O4_OSM_Utils as OSM
+import O4_Subprocess_Utils as SP
+import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
-import O4_DEM_Utils as DEM
-import O4_Copernicus as COP
-
-from shapely import geometry, ops
 
 if "dar" in sys.platform:
     unzip_cmd = os.path.join(FNAMES.Utils_dir, "mac", "7zz")
@@ -130,7 +134,7 @@ def OSM_to_MultiPolygon_dico(osm_layer, lat, lon, dem, classifier, dico):
                 for nodelist in osm_layer.dicosmr[relid]["outer"]
             ]
             # do not check for validity here, let it fail and write a log
-            multiout = ops.cascaded_union([geom for geom in multiout])  # ty:ignore[unresolved-attribute]
+            multiout = ops.cascaded_union(list(multiout))  # ty:ignore[unresolved-attribute]
             multiin = [
                 geometry.Polygon(
                     numpy.round(
@@ -178,8 +182,10 @@ def write_text_dsf(
     dico_polygons,
     dico_polygon_def,
     shift_latlon=True,
-    exclusions=[],
+    exclusions=None,
 ):
+    if exclusions is None:
+        exclusions = []
     if not os.path.isdir(os.path.dirname(dsf_txt_filename)):
         try:
             os.makedirs(os.path.dirname(dsf_txt_filename))
@@ -190,7 +196,7 @@ def write_text_dsf(
             )
             return 0
     try:
-        f = open(dsf_txt_filename, "w")
+        f = open(dsf_txt_filename, "w")  # noqa: SIM115
     except OSError:
         UI.exit_message_and_bottom_line(
             "   ERROR: could not open file", dsf_txt_filename, "for writing."
@@ -231,19 +237,13 @@ def write_text_dsf(
                 if shift_latlon:
                     f.write(
                         "POLYGON_POINT "
-                        + "{:7f}".format(x + lon)
+                        + f"{x + lon:7f}"
                         + " "
-                        + "{:7f}".format(y + lat)
+                        + f"{y + lat:7f}"
                         + "\n"
                     )
                 else:
-                    f.write(
-                        "POLYGON_POINT "
-                        + "{:7f}".format(x)
-                        + " "
-                        + "{:7f}".format(y)
-                        + "\n"
-                    )
+                    f.write("POLYGON_POINT " + f"{x:7f}" + " " + f"{y:7f}" + "\n")
             f.write("END_WINDING\n")
             for wind in pol.interiors:
                 f.write("BEGIN_WINDING\n")
@@ -251,19 +251,13 @@ def write_text_dsf(
                     if shift_latlon:
                         f.write(
                             "POLYGON_POINT "
-                            + "{:7f}".format(x + lon)
+                            + f"{x + lon:7f}"
                             + " "
-                            + "{:7f}".format(y + lat)
+                            + f"{y + lat:7f}"
                             + "\n"
                         )
                     else:
-                        f.write(
-                            "POLYGON_POINT "
-                            + "{:7f}".format(x)
-                            + " "
-                            + "{:7f}".format(y)
-                            + "\n"
-                        )
+                        f.write("POLYGON_POINT " + f"{x:7f}" + " " + f"{y:7f}" + "\n")
                 f.write("END_WINDING\n")
             f.write("END_POLYGON\n")
         i += 1
@@ -282,7 +276,7 @@ def build_road_exclusion(lat, lon, road_level):
         return 1
     UI.vprint(0, "    * Building roads multipolygon")
     tags_of_interest = ["bridge", "tunnel"]
-    tags_for_exclusion = set(["tunnel"])
+    tags_for_exclusion = {"tunnel"}
     road_layer = OSM.OSM_layer()
     queries = [
         'way["highway"="motorway"]',
@@ -411,13 +405,12 @@ def build_forest(lat, lon, target_scenery_dir, exclude_road_level=0):
         os.path.join(dest_dir, FNAMES.short_latlon(lat, lon) + ".txt"),
         os.path.join(dest_dir, FNAMES.short_latlon(lat, lon) + ".dsf"),
     ]
-    fingers_crossed = subprocess.Popen(dsfconvertcmd, stdout=subprocess.PIPE, bufsize=0)
-    while True:
-        line = fingers_crossed.stdout.readline()  # ty:ignore[unresolved-attribute]
-        if not line:
-            break
-        else:
-            print("     " + line.decode("utf-8")[:-1])
+    SP.run_external_command(
+        dsfconvertcmd,
+        tool_name="DSFTool",
+        stream_stdout=True,
+        stdout_handler=lambda line: print("     " + line),
+    )
     UI.timings_and_bottom_line(timer)
     return 1
 

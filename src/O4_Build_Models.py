@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 ALL_STEPS = ("vector", "mesh", "masks", "tile", "overlays")
 DEFAULT_STEPS = ("vector", "mesh", "masks", "tile")
 

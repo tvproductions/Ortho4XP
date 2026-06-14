@@ -4,8 +4,9 @@ This module exists so importing O4_Config_Utils can stay side-effect-free while
 the file I/O and cross-module default assignment remain explicit and testable.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 import O4_UI_Utils as UI
 from O4_Config_Models import UnsupportedWaterTechError
@@ -73,7 +74,7 @@ class GlobalConfigRuntime:
 
     def _load_global_config(self) -> None:
         """Load active assignment lines from the global config file."""
-        with open(self.global_cfg_file, "r") as f:
+        with open(self.global_cfg_file) as f:
             for line in f.readlines():
                 self._load_global_config_line(line)
 

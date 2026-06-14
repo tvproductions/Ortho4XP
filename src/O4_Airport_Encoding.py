@@ -1,11 +1,13 @@
-from math import pi, cos, sin
+from math import cos, pi, sin
+
 import numpy
+from rtree import index
 from shapely import geometry, ops
 from shapely.errors import GEOSException
-from rtree import index
+
+import O4_Geo_Utils as GEO
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
-import O4_Geo_Utils as GEO
 
 runway_chunks = 100
 chunk_min_size = 10
@@ -26,7 +28,7 @@ def encode_runways_taxiways_and_aprons(
         alt_idx = index.Index()
         alt_dico = {}
         id = 0
-        for runway_pol, runway_start, runway_end, runway_width in (
+        for _runway_pol, runway_start, runway_end, runway_width in (
             apt["runway"][1] + apt["runway"][2]
         ):
             center_way = numpy.vstack((runway_start, runway_end))

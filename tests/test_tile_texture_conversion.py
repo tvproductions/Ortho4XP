@@ -1,5 +1,5 @@
-import unittest
 import queue
+import unittest
 from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import mock
@@ -144,16 +144,16 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
             return result
 
         vprint = mock.Mock()
-        with _build_tile_patches(tile, vprint=vprint):
-            with (
-                mock.patch.object(TILE.queue, "Queue", side_effect=queue_factory),
-                mock.patch.object(
-                    TTC.TCS,
-                    "run_texture_conversion_queue",
-                    side_effect=run_scheduler,
-                ),
-            ):
-                self.assertEqual(TILE.build_tile(tile), 1)
+        with (
+            _build_tile_patches(tile, vprint=vprint),
+            mock.patch.object(TILE.queue, "Queue", side_effect=queue_factory),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                side_effect=run_scheduler,
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 1)
 
         convert_queue = queues[1]
         self.assertIs(scheduler_queues[0], convert_queue)
@@ -166,13 +166,15 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
         replace = mock.Mock()
         vprint = mock.Mock()
 
-        with _build_tile_patches(tile, replace=replace, vprint=vprint):
-            with mock.patch.object(
+        with (
+            _build_tile_patches(tile, replace=replace, vprint=vprint),
+            mock.patch.object(
                 TTC.TCS,
                 "run_texture_conversion_queue",
                 side_effect=RuntimeError("scheduler failed"),
-            ):
-                self.assertEqual(TILE.build_tile(tile), 0)
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 0)
 
         replace.assert_not_called()
         vprint.assert_any_call(

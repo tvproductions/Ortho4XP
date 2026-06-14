@@ -1,11 +1,12 @@
-from math import ceil, sqrt, atan2
+from math import atan2, ceil, sqrt
+
 import numpy
-from shapely import geometry, affinity
-from shapely import ops
-from shapely.errors import GEOSException
 from rtree import index
-import O4_UI_Utils as UI
+from shapely import affinity, geometry, ops
+from shapely.errors import GEOSException
+
 import O4_Geo_Utils as GEO
+import O4_UI_Utils as UI
 
 # Some functions further down rely not only on a vector structure but also on a
 # metric (distances of course but more importantly angles and normals).
@@ -174,7 +175,9 @@ class Vector_Map:
                 id_list.append(c_id)
             else:  # parallel encroachment
                 (alpha0, alpha1, beta0, beta1) = coeffs
-                ordered_data = sorted(zip((beta0, beta1, 0, 1), (id0, id1, id2, id3)))
+                ordered_data = sorted(
+                    zip((beta0, beta1, 0, 1), (id0, id1, id2, id3), strict=False)
+                )
                 for i in range(1, 3):
                     if ordered_data[i][0] > 0 and ordered_data[i][0] < 1:
                         # destroy old edge
@@ -213,7 +216,9 @@ class Vector_Map:
         if 1 not in weight_list:
             weight_list.append(1)
             id_list.append(id1)
-        id_list = list(zip(*(sorted(zip(weight_list, id_list)))))[1]
+        id_list = list(
+            zip(*(sorted(zip(weight_list, id_list, strict=False))), strict=False)
+        )[1]
         for i in range(0, len(id_list) - 1):
             if (id_list[i], id_list[i + 1]) in self.dico_edges:
                 edge_id = self.dico_edges[(id_list[i], id_list[i + 1])]
@@ -537,7 +542,7 @@ class Vector_Map:
         # note that Triangle4XP too is writing a(nother) node file, which as
         # more node attributes
         total_nodes = len(self.dico_nodes)
-        f = open(node_file_name, "w")
+        f = open(node_file_name, "w")  # noqa: SIM115
         f.write(str(total_nodes) + " 2 1 0\n")
         for idx in sorted(self.nodes_dico.keys()):
             f.write(
@@ -545,7 +550,7 @@ class Vector_Map:
                 + " "
                 + " ".join(
                     [
-                        "{:.9f}".format(x)
+                        f"{x:.9f}"
                         for x in (
                             self.nodes_dico[idx][0],
                             self.nodes_dico[idx][1],
@@ -558,7 +563,7 @@ class Vector_Map:
         f.close()
 
     def write_poly_file(self, poly_file_name):
-        f = open(poly_file_name, "w")
+        f = open(poly_file_name, "w")  # noqa: SIM115
         f.write("0 2 1 0\n")
         f.write("\n")
         total_edges = len(self.edges_dico)
@@ -579,9 +584,7 @@ class Vector_Map:
         f.write("\n" + str(len(self.holes)) + "\n")
         idx = 1
         for hole in self.holes:
-            f.write(
-                str(idx) + " " + " ".join(["{:.15f}".format(h) for h in hole]) + "\n"
-            )
+            f.write(str(idx) + " " + " ".join([f"{h:.15f}" for h in hole]) + "\n")
             idx += 1
         total_seeds = numpy.sum([len(self.seeds[key]) for key in self.seeds])
         if total_seeds == 0:
@@ -599,7 +602,7 @@ class Vector_Map:
                     f.write(
                         str(idx)
                         + " "
-                        + " ".join(["{:.15f}".format(s) for s in seed])
+                        + " ".join([f"{s:.15f}" for s in seed])
                         + " "
                         + str(marker)
                         + "\n"
@@ -673,7 +676,8 @@ def MultiPolygon_to_Indexed_Polygons(multipol, merge_overlappings=True):
         for pol in (
             merged_pols.geoms if "Multi" in merged_pols.geom_type else [merged_pols]
         ):
-            assert isinstance(pol, geometry.Polygon)
+            if not isinstance(pol, geometry.Polygon):
+                raise TypeError("Expected merged polygon geometry.")
             for subpol in [pol]:  # in split_polygon(merged_pols,10):
                 idx_pol.insert(id_pol, subpol.bounds)
                 dico_pol[id_pol] = subpol
@@ -711,10 +715,7 @@ def MultiPolygon_to_Indexed_Polygons(multipol, merge_overlappings=True):
             UI.logprint("Invalid polygon detected at", list(pol.exterior.coords)[0])
             done += 1
             continue
-        if merge_overlappings:
-            id_pol = merge_pol(pol, id_pol)
-        else:
-            id_pol = add_pol(pol, id_pol)
+        id_pol = merge_pol(pol, id_pol) if merge_overlappings else add_pol(pol, id_pol)
         done += 1
         if done % step == 0:
             UI.progress_bar(1, int(100 * done / todo))
@@ -771,7 +772,7 @@ def ensure_MultiPolygon(input_geometry):
         return geometry.MultiPolygon([input_geometry])
     elif "Collection" in input_geometry.geom_type:
         return geometry.MultiPolygon(
-            (pol for pol in input_geometry.geoms if pol.geom_type == "Polygon")
+            pol for pol in input_geometry.geoms if pol.geom_type == "Polygon"
         )
     else:
         return geometry.MultiPolygon()
@@ -817,7 +818,7 @@ def indexed_difference(idx_pol1, dico_pol1, idx_pol2, dico_pol2):
     idx_out = index.Index()
     dico_out = {}
     idnew = 0
-    for polid1, pol1 in dico_pol1.items():
+    for _polid1, pol1 in dico_pol1.items():
         for polid2 in idx_pol2.intersection(pol1.bounds):
             if pol1.intersects(dico_pol2[polid2]):
                 pol1 = pol1.difference(dico_pol2[polid2])
@@ -1327,10 +1328,7 @@ def point_in_polygon(point, polygon):
         else:
             winding_nbr += -2
     total_winding_nbr += winding_nbr / 4
-    if total_winding_nbr == 0:
-        return False
-    else:
-        return True
+    return total_winding_nbr != 0
 
 
 ################################################################################

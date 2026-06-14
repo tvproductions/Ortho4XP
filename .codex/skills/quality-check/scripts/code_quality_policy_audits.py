@@ -10,7 +10,6 @@ from code_quality_models import (
     scan_python_files,
 )
 
-
 FORBIDDEN_TYPE_IGNORE = re.compile(r"#\s*type:\s*ignore\[")
 FORBIDDEN_TEST_TIER_DIRS = ("integration", "e2e", "slow", "bdd")
 FORBIDDEN_TEST_TIER_FLAGS = ("--integration", "--e2e", "--slow", "--bdd-only")

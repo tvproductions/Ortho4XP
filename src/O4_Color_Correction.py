@@ -7,7 +7,6 @@ from PIL import Image
 
 from O4_Srgb_Color import linear_to_srgb_array, srgb_to_linear_array
 
-
 MIN_EXPOSURE_SCALE = 0.85
 MAX_EXPOSURE_SCALE = 1.18
 MIN_CHANNEL_SCALE = 0.88

@@ -1,8 +1,9 @@
+import json
 import os
 import sys
 import time
-import json
 import traceback as traceback_module
+from contextlib import suppress
 from datetime import UTC, datetime
 from typing import Any
 
@@ -53,10 +54,8 @@ def log_path() -> str:
 def log_event(message: str, *args, **options: Any) -> None:
     if not log:
         return
-    try:
+    with suppress(OSError):
         _write_event(_event_payload(message, args, options))
-    except OSError:
-        pass
 
 
 ################################################################################
@@ -202,7 +201,7 @@ def _json_mapping(value):
 def human_print(num, suffix=""):
     for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
         if abs(num) < 1024.0:
-            return "{:.1f}{}{}".format(num, unit, suffix)
+            return f"{num:.1f}{unit}{suffix}"
         num /= 1024.0
     return "{:.1f}{}{}".format(num, "Y", suffix)
 
@@ -218,6 +217,6 @@ def nicer_timer(elapsed):
     if hours or minutes:
         elapsed -= 60 * minutes
         out_string += str(int(minutes)) + "m"
-    elapsed = "{:.2f}".format(elapsed) if not out_string else int(elapsed)
+    elapsed = f"{elapsed:.2f}" if not out_string else int(elapsed)
     out_string += str(elapsed) + "sec"
     return out_string

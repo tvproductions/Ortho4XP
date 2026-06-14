@@ -1,7 +1,6 @@
 import json
 import os
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime, timezone
 
 PACKAGE_SCHEMA_VERSION = "1"
 SUPPORTED_TYPES = {"mesh", "overlay", "library"}
@@ -26,12 +25,13 @@ def write_package_metadata(build_dir, tile, package_type="mesh"):
         "generation": {
             "tool": "Ortho4XP",
             "tool_version": TOOL_VERSION,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         },
     }
 
     if hasattr(tile, "lat") and hasattr(tile, "lon"):
         from math import floor
+
         lat = int(tile.lat) if isinstance(tile.lat, float) else tile.lat
         lon = int(tile.lon) if isinstance(tile.lon, float) else tile.lon
         metadata["tile"] = {

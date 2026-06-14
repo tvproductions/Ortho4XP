@@ -9,11 +9,11 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
+import O4_File_Names as FNAMES
+import O4_Texture_Color_Normalization as TCN
 from tests._imagery_color_normalization_helpers import (
     ImageryColorNormalizationTestCase,
 )
-import O4_File_Names as FNAMES
-import O4_Texture_Color_Normalization as TCN
 
 
 class TextureImageNormalizationTests(ImageryColorNormalizationTestCase):

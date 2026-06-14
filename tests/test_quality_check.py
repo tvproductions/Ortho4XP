@@ -3,9 +3,8 @@ import json
 import sys
 import tempfile
 import unittest
-from unittest import mock
 from pathlib import Path
-
+from unittest import mock
 
 QUALITY_CHECK_PATH = (
     Path(__file__).resolve().parents[1]
@@ -111,6 +110,29 @@ class QualityCheckTests(unittest.TestCase):
 
         self.assertEqual(regressions, [])
 
+    def test_baseline_comparison_matches_lizard_signature_changes(self):
+        finding = quality_check.Finding(
+            metric="lizard_ccn",
+            path="src/example.py",
+            name="build( items = None )",
+            value=11.0,
+            severity="block",
+            line=20,
+        )
+        baseline = {
+            "lizard_ccn|src/example.py|10|build( items = [] )": {
+                "metric": "lizard_ccn",
+                "path": "src/example.py",
+                "name": "build( items = [] )",
+                "value": 11.0,
+            }
+        }
+        thresholds = {"lizard_ccn": {"polarity": "high"}}
+
+        regressions = quality_check.compare_to_baseline([finding], baseline, thresholds)
+
+        self.assertEqual(regressions, [])
+
     def test_compile_database_files_returns_repo_relative_paths(self):
         with tempfile.TemporaryDirectory() as directory:
             compile_db = Path(directory) / "compile_commands.json"
@@ -132,6 +154,12 @@ class QualityCheckTests(unittest.TestCase):
             files = quality_check.compile_database_files(compile_db)
 
         self.assertEqual(files, {"Utils/src/Triangle4XP.c"})
+
+    def test_complexity_targets_exclude_vulture_whitelist(self):
+        self.assertNotIn(
+            ".codex/skills/maintenance-qa/vulture.whitelist.py",
+            quality_check.all_python_files(),
+        )
 
     def test_native_files_in_compile_database_splits_coverage(self):
         compiled, missing = quality_check.native_files_in_compile_database(

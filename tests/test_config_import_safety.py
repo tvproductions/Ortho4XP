@@ -35,9 +35,9 @@ class ConfigImportSafetyTests(unittest.TestCase):
         self.assertEqual(IMG.http_timeout, 999)
 
     def test_explicit_initializer_applies_defaults_and_creates_missing_config(self):
+        import O4_Config_Utils as CFG
         import O4_Imagery_Utils as IMG
         import O4_UI_Utils as UI
-        import O4_Config_Utils as CFG
 
         UI.verbosity = 99
         IMG.http_timeout = 999

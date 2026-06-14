@@ -1,15 +1,16 @@
 import threading
+
 import O4_UI_Utils as UI
 
 
 ################################################################################
 class parallel_worker(threading.Thread):
-    def __init__(self, task, queue, progress=None, success=[1]):
+    def __init__(self, task, queue, progress=None, success=None):
         threading.Thread.__init__(self)
         self._task = task
         self._queue = queue
         self._progress = progress
-        self._success = success
+        self._success = success if success is not None else [1]
 
     def run(self):
         while True:

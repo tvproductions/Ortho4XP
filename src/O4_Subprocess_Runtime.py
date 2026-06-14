@@ -1,15 +1,14 @@
 import subprocess
-from typing import Callable
+from collections.abc import Callable
 
 import O4_UI_Utils as UI
-
 
 CommandOutcome = tuple[int, str, str]
 StdoutHandler = Callable[[str], None]
 
 
 def run_captured(command: list[str]) -> CommandOutcome:
-    completed = subprocess.run(
+    completed = subprocess.run(  # noqa: S603
         command,
         check=False,
         capture_output=True,
@@ -23,14 +22,15 @@ def run_streamed(
     command: list[str], stdout_handler: StdoutHandler | None
 ) -> CommandOutcome:
     stdout_chunks: list[str] = []
-    with subprocess.Popen(
+    with subprocess.Popen(  # noqa: S603
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         bufsize=0,
         env=UI.subprocess_env(),
     ) as process:
-        assert process.stdout is not None
+        if process.stdout is None:
+            raise RuntimeError("streamed subprocess stdout pipe was not created")
         while True:
             line = process.stdout.readline()
             if not line:

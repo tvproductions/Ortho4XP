@@ -19,7 +19,7 @@ class ConfigLoadingTests(unittest.TestCase):
             tile = CFG.Tile(0, 0, "")
 
             self.assertEqual(tile.read_from_config(str(config_file)), 0)
-            self.assertEqual(getattr(tile, "water_tech"), "XP12")
+            self.assertEqual(tile.water_tech, "XP12")
 
     def test_tile_config_load_accepts_xp12_water_tech(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -29,7 +29,7 @@ class ConfigLoadingTests(unittest.TestCase):
             tile = CFG.Tile(0, 0, "")
 
             self.assertEqual(tile.read_from_config(str(config_file)), 1)
-            self.assertEqual(getattr(tile, "water_tech"), "XP12")
+            self.assertEqual(tile.water_tech, "XP12")
 
     def test_global_config_assignment_rejects_legacy_water_tech(self):
         with self.assertRaisesRegex(

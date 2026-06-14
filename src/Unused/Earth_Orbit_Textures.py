@@ -1,5 +1,10 @@
-import sys, os, shutil, subprocess, time
+import os
+import shutil
+import sys
+import time
+
 import O4_Imagery_Utils as IMG
+import O4_Subprocess_Utils as SP
 
 IMG.initialize_color_filters_dict()
 IMG.initialize_providers_dict()
@@ -48,9 +53,8 @@ if __name__ == "__main__":
             ]
             tentative = 0
             while True:
-                if not subprocess.call(
-                    conv_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
-                ):
+                result = SP.run_external_command(conv_cmd, tool_name="DDSConvert")
+                if result.ok:
                     break
                 tentative += 1
                 if tentative == 10:

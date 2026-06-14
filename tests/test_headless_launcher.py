@@ -29,7 +29,7 @@ lon = 0
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [
                     sys.executable,
                     str(_path.ROOT_DIR / "Ortho4XP.py"),
@@ -73,7 +73,7 @@ lon = 0
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [
                     sys.executable,
                     str(_path.ROOT_DIR / "Ortho4XP.py"),
@@ -108,7 +108,7 @@ lon = 0
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [
                     sys.executable,
                     str(_path.ROOT_DIR / "Ortho4XP.py"),
@@ -127,7 +127,7 @@ lon = 0
             self.assertFalse((temp_path / "Ortho4XP.cfg").exists())
 
     def test_legacy_help_mentions_headless_commands(self):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             [sys.executable, str(_path.ROOT_DIR / "Ortho4XP.py"), "--help"],
             check=False,
             capture_output=True,

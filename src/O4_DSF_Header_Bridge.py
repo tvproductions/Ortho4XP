@@ -10,17 +10,18 @@ and conversion failures all leave the generated ortho DSF unchanged.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import os
-from pathlib import Path
 import shutil
+from contextlib import suppress
+from dataclasses import dataclass
+from pathlib import Path
 
+import O4_File_Names as FNAMES
 from O4_DSF_Header_Models import DsfHeaderBridgeRequest, DsfHeaderBridgeResult
 from O4_DSF_Header_Text import (
     extract_supported_header_lines,
     splice_supported_header_lines,
 )
-import O4_File_Names as FNAMES
 
 
 class _BridgeSkip(RuntimeError):
@@ -229,10 +230,8 @@ def _tool_result_ok(result) -> bool:
 
 def _cleanup_paths(paths: list[Path]) -> None:
     for path in paths:
-        try:
+        with suppress(OSError):
             path.unlink()
-        except OSError:
-            pass
 
 
 def _log_bridge_result(result: DsfHeaderBridgeResult, UI) -> None:

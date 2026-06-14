@@ -11,7 +11,6 @@ except ModuleNotFoundError:
 import O4_Build_Models as MODELS
 import O4_CLI_Jobs as JOBS
 
-
 PROVIDERS = {"BI", "Arc"}
 COMBINED = {"EUR"}
 PROVIDER_METADATA = {

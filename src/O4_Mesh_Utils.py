@@ -1,26 +1,23 @@
-import time
-import sys
 import os
 import pickle
+import sys
+import time
+from math import cos, pi, sqrt
+
 import numpy
 import requests
-from math import sqrt, cos, pi
+
+import O4_Build_Context as BC
 import O4_DEM_Utils as DEM
-import O4_UI_Utils as UI
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
-import O4_Vector_Utils as VECT
 import O4_OSM_Utils as OSM
 import O4_Subprocess_Utils as SP
+import O4_UI_Utils as UI
+import O4_Vector_Utils as VECT
 import O4_Version
-import O4_Build_Context as BC
 
-if "dar" in sys.platform:
-    Triangle4XP_cmd = SP.resolve_tool("Triangle4XP")
-    triangle_cmd = SP.resolve_tool("triangle")
-    sort_mesh_cmd = SP.resolve_tool("moulinette")
-    unzip_cmd = SP.resolve_tool("7z")
-elif "win" in sys.platform:
+if "dar" in sys.platform or "win" in sys.platform:
     Triangle4XP_cmd = SP.resolve_tool("Triangle4XP")
     triangle_cmd = SP.resolve_tool("triangle")
     sort_mesh_cmd = SP.resolve_tool("moulinette")
@@ -35,7 +32,7 @@ else:
 community_server = False
 if os.path.exists(FNAMES.resource_path("community_server.txt")):
     try:
-        with open(FNAMES.resource_path("community_server.txt"), "r") as f:
+        with open(FNAMES.resource_path("community_server.txt")) as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -131,9 +128,8 @@ def build_curv_tol_weight_map(tile, weight_array):
     if tile.apt_curv_tol != tile.curvature_tol and tile.apt_curv_tol > 0:
         UI.vprint(1, "-> Modifying curv_tol weight map according to runway locations.")
         try:
-            f = open(FNAMES.apt_file(tile), "rb")
-            dico_airports = pickle.load(f)
-            f.close()
+            with open(FNAMES.apt_file(tile), "rb") as f:
+                dico_airports = pickle.load(f)  # noqa: S301
         except (OSError, EOFError, pickle.UnpicklingError):
             UI.vprint(
                 1,
@@ -221,22 +217,23 @@ def build_curv_tol_weight_map(tile, weight_array):
 ################################################################################
 def post_process_nodes_altitudes(tile):
     dico_attributes = VECT.Vector_Map.dico_attributes
-    f_node = open(FNAMES.output_node_file(tile), "r")
-    init_line_f_node = f_node.readline()
-    nbr_pt = int(init_line_f_node.split()[0])
-    vertices = numpy.zeros(6 * nbr_pt)
-    UI.vprint(1, "-> Loading of the mesh computed by Triangle4XP.")
-    for i in range(0, nbr_pt):
-        vertices[6 * i : 6 * i + 6] = [float(x) for x in f_node.readline().split()[1:7]]
-    end_line_f_node = f_node.readline()
-    f_node.close()
+    with open(FNAMES.output_node_file(tile)) as f_node:
+        init_line_f_node = f_node.readline()
+        nbr_pt = int(init_line_f_node.split()[0])
+        vertices = numpy.zeros(6 * nbr_pt)
+        UI.vprint(1, "-> Loading of the mesh computed by Triangle4XP.")
+        for i in range(0, nbr_pt):
+            vertices[6 * i : 6 * i + 6] = [
+                float(x) for x in f_node.readline().split()[1:7]
+            ]
+        end_line_f_node = f_node.readline()
     UI.vprint(1, "-> Post processing of altitudes according to vector data")
-    f_ele = open(FNAMES.output_ele_file(tile), "r")
+    f_ele = open(FNAMES.output_ele_file(tile))  # noqa: SIM115
     nbr_tri = int(f_ele.readline().split()[0])
     water_tris = set()
     sea_tris = set()
     interp_alt_tris = set()
-    for i in range(nbr_tri):
+    for _i in range(nbr_tri):
         line = f_ele.readline()
         # triangle attributes are powers of 2, except for the dummy attributed
         # which doesn't require post-treatment
@@ -250,9 +247,10 @@ def post_process_nodes_altitudes(tile):
             sea_tris.add((v1, v2, v3))
         elif attr & dico_attributes["WATER"] or attr & dico_attributes["SEA_EQUIV"]:
             water_tris.add((v1, v2, v3))
+    f_ele.close()
     if tile.water_smoothing:
         UI.vprint(1, "   Smoothing inland water.")
-        for j in range(tile.water_smoothing):
+        for _j in range(tile.water_smoothing):
             for v1, v2, v3 in water_tris:
                 zmean = (
                     vertices[6 * v1 + 2] + vertices[6 * v2 + 2] + vertices[6 * v3 + 2]
@@ -289,17 +287,16 @@ def post_process_nodes_altitudes(tile):
         vertices[6 * v2 + 4] = 0
         vertices[6 * v3 + 4] = 0
     UI.vprint(1, "-> Writing output nodes file.")
-    f_node = open(FNAMES.output_node_file(tile), "w")
-    f_node.write(init_line_f_node)
-    for i in range(0, nbr_pt):
-        f_node.write(
-            str(i + 1)
-            + " "
-            + " ".join(("{:.15f}".format(x) for x in vertices[6 * i : 6 * i + 6]))
-            + "\n"
-        )
-    f_node.write(end_line_f_node)
-    f_node.close()
+    with open(FNAMES.output_node_file(tile), "w") as f_node:
+        f_node.write(init_line_f_node)
+        for i in range(0, nbr_pt):
+            f_node.write(
+                str(i + 1)
+                + " "
+                + " ".join(f"{x:.15f}" for x in vertices[6 * i : 6 * i + 6])
+                + "\n"
+            )
+        f_node.write(end_line_f_node)
     return vertices
 
 
@@ -310,21 +307,21 @@ def write_mesh_file(tile, vertices):
         "-> Writing final mesh to the file "
         + FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon),
     )
-    f_ele = open(FNAMES.output_ele_file(tile), "r")
+    f_ele = open(FNAMES.output_ele_file(tile))  # noqa: SIM115
     nbr_vert = len(vertices) // 6
     nbr_tri = int(f_ele.readline().split()[0])
-    f = open(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon), "w")
+    f = open(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon), "w")  # noqa: SIM115
     f.write("MeshVersionFormatted 2\n")
     f.write("Dimension 3\n\n")
     f.write("Vertices\n")
     f.write(str(nbr_vert) + "\n")
     for i in range(0, nbr_vert):
         f.write(
-            "{:.15f}".format(vertices[6 * i] + tile.lon)
+            f"{vertices[6 * i] + tile.lon:.15f}"
             + " "
-            + "{:.15f}".format(vertices[6 * i + 1] + tile.lat)
+            + f"{vertices[6 * i + 1] + tile.lat:.15f}"
             + " "
-            + "{:.15f}".format(vertices[6 * i + 2] / 100000)
+            + f"{vertices[6 * i + 2] / 100000:.15f}"
             + " 0\n"
         )
     f.write("\n")
@@ -332,15 +329,12 @@ def write_mesh_file(tile, vertices):
     f.write(str(nbr_vert) + "\n")
     for i in range(0, nbr_vert):
         f.write(
-            "{:.2f}".format(vertices[6 * i + 3])
-            + " "
-            + "{:.2f}".format(vertices[6 * i + 4])
-            + " 0\n"
+            f"{vertices[6 * i + 3]:.2f}" + " " + f"{vertices[6 * i + 4]:.2f}" + " 0\n"
         )
     f.write("\n")
     f.write("Triangles\n")
     f.write(str(nbr_tri) + "\n")
-    for i in range(0, nbr_tri):
+    for _i in range(0, nbr_tri):
         f.write(" ".join(f_ele.readline().split()[1:]) + "\n")
     f_ele.close()
     f.close()
@@ -357,19 +351,19 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
     (latmin, lonmax) = GEO.gtile_to_wgs84(til_x_left + 16, til_y_top + 16, zoomlevel)
     obj_file_name = FNAMES.obj_file(til_x_left, til_y_top, zoomlevel, provider_code)
     mtl_file_name = FNAMES.mtl_file(til_x_left, til_y_top, zoomlevel, provider_code)
-    f_mesh = open(mesh_file, "r")
-    for i in range(4):
+    f_mesh = open(mesh_file)  # noqa: SIM115
+    for _i in range(4):
         f_mesh.readline()
     nbr_pt_in = int(f_mesh.readline())
     UI.vprint(1, "    Reading nodes...")
     pt_in = numpy.zeros(5 * nbr_pt_in, "float")
     for i in range(nbr_pt_in):
         pt_in[5 * i : 5 * i + 3] = [float(x) for x in f_mesh.readline().split()[:3]]
-    for i in range(3):
+    for _i in range(3):
         f_mesh.readline()
     for i in range(nbr_pt_in):
         pt_in[5 * i + 3 : 5 * i + 5] = [float(x) for x in f_mesh.readline().split()[:2]]
-    for i in range(0, 2):  # skip 2 lines
+    for _i in range(0, 2):  # skip 2 lines
         f_mesh.readline()
     if UI.red_flag:
         UI.exit_message_and_bottom_line()
@@ -382,7 +376,7 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
     len_textured_nodes = 0
     dico_new_tri = {}
     len_dico_new_tri = 0
-    for i in range(0, nbr_tri_in):
+    for _i in range(0, nbr_tri_in):
         (n1, n2, n3) = [int(x) - 1 for x in f_mesh.readline().split()[:3]]
         (lon1, lat1, z1, u1, v1) = pt_in[5 * n1 : 5 * n1 + 5]
         (lon2, lat2, z2, u2, v2) = pt_in[5 * n2 : 5 * n2 + 5]
@@ -428,16 +422,16 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
         return 0
     UI.vprint(1, "    Writing the obj file.")
     # first the obj file
-    f = open(obj_file_name, "w")
+    f = open(obj_file_name, "w")  # noqa: SIM115
     for i in range(1, nbr_vert + 1):
         j = textured_nodes[i]
         f.write(
             "v "
-            + "{:.9f}".format(pt_in[5 * j] - lonmin)
+            + f"{pt_in[5 * j] - lonmin:.9f}"
             + " "
-            + "{:.9f}".format(pt_in[5 * j + 1] - latmin)
+            + f"{pt_in[5 * j + 1] - latmin:.9f}"
             + " "
-            + "{:.9f}".format(pt_in[5 * j + 2])
+            + f"{pt_in[5 * j + 2]:.9f}"
             + "\n"
         )
     f.write("\n")
@@ -445,13 +439,11 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
         j = textured_nodes[i]
         f.write(
             "vn "
-            + "{:.9f}".format(pt_in[5 * j + 3])
+            + f"{pt_in[5 * j + 3]:.9f}"
             + " "
-            + "{:.9f}".format(pt_in[5 * j + 4])
+            + f"{pt_in[5 * j + 4]:.9f}"
             + " "
-            + "{:.9f}".format(
-                sqrt(max(1 - pt_in[5 * j + 3] ** 2 - pt_in[5 * j + 4] ** 2, 0))
-            )
+            + f"{sqrt(max(1 - pt_in[5 * j + 3] ** 2 - pt_in[5 * j + 4] ** 2, 0)):.9f}"
             + "\n"
         )
     f.write("\n")
@@ -459,9 +451,9 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
         j = textured_nodes[i]
         f.write(
             "vt "
-            + "{:.9f}".format(nodes_st_coord[i][0])
+            + f"{nodes_st_coord[i][0]:.9f}"
             + " "
-            + "{:.9f}".format(nodes_st_coord[i][1])
+            + f"{nodes_st_coord[i][1]:.9f}"
             + "\n"
         )
     f.write("\n")
@@ -492,7 +484,7 @@ def extract_mesh_to_obj(mesh_file, til_x_left, til_y_top, zoomlevel, provider_co
     f_mesh.close()
     f.close()
     # then the mtl file
-    f = open(mtl_file_name, "w")
+    f = open(mtl_file_name, "w")  # noqa: SIM115
     f.write(
         "newmtl orthophoto\nmap_Kd "
         + FNAMES.geotiff_file_name_from_attributes(
@@ -546,7 +538,7 @@ def build_mesh(tile, ctx=None):
                 (";" in tile.custom_dem) and tile.custom_dem.split(";")[0]
             ) or tile.custom_dem
             tile.dem = DEM.DEM(tile.lat, tile.lon, source, fill_nodata, info_only=True)
-            if not os.path.getsize(alt_file) == 4 * tile.dem.nxdem * tile.dem.nydem:
+            if os.path.getsize(alt_file) != 4 * tile.dem.nxdem * tile.dem.nydem:
                 UI.exit_message_and_bottom_line(
                     "\nERROR: Cached raster elevation does not match the ",
                     "current custom DEM specs.\n       You must run Step 1 ",
@@ -570,7 +562,7 @@ def build_mesh(tile, ctx=None):
             )
             if (
                 not os.path.isfile(alt_file)
-                or not os.path.getsize(alt_file) == 4 * tile.dem.nxdem * tile.dem.nydem
+                or os.path.getsize(alt_file) != 4 * tile.dem.nxdem * tile.dem.nydem
             ):
                 tile.dem = DEM.DEM(
                     tile.lat,
@@ -588,9 +580,8 @@ def build_mesh(tile, ctx=None):
             )
             return 0
     try:
-        f = open(node_file, "r")
-        input_nodes = int(f.readline().split()[0])
-        f.close()
+        with open(node_file) as f:
+            input_nodes = int(f.readline().split()[0])
     except (OSError, IndexError, ValueError) as exc:
         UI.exit_message_and_bottom_line("\nERROR: In reading ", node_file)
         UI.vprint(3, exc)
@@ -613,7 +604,7 @@ def build_mesh(tile, ctx=None):
     limit_tris = "S" + str(max_steiner)
     Tri_option = (
         "-pq"
-        + "{:.9g}".format(tile.min_angle)
+        + f"{tile.min_angle:.9g}"
         + do_refine
         + "uYB"
         + tri_verbosity
@@ -635,16 +626,16 @@ def build_mesh(tile, ctx=None):
     mesh_cmd = [
         Triangle4XP_cmd,
         Tri_option.strip(),
-        "{:.9g}".format(GEO.lon_to_m(tile.lat)),
-        "{:.9g}".format(GEO.lat_to_m),
-        "{:n}".format(tile.dem.nxdem),
-        "{:n}".format(tile.dem.nydem),
-        "{:.9g}".format(tile.dem.x0),
-        "{:.9g}".format(tile.dem.y0),
-        "{:.9g}".format(tile.dem.x1),
-        "{:.9g}".format(tile.dem.y1),
-        "{:.9g}".format(tile.dem.nodata),
-        "{:.9g}".format(tile.curvature_tol),
+        f"{GEO.lon_to_m(tile.lat):.9g}",
+        f"{GEO.lat_to_m:.9g}",
+        f"{tile.dem.nxdem:n}",
+        f"{tile.dem.nydem:n}",
+        f"{tile.dem.x0:.9g}",
+        f"{tile.dem.y0:.9g}",
+        f"{tile.dem.x1:.9g}",
+        f"{tile.dem.y1:.9g}",
+        f"{tile.dem.nodata:.9g}",
+        f"{tile.curvature_tol:.9g}",
         alt_file,
         weight_file,
         poly_file,
@@ -674,7 +665,7 @@ def build_mesh(tile, ctx=None):
             )
             Tri_option = (
                 "-pq"
-                + "{:.9g}".format(min_angle)
+                + f"{min_angle:.9g}"
                 + do_refine
                 + "uYB"
                 + tri_verbosity
@@ -830,11 +821,11 @@ def triangulate(name, path_to_Ortho4XP_dir):
 ##############################################################################
 def read_mesh_file(mesh_file):
 
-    f = open(mesh_file, "r")
+    f = open(mesh_file)  # noqa: SIM115
     mesh_version = float(f.readline().strip().split()[-1])
 
     # skip 3 lines
-    for i in range(3):
+    for _i in range(3):
         f.readline()
 
     nbr_nodes = int(f.readline())
@@ -847,7 +838,7 @@ def read_mesh_file(mesh_file):
     node_coords[2::5] *= 100000
 
     # skip 3 lines
-    for i in range(3):
+    for _i in range(3):
         f.readline()
 
     # read normals
@@ -857,7 +848,7 @@ def read_mesh_file(mesh_file):
         ]
 
     # skip 2 lines
-    for i in range(0, 2):
+    for _i in range(0, 2):
         f.readline()
 
     # read nbr of tris
