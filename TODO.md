@@ -1144,29 +1144,27 @@ Suggested labels: `gui`, `developer-experience`
 
 ### TODO-049: Repair Repo-Wide Ruff Quality Gate Baseline
 
-Status: Pending
+Status: Done
 
 GitHub Issue: #32
 
-The maintained quality gate currently fails at its repo-wide Ruff step before it
-can reach later quality stages. Wave 1 verification showed:
+Completion note: verified on 2026-06-14 that the maintained quality gate now
+passes through repo-wide Ruff, later Python quality stages, and native checks.
+No script behavior change was needed; the previously recorded Ruff failure was
+stale backlog evidence. Current verification showed:
 
-- `uv run python -m unittest discover -s tests` passes with 320 tests.
-- Changed-file Ruff check passes for the Wave 1 touched files.
-- Changed-file Ruff format check passes for the Wave 1 touched files.
-- Changed-file `ty` passes for the Wave 1 touched source files.
-- `uv run python .codex/skills/quality-check/scripts/quality_check.py` fails at
-  `uv run ruff check ...` with 198 findings outside the Wave 1 changes.
+- `uv run python .codex/skills/quality-check/scripts/quality_check.py --skip-native`
+  passes all Python-side quality stages.
+- `uv run python .codex/skills/quality-check/scripts/quality_check.py` passes
+  the full gate, including LLVM/CMake native checks.
+- `uv run python -m unittest discover -s tests` passes with 323 tests.
+- Repo-wide Ruff check passes for `Ortho4XP.py`, `src`, `tests`, and maintained
+  skill scripts.
+- Ruff format, `ty`, whitespace, code-quality audits, Xenon/Radon/Lizard/
+  Cohesion complexity gates, `clang-tidy`, and CMake native build checks pass.
 
-Aggregate failing Ruff findings:
-
-- 61 `I001` import ordering findings
-- 44 `UP032` format-call modernization findings
-- 15 `S603` subprocess audit findings
-- 14 `S101` assert findings
-- 11 `SIM115` open-file context-manager findings
-- Remaining findings span `UP035`, `SIM118`, `UP015`, `B010`, `SIM117`,
-  `C405`, `SIM105`, `B006`, `B009`, and related modernization rules.
+Historical Wave 1 verification had reported 198 repo-wide Ruff findings before
+the gate could reach later stages. That state no longer reproduces.
 
 Acceptance criteria:
 
