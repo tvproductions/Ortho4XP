@@ -22,3 +22,5 @@ Ortho4XP.cfg
 **/*.swp
 .last_gui_params.txt
 .DS_Store
+.coverage
+.codex/.coverage
