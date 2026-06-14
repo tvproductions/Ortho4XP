@@ -122,6 +122,21 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Renamed: {result['old_name']} -> {result['new_name']}")
                 if result["metadata_written"]:
                     print("package.json written")
+            if args.update_scenery and not args.dry_run:
+                from O4_Config_Utils import CFG
+                from O4_Scenery_Manager import SceneryManager
+                cs_dir = getattr(CFG, "custom_scenery_dir", "")
+                if cs_dir:
+                    xp_root = os.path.dirname(os.path.normpath(cs_dir))
+                    ini_path = os.path.join(xp_root, "Output", "preferences", "scenery_packs.ini")
+                    mgr = SceneryManager(custom_scenery_dir=cs_dir, ini_path=ini_path)
+                    old_ini_path = os.path.join("Custom Scenery", result["old_name"])
+                    mgr._ini.remove_entry(old_ini_path)
+                    mgr._ini.write()
+                    mgr.add_tile(lat=result["lat"], lon=result["lon"], build_dir=os.path.dirname(result["new_dir"]))
+                    print("scenery_packs.ini updated.")
+                else:
+                    print("Warning: custom_scenery_dir not set; cannot update scenery_packs.ini")
         else:
             print(f"Not a legacy zOrtho4XP_ package: {args.package_dir}")
         return 0
@@ -186,6 +201,10 @@ def _parser() -> argparse.ArgumentParser:
     p_upgrade.add_argument(
         "--dry-run", action="store_true",
         help="Show what would be changed without making changes",
+    )
+    p_upgrade.add_argument(
+        "--update-scenery", "-u", action="store_true",
+        help="Also update scenery_packs.ini after upgrade",
     )
 
     sp = subparsers.add_parser("scenery", help="Manage Ortho4XP scenery packages")

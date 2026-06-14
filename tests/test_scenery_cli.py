@@ -44,3 +44,26 @@ class TestSceneryCLIDispatch(unittest.TestCase):
         from O4_CLI_Run import dispatch_scenery
         with self.assertRaises(SystemExit):
             dispatch_scenery(["--help"])
+
+
+class TestUpgradePackageWithScenery(unittest.TestCase):
+    """Test upgrade-package --update-scenery flag parsing."""
+
+    def test_upgrade_package_parser_accepts_update_scenery(self):
+        from O4_CLI_Run import _parser
+        p = _parser()
+        args = p.parse_args(["upgrade-package", "/some/path", "--update-scenery"])
+        self.assertTrue(args.update_scenery)
+
+    def test_upgrade_package_parser_dry_run_with_update_scenery(self):
+        from O4_CLI_Run import _parser
+        p = _parser()
+        args = p.parse_args(["upgrade-package", "/some/path", "--dry-run", "--update-scenery"])
+        self.assertTrue(args.dry_run)
+        self.assertTrue(args.update_scenery)
+
+    def test_upgrade_package_parser_short_flag(self):
+        from O4_CLI_Run import _parser
+        p = _parser()
+        args = p.parse_args(["upgrade-package", "/some/path", "-u"])
+        self.assertTrue(args.update_scenery)

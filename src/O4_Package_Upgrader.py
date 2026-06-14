@@ -30,6 +30,8 @@ def upgrade_package(package_dir, dry_run=True):
         "old_name": basename,
         "new_name": new_name,
         "new_dir": new_dir,
+        "lat": lat,
+        "lon": lon,
         "metadata_written": False,
     }
 
