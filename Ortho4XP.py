@@ -9,7 +9,8 @@ cmd_line = (
     "  OR:  Ortho4XP.py validate-job build_job.toml [--json]\n"
     "  OR:  Ortho4XP.py build-job build_job.toml [--dry-run] [--json]\n"
     "  OR:  Ortho4XP.py validate-package <package_dir>\n"
-    "  OR:  Ortho4XP.py upgrade-package <package_dir> [--dry-run]"
+    "  OR:  Ortho4XP.py upgrade-package <package_dir> [--dry-run]\n"
+    "  OR:  Ortho4XP.py scenery <subcommand> [args]"
 )
 
 
@@ -26,12 +27,12 @@ def _ensure_src_path() -> None:
 
 
 def _is_headless_command(argv: list[str]) -> bool:
-    return len(argv) > 1 and argv[1] in {"validate-job", "build-job", "validate-package", "upgrade-package"}
+    return len(argv) > 1 and argv[1] in {"validate-job", "build-job", "validate-package", "upgrade-package", "scenery"}
 
 
 def _dispatch_headless(argv: list[str]) -> int:
     cli_argv = list(argv[1:])
-    if len(cli_argv) >= 2 and not cli_argv[1].startswith("-"):
+    if cli_argv[0] != "scenery" and len(cli_argv) >= 2 and not cli_argv[1].startswith("-"):
         cli_argv[1] = os.path.abspath(cli_argv[1])
     os.chdir(_source_root())
     _ensure_src_path()

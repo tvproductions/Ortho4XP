@@ -1,15 +1,107 @@
 from __future__ import annotations
 
 import argparse
+import os
 from typing import Callable, cast
 
 import O4_Build_Models as MODELS
 import O4_CLI_Jobs as JOBS
 
 
+def dispatch_scenery(argv: list[str]) -> None:
+    """Dispatch scenery subcommands."""
+    parser = argparse.ArgumentParser(prog="scenery")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    add_p = sub.add_parser("add", help="Add a tile or overlay to scenery")
+    add_p.add_argument("target", help="Latitude (integer) or 'overlay'")
+    add_p.add_argument("lon", nargs="?", type=int, help="Longitude (integer)")
+
+    rm_p = sub.add_parser("remove", help="Remove a tile or overlay from scenery")
+    rm_p.add_argument("target", help="Latitude (integer) or 'overlay'")
+    rm_p.add_argument("lon", nargs="?", type=int, help="Longitude (integer)")
+
+    sub.add_parser("list", help="List Ortho4XP entries in scenery_packs.ini")
+    sub.add_parser("reorder", help="Reorder Ortho4XP entries in scenery_packs.ini")
+    sub.add_parser("validate", help="Validate scenery_packs.ini ordering")
+
+    args = parser.parse_args(argv)
+
+    from O4_Config_Utils import CFG
+    from O4_Scenery_Manager import SceneryManager
+
+    cs_dir = getattr(CFG, "custom_scenery_dir", "")
+    if not cs_dir:
+        print("Error: custom_scenery_dir is not set in config.")
+        return
+
+    xplane_root = os.path.dirname(os.path.normpath(cs_dir))
+    ini_path = os.path.join(xplane_root, "Output", "preferences", "scenery_packs.ini")
+    mgr = SceneryManager(custom_scenery_dir=cs_dir, ini_path=ini_path)
+
+    if args.command == "add":
+        if args.target == "overlay":
+            mgr.add_overlay(overlay_dir=getattr(CFG, "Overlay_dir", None))
+            print("Added overlay symlink + ini entry.")
+        else:
+            try:
+                lat = int(args.target)
+                lon = int(args.lon)
+            except (ValueError, TypeError):
+                parser.error("Usage: scenery add <lat> <lon> or scenery add overlay")
+            mgr.add_tile(lat=lat, lon=lon, build_dir=getattr(CFG, "custom_build_dir", None))
+            print(f"Added tile {lat:+d}{lon:+d} symlink + ini entry.")
+
+    elif args.command == "remove":
+        if args.target == "overlay":
+            if mgr.remove_overlay():
+                print("Removed overlay symlink + ini entry.")
+            else:
+                print("Overlay not found.")
+        else:
+            try:
+                lat = int(args.target)
+                lon = int(args.lon)
+            except (ValueError, TypeError):
+                parser.error("Usage: scenery remove <lat> <lon> or scenery remove overlay")
+            if mgr.remove_tile(lat=lat, lon=lon):
+                print(f"Removed tile {lat:+d}{lon:+d} symlink + ini entry.")
+            else:
+                print(f"Tile {lat:+d}{lon:+d} not found in scenery.")
+
+    elif args.command == "list":
+        mgr.refresh()
+        entries = mgr.ortho4xp_entries()
+        if not entries:
+            print("No Ortho4XP entries found in scenery_packs.ini.")
+        else:
+            for e in entries:
+                status = "DISABLED" if e.disabled else "ACTIVE"
+                print(f"  [{status}] {e.path}")
+
+    elif args.command == "reorder":
+        mgr.refresh()
+        mgr.reorder()
+        print("Ortho4XP entries reordered in scenery_packs.ini.")
+
+    elif args.command == "validate":
+        mgr.refresh()
+        issues = mgr.validate()
+        if not issues:
+            print("No issues found. Scenery stack looks good.")
+        else:
+            for issue in issues:
+                tag = "ERROR" if issue.severity == "error" else "WARNING"
+                print(f"  [{tag}] {issue.message}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
+
+    if args.command == "scenery":
+        dispatch_scenery(args.argv)
+        return 0
 
     if args.command == "validate-package":
         from O4_Package_Validator import validate_package
@@ -95,6 +187,9 @@ def _parser() -> argparse.ArgumentParser:
         "--dry-run", action="store_true",
         help="Show what would be changed without making changes",
     )
+
+    sp = subparsers.add_parser("scenery", help="Manage Ortho4XP scenery packages")
+    sp.add_argument("argv", nargs=argparse.REMAINDER, help="Scenery subcommand and args")
 
     return parser
 
