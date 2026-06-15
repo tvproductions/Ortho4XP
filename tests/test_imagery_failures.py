@@ -7,12 +7,12 @@ import tempfile
 import unittest
 from unittest import mock
 
+import aiohttp
+
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
-
-import requests
 
 import O4_Imagery_Failures as IFAIL
 import O4_Imagery_Utils as IMG
@@ -159,14 +159,13 @@ class ImageryFailureTests(unittest.TestCase):
         IMG.max_connect_retries = 2
         session = FakeSession(
             [
-                requests.exceptions.ConnectionError("down"),
-                requests.exceptions.ConnectionError("still down"),
+                aiohttp.ClientError("down"),
+                aiohttp.ClientError("still down"),
             ]
         )
 
         with (
-            mock.patch.object(IMG.time, "sleep"),
-            mock.patch.object(IMG.requests, "Session", return_value=session),
+            mock.patch.object(IMG, "async_request_sleep", new=mock.AsyncMock()),
         ):
             _success, _data, failure = IMG.http_request_to_image(
                 256,

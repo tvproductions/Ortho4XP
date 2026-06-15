@@ -560,6 +560,46 @@
       "severity": "advise",
       "value": 4.0
     },
+    "lizard_ccn|src/O4_Async_HTTP.py|102|_provider_no_data_status( data )": {
+      "line": 102,
+      "metric": "lizard_ccn",
+      "name": "_provider_no_data_status( data )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 7.0
+    },
+    "lizard_ccn|src/O4_Async_HTTP.py|127|_classify_http_response( data , config )": {
+      "line": 127,
+      "metric": "lizard_ccn",
+      "name": "_classify_http_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Async_HTTP.py|142|_classify_non_image_response( data , config )": {
+      "line": 142,
+      "metric": "lizard_ccn",
+      "name": "_classify_non_image_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Async_HTTP.py|158|_classify_other_response( data , config )": {
+      "line": 158,
+      "metric": "lizard_ccn",
+      "name": "_classify_other_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Async_HTTP.py|253|_request_loop_done( runtime , result )": {
+      "line": 253,
+      "metric": "lizard_ccn",
+      "name": "_request_loop_done( runtime , result )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 5.0
+    },
     "lizard_ccn|src/O4_Bathymetry.py|204|compute_depth_ratio_bounds_from_masks( nbr_nodes , node_coords , node_types , tile )": {
       "line": 204,
       "metric": "lizard_ccn",
@@ -1504,221 +1544,213 @@
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1090|get_wms_image( bbox , width , height , provider , http_session )": {
-      "line": 1090,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1016|get_wms_image( bbox , width , height , provider , http_session )": {
+      "line": 1016,
       "metric": "lizard_ccn",
       "name": "get_wms_image( bbox , width , height , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1150|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
-      "line": 1150,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1076|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
+      "line": 1076,
       "metric": "lizard_ccn",
       "name": "get_wmts_image( tilematrix , til_x , til_y , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1339|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
-      "line": 1339,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1265|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
+      "line": 1265,
       "metric": "lizard_ccn",
       "name": "build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1380|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
-      "line": 1380,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1306|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
+      "line": 1306,
       "metric": "lizard_ccn",
       "name": "build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 24.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1537|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
-      "line": 1537,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1463|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
+      "line": 1463,
       "metric": "lizard_ccn",
       "name": "download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1627|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
-      "line": 1627,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1553|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
+      "line": 1553,
       "metric": "lizard_ccn",
       "name": "build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 18.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|168|_validation_issues( source_code , source_path , source_kind , exc )": {
-      "line": 168,
-      "metric": "lizard_ccn",
-      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1777|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
-      "line": 1777,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1707|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
+      "line": 1707,
       "metric": "lizard_ccn",
       "name": "build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1901|build_geotiffs( tile , texture_attributes_list )": {
-      "line": 1901,
+    "lizard_ccn|src/O4_Imagery_Utils.py|172|_validation_issues( source_code , source_path , source_kind , exc )": {
+      "line": 172,
+      "metric": "lizard_ccn",
+      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Imagery_Utils.py|1831|build_geotiffs( tile , texture_attributes_list )": {
+      "line": 1831,
       "metric": "lizard_ccn",
       "name": "build_geotiffs( tile , texture_attributes_list )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1930|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
-      "line": 1930,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1860|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
+      "line": 1860,
       "metric": "lizard_ccn",
       "name": "build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|196|_normalize_provider_for_runtime( provider )": {
-      "line": 196,
-      "metric": "lizard_ccn",
-      "name": "_normalize_provider_for_runtime( provider )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 5.0
-    },
-    "lizard_ccn|src/O4_Imagery_Utils.py|1990|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
-      "line": 1990,
+    "lizard_ccn|src/O4_Imagery_Utils.py|1920|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
+      "line": 1920,
       "metric": "lizard_ccn",
       "name": "create_tile_preview( lat , lon , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|2121|color_transform( im , color_code )": {
-      "line": 2121,
+    "lizard_ccn|src/O4_Imagery_Utils.py|200|_normalize_provider_for_runtime( provider )": {
+      "line": 200,
+      "metric": "lizard_ccn",
+      "name": "_normalize_provider_for_runtime( provider )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|src/O4_Imagery_Utils.py|2051|color_transform( im , color_code )": {
+      "line": 2051,
       "metric": "lizard_ccn",
       "name": "color_transform( im , color_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 10.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|2183|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
-      "line": 2183,
+    "lizard_ccn|src/O4_Imagery_Utils.py|2113|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
+      "line": 2113,
       "metric": "lizard_ccn",
       "name": "combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 18.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|2320|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
-      "line": 2320,
+    "lizard_ccn|src/O4_Imagery_Utils.py|2250|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
+      "line": 2250,
       "metric": "lizard_ccn",
       "name": "convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 26.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|237|parse_provider_definition( provider_code , source_path )": {
-      "line": 237,
+    "lizard_ccn|src/O4_Imagery_Utils.py|241|parse_provider_definition( provider_code , source_path )": {
+      "line": 241,
       "metric": "lizard_ccn",
       "name": "parse_provider_definition( provider_code , source_path )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|2499|geotag( input_file_name )": {
-      "line": 2499,
+    "lizard_ccn|src/O4_Imagery_Utils.py|2429|geotag( input_file_name )": {
+      "line": 2429,
       "metric": "lizard_ccn",
       "name": "geotag( input_file_name )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|273|iter_provider_definition_paths( provider_dir = None )": {
-      "line": 273,
+    "lizard_ccn|src/O4_Imagery_Utils.py|277|iter_provider_definition_paths( provider_dir = None )": {
+      "line": 277,
       "metric": "lizard_ccn",
       "name": "iter_provider_definition_paths( provider_dir = None )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|307|parse_extent_definition( extent_code , source_path )": {
-      "line": 307,
+    "lizard_ccn|src/O4_Imagery_Utils.py|311|parse_extent_definition( extent_code , source_path )": {
+      "line": 311,
       "metric": "lizard_ccn",
       "name": "parse_extent_definition( extent_code , source_path )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 5.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|334|initialize_extents_dict( )": {
-      "line": 334,
+    "lizard_ccn|src/O4_Imagery_Utils.py|338|initialize_extents_dict( )": {
+      "line": 338,
       "metric": "lizard_ccn",
       "name": "initialize_extents_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|354|initialize_color_filters_dict( )": {
-      "line": 354,
+    "lizard_ccn|src/O4_Imagery_Utils.py|358|initialize_color_filters_dict( )": {
+      "line": 358,
       "metric": "lizard_ccn",
       "name": "initialize_color_filters_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|381|initialize_providers_dict( )": {
-      "line": 381,
+    "lizard_ccn|src/O4_Imagery_Utils.py|385|initialize_providers_dict( )": {
+      "line": 385,
       "metric": "lizard_ccn",
       "name": "initialize_providers_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 28.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|492|initialize_combined_providers_dict( )": {
-      "line": 492,
+    "lizard_ccn|src/O4_Imagery_Utils.py|496|initialize_combined_providers_dict( )": {
+      "line": 496,
       "metric": "lizard_ccn",
       "name": "initialize_combined_providers_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|604|initialize_local_combined_providers_dict( tile )": {
-      "line": 604,
+    "lizard_ccn|src/O4_Imagery_Utils.py|608|initialize_local_combined_providers_dict( tile )": {
+      "line": 608,
       "metric": "lizard_ccn",
       "name": "initialize_local_combined_providers_dict( tile )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 24.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|783|read_tilematrixsets( file_name )": {
-      "line": 783,
+    "lizard_ccn|src/O4_Imagery_Utils.py|787|read_tilematrixsets( file_name )": {
+      "line": 787,
       "metric": "lizard_ccn",
       "name": "read_tilematrixsets( file_name )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "lizard_ccn|src/O4_Imagery_Utils.py|823|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
-      "line": 823,
+    "lizard_ccn|src/O4_Imagery_Utils.py|827|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
+      "line": 827,
       "metric": "lizard_ccn",
       "name": "has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 27.0
-    },
-    "lizard_ccn|src/O4_Imagery_Utils.py|976|http_request_to_image( width , height , url , request_headers , http_session , )": {
-      "line": 976,
-      "metric": "lizard_ccn",
-      "name": "http_request_to_image( width , height , url , request_headers , http_session , )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "block",
-      "value": 25.0
     },
     "lizard_ccn|src/O4_Mask_Utils.py|149|build_masks.build_mask( til_x , til_y )": {
       "line": 149,
@@ -2208,6 +2240,46 @@
       "severity": "advise",
       "value": 4.0
     },
+    "lizard_ccn|src/O4_Texture_Download_Scheduler.py|117|_download_task( runtime , attrs )": {
+      "line": 117,
+      "metric": "lizard_ccn",
+      "name": "_download_task( runtime , attrs )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Texture_Download_Scheduler.py|141|_run_ready_tasks( runtime , tasks )": {
+      "line": 141,
+      "metric": "lizard_ccn",
+      "name": "_run_ready_tasks( runtime , tasks )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "lizard_ccn|src/O4_Texture_Download_Scheduler.py|159|_wait_for_downloads( runtime , producer_done_event )": {
+      "line": 159,
+      "metric": "lizard_ccn",
+      "name": "_wait_for_downloads( runtime , producer_done_event )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Texture_Download_Scheduler.py|209|async_download_textures( tile , download_queue , convert_queue , options )": {
+      "line": 209,
+      "metric": "lizard_ccn",
+      "name": "async_download_textures( tile , download_queue , convert_queue , options )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "lizard_ccn|src/O4_Texture_Download_Scheduler.py|91|_record_download_result( runtime , attrs , ok )": {
+      "line": 91,
+      "metric": "lizard_ccn",
+      "name": "_record_download_result( runtime , attrs , ok )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "lizard_ccn|src/O4_Texture_Encoder.py|18|coerce_conversion_result( result : TextureConversionResult | TextureEncodeResult | object , display_name : str , provider_code : str = '' , )": {
       "line": 18,
       "metric": "lizard_ccn",
@@ -2232,61 +2304,45 @@
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Tile_Utils.py|180|build_tile( tile , ctx = None )": {
-      "line": 180,
-      "metric": "lizard_ccn",
-      "name": "build_tile( tile , ctx = None )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 32.0
-    },
-    "lizard_ccn|src/O4_Tile_Utils.py|30|download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )": {
-      "line": 30,
-      "metric": "lizard_ccn",
-      "name": "download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 16.0
-    },
-    "lizard_ccn|src/O4_Tile_Utils.py|348|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
-      "line": 348,
+    "lizard_ccn|src/O4_Tile_Utils.py|238|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
+      "line": 238,
       "metric": "lizard_ccn",
       "name": "build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Tile_Utils.py|371|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
-      "line": 371,
+    "lizard_ccn|src/O4_Tile_Utils.py|261|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
+      "line": 261,
       "metric": "lizard_ccn",
       "name": "_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "lizard_ccn|src/O4_Tile_Utils.py|387|remove_unwanted_textures( tile )": {
-      "line": 387,
+    "lizard_ccn|src/O4_Tile_Utils.py|277|remove_unwanted_textures( tile )": {
+      "line": 277,
       "metric": "lizard_ccn",
       "name": "remove_unwanted_textures( tile )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "warn",
       "value": 9.0
     },
-    "lizard_ccn|src/O4_Tile_Utils.py|409|delete_incomplete_imgs( tile )": {
-      "line": 409,
+    "lizard_ccn|src/O4_Tile_Utils.py|299|delete_incomplete_imgs( tile )": {
+      "line": 299,
       "metric": "lizard_ccn",
       "name": "delete_incomplete_imgs( tile )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 7.0
     },
-    "lizard_ccn|src/O4_Tile_Utils.py|80|download_textures._download_task( * attrs )": {
-      "line": 80,
+    "lizard_ccn|src/O4_Tile_Utils.py|70|build_tile( tile , ctx = None )": {
+      "line": 70,
       "metric": "lizard_ccn",
-      "name": "download_textures._download_task( * attrs )",
+      "name": "build_tile( tile , ctx = None )",
       "path": "src/O4_Tile_Utils.py",
-      "severity": "warn",
-      "value": 10.0
+      "severity": "block",
+      "value": 32.0
     },
     "lizard_ccn|src/O4_UI_Utils.py|104|log_exception( message : object = 'Unhandled exception' , * args , context : dict [ str , Any ] | None = None , )": {
       "line": 104,
@@ -3367,6 +3423,94 @@
       "path": "src/O4_Airport_Geometry.py",
       "severity": "warn",
       "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|102|_provider_no_data_status( data )": {
+      "line": 102,
+      "metric": "lizard_nesting_depth",
+      "name": "_provider_no_data_status( data )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|127|_classify_http_response( data , config )": {
+      "line": 127,
+      "metric": "lizard_nesting_depth",
+      "name": "_classify_http_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|142|_classify_non_image_response( data , config )": {
+      "line": 142,
+      "metric": "lizard_nesting_depth",
+      "name": "_classify_non_image_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|158|_classify_other_response( data , config )": {
+      "line": 158,
+      "metric": "lizard_nesting_depth",
+      "name": "_classify_other_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|184|_handle_connection_failure( state , error , config )": {
+      "line": 184,
+      "metric": "lizard_nesting_depth",
+      "name": "_handle_connection_failure( state , error , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|217|_apply_attempt_result( state , result )": {
+      "line": 217,
+      "metric": "lizard_nesting_depth",
+      "name": "_apply_attempt_result( state , result )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|225|async_http_request_to_image( url , request_headers , http_session , config )": {
+      "line": 225,
+      "metric": "lizard_nesting_depth",
+      "name": "async_http_request_to_image( url , request_headers , http_session , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|246|_run_request_loop( runtime )": {
+      "line": 246,
+      "metric": "lizard_nesting_depth",
+      "name": "_run_request_loop( runtime )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|253|_request_loop_done( runtime , result )": {
+      "line": 253,
+      "metric": "lizard_nesting_depth",
+      "name": "_request_loop_done( runtime , result )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|68|_response_content( response )": {
+      "line": 68,
+      "metric": "lizard_nesting_depth",
+      "name": "_response_content( response )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Async_HTTP.py|81|_read_http_response( http_session , url , request_headers , config )": {
+      "line": 81,
+      "metric": "lizard_nesting_depth",
+      "name": "_read_http_response( http_session , url , request_headers , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 2.0
     },
     "lizard_nesting_depth|src/O4_Bathymetry.py|204|compute_depth_ratio_bounds_from_masks( nbr_nodes , node_coords , node_types , tile )": {
       "line": 204,
@@ -4632,269 +4776,261 @@
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1090|get_wms_image( bbox , width , height , provider , http_session )": {
-      "line": 1090,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1016|get_wms_image( bbox , width , height , provider , http_session )": {
+      "line": 1016,
       "metric": "lizard_nesting_depth",
       "name": "get_wms_image( bbox , width , height , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1150|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
-      "line": 1150,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1076|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
+      "line": 1076,
       "metric": "lizard_nesting_depth",
       "name": "get_wmts_image( tilematrix , til_x , til_y , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|129|__str__( self )": {
-      "line": 129,
-      "metric": "lizard_nesting_depth",
-      "name": "__str__( self )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 2.0
-    },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1339|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
-      "line": 1339,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1265|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
+      "line": 1265,
       "metric": "lizard_nesting_depth",
       "name": "build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1380|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
-      "line": 1380,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1306|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
+      "line": 1306,
       "metric": "lizard_nesting_depth",
       "name": "build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 9.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1537|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
-      "line": 1537,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|133|__str__( self )": {
+      "line": 133,
+      "metric": "lizard_nesting_depth",
+      "name": "__str__( self )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1463|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
+      "line": 1463,
       "metric": "lizard_nesting_depth",
       "name": "download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 8.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1627|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
-      "line": 1627,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1553|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
+      "line": 1553,
       "metric": "lizard_nesting_depth",
       "name": "build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 12.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|168|_validation_issues( source_code , source_path , source_kind , exc )": {
-      "line": 168,
-      "metric": "lizard_nesting_depth",
-      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "warn",
-      "value": 3.0
-    },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1777|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
-      "line": 1777,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1707|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
+      "line": 1707,
       "metric": "lizard_nesting_depth",
       "name": "build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|185|_record_provider_epsg( epsg_code )": {
-      "line": 185,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|172|_validation_issues( source_code , source_path , source_kind , exc )": {
+      "line": 172,
       "metric": "lizard_nesting_depth",
-      "name": "_record_provider_epsg( epsg_code )",
+      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
       "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 2.0
+      "severity": "warn",
+      "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1901|build_geotiffs( tile , texture_attributes_list )": {
-      "line": 1901,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1831|build_geotiffs( tile , texture_attributes_list )": {
+      "line": 1831,
       "metric": "lizard_nesting_depth",
       "name": "build_geotiffs( tile , texture_attributes_list )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1930|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
-      "line": 1930,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1860|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
+      "line": 1860,
       "metric": "lizard_nesting_depth",
       "name": "build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|196|_normalize_provider_for_runtime( provider )": {
-      "line": 196,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|189|_record_provider_epsg( epsg_code )": {
+      "line": 189,
       "metric": "lizard_nesting_depth",
-      "name": "_normalize_provider_for_runtime( provider )",
+      "name": "_record_provider_epsg( epsg_code )",
       "path": "src/O4_Imagery_Utils.py",
-      "severity": "block",
-      "value": 4.0
+      "severity": "advise",
+      "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1990|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
-      "line": 1990,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|1920|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
+      "line": 1920,
       "metric": "lizard_nesting_depth",
       "name": "create_tile_preview( lat , lon , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2078|_memory_raster_from_image( source_im , source_array , source_bands , bbox )": {
-      "line": 2078,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2008|_memory_raster_from_image( source_im , source_array , source_bands , bbox )": {
+      "line": 2008,
       "metric": "lizard_nesting_depth",
       "name": "_memory_raster_from_image( source_im , source_array , source_bands , bbox )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|208|_provider_validation_issues( provider_code , source_path , exc )": {
-      "line": 208,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|200|_normalize_provider_for_runtime( provider )": {
+      "line": 200,
       "metric": "lizard_nesting_depth",
-      "name": "_provider_validation_issues( provider_code , source_path , exc )",
+      "name": "_normalize_provider_for_runtime( provider )",
       "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 2.0
+      "severity": "block",
+      "value": 4.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2107|_image_from_memory_raster( raster , mode )": {
-      "line": 2107,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2037|_image_from_memory_raster( raster , mode )": {
+      "line": 2037,
       "metric": "lizard_nesting_depth",
       "name": "_image_from_memory_raster( raster , mode )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2121|color_transform( im , color_code )": {
-      "line": 2121,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2051|color_transform( im , color_code )": {
+      "line": 2051,
       "metric": "lizard_nesting_depth",
       "name": "color_transform( im , color_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2183|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
-      "line": 2183,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2113|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
+      "line": 2113,
       "metric": "lizard_nesting_depth",
       "name": "combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 12.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2320|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
-      "line": 2320,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|212|_provider_validation_issues( provider_code , source_path , exc )": {
+      "line": 212,
+      "metric": "lizard_nesting_depth",
+      "name": "_provider_validation_issues( provider_code , source_path , exc )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2250|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
+      "line": 2250,
       "metric": "lizard_nesting_depth",
       "name": "convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 17.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|237|parse_provider_definition( provider_code , source_path )": {
-      "line": 237,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|241|parse_provider_definition( provider_code , source_path )": {
+      "line": 241,
       "metric": "lizard_nesting_depth",
       "name": "parse_provider_definition( provider_code , source_path )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2499|geotag( input_file_name )": {
-      "line": 2499,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|2429|geotag( input_file_name )": {
+      "line": 2429,
       "metric": "lizard_nesting_depth",
       "name": "geotag( input_file_name )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|273|iter_provider_definition_paths( provider_dir = None )": {
-      "line": 273,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|277|iter_provider_definition_paths( provider_dir = None )": {
+      "line": 277,
       "metric": "lizard_nesting_depth",
       "name": "iter_provider_definition_paths( provider_dir = None )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|296|_record_extent_epsg( epsg_code )": {
-      "line": 296,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|300|_record_extent_epsg( epsg_code )": {
+      "line": 300,
       "metric": "lizard_nesting_depth",
       "name": "_record_extent_epsg( epsg_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|307|parse_extent_definition( extent_code , source_path )": {
-      "line": 307,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|311|parse_extent_definition( extent_code , source_path )": {
+      "line": 311,
       "metric": "lizard_nesting_depth",
       "name": "parse_extent_definition( extent_code , source_path )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|334|initialize_extents_dict( )": {
-      "line": 334,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|338|initialize_extents_dict( )": {
+      "line": 338,
       "metric": "lizard_nesting_depth",
       "name": "initialize_extents_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|354|initialize_color_filters_dict( )": {
-      "line": 354,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|358|initialize_color_filters_dict( )": {
+      "line": 358,
       "metric": "lizard_nesting_depth",
       "name": "initialize_color_filters_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|381|initialize_providers_dict( )": {
-      "line": 381,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|385|initialize_providers_dict( )": {
+      "line": 385,
       "metric": "lizard_nesting_depth",
       "name": "initialize_providers_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 23.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|492|initialize_combined_providers_dict( )": {
-      "line": 492,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|496|initialize_combined_providers_dict( )": {
+      "line": 496,
       "metric": "lizard_nesting_depth",
       "name": "initialize_combined_providers_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|604|initialize_local_combined_providers_dict( tile )": {
-      "line": 604,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|608|initialize_local_combined_providers_dict( tile )": {
+      "line": 608,
       "metric": "lizard_nesting_depth",
       "name": "initialize_local_combined_providers_dict( tile )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 20.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|783|read_tilematrixsets( file_name )": {
-      "line": 783,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|787|read_tilematrixsets( file_name )": {
+      "line": 787,
       "metric": "lizard_nesting_depth",
       "name": "read_tilematrixsets( file_name )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|823|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
-      "line": 823,
+    "lizard_nesting_depth|src/O4_Imagery_Utils.py|827|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
+      "line": 827,
       "metric": "lizard_nesting_depth",
       "name": "has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 14.0
-    },
-    "lizard_nesting_depth|src/O4_Imagery_Utils.py|976|http_request_to_image( width , height , url , request_headers , http_session , )": {
-      "line": 976,
-      "metric": "lizard_nesting_depth",
-      "name": "http_request_to_image( width , height , url , request_headers , http_session , )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "block",
-      "value": 12.0
     },
     "lizard_nesting_depth|src/O4_Mask_Utils.py|149|build_masks.build_mask( til_x , til_y )": {
       "line": 149,
@@ -5440,6 +5576,46 @@
       "severity": "advise",
       "value": 2.0
     },
+    "lizard_nesting_depth|src/O4_Texture_Download_Scheduler.py|117|_download_task( runtime , attrs )": {
+      "line": 117,
+      "metric": "lizard_nesting_depth",
+      "name": "_download_task( runtime , attrs )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Texture_Download_Scheduler.py|141|_run_ready_tasks( runtime , tasks )": {
+      "line": 141,
+      "metric": "lizard_nesting_depth",
+      "name": "_run_ready_tasks( runtime , tasks )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Texture_Download_Scheduler.py|150|_collect_completed_tasks( tasks )": {
+      "line": 150,
+      "metric": "lizard_nesting_depth",
+      "name": "_collect_completed_tasks( tasks )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 2.0
+    },
+    "lizard_nesting_depth|src/O4_Texture_Download_Scheduler.py|159|_wait_for_downloads( runtime , producer_done_event )": {
+      "line": 159,
+      "metric": "lizard_nesting_depth",
+      "name": "_wait_for_downloads( runtime , producer_done_event )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "warn",
+      "value": 3.0
+    },
+    "lizard_nesting_depth|src/O4_Texture_Download_Scheduler.py|209|async_download_textures( tile , download_queue , convert_queue , options )": {
+      "line": 209,
+      "metric": "lizard_nesting_depth",
+      "name": "async_download_textures( tile , download_queue , convert_queue , options )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nesting_depth|src/O4_Texture_Encoder.py|18|coerce_conversion_result( result : TextureConversionResult | TextureEncodeResult | object , display_name : str , provider_code : str = '' , )": {
       "line": 18,
       "metric": "lizard_nesting_depth",
@@ -5472,61 +5648,45 @@
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|180|build_tile( tile , ctx = None )": {
-      "line": 180,
-      "metric": "lizard_nesting_depth",
-      "name": "build_tile( tile , ctx = None )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 28.0
-    },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|30|download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )": {
-      "line": 30,
-      "metric": "lizard_nesting_depth",
-      "name": "download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 14.0
-    },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|348|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
-      "line": 348,
+    "lizard_nesting_depth|src/O4_Tile_Utils.py|238|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
+      "line": 238,
       "metric": "lizard_nesting_depth",
       "name": "build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 2.0
     },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|371|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
-      "line": 371,
+    "lizard_nesting_depth|src/O4_Tile_Utils.py|261|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
+      "line": 261,
       "metric": "lizard_nesting_depth",
       "name": "_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|387|remove_unwanted_textures( tile )": {
-      "line": 387,
+    "lizard_nesting_depth|src/O4_Tile_Utils.py|277|remove_unwanted_textures( tile )": {
+      "line": 277,
       "metric": "lizard_nesting_depth",
       "name": "remove_unwanted_textures( tile )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|409|delete_incomplete_imgs( tile )": {
-      "line": 409,
+    "lizard_nesting_depth|src/O4_Tile_Utils.py|299|delete_incomplete_imgs( tile )": {
+      "line": 299,
       "metric": "lizard_nesting_depth",
       "name": "delete_incomplete_imgs( tile )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_nesting_depth|src/O4_Tile_Utils.py|80|download_textures._download_task( * attrs )": {
-      "line": 80,
+    "lizard_nesting_depth|src/O4_Tile_Utils.py|70|build_tile( tile , ctx = None )": {
+      "line": 70,
       "metric": "lizard_nesting_depth",
-      "name": "download_textures._download_task( * attrs )",
+      "name": "build_tile( tile , ctx = None )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
-      "value": 6.0
+      "value": 28.0
     },
     "lizard_nesting_depth|src/O4_UI_Utils.py|104|log_exception( message : object = 'Unhandled exception' , * args , context : dict [ str , Any ] | None = None , )": {
       "line": 104,
@@ -6168,6 +6328,14 @@
       "severity": "advise",
       "value": 2.0
     },
+    "lizard_nesting_depth|tests/test_texture_async_downloads.py|57|test_async_download_textures_retries_and_summarizes_final_failures_once( self )": {
+      "line": 57,
+      "metric": "lizard_nesting_depth",
+      "name": "test_async_download_textures_retries_and_summarizes_final_failures_once( self )",
+      "path": "tests/test_texture_async_downloads.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nesting_depth|tests/test_texture_conversion_scheduler_live.py|63|_wait_for_completed_textures( self , expected_count )": {
       "line": 63,
       "metric": "lizard_nesting_depth",
@@ -6687,6 +6855,38 @@
       "path": "src/O4_Airport_Geometry.py",
       "severity": "warn",
       "value": 26.0
+    },
+    "lizard_nloc|src/O4_Async_HTTP.py|127|_classify_http_response( data , config )": {
+      "line": 127,
+      "metric": "lizard_nloc",
+      "name": "_classify_http_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|src/O4_Async_HTTP.py|142|_classify_non_image_response( data , config )": {
+      "line": 142,
+      "metric": "lizard_nloc",
+      "name": "_classify_non_image_response( data , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|src/O4_Async_HTTP.py|198|_next_attempt( runtime )": {
+      "line": 198,
+      "metric": "lizard_nloc",
+      "name": "_next_attempt( runtime )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|src/O4_Async_HTTP.py|225|async_http_request_to_image( url , request_headers , http_session , config )": {
+      "line": 225,
+      "metric": "lizard_nloc",
+      "name": "async_http_request_to_image( url , request_headers , http_session , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 19.0
     },
     "lizard_nloc|src/O4_Bathymetry.py|204|compute_depth_ratio_bounds_from_masks( nbr_nodes , node_coords , node_types , tile )": {
       "line": 204,
@@ -7784,245 +7984,237 @@
       "severity": "advise",
       "value": 24.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1090|get_wms_image( bbox , width , height , provider , http_session )": {
-      "line": 1090,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1016|get_wms_image( bbox , width , height , provider , http_session )": {
+      "line": 1016,
       "metric": "lizard_nloc",
       "name": "get_wms_image( bbox , width , height , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 54.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1150|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
-      "line": 1150,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1076|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
+      "line": 1076,
       "metric": "lizard_nloc",
       "name": "get_wmts_image( tilematrix , til_x , til_y , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 142.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1312|get_and_paste_wmts_part( tilematrix , til_x , til_y , provider , big_image , x0 , y0 , http_session , subt_size = None , )": {
-      "line": 1312,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1238|get_and_paste_wmts_part( tilematrix , til_x , til_y , provider , big_image , x0 , y0 , http_session , subt_size = None , )": {
+      "line": 1238,
       "metric": "lizard_nloc",
       "name": "get_and_paste_wmts_part( tilematrix , til_x , til_y , provider , big_image , x0 , y0 , http_session , subt_size = None , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 21.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1339|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
-      "line": 1339,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1265|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
+      "line": 1265,
       "metric": "lizard_nloc",
       "name": "build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 29.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1380|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
-      "line": 1380,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1306|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
+      "line": 1306,
       "metric": "lizard_nloc",
       "name": "build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 141.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|143|_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )": {
-      "line": 143,
-      "metric": "lizard_nloc",
-      "name": "_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 18.0
-    },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1537|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
-      "line": 1537,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1463|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
+      "line": 1463,
       "metric": "lizard_nloc",
       "name": "download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 81.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1627|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
-      "line": 1627,
+    "lizard_nloc|src/O4_Imagery_Utils.py|147|_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )": {
+      "line": 147,
+      "metric": "lizard_nloc",
+      "name": "_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|src/O4_Imagery_Utils.py|1553|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
+      "line": 1553,
       "metric": "lizard_nloc",
       "name": "build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 136.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|168|_validation_issues( source_code , source_path , source_kind , exc )": {
-      "line": 168,
-      "metric": "lizard_nloc",
-      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 15.0
-    },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1777|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
-      "line": 1777,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1707|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
+      "line": 1707,
       "metric": "lizard_nloc",
       "name": "build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 106.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1901|build_geotiffs( tile , texture_attributes_list )": {
-      "line": 1901,
+    "lizard_nloc|src/O4_Imagery_Utils.py|172|_validation_issues( source_code , source_path , source_kind , exc )": {
+      "line": 172,
+      "metric": "lizard_nloc",
+      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 15.0
+    },
+    "lizard_nloc|src/O4_Imagery_Utils.py|1831|build_geotiffs( tile , texture_attributes_list )": {
+      "line": 1831,
       "metric": "lizard_nloc",
       "name": "build_geotiffs( tile , texture_attributes_list )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 23.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1930|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
-      "line": 1930,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1860|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
+      "line": 1860,
       "metric": "lizard_nloc",
       "name": "build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 40.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|1990|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
-      "line": 1990,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1920|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
+      "line": 1920,
       "metric": "lizard_nloc",
       "name": "create_tile_preview( lat , lon , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 37.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|2040|warp_image_with_gdal( source_im , s_bbox , s_epsg , t_bbox , t_epsg , t_size )": {
-      "line": 2040,
+    "lizard_nloc|src/O4_Imagery_Utils.py|1970|warp_image_with_gdal( source_im , s_bbox , s_epsg , t_bbox , t_epsg , t_size )": {
+      "line": 1970,
       "metric": "lizard_nloc",
       "name": "warp_image_with_gdal( source_im , s_bbox , s_epsg , t_bbox , t_epsg , t_size )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 22.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|2078|_memory_raster_from_image( source_im , source_array , source_bands , bbox )": {
-      "line": 2078,
+    "lizard_nloc|src/O4_Imagery_Utils.py|2008|_memory_raster_from_image( source_im , source_array , source_bands , bbox )": {
+      "line": 2008,
       "metric": "lizard_nloc",
       "name": "_memory_raster_from_image( source_im , source_array , source_bands , bbox )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 27.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|208|_provider_validation_issues( provider_code , source_path , exc )": {
-      "line": 208,
-      "metric": "lizard_nloc",
-      "name": "_provider_validation_issues( provider_code , source_path , exc )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 14.0
-    },
-    "lizard_nloc|src/O4_Imagery_Utils.py|2121|color_transform( im , color_code )": {
-      "line": 2121,
+    "lizard_nloc|src/O4_Imagery_Utils.py|2051|color_transform( im , color_code )": {
+      "line": 2051,
       "metric": "lizard_nloc",
       "name": "color_transform( im , color_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 51.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|2183|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
-      "line": 2183,
+    "lizard_nloc|src/O4_Imagery_Utils.py|2113|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
+      "line": 2113,
       "metric": "lizard_nloc",
       "name": "combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 121.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|2320|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
-      "line": 2320,
+    "lizard_nloc|src/O4_Imagery_Utils.py|212|_provider_validation_issues( provider_code , source_path , exc )": {
+      "line": 212,
+      "metric": "lizard_nloc",
+      "name": "_provider_validation_issues( provider_code , source_path , exc )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 14.0
+    },
+    "lizard_nloc|src/O4_Imagery_Utils.py|2250|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
+      "line": 2250,
       "metric": "lizard_nloc",
       "name": "convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 156.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|237|parse_provider_definition( provider_code , source_path )": {
-      "line": 237,
+    "lizard_nloc|src/O4_Imagery_Utils.py|241|parse_provider_definition( provider_code , source_path )": {
+      "line": 241,
       "metric": "lizard_nloc",
       "name": "parse_provider_definition( provider_code , source_path )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 33.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|2499|geotag( input_file_name )": {
-      "line": 2499,
+    "lizard_nloc|src/O4_Imagery_Utils.py|2429|geotag( input_file_name )": {
+      "line": 2429,
       "metric": "lizard_nloc",
       "name": "geotag( input_file_name )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 29.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|307|parse_extent_definition( extent_code , source_path )": {
-      "line": 307,
+    "lizard_nloc|src/O4_Imagery_Utils.py|311|parse_extent_definition( extent_code , source_path )": {
+      "line": 311,
       "metric": "lizard_nloc",
       "name": "parse_extent_definition( extent_code , source_path )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 25.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|334|initialize_extents_dict( )": {
-      "line": 334,
+    "lizard_nloc|src/O4_Imagery_Utils.py|338|initialize_extents_dict( )": {
+      "line": 338,
       "metric": "lizard_nloc",
       "name": "initialize_extents_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 14.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|354|initialize_color_filters_dict( )": {
-      "line": 354,
+    "lizard_nloc|src/O4_Imagery_Utils.py|358|initialize_color_filters_dict( )": {
+      "line": 358,
       "metric": "lizard_nloc",
       "name": "initialize_color_filters_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 21.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|381|initialize_providers_dict( )": {
-      "line": 381,
+    "lizard_nloc|src/O4_Imagery_Utils.py|385|initialize_providers_dict( )": {
+      "line": 385,
       "metric": "lizard_nloc",
       "name": "initialize_providers_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 105.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|492|initialize_combined_providers_dict( )": {
-      "line": 492,
+    "lizard_nloc|src/O4_Imagery_Utils.py|496|initialize_combined_providers_dict( )": {
+      "line": 496,
       "metric": "lizard_nloc",
       "name": "initialize_combined_providers_dict( )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 106.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|604|initialize_local_combined_providers_dict( tile )": {
-      "line": 604,
+    "lizard_nloc|src/O4_Imagery_Utils.py|608|initialize_local_combined_providers_dict( tile )": {
+      "line": 608,
       "metric": "lizard_nloc",
       "name": "initialize_local_combined_providers_dict( tile )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 169.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|783|read_tilematrixsets( file_name )": {
-      "line": 783,
+    "lizard_nloc|src/O4_Imagery_Utils.py|787|read_tilematrixsets( file_name )": {
+      "line": 787,
       "metric": "lizard_nloc",
       "name": "read_tilematrixsets( file_name )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 30.0
     },
-    "lizard_nloc|src/O4_Imagery_Utils.py|823|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
-      "line": 823,
+    "lizard_nloc|src/O4_Imagery_Utils.py|827|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
+      "line": 827,
       "metric": "lizard_nloc",
       "name": "has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 118.0
-    },
-    "lizard_nloc|src/O4_Imagery_Utils.py|976|http_request_to_image( width , height , url , request_headers , http_session , )": {
-      "line": 976,
-      "metric": "lizard_nloc",
-      "name": "http_request_to_image( width , height , url , request_headers , http_session , )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "block",
-      "value": 105.0
     },
     "lizard_nloc|src/O4_Mask_Utils.py|149|build_masks.build_mask( til_x , til_y )": {
       "line": 149,
@@ -8504,6 +8696,46 @@
       "severity": "warn",
       "value": 36.0
     },
+    "lizard_nloc|src/O4_Texture_Download_Scheduler.py|117|_download_task( runtime , attrs )": {
+      "line": 117,
+      "metric": "lizard_nloc",
+      "name": "_download_task( runtime , attrs )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|src/O4_Texture_Download_Scheduler.py|190|_print_summary( tile , final_failures )": {
+      "line": 190,
+      "metric": "lizard_nloc",
+      "name": "_print_summary( tile , final_failures )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|src/O4_Texture_Download_Scheduler.py|209|async_download_textures( tile , download_queue , convert_queue , options )": {
+      "line": 209,
+      "metric": "lizard_nloc",
+      "name": "async_download_textures( tile , download_queue , convert_queue , options )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 20.0
+    },
+    "lizard_nloc|src/O4_Texture_Download_Scheduler.py|51|_texture_failure_context( attrs )": {
+      "line": 51,
+      "metric": "lizard_nloc",
+      "name": "_texture_failure_context( attrs )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "warn",
+      "value": 26.0
+    },
+    "lizard_nloc|src/O4_Texture_Download_Scheduler.py|91|_record_download_result( runtime , attrs , ok )": {
+      "line": 91,
+      "metric": "lizard_nloc",
+      "name": "_record_download_result( runtime , attrs , ok )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 16.0
+    },
     "lizard_nloc|src/O4_Texture_Encoder.py|18|coerce_conversion_result( result : TextureConversionResult | TextureEncodeResult | object , display_name : str , provider_code : str = '' , )": {
       "line": 18,
       "metric": "lizard_nloc",
@@ -8528,69 +8760,61 @@
       "severity": "advise",
       "value": 16.0
     },
-    "lizard_nloc|src/O4_Tile_Utils.py|180|build_tile( tile , ctx = None )": {
-      "line": 180,
-      "metric": "lizard_nloc",
-      "name": "build_tile( tile , ctx = None )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 148.0
-    },
-    "lizard_nloc|src/O4_Tile_Utils.py|30|download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )": {
-      "line": 30,
-      "metric": "lizard_nloc",
-      "name": "download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 64.0
-    },
-    "lizard_nloc|src/O4_Tile_Utils.py|348|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
-      "line": 348,
+    "lizard_nloc|src/O4_Tile_Utils.py|238|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
+      "line": 238,
       "metric": "lizard_nloc",
       "name": "build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 20.0
     },
-    "lizard_nloc|src/O4_Tile_Utils.py|371|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
-      "line": 371,
+    "lizard_nloc|src/O4_Tile_Utils.py|261|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
+      "line": 261,
       "metric": "lizard_nloc",
       "name": "_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 13.0
     },
-    "lizard_nloc|src/O4_Tile_Utils.py|387|remove_unwanted_textures( tile )": {
-      "line": 387,
+    "lizard_nloc|src/O4_Tile_Utils.py|277|remove_unwanted_textures( tile )": {
+      "line": 277,
       "metric": "lizard_nloc",
       "name": "remove_unwanted_textures( tile )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 20.0
     },
-    "lizard_nloc|src/O4_Tile_Utils.py|409|delete_incomplete_imgs( tile )": {
-      "line": 409,
+    "lizard_nloc|src/O4_Tile_Utils.py|299|delete_incomplete_imgs( tile )": {
+      "line": 299,
       "metric": "lizard_nloc",
       "name": "delete_incomplete_imgs( tile )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 19.0
     },
-    "lizard_nloc|src/O4_Tile_Utils.py|47|download_textures._texture_failure_context( attrs )": {
-      "line": 47,
+    "lizard_nloc|src/O4_Tile_Utils.py|30|async_download_textures( tile , download_queue , convert_queue , options = None , )": {
+      "line": 30,
       "metric": "lizard_nloc",
-      "name": "download_textures._texture_failure_context( attrs )",
+      "name": "async_download_textures( tile , download_queue , convert_queue , options = None , )",
       "path": "src/O4_Tile_Utils.py",
-      "severity": "warn",
-      "value": 26.0
+      "severity": "advise",
+      "value": 14.0
     },
-    "lizard_nloc|src/O4_Tile_Utils.py|80|download_textures._download_task( * attrs )": {
-      "line": 80,
+    "lizard_nloc|src/O4_Tile_Utils.py|46|download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )": {
+      "line": 46,
       "metric": "lizard_nloc",
-      "name": "download_textures._download_task( * attrs )",
+      "name": "download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )",
+      "path": "src/O4_Tile_Utils.py",
+      "severity": "advise",
+      "value": 21.0
+    },
+    "lizard_nloc|src/O4_Tile_Utils.py|70|build_tile( tile , ctx = None )": {
+      "line": 70,
+      "metric": "lizard_nloc",
+      "name": "build_tile( tile , ctx = None )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
-      "value": 37.0
+      "value": 148.0
     },
     "lizard_nloc|src/O4_UI_Utils.py|104|log_exception( message : object = 'Unhandled exception' , * args , context : dict [ str , Any ] | None = None , )": {
       "line": 104,
@@ -9648,6 +9872,54 @@
       "severity": "warn",
       "value": 32.0
     },
+    "lizard_nloc|tests/test_imagery_async_downloads.py|102|test_async_http_request_decodes_image_in_thread( self )": {
+      "line": 102,
+      "metric": "lizard_nloc",
+      "name": "test_async_http_request_decodes_image_in_thread( self )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 19.0
+    },
+    "lizard_nloc|tests/test_imagery_async_downloads.py|124|test_async_connection_error_retries_and_records_failure( self )": {
+      "line": 124,
+      "metric": "lizard_nloc",
+      "name": "test_async_connection_error_retries_and_records_failure( self )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 22.0
+    },
+    "lizard_nloc|tests/test_imagery_async_downloads.py|149|test_async_connection_error_honors_zero_retry_limit( self )": {
+      "line": 149,
+      "metric": "lizard_nloc",
+      "name": "test_async_connection_error_honors_zero_retry_limit( self )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|tests/test_imagery_async_downloads.py|169|test_async_corrupted_image_retries_bad_data_and_records_failure( self )": {
+      "line": 169,
+      "metric": "lizard_nloc",
+      "name": "test_async_corrupted_image_retries_bad_data_and_records_failure( self )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 22.0
+    },
+    "lizard_nloc|tests/test_imagery_async_downloads.py|194|test_async_http_404_records_sanitized_failure( self )": {
+      "line": 194,
+      "metric": "lizard_nloc",
+      "name": "test_async_http_404_records_sanitized_failure( self )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 18.0
+    },
+    "lizard_nloc|tests/test_imagery_async_downloads.py|69|setUp( self )": {
+      "line": 69,
+      "metric": "lizard_nloc",
+      "name": "setUp( self )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 23.0
+    },
     "lizard_nloc|tests/test_imagery_color_normalization.py|32|test_normalize_texture_image_loads_existing_cardinal_neighbors( self )": {
       "line": 32,
       "metric": "lizard_nloc",
@@ -9734,34 +10006,34 @@
       "name": "test_request_exception_retries_connect_and_records_failure( self )",
       "path": "tests/test_imagery_failures.py",
       "severity": "advise",
-      "value": 23.0
+      "value": 22.0
     },
-    "lizard_nloc|tests/test_imagery_failures.py|183|test_debug_verbosity_includes_full_url( self )": {
-      "line": 183,
+    "lizard_nloc|tests/test_imagery_failures.py|182|test_debug_verbosity_includes_full_url( self )": {
+      "line": 182,
       "metric": "lizard_nloc",
       "name": "test_debug_verbosity_includes_full_url( self )",
       "path": "tests/test_imagery_failures.py",
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|tests/test_imagery_failures.py|226|test_texture_retries_use_configured_limit( self )": {
-      "line": 226,
+    "lizard_nloc|tests/test_imagery_failures.py|225|test_texture_retries_use_configured_limit( self )": {
+      "line": 225,
       "metric": "lizard_nloc",
       "name": "test_texture_retries_use_configured_limit( self )",
       "path": "tests/test_imagery_failures.py",
       "severity": "advise",
       "value": 14.0
     },
-    "lizard_nloc|tests/test_imagery_failures.py|246|test_failed_texture_attempts_are_summarized_once( self )": {
-      "line": 246,
+    "lizard_nloc|tests/test_imagery_failures.py|245|test_failed_texture_attempts_are_summarized_once( self )": {
+      "line": 245,
       "metric": "lizard_nloc",
       "name": "test_failed_texture_attempts_are_summarized_once( self )",
       "path": "tests/test_imagery_failures.py",
       "severity": "advise",
       "value": 18.0
     },
-    "lizard_nloc|tests/test_imagery_failures.py|275|test_successful_retry_is_not_in_final_failure_summary( self )": {
-      "line": 275,
+    "lizard_nloc|tests/test_imagery_failures.py|274|test_successful_retry_is_not_in_final_failure_summary( self )": {
+      "line": 274,
       "metric": "lizard_nloc",
       "name": "test_successful_retry_is_not_in_final_failure_summary( self )",
       "path": "tests/test_imagery_failures.py",
@@ -10144,6 +10416,22 @@
       "severity": "advise",
       "value": 20.0
     },
+    "lizard_nloc|tests/test_texture_async_downloads.py|18|test_async_download_textures_limits_concurrency_and_enqueues_conversions( self )": {
+      "line": 18,
+      "metric": "lizard_nloc",
+      "name": "test_async_download_textures_limits_concurrency_and_enqueues_conversions( self )",
+      "path": "tests/test_texture_async_downloads.py",
+      "severity": "warn",
+      "value": 26.0
+    },
+    "lizard_nloc|tests/test_texture_async_downloads.py|57|test_async_download_textures_retries_and_summarizes_final_failures_once( self )": {
+      "line": 57,
+      "metric": "lizard_nloc",
+      "name": "test_async_download_textures_retries_and_summarizes_final_failures_once( self )",
+      "path": "tests/test_texture_async_downloads.py",
+      "severity": "warn",
+      "value": 25.0
+    },
     "lizard_nloc|tests/test_texture_conversion_scheduler.py|107|test_scheduler_respects_red_flag_before_scheduling( self )": {
       "line": 107,
       "metric": "lizard_nloc",
@@ -10495,6 +10783,30 @@
       "path": "src/O4_Airport_Geometry.py",
       "severity": "advise",
       "value": 3.0
+    },
+    "lizard_param_count|src/O4_Async_HTTP.py|184|_handle_connection_failure( state , error , config )": {
+      "line": 184,
+      "metric": "lizard_param_count",
+      "name": "_handle_connection_failure( state , error , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Async_HTTP.py|225|async_http_request_to_image( url , request_headers , http_session , config )": {
+      "line": 225,
+      "metric": "lizard_param_count",
+      "name": "async_http_request_to_image( url , request_headers , http_session , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Async_HTTP.py|81|_read_http_response( http_session , url , request_headers , config )": {
+      "line": 81,
+      "metric": "lizard_param_count",
+      "name": "_read_http_response( http_session , url , request_headers , config )",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "warn",
+      "value": 4.0
     },
     "lizard_param_count|src/O4_Bathymetry.py|16|set_depth_ratio( n , node_is_coast , node_bathy , tile )": {
       "line": 16,
@@ -11352,178 +11664,186 @@
       "severity": "block",
       "value": 6.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1090|get_wms_image( bbox , width , height , provider , http_session )": {
-      "line": 1090,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1016|get_wms_image( bbox , width , height , provider , http_session )": {
+      "line": 1016,
       "metric": "lizard_param_count",
       "name": "get_wms_image( bbox , width , height , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1150|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
-      "line": 1150,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1076|get_wmts_image( tilematrix , til_x , til_y , provider , http_session )": {
+      "line": 1076,
       "metric": "lizard_param_count",
       "name": "get_wmts_image( tilematrix , til_x , til_y , provider , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1300|get_and_paste_wms_part( bbox , width , height , provider , big_image , x0 , y0 , http_session )": {
-      "line": 1300,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1226|get_and_paste_wms_part( bbox , width , height , provider , big_image , x0 , y0 , http_session )": {
+      "line": 1226,
       "metric": "lizard_param_count",
       "name": "get_and_paste_wms_part( bbox , width , height , provider , big_image , x0 , y0 , http_session )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 8.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1312|get_and_paste_wmts_part( tilematrix , til_x , til_y , provider , big_image , x0 , y0 , http_session , subt_size = None , )": {
-      "line": 1312,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1238|get_and_paste_wmts_part( tilematrix , til_x , til_y , provider , big_image , x0 , y0 , http_session , subt_size = None , )": {
+      "line": 1238,
       "metric": "lizard_param_count",
       "name": "get_and_paste_wmts_part( tilematrix , til_x , til_y , provider , big_image , x0 , y0 , http_session , subt_size = None , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 9.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1339|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
-      "line": 1339,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1265|build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )": {
+      "line": 1265,
       "metric": "lizard_param_count",
       "name": "build_texture_from_tilbox( tilbox , zoomlevel , provider , progress = None )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1380|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
-      "line": 1380,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1306|build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )": {
+      "line": 1306,
       "metric": "lizard_param_count",
       "name": "build_texture_from_bbox_and_size( t_bbox , t_epsg , t_size , provider )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|143|_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )": {
-      "line": 143,
-      "metric": "lizard_param_count",
-      "name": "_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "block",
-      "value": 7.0
-    },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1537|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
-      "line": 1537,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1463|download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )": {
+      "line": 1463,
       "metric": "lizard_param_count",
       "name": "download_jpeg_ortho( file_dir , file_name , til_x_left , til_y_top , zoomlevel , provider_code , super_resol_factor = 1 , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1627|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
-      "line": 1627,
+    "lizard_param_count|src/O4_Imagery_Utils.py|147|_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )": {
+      "line": 147,
+      "metric": "lizard_param_count",
+      "name": "_provider_issue( provider_code , source_path , field , message , line_number = None , is_error = True , source_kind = 'provider' , )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "block",
+      "value": 7.0
+    },
+    "lizard_param_count|src/O4_Imagery_Utils.py|1553|build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )": {
+      "line": 1553,
       "metric": "lizard_param_count",
       "name": "build_jpeg_ortho( tile , til_x_left , til_y_top , zoomlevel , provider_code , out_file_name = '' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|168|_validation_issues( source_code , source_path , source_kind , exc )": {
-      "line": 168,
-      "metric": "lizard_param_count",
-      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "warn",
-      "value": 4.0
-    },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1777|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
-      "line": 1777,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1707|build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )": {
+      "line": 1707,
       "metric": "lizard_param_count",
       "name": "build_combined_ortho( tile , latp , lonp , zoomlevel , provider_code , mask_zl , filename = 'test.png' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1930|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
-      "line": 1930,
+    "lizard_param_count|src/O4_Imagery_Utils.py|172|_validation_issues( source_code , source_path , source_kind , exc )": {
+      "line": 172,
+      "metric": "lizard_param_count",
+      "name": "_validation_issues( source_code , source_path , source_kind , exc )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Imagery_Utils.py|1860|build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )": {
+      "line": 1860,
       "metric": "lizard_param_count",
       "name": "build_texture_region( dest_dir , latmin , latmax , lonmin , lonmax , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 7.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1976|build_provider_texture( dest_dir , provider_code , zoomlevel )": {
-      "line": 1976,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1906|build_provider_texture( dest_dir , provider_code , zoomlevel )": {
+      "line": 1906,
       "metric": "lizard_param_count",
       "name": "build_provider_texture( dest_dir , provider_code , zoomlevel )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|1990|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
-      "line": 1990,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1920|create_tile_preview( lat , lon , zoomlevel , provider_code )": {
+      "line": 1920,
       "metric": "lizard_param_count",
       "name": "create_tile_preview( lat , lon , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|2040|warp_image_with_gdal( source_im , s_bbox , s_epsg , t_bbox , t_epsg , t_size )": {
-      "line": 2040,
+    "lizard_param_count|src/O4_Imagery_Utils.py|1970|warp_image_with_gdal( source_im , s_bbox , s_epsg , t_bbox , t_epsg , t_size )": {
+      "line": 1970,
       "metric": "lizard_param_count",
       "name": "warp_image_with_gdal( source_im , s_bbox , s_epsg , t_bbox , t_epsg , t_size )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|2078|_memory_raster_from_image( source_im , source_array , source_bands , bbox )": {
-      "line": 2078,
+    "lizard_param_count|src/O4_Imagery_Utils.py|2008|_memory_raster_from_image( source_im , source_array , source_bands , bbox )": {
+      "line": 2008,
       "metric": "lizard_param_count",
       "name": "_memory_raster_from_image( source_im , source_array , source_bands , bbox )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|208|_provider_validation_issues( provider_code , source_path , exc )": {
-      "line": 208,
-      "metric": "lizard_param_count",
-      "name": "_provider_validation_issues( provider_code , source_path , exc )",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 3.0
-    },
-    "lizard_param_count|src/O4_Imagery_Utils.py|2183|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
-      "line": 2183,
+    "lizard_param_count|src/O4_Imagery_Utils.py|2113|combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )": {
+      "line": 2113,
       "metric": "lizard_param_count",
       "name": "combine_textures( tile , til_x_left , til_y_top , zoomlevel , provider_code )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|224|_json_decode_issues( source_code , source_path , source_kind , exc )": {
-      "line": 224,
+    "lizard_param_count|src/O4_Imagery_Utils.py|212|_provider_validation_issues( provider_code , source_path , exc )": {
+      "line": 212,
       "metric": "lizard_param_count",
-      "name": "_json_decode_issues( source_code , source_path , source_kind , exc )",
+      "name": "_provider_validation_issues( provider_code , source_path , exc )",
       "path": "src/O4_Imagery_Utils.py",
-      "severity": "warn",
-      "value": 4.0
+      "severity": "advise",
+      "value": 3.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|2320|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
-      "line": 2320,
+    "lizard_param_count|src/O4_Imagery_Utils.py|2250|convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )": {
+      "line": 2250,
       "metric": "lizard_param_count",
       "name": "convert_texture( tile , til_x_left , til_y_top , zoomlevel , provider_code , type = 'dds' )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|823|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
-      "line": 823,
+    "lizard_param_count|src/O4_Imagery_Utils.py|228|_json_decode_issues( source_code , source_path , source_kind , exc )": {
+      "line": 228,
+      "metric": "lizard_param_count",
+      "name": "_json_decode_issues( source_code , source_path , source_kind , exc )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Imagery_Utils.py|827|has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )": {
+      "line": 827,
       "metric": "lizard_param_count",
       "name": "has_data( bbox , extent_code , return_mask = False , mask_size = ( 4096 , 4096 )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
     },
-    "lizard_param_count|src/O4_Imagery_Utils.py|976|http_request_to_image( width , height , url , request_headers , http_session , )": {
-      "line": 976,
+    "lizard_param_count|src/O4_Imagery_Utils.py|990|async_http_request_to_image( url , request_headers , http_session )": {
+      "line": 990,
       "metric": "lizard_param_count",
-      "name": "http_request_to_image( width , height , url , request_headers , http_session , )",
+      "name": "async_http_request_to_image( url , request_headers , http_session )",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Imagery_Utils.py|996|http_request_to_image( width , height , url , request_headers , http_session = None , )": {
+      "line": 996,
+      "metric": "lizard_param_count",
+      "name": "http_request_to_image( width , height , url , request_headers , http_session = None , )",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 5.0
@@ -11944,6 +12264,46 @@
       "severity": "advise",
       "value": 3.0
     },
+    "lizard_param_count|src/O4_Texture_Download_Scheduler.py|132|_queue_download_result( runtime , attrs , ok , should_retry )": {
+      "line": 132,
+      "metric": "lizard_param_count",
+      "name": "_queue_download_result( runtime , attrs , ok , should_retry )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Texture_Download_Scheduler.py|170|_download_loop_done( runtime , producer_done_event , tasks )": {
+      "line": 170,
+      "metric": "lizard_param_count",
+      "name": "_download_loop_done( runtime , producer_done_event , tasks )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Texture_Download_Scheduler.py|177|_downloads_complete( runtime , producer_done_event , tasks )": {
+      "line": 177,
+      "metric": "lizard_param_count",
+      "name": "_downloads_complete( runtime , producer_done_event , tasks )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|src/O4_Texture_Download_Scheduler.py|209|async_download_textures( tile , download_queue , convert_queue , options )": {
+      "line": 209,
+      "metric": "lizard_param_count",
+      "name": "async_download_textures( tile , download_queue , convert_queue , options )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Texture_Download_Scheduler.py|91|_record_download_result( runtime , attrs , ok )": {
+      "line": 91,
+      "metric": "lizard_param_count",
+      "name": "_record_download_result( runtime , attrs , ok )",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 3.0
+    },
     "lizard_param_count|src/O4_Texture_Encoder.py|18|coerce_conversion_result( result : TextureConversionResult | TextureEncodeResult | object , display_name : str , provider_code : str = '' , )": {
       "line": 18,
       "metric": "lizard_param_count",
@@ -11976,26 +12336,34 @@
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Tile_Utils.py|30|download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )": {
-      "line": 30,
-      "metric": "lizard_param_count",
-      "name": "download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 5.0
-    },
-    "lizard_param_count|src/O4_Tile_Utils.py|348|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
-      "line": 348,
+    "lizard_param_count|src/O4_Tile_Utils.py|238|build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )": {
+      "line": 238,
       "metric": "lizard_param_count",
       "name": "build_tile_list( tile , list_lat_lon , do_osm , do_mesh , do_mask , do_dsf , do_ovl , override_cfg )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
       "value": 8.0
     },
-    "lizard_param_count|src/O4_Tile_Utils.py|371|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
-      "line": 371,
+    "lizard_param_count|src/O4_Tile_Utils.py|261|_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )": {
+      "line": 261,
       "metric": "lizard_param_count",
       "name": "_batch_steps( do_osm , do_mesh , do_mask , do_dsf , do_ovl )",
+      "path": "src/O4_Tile_Utils.py",
+      "severity": "block",
+      "value": 5.0
+    },
+    "lizard_param_count|src/O4_Tile_Utils.py|30|async_download_textures( tile , download_queue , convert_queue , options = None , )": {
+      "line": 30,
+      "metric": "lizard_param_count",
+      "name": "async_download_textures( tile , download_queue , convert_queue , options = None , )",
+      "path": "src/O4_Tile_Utils.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|src/O4_Tile_Utils.py|46|download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )": {
+      "line": 46,
+      "metric": "lizard_param_count",
+      "name": "download_textures( tile , download_queue , convert_queue , workers = None , producer_done_event = None , )",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
       "value": 5.0
@@ -12488,6 +12856,30 @@
       "severity": "advise",
       "value": 3.0
     },
+    "lizard_param_count|tests/test_imagery_async_downloads.py|31|__init__( self , status , headers = None , content = b '' )": {
+      "line": 31,
+      "metric": "lizard_param_count",
+      "name": "__init__( self , status , headers = None , content = b '' )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/test_imagery_async_downloads.py|52|__aexit__( self , _exc_type , _exc , _tb )": {
+      "line": 52,
+      "metric": "lizard_param_count",
+      "name": "__aexit__( self , _exc_type , _exc , _tb )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "warn",
+      "value": 4.0
+    },
+    "lizard_param_count|tests/test_imagery_async_downloads.py|62|get( self , * _args , ** kwargs )": {
+      "line": 62,
+      "metric": "lizard_param_count",
+      "name": "get( self , * _args , ** kwargs )",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "advise",
+      "value": 3.0
+    },
     "lizard_param_count|tests/test_imagery_failures.py|24|__init__( self , status_code , headers = None , content = b '' )": {
       "line": 24,
       "metric": "lizard_param_count",
@@ -12527,6 +12919,14 @@
       "path": "tests/test_scenery_manager.py",
       "severity": "warn",
       "value": 4.0
+    },
+    "lizard_param_count|tests/test_texture_async_downloads.py|91|_options( self , workers = None , retries = 3 )": {
+      "line": 91,
+      "metric": "lizard_param_count",
+      "name": "_options( self , workers = None , retries = 3 )",
+      "path": "tests/test_texture_async_downloads.py",
+      "severity": "advise",
+      "value": 3.0
     },
     "lizard_param_count|tests/test_texture_conversion_scheduler.py|20|progress_bar( self , bar , value )": {
       "line": 20,
@@ -13143,6 +13543,46 @@
       "path": "src/O4_Airport_Geometry.py",
       "severity": "advise",
       "value": 4.0
+    },
+    "radon_cc|src/O4_Async_HTTP.py|102|_provider_no_data_status": {
+      "line": 102,
+      "metric": "radon_cc",
+      "name": "_provider_no_data_status",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "warn",
+      "value": 7.0
+    },
+    "radon_cc|src/O4_Async_HTTP.py|127|_classify_http_response": {
+      "line": 127,
+      "metric": "radon_cc",
+      "name": "_classify_http_response",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Async_HTTP.py|142|_classify_non_image_response": {
+      "line": 142,
+      "metric": "radon_cc",
+      "name": "_classify_non_image_response",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Async_HTTP.py|158|_classify_other_response": {
+      "line": 158,
+      "metric": "radon_cc",
+      "name": "_classify_other_response",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Async_HTTP.py|253|_request_loop_done": {
+      "line": 253,
+      "metric": "radon_cc",
+      "name": "_request_loop_done",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "advise",
+      "value": 5.0
     },
     "radon_cc|src/O4_Bathymetry.py|204|compute_depth_ratio_bounds_from_masks": {
       "line": 204,
@@ -14160,229 +14600,221 @@
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1090|get_wms_image": {
-      "line": 1090,
+    "radon_cc|src/O4_Imagery_Utils.py|1016|get_wms_image": {
+      "line": 1016,
       "metric": "radon_cc",
       "name": "get_wms_image",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1150|get_wmts_image": {
-      "line": 1150,
+    "radon_cc|src/O4_Imagery_Utils.py|1076|get_wmts_image": {
+      "line": 1076,
       "metric": "radon_cc",
       "name": "get_wmts_image",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|120|ProviderValidationIssue": {
-      "line": 120,
+    "radon_cc|src/O4_Imagery_Utils.py|124|ProviderValidationIssue": {
+      "line": 124,
       "metric": "radon_cc",
       "name": "ProviderValidationIssue",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1339|build_texture_from_tilbox": {
-      "line": 1339,
+    "radon_cc|src/O4_Imagery_Utils.py|1265|build_texture_from_tilbox": {
+      "line": 1265,
       "metric": "radon_cc",
       "name": "build_texture_from_tilbox",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1380|build_texture_from_bbox_and_size": {
-      "line": 1380,
+    "radon_cc|src/O4_Imagery_Utils.py|1306|build_texture_from_bbox_and_size": {
+      "line": 1306,
       "metric": "radon_cc",
       "name": "build_texture_from_bbox_and_size",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 24.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1537|download_jpeg_ortho": {
-      "line": 1537,
+    "radon_cc|src/O4_Imagery_Utils.py|1463|download_jpeg_ortho": {
+      "line": 1463,
       "metric": "radon_cc",
       "name": "download_jpeg_ortho",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1627|build_jpeg_ortho": {
-      "line": 1627,
+    "radon_cc|src/O4_Imagery_Utils.py|1553|build_jpeg_ortho": {
+      "line": 1553,
       "metric": "radon_cc",
       "name": "build_jpeg_ortho",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 18.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|168|_validation_issues": {
-      "line": 168,
-      "metric": "radon_cc",
-      "name": "_validation_issues",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 4.0
-    },
-    "radon_cc|src/O4_Imagery_Utils.py|1777|build_combined_ortho": {
-      "line": 1777,
+    "radon_cc|src/O4_Imagery_Utils.py|1707|build_combined_ortho": {
+      "line": 1707,
       "metric": "radon_cc",
       "name": "build_combined_ortho",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 13.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1901|build_geotiffs": {
-      "line": 1901,
+    "radon_cc|src/O4_Imagery_Utils.py|172|_validation_issues": {
+      "line": 172,
+      "metric": "radon_cc",
+      "name": "_validation_issues",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Imagery_Utils.py|1831|build_geotiffs": {
+      "line": 1831,
       "metric": "radon_cc",
       "name": "build_geotiffs",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|1930|build_texture_region": {
-      "line": 1930,
+    "radon_cc|src/O4_Imagery_Utils.py|1860|build_texture_region": {
+      "line": 1860,
       "metric": "radon_cc",
       "name": "build_texture_region",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|196|_normalize_provider_for_runtime": {
-      "line": 196,
-      "metric": "radon_cc",
-      "name": "_normalize_provider_for_runtime",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "advise",
-      "value": 5.0
-    },
-    "radon_cc|src/O4_Imagery_Utils.py|1990|create_tile_preview": {
-      "line": 1990,
+    "radon_cc|src/O4_Imagery_Utils.py|1920|create_tile_preview": {
+      "line": 1920,
       "metric": "radon_cc",
       "name": "create_tile_preview",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 7.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|2121|color_transform": {
-      "line": 2121,
+    "radon_cc|src/O4_Imagery_Utils.py|200|_normalize_provider_for_runtime": {
+      "line": 200,
+      "metric": "radon_cc",
+      "name": "_normalize_provider_for_runtime",
+      "path": "src/O4_Imagery_Utils.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|src/O4_Imagery_Utils.py|2051|color_transform": {
+      "line": 2051,
       "metric": "radon_cc",
       "name": "color_transform",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 10.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|2183|combine_textures": {
-      "line": 2183,
+    "radon_cc|src/O4_Imagery_Utils.py|2113|combine_textures": {
+      "line": 2113,
       "metric": "radon_cc",
       "name": "combine_textures",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 18.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|2320|convert_texture": {
-      "line": 2320,
+    "radon_cc|src/O4_Imagery_Utils.py|2250|convert_texture": {
+      "line": 2250,
       "metric": "radon_cc",
       "name": "convert_texture",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 26.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|237|parse_provider_definition": {
-      "line": 237,
+    "radon_cc|src/O4_Imagery_Utils.py|241|parse_provider_definition": {
+      "line": 241,
       "metric": "radon_cc",
       "name": "parse_provider_definition",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|2499|geotag": {
-      "line": 2499,
+    "radon_cc|src/O4_Imagery_Utils.py|2429|geotag": {
+      "line": 2429,
       "metric": "radon_cc",
       "name": "geotag",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|273|iter_provider_definition_paths": {
-      "line": 273,
+    "radon_cc|src/O4_Imagery_Utils.py|277|iter_provider_definition_paths": {
+      "line": 277,
       "metric": "radon_cc",
       "name": "iter_provider_definition_paths",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|307|parse_extent_definition": {
-      "line": 307,
+    "radon_cc|src/O4_Imagery_Utils.py|311|parse_extent_definition": {
+      "line": 311,
       "metric": "radon_cc",
       "name": "parse_extent_definition",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 5.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|334|initialize_extents_dict": {
-      "line": 334,
+    "radon_cc|src/O4_Imagery_Utils.py|338|initialize_extents_dict": {
+      "line": 338,
       "metric": "radon_cc",
       "name": "initialize_extents_dict",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|354|initialize_color_filters_dict": {
-      "line": 354,
+    "radon_cc|src/O4_Imagery_Utils.py|358|initialize_color_filters_dict": {
+      "line": 358,
       "metric": "radon_cc",
       "name": "initialize_color_filters_dict",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|381|initialize_providers_dict": {
-      "line": 381,
+    "radon_cc|src/O4_Imagery_Utils.py|385|initialize_providers_dict": {
+      "line": 385,
       "metric": "radon_cc",
       "name": "initialize_providers_dict",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 28.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|492|initialize_combined_providers_dict": {
-      "line": 492,
+    "radon_cc|src/O4_Imagery_Utils.py|496|initialize_combined_providers_dict": {
+      "line": 496,
       "metric": "radon_cc",
       "name": "initialize_combined_providers_dict",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 19.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|604|initialize_local_combined_providers_dict": {
-      "line": 604,
+    "radon_cc|src/O4_Imagery_Utils.py|608|initialize_local_combined_providers_dict": {
+      "line": 608,
       "metric": "radon_cc",
       "name": "initialize_local_combined_providers_dict",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 24.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|783|read_tilematrixsets": {
-      "line": 783,
+    "radon_cc|src/O4_Imagery_Utils.py|787|read_tilematrixsets": {
+      "line": 787,
       "metric": "radon_cc",
       "name": "read_tilematrixsets",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "warn",
       "value": 8.0
     },
-    "radon_cc|src/O4_Imagery_Utils.py|823|has_data": {
-      "line": 823,
+    "radon_cc|src/O4_Imagery_Utils.py|827|has_data": {
+      "line": 827,
       "metric": "radon_cc",
       "name": "has_data",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
       "value": 27.0
-    },
-    "radon_cc|src/O4_Imagery_Utils.py|976|http_request_to_image": {
-      "line": 976,
-      "metric": "radon_cc",
-      "name": "http_request_to_image",
-      "path": "src/O4_Imagery_Utils.py",
-      "severity": "block",
-      "value": 25.0
     },
     "radon_cc|src/O4_Mask_Utils.py|246|select_neighbor_meshes": {
       "line": 246,
@@ -14904,6 +15336,46 @@
       "severity": "advise",
       "value": 4.0
     },
+    "radon_cc|src/O4_Texture_Download_Scheduler.py|117|_download_task": {
+      "line": 117,
+      "metric": "radon_cc",
+      "name": "_download_task",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Texture_Download_Scheduler.py|141|_run_ready_tasks": {
+      "line": 141,
+      "metric": "radon_cc",
+      "name": "_run_ready_tasks",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 5.0
+    },
+    "radon_cc|src/O4_Texture_Download_Scheduler.py|159|_wait_for_downloads": {
+      "line": 159,
+      "metric": "radon_cc",
+      "name": "_wait_for_downloads",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Texture_Download_Scheduler.py|209|async_download_textures": {
+      "line": 209,
+      "metric": "radon_cc",
+      "name": "async_download_textures",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
+    "radon_cc|src/O4_Texture_Download_Scheduler.py|91|_record_download_result": {
+      "line": 91,
+      "metric": "radon_cc",
+      "name": "_record_download_result",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "advise",
+      "value": 4.0
+    },
     "radon_cc|src/O4_Texture_Encoder.py|18|coerce_conversion_result": {
       "line": 18,
       "metric": "radon_cc",
@@ -14928,53 +15400,45 @@
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Tile_Utils.py|180|build_tile": {
-      "line": 180,
-      "metric": "radon_cc",
-      "name": "build_tile",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 32.0
-    },
-    "radon_cc|src/O4_Tile_Utils.py|30|download_textures": {
-      "line": 30,
-      "metric": "radon_cc",
-      "name": "download_textures",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "block",
-      "value": 16.0
-    },
-    "radon_cc|src/O4_Tile_Utils.py|348|build_tile_list": {
-      "line": 348,
+    "radon_cc|src/O4_Tile_Utils.py|238|build_tile_list": {
+      "line": 238,
       "metric": "radon_cc",
       "name": "build_tile_list",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Tile_Utils.py|371|_batch_steps": {
-      "line": 371,
+    "radon_cc|src/O4_Tile_Utils.py|261|_batch_steps": {
+      "line": 261,
       "metric": "radon_cc",
       "name": "_batch_steps",
       "path": "src/O4_Tile_Utils.py",
       "severity": "advise",
       "value": 6.0
     },
-    "radon_cc|src/O4_Tile_Utils.py|387|remove_unwanted_textures": {
-      "line": 387,
+    "radon_cc|src/O4_Tile_Utils.py|277|remove_unwanted_textures": {
+      "line": 277,
       "metric": "radon_cc",
       "name": "remove_unwanted_textures",
       "path": "src/O4_Tile_Utils.py",
       "severity": "warn",
       "value": 9.0
     },
-    "radon_cc|src/O4_Tile_Utils.py|409|delete_incomplete_imgs": {
-      "line": 409,
+    "radon_cc|src/O4_Tile_Utils.py|299|delete_incomplete_imgs": {
+      "line": 299,
       "metric": "radon_cc",
       "name": "delete_incomplete_imgs",
       "path": "src/O4_Tile_Utils.py",
       "severity": "warn",
       "value": 7.0
+    },
+    "radon_cc|src/O4_Tile_Utils.py|70|build_tile": {
+      "line": 70,
+      "metric": "radon_cc",
+      "name": "build_tile",
+      "path": "src/O4_Tile_Utils.py",
+      "severity": "block",
+      "value": 32.0
     },
     "radon_cc|src/O4_UI_Utils.py|104|log_exception": {
       "line": 104,
@@ -15494,7 +15958,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 16.14539748953975
+      "value": 16.22312703583062
     },
     "radon_hal_difficulty|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -15535,14 +15999,6 @@
       "path": "src/O4_Source_Data_Models.py",
       "severity": "advise",
       "value": 11.523809523809524
-    },
-    "radon_hal_difficulty|src/O4_Tile_Utils.py||<module>": {
-      "line": null,
-      "metric": "radon_hal_difficulty",
-      "name": "<module>",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "advise",
-      "value": 9.196428571428571
     },
     "radon_hal_difficulty|src/O4_UI_Utils.py||<module>": {
       "line": null,
@@ -15686,7 +16142,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 357281.08881181607
+      "value": 345558.794761712
     },
     "radon_hal_effort|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -15735,14 +16191,6 @@
       "path": "src/O4_Source_Data_Models.py",
       "severity": "advise",
       "value": 8778.992750027197
-    },
-    "radon_hal_effort|src/O4_Tile_Utils.py||<module>": {
-      "line": null,
-      "metric": "radon_hal_effort",
-      "name": "<module>",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "advise",
-      "value": 10181.389573391905
     },
     "radon_hal_effort|src/O4_Vector_Map.py||<module>": {
       "line": null,
@@ -15894,7 +16342,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 22128.97446738556
+      "value": 21300.381486165163
     },
     "radon_hal_volume|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -15943,14 +16391,6 @@
       "path": "src/O4_Scenery_Manager.py",
       "severity": "advise",
       "value": 1273.2611494756538
-    },
-    "radon_hal_volume|src/O4_Tile_Utils.py||<module>": {
-      "line": null,
-      "metric": "radon_hal_volume",
-      "name": "<module>",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "advise",
-      "value": 1107.1025555532947
     },
     "radon_hal_volume|src/O4_Vector_Map.py||<module>": {
       "line": null,
@@ -16143,6 +16583,14 @@
       "path": "src/O4_Airport_Geometry.py",
       "severity": "block",
       "value": 24.406712283814365
+    },
+    "radon_mi|src/O4_Async_HTTP.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Async_HTTP.py",
+      "severity": "block",
+      "value": 25.3941084879975
     },
     "radon_mi|src/O4_Bathymetry.py||<module>": {
       "line": null,
@@ -16560,6 +17008,14 @@
       "severity": "warn",
       "value": 50.05586793050524
     },
+    "radon_mi|src/O4_Texture_Download_Scheduler.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Texture_Download_Scheduler.py",
+      "severity": "block",
+      "value": 28.08369282953337
+    },
     "radon_mi|src/O4_Texture_Encoder.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -16590,7 +17046,7 @@
       "name": "<module>",
       "path": "src/O4_Tile_Utils.py",
       "severity": "block",
-      "value": 25.07406332515373
+      "value": 33.08197743555268
     },
     "radon_mi|src/O4_UI_Utils.py||<module>": {
       "line": null,
@@ -16952,6 +17408,14 @@
       "severity": "warn",
       "value": 60.55076121686441
     },
+    "radon_mi|tests/test_imagery_async_downloads.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_imagery_async_downloads.py",
+      "severity": "block",
+      "value": 45.93987991757145
+    },
     "radon_mi|tests/test_imagery_color_normalization.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -16982,7 +17446,7 @@
       "name": "<module>",
       "path": "tests/test_imagery_failures.py",
       "severity": "block",
-      "value": 42.608044818620016
+      "value": 42.61824054859467
     },
     "radon_mi|tests/test_imagery_incomplete_color_normalization.py||<module>": {
       "line": null,
@@ -17112,6 +17576,14 @@
       "severity": "warn",
       "value": 57.92591050672683
     },
+    "radon_mi|tests/test_texture_async_downloads.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_texture_async_downloads.py",
+      "severity": "warn",
+      "value": 58.893058379900516
+    },
     "radon_mi|tests/test_texture_conversion_scheduler.py||<module>": {
       "line": null,
       "metric": "radon_mi",
@@ -17214,7 +17686,7 @@
       "name": "<module>",
       "path": "src/O4_Imagery_Utils.py",
       "severity": "block",
-      "value": 1354.0
+      "value": 1286.0
     },
     "radon_raw_lloc|src/O4_Mask_Utils.py||<module>": {
       "line": null,
@@ -17239,14 +17711,6 @@
       "path": "src/O4_OSM_Utils.py",
       "severity": "advise",
       "value": 507.0
-    },
-    "radon_raw_lloc|src/O4_Tile_Utils.py||<module>": {
-      "line": null,
-      "metric": "radon_raw_lloc",
-      "name": "<module>",
-      "path": "src/O4_Tile_Utils.py",
-      "severity": "advise",
-      "value": 295.0
     },
     "radon_raw_lloc|src/O4_Vector_Map.py||<module>": {
       "line": null,
@@ -17303,6 +17767,7 @@
     "src/O4_Airport_Discovery.py",
     "src/O4_Airport_Encoding.py",
     "src/O4_Airport_Geometry.py",
+    "src/O4_Async_HTTP.py",
     "src/O4_Bathymetry.py",
     "src/O4_Bathymetry_DSF_Atoms.py",
     "src/O4_Bathymetry_DSF_Bytes.py",
@@ -17361,6 +17826,7 @@
     "src/O4_Texture_Conversion_Runner.py",
     "src/O4_Texture_Conversion_Scheduler.py",
     "src/O4_Texture_Conversion_Utils.py",
+    "src/O4_Texture_Download_Scheduler.py",
     "src/O4_Texture_Encoder.py",
     "src/O4_Texture_Models.py",
     "src/O4_Tile_Texture_Conversion.py",
@@ -17414,6 +17880,7 @@
     "tests/test_geotag.py",
     "tests/test_gui_batch_adapter.py",
     "tests/test_headless_launcher.py",
+    "tests/test_imagery_async_downloads.py",
     "tests/test_imagery_color_normalization.py",
     "tests/test_imagery_convert_color_normalization.py",
     "tests/test_imagery_download_color_normalization.py",
@@ -17435,6 +17902,7 @@
     "tests/test_startup.py",
     "tests/test_subprocess_regression.py",
     "tests/test_subprocess_utils.py",
+    "tests/test_texture_async_downloads.py",
     "tests/test_texture_conversion_scheduler.py",
     "tests/test_texture_conversion_scheduler_limits.py",
     "tests/test_texture_conversion_scheduler_live.py",

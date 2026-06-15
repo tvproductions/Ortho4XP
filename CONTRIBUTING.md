@@ -1,10 +1,10 @@
 # Contributing
 
-This fork is being modernized around Python 3.13+, `uv`, `unittest`, Ruff, ty, and LLVM/Clang for native utilities. Keep changes portable across Windows, current Apple Silicon macOS, and Ubuntu unless a platform-specific limitation is documented.
+This fork is being modernized around Python 3.13.x, `uv`, `unittest`, Ruff, ty, and LLVM/Clang for native utilities. Keep changes portable across Windows, current Apple Silicon macOS, and Ubuntu unless a platform-specific limitation is documented.
 
 ## Development Environment
 
-Install Python 3.13 and `uv`, then sync the project environment from the repository root:
+Install Python 3.13.x and `uv`, then sync the project environment from the repository root:
 
 ```bash
 uv sync --dev

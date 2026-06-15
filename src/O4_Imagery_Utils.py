@@ -1,6 +1,6 @@
+import asyncio
 import importlib
 import importlib.util
-import io
 import json
 import os
 import queue
@@ -13,11 +13,11 @@ from pathlib import Path
 from typing import Any
 
 import numpy
-import requests
 from osgeo import gdal
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from pydantic import ValidationError
 
+import O4_Async_HTTP as AHTTP
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Imagery_Failures as IFAIL
@@ -81,6 +81,10 @@ imagery_download_summary = IFAIL.imagery_download_summary
 incomplete_texture_file_names = IFAIL.incomplete_texture_file_names
 incomplete_texture_file_names_by_tile = IFAIL.incomplete_texture_file_names_by_tile
 record_incomplete_texture = IFAIL.record_incomplete_texture
+
+
+async def async_request_sleep(delay):
+    await asyncio.sleep(delay)
 
 
 user_agent_generic = (
@@ -973,114 +977,36 @@ def has_data(
 
 
 ################################################################################
+def _async_http_config():
+    return AHTTP.AsyncHttpConfig(
+        timeout=http_timeout,
+        check_response=check_tms_response,
+        max_connect_retries=max_connect_retries,
+        max_baddata_retries=max_baddata_retries,
+        sleep=async_request_sleep,
+    )
+
+
+async def async_http_request_to_image(url, request_headers, http_session):
+    return await AHTTP.async_http_request_to_image(
+        url, request_headers, http_session, _async_http_config()
+    )
+
+
 def http_request_to_image(
     width,
     height,
     url,
     request_headers,
-    http_session,
+    http_session=None,
 ):
-    request_headers, request_context = IFAIL.split_request_headers(request_headers)
-    UI.vprint(3, "HTTP request issued :", url, "\nRequest headers :", request_headers)
-    tentative_request = 0
-    tentative_image = 0
-    r = False
-    status_code = None
-    reason = "request_failed"
-    while True:
-        try:
-            if request_headers:
-                r = http_session.get(url, timeout=http_timeout, headers=request_headers)
-            else:
-                r = http_session.get(url, timeout=http_timeout)
-            status_code = IFAIL.response_status_code(r)
-            status_text = IFAIL.response_status_text(r)
-            # Bing white image with small camera or Arcgis no data yet =>
-            # try to downsample to lower ZL
-            if ("Content-Length" in r.headers) and int(
-                r.headers["Content-Length"]
-            ) <= 2521:
-                if (r.headers["Content-Length"] == "1033") and ("virtualearth" in url):
-                    UI.vprint(3, url, r.headers)
-                    status_code = 404
-                    reason = "provider_no_data_image"
-                    break
-                if (r.headers["Content-Length"] == "2521") and ("arcgisonline" in url):
-                    UI.vprint(3, url, r.headers)
-                    status_code = 404
-                    reason = "provider_no_data_image"
-                    break
-            content_type = r.headers.get("Content-Type", "")
-            if status_code == 200 and "image" in content_type:
-                try:
-                    small_image = Image.open(io.BytesIO(r.content))
-                    return (1, small_image, None)
-                except (OSError, UnidentifiedImageError):
-                    reason = "corrupted_image"
-                    UI.vprint(
-                        2,
-                        "Server said 'OK', but the received ",
-                        "image was corrupted.",
-                    )
-                    UI.vprint(3, url, r.headers)
-            elif status_code == 404:
-                reason = "not_found"
-                UI.vprint(2, "Server said 'Not Found'")
-                UI.vprint(3, url, r.headers)
-                break
-            elif status_code == 200:
-                reason = "wrong_content_type"
-                UI.vprint(2, "Server said 'OK' but sent us the wrong Content-Type.")
-                UI.vprint(3, url, r.headers, r.content)
-                break
-            elif status_code == 403:
-                reason = "forbidden"
-                UI.vprint(2, "Server said 'Forbidden' ! (IP banned?)")
-                UI.vprint(3, url, r.headers, r.content)
-                break
-            elif isinstance(status_code, int) and 500 <= status_code < 600:
-                reason = "server_error"
-                UI.vprint(2, "Server said 'Internal Error'.", status_text)
-                if not check_tms_response:
-                    break
-                time.sleep(2)
-            else:
-                reason = "unmanaged_status"
-                UI.vprint(2, "Unmanaged Server answer:", status_text)
-                UI.vprint(3, url, r.headers)
-                break
-            if UI.red_flag:
-                return (0, "Stopped", None)
-            tentative_image += 1
-        except requests.exceptions.RequestException as e:
-            status_code = "connection_failure"
-            reason = "connection_failure"
-            UI.vprint(2, "Server could not be connected, retrying in 2 secs")
-            UI.vprint(3, e)
-            if not check_tms_response:
-                break
-            # trying a new session ?
-            http_session = requests.Session()
-            time.sleep(2)
-            if UI.red_flag:
-                return (0, "Stopped", None)
-            tentative_request += 1
-        if (
-            tentative_request == max_connect_retries
-            or tentative_image == max_baddata_retries
-        ):
-            break
-    failure = IFAIL.record_failure(
-        url,
-        status_code,
-        tentative_request,
-        tentative_image,
-        reason,
-        request_context,
-    )
-    if status_code == 404:
-        return (0, "[404]", failure)
-    return (0, str(status_code), failure)
+    async def _run_request():
+        if http_session is not None:
+            return await async_http_request_to_image(url, request_headers, http_session)
+        async with AHTTP.aiohttp.ClientSession() as session:
+            return await async_http_request_to_image(url, request_headers, session)
+
+    return asyncio.run(_run_request())
 
 
 ################################################################################
@@ -1345,7 +1271,7 @@ def build_texture_from_tilbox(tilbox, zoomlevel, provider, progress=None):
     width = height = provider["tile_size"]
     big_image = Image.new("RGB", (width * parts_x, height * parts_y))
     # we set-up the queue of downloads
-    http_session = requests.Session()
+    http_session = None
     download_queue = queue.Queue()
     for monty in range(0, parts_y):
         for montx in range(0, parts_x):
@@ -1459,7 +1385,7 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
         else:
             subt_size = None
     big_image = Image.new("RGB", (width * parts_x, height * parts_y))
-    http_session = requests.Session()
+    http_session = None
     download_queue = queue.Queue()
     for monty in range(0, parts_y):
         for montx in range(0, parts_x):
@@ -1763,6 +1689,10 @@ def build_jpeg_ortho(
         )
         return 0
     return 1
+
+
+async def async_build_jpeg_ortho(tile, *attrs):
+    return await asyncio.to_thread(build_jpeg_ortho, tile, *attrs)
 
 
 ################################################################################

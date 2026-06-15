@@ -3,8 +3,9 @@ name = "ortho4xp"
 version = "1.4"
 description = "Scenery generation tool for X-Plane."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
+  "aiohttp>=3.13,<4",
   "numpy==2.4.4",
   "pillow==12.2.0",
   "pydantic>=2,<3",

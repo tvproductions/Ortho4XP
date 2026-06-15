@@ -9,7 +9,7 @@ description: Run repository hygiene workflows for Ortho4XP build readiness, work
 
 Use this skill only inside the Ortho4XP repository. Keep the workflow modern and project-local:
 
-- Python 3.13+ through `uv`.
+- Python 3.13.x through `uv`.
 - `unittest` only for tests.
 - `ruff check` and `ruff format`.
 - `ty` for type checking changed Python files and the current baseline.

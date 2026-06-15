@@ -1,6 +1,6 @@
 # TODO
 
-Each TODO below is intended to become one GitHub Issue (GHI). Numbers are execution-priority order and may be renumbered when dependencies change. Keep issue bodies scoped, actionable, independently mergeable, and aligned with the current repo policy: Python 3.13+, `uv`, `ruff`, `ty`, `unittest`, and LLVM/Clang.
+Each TODO below is intended to become one GitHub Issue (GHI). Numbers are execution-priority order and may be renumbered when dependencies change. Keep issue bodies scoped, actionable, independently mergeable, and aligned with the current repo policy: Python 3.13.x, `uv`, `ruff`, `ty`, `unittest`, and LLVM/Clang.
 
 GitHub issue numbers are references only; they are not expected to match TODO
 numbers. Some completed TODOs were captured retroactively after the work was
@@ -39,7 +39,7 @@ Add modern project tooling configuration.
 Acceptance criteria:
 
 - Adds `pyproject.toml`.
-- Requires Python 3.13+.
+- Requires Python 3.13.x.
 - Uses committed `uv.lock`.
 - Configures Ruff check and format.
 - Configures ty baseline.
@@ -96,7 +96,7 @@ Create contributor-facing setup documentation that matches the modern toolchain.
 
 Acceptance criteria:
 
-- Documents Python 3.13+, `uv sync --dev`, Ruff, ty, and `unittest`.
+- Documents Python 3.13.x, `uv sync --dev`, Ruff, ty, and `unittest`.
 - Documents LLVM/Clang native build prerequisites.
 - Documents Windows 11, Apple Silicon macOS, and Ubuntu expectations.
 - Documents local-only generated data directories.
@@ -815,9 +815,23 @@ Suggested labels: `textures`, `quality`, `quick-win`
 
 ### TODO-030: aiohttp + asyncio Tile Downloads
 
-Status: Pending
+Status: Done
 
 GitHub Issue: #33
+
+Completion note: implemented with `aiohttp` as a runtime dependency, a focused
+async HTTP request state machine in `O4_Async_HTTP`, an async-compatible
+`O4_Imagery_Utils.async_http_request_to_image()` path, and a synchronous
+compatibility wrapper for existing callers. Texture downloads now route through
+`O4_Texture_Download_Scheduler.async_download_textures()`, which uses asyncio
+tasks with semaphore backpressure, preserves the conversion queue handoff,
+keeps retry/failure aggregation, and dispatches JPEG build work through
+`asyncio.to_thread()`.
+
+Verification note: focused async imagery/scheduler tests, full `unittest`
+discovery, Ruff, Ruff format, changed-file `ty`, complexity checks, clang-tidy,
+and the native CMake build all passed through the full repository quality gate:
+`uv run python .codex/skills/quality-check/scripts/quality_check.py`.
 
 Replace `requests` + `ThreadPoolExecutor` with `aiohttp` + `asyncio` for tile
 downloads. Provides native async I/O, connection pooling, backpressure via

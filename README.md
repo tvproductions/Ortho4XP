@@ -127,7 +127,7 @@ Create and sync the development environment with:
 uv sync --dev
 ```
 
-The repository pins local development to Python 3.13 through `.python-version`.
+The repository supports Python 3.13.x and pins local development through `.python-version`.
 
 Run the deterministic unit test suite with:
 

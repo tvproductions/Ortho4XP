@@ -85,7 +85,7 @@ claims. These reinforce this repo's PRIME DIRECTIVE and DO IT RIGHT rules.
 
 ## Modern Toolchain
 
-Windows 11 is the primary development environment for now. Keep choices portable to current Apple Silicon macOS and Ubuntu. Python 3.13+ is required; `.python-version` pins local `uv` environments to Python 3.13. `uv.lock` is committed and authoritative.
+Windows 11 is the primary development environment for now. Keep choices portable to current Apple Silicon macOS and Ubuntu. Python 3.13.x is required; `.python-version` pins local `uv` environments to Python 3.13. `uv.lock` is committed and authoritative.
 
 Use:
 
