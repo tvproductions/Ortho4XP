@@ -817,6 +817,8 @@ Suggested labels: `textures`, `quality`, `quick-win`
 
 Status: Pending
 
+GitHub Issue: #33
+
 Replace `requests` + `ThreadPoolExecutor` with `aiohttp` + `asyncio` for tile
 downloads. Provides native async I/O, connection pooling, backpressure via
 semaphore, and easier cancellation.
