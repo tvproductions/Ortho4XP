@@ -6,9 +6,9 @@ Breaks down usage by main session and individual subagents.
 
 import json
 import sys
-from collections import defaultdict
 from pathlib import Path
-from typing import TypedDict
+from collections import defaultdict
+from typing import Any, TypedDict
 
 
 class TokenUsage(TypedDict):
@@ -19,11 +19,11 @@ class TokenUsage(TypedDict):
     messages: int
 
 
-class SubagentUsage(TokenUsage):
+class AgentUsage(TokenUsage):
     description: str | None
 
 
-def new_subagent_usage() -> SubagentUsage:
+def make_agent_usage() -> AgentUsage:
     return {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -34,7 +34,7 @@ def new_subagent_usage() -> SubagentUsage:
     }
 
 
-def analyze_main_session(filepath):
+def analyze_main_session(filepath: str) -> tuple[TokenUsage, dict[str, AgentUsage]]:
     """Analyze a session file and return token usage broken down by agent."""
     main_usage: TokenUsage = {
         "input_tokens": 0,
@@ -45,7 +45,7 @@ def analyze_main_session(filepath):
     }
 
     # Track usage per subagent
-    subagent_usage: defaultdict[str, SubagentUsage] = defaultdict(new_subagent_usage)
+    subagent_usage: defaultdict[str, AgentUsage] = defaultdict(make_agent_usage)
 
     with open(filepath, "r") as f:
         for line in f:
@@ -69,8 +69,8 @@ def analyze_main_session(filepath):
                 if data.get("type") == "user" and "toolUseResult" in data:
                     result = data["toolUseResult"]
                     if "usage" in result and "agentId" in result:
-                        agent_id = result["agentId"]
-                        usage = result["usage"]
+                        agent_id = str(result["agentId"])
+                        usage: dict[str, Any] = result["usage"]
 
                         # Get description from prompt if available
                         if subagent_usage[agent_id]["description"] is None:
@@ -102,12 +102,14 @@ def analyze_main_session(filepath):
     return main_usage, dict(subagent_usage)
 
 
-def format_tokens(n):
+def format_tokens(n: int) -> str:
     """Format token count with thousands separators."""
     return f"{n:,}"
 
 
-def calculate_cost(usage, input_cost_per_m=3.0, output_cost_per_m=15.0):
+def calculate_cost(
+    usage: TokenUsage, input_cost_per_m: float = 3.0, output_cost_per_m: float = 15.0
+) -> float:
     """Calculate estimated cost in dollars."""
     total_input = usage["input_tokens"] + usage["cache_creation"] + usage["cache_read"]
     input_cost = total_input * input_cost_per_m / 1_000_000
@@ -170,7 +172,7 @@ def main():
     print("-" * 100)
 
     # Calculate totals
-    total_usage = {
+    total_usage: TokenUsage = {
         "input_tokens": main_usage["input_tokens"],
         "output_tokens": main_usage["output_tokens"],
         "cache_creation": main_usage["cache_creation"],
