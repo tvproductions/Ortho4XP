@@ -9,6 +9,7 @@ from shapely.errors import GEOSException
 import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
+import O4_Resampling_Policy as RP
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
 
@@ -247,7 +248,8 @@ def smooth_raster_over_airports(tile, dico_airports, preserve_boundary=True):
                 ]
                 airport_draw.polygon(interior_pol_pix, fill="black")
         airport_im = airport_im.resize(
-            (colmax - colmin + 1, rowmax - rowmin + 1), Image.Resampling.BICUBIC
+            (colmax - colmin + 1, rowmax - rowmin + 1),
+            RP.tile_pillow_resampling(tile, "airport_smoothing_resampling"),
         )
         tile.dem.alt_dem[rowmin : rowmax + 1, colmin : colmax + 1] = DEM.smoothen(
             tile.dem.alt_dem[rowmin : rowmax + 1, colmin : colmax + 1],

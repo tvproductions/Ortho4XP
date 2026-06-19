@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 
 import numpy
 from PIL import Image
@@ -69,6 +70,34 @@ class GDALWarpTests(unittest.TestCase):
 
         self.assertEqual(result.mode, "L")
         self.assertGreater(numpy.array(result)[4, 4], 200)
+
+    def test_warp_image_with_gdal_uses_configured_resampling(self):
+        import O4_Imagery_Utils as IMG
+
+        source_im = Image.new("RGB", (8, 8), (255, 0, 0))
+        original_warp = IMG.gdal.Warp
+        captured = {}
+        previous = IMG.warp_resampling
+
+        def warp(*args, **kwargs):
+            captured["resampleAlg"] = kwargs["resampleAlg"]
+            return original_warp(*args, **kwargs)
+
+        try:
+            IMG.warp_resampling = "nearest"
+            with mock.patch.object(IMG.gdal, "Warp", side_effect=warp):
+                IMG.warp_image_with_gdal(
+                    source_im,
+                    (0, 1, 1, 0),
+                    4326,
+                    (0, 1, 1, 0),
+                    4326,
+                    source_im.size,
+                )
+        finally:
+            IMG.warp_resampling = previous
+
+        self.assertEqual(captured["resampleAlg"], "near")
 
 
 if __name__ == "__main__":

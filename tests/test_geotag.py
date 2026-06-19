@@ -25,7 +25,7 @@ class StandaloneGeotagTests(unittest.TestCase):
             mock.patch.object(GEOTAG, "gdal") as gdal_mock,
             mock.patch.object(GEOTAG.os, "remove") as remove_mock,
         ):
-            GEOTAG.geotag_jpeg("48_32_16.jpg")
+            _geotag_jpeg_with_resampling("nearest")
 
         gdal_mock.Translate.assert_called_once_with(
             "48_32_16_tmp.tif",
@@ -44,9 +44,18 @@ class StandaloneGeotagTests(unittest.TestCase):
             dstSRS="EPSG:4326",
             width=4096,
             height=4096,
-            resampleAlg="bilinear",
+            resampleAlg="near",
         )
         remove_mock.assert_called_once_with("48_32_16_tmp.tif")
+
+
+def _geotag_jpeg_with_resampling(method):
+    previous = GEOTAG.warp_resampling
+    GEOTAG.warp_resampling = method
+    try:
+        GEOTAG.geotag_jpeg("48_32_16.jpg")
+    finally:
+        GEOTAG.warp_resampling = previous
 
 
 if __name__ == "__main__":

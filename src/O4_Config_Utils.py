@@ -221,7 +221,7 @@ class Tile:
         self.water_tech = globals()["water_tech"]
         self.zone_list = globals()["zone_list"]
         for var in list_tile_vars:
-            setattr(self, var, globals()[var])
+            setattr(self, var, _get_config_value(var))
 
     def make_dirs(self):
         if os.path.isdir(self.build_dir):

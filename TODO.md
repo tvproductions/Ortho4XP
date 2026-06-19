@@ -850,7 +850,8 @@ Suggested labels: `async`, `network`, `performance`
 
 ### TODO-031: Per-Stage Resampling Policy
 
-Status: Pending
+Status: Done
+GitHub: #34
 
 Define per-stage resampling defaults with optional config overrides.
 

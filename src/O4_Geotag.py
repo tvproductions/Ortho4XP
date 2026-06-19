@@ -4,8 +4,11 @@ from math import atan, exp, pi
 from osgeo import gdal
 from pyproj import Transformer
 
+import O4_Resampling_Policy as RP
+
 geo_to_webm = Transformer.from_crs("epsg:4326", "epsg:3857", always_xy=True)
 gdal.UseExceptions()
+warp_resampling: str = "bicubic"
 
 
 def gtile_to_wgs84(til_x, til_y, zoomlevel):
@@ -44,7 +47,7 @@ def geotag_jpeg(file_name):
         dstSRS="EPSG:4326",
         width=4096,
         height=4096,
-        resampleAlg="bilinear",
+        resampleAlg=RP.gdal_resampling(warp_resampling),
     )
     os.remove(tmp_tif)
 

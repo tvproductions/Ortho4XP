@@ -12,9 +12,11 @@ from osgeo import gdal
 from PIL import Image
 
 import O4_File_Names as FNAMES
+import O4_Resampling_Policy as RP
 import O4_UI_Utils as UI
 
 gdal.UseExceptions()
+dem_resampling: str = "bicubic"
 
 available_sources = (
     "View",
@@ -180,11 +182,13 @@ class DEM:
         dy = dy / norm
         del norm
         band_r = Image.fromarray(((1 + dx) / 2 * 255).astype(numpy.uint8)).resize(
-            (4096, 4096)
+            (4096, 4096),
+            RP.pillow_resampling(dem_resampling),
         )
         del dx
         band_g = Image.fromarray(((1 - dy) / 2 * 255).astype(numpy.uint8)).resize(
-            (4096, 4096)
+            (4096, 4096),
+            RP.pillow_resampling(dem_resampling),
         )
         del dy
         band_b = Image.fromarray((numpy.ones((4096, 4096)) * 10).astype(numpy.uint8))

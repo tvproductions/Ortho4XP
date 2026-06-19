@@ -14,7 +14,7 @@ import O4_Texture_Conversion_Utils as TCU
 
 class GdalGeotiffSmallTileTests(unittest.TestCase):
     def setUp(self):
-        self.tile = SimpleNamespace(build_dir="/build")
+        self.tile = SimpleNamespace(build_dir="/build", warp_resampling="bicubic")
 
     def test_small_tile_calls_gdal_translate_with_epsg4326(self):
         with (
@@ -73,7 +73,7 @@ class GdalGeotiffSmallTileTests(unittest.TestCase):
 
 class GdalGeotiffLargeTileTests(unittest.TestCase):
     def setUp(self):
-        self.tile = SimpleNamespace(build_dir="/build")
+        self.tile = SimpleNamespace(build_dir="/build", warp_resampling="lanczos")
 
     def test_large_tile_calls_geotag_then_warp(self):
         with (
@@ -110,7 +110,7 @@ class GdalGeotiffLargeTileTests(unittest.TestCase):
             dstSRS="EPSG:4326",
             width=4096,
             height=4096,
-            resampleAlg="bilinear",
+            resampleAlg="lanczos",
         )
         self.assertTrue(result.ok)
 

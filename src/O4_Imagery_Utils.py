@@ -24,6 +24,7 @@ import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
+import O4_Resampling_Policy as RP
 import O4_Texture_Color_Normalization as TCN
 import O4_UI_Utils as UI
 import O4_Vector_Utils as VECT
@@ -73,6 +74,10 @@ check_tms_response: bool = False
 max_connect_retries: int = 10
 max_baddata_retries: int = 10
 normalize_texture_colors: bool = False
+texture_resize_resampling: str = "lanczos"
+mask_resize_resampling: str = "nearest"
+warp_resampling: str = "bicubic"
+normalization_resampling: str = "bilinear"
 incomplete_imgs = IFAIL.incomplete_imgs
 imagery_failure_records = IFAIL.imagery_failure_records
 ImageryFailureRecord = IFAIL.ImageryFailureRecord
@@ -887,10 +892,7 @@ def has_data(
                 return False
             if not return_mask:
                 return True
-            if is_sharp_resize:
-                return mask_im.resize(mask_size)
-            else:
-                return mask_im.resize(mask_size, Image.Resampling.BICUBIC)
+            return RP.resize_image(mask_resize_resampling, mask_im, mask_size)
         else:
             # following code only visited when is_mask_layer is True
             # in which case it is passed as (lat,lon,mask_zl)
@@ -928,10 +930,7 @@ def has_data(
                     mask_im = ImageOps.invert(mask_im)
                 if not mask_im.getbbox():
                     return False
-                if is_sharp_resize:
-                    mask_im = mask_im.resize(mask_size)
-                else:
-                    mask_im = mask_im.resize(mask_size, Image.Resampling.BICUBIC)
+                mask_im = RP.resize_image(mask_resize_resampling, mask_im, mask_size)
             else:
                 mask_im = Image.new("L", mask_size, "white")
             # build sea mask_im2
@@ -945,8 +944,10 @@ def has_data(
             pxx1 = int((x1 - xmin) / (xmax - xmin) * sizex)
             pxy0 = int((ymax - y0) / (ymax - ymin) * sizey)
             pxy1 = int((ymax - y1) / (ymax - ymin) * sizey)
-            mask_im2 = mask_im2.crop((pxx0, pxy0, pxx1, pxy1)).resize(
-                mask_size, Image.Resampling.BICUBIC
+            mask_im2 = RP.resize_image(
+                mask_resize_resampling,
+                mask_im2.crop((pxx0, pxy0, pxx1, pxy1)),
+                mask_size,
             )
             # invert it
             mask_array2 = 255 - numpy.array(mask_im2, dtype=numpy.uint8)
@@ -1200,8 +1201,10 @@ def get_wmts_image(tilematrix, til_x, til_y, provider, http_session):
             y1 = y0 + height // (2**down_sample)
             return (
                 success,
-                data.crop((x0, y0, x1, y1)).resize(
-                    (width, height), Image.Resampling.BICUBIC
+                RP.resize_image(
+                    texture_resize_resampling,
+                    data.crop((x0, y0, x1, y1)),
+                    (width, height),
                 ),
             )
         elif "[404]" in data:
@@ -1253,7 +1256,8 @@ def get_and_paste_wmts_part(
         big_image.paste(small_image, (x0, y0))
     else:
         big_image.paste(
-            small_image.resize(subt_size, Image.Resampling.BICUBIC), (x0, y0)
+            RP.resize_image(texture_resize_resampling, small_image, subt_size),
+            (x0, y0),
         )
     return success
 
@@ -1448,7 +1452,7 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
             + " "
             + str(t_size[1] / big_image.size[1]),
         )
-        big_image = big_image.resize(t_size, Image.Resampling.BICUBIC)
+        big_image = RP.resize_image(texture_resize_resampling, big_image, t_size)
     return (success, big_image)
 
 
@@ -1527,12 +1531,13 @@ def download_jpeg_ortho(
         if super_resol_factor == 1:
             output_image = big_image.convert("RGB")
         else:
-            output_image = big_image.resize(
+            output_image = RP.resize_image(
+                texture_resize_resampling,
+                big_image,
                 (
                     int(width / super_resol_factor),
                     int(height / super_resol_factor),
                 ),
-                Image.Resampling.BICUBIC,
             ).convert("RGB")
         output_image.save(os.path.join(file_dir, file_name))
     except Exception as e:
@@ -1793,8 +1798,11 @@ def build_combined_ortho(
                 ImageFilter.GaussianBlur(tile.sea_texture_blur * 2 ** (true_zl - 17))
             )
         if crop:
-            true_im = true_im.crop((pixx0, pixy0, pixx1, pixy1)).resize(
-                (4096, 4096), Image.Resampling.BICUBIC
+            true_im = RP.tile_resize_image(
+                tile,
+                "texture_resize_resampling",
+                true_im.crop((pixx0, pixy0, pixx1, pixy1)),
+                (4096, 4096),
             )
         # in case the smoothing of the extent mask was too strong we remove the
         # the mask (where it is nor 0 nor 255) the pixels for which the true_im
@@ -1986,7 +1994,7 @@ def warp_image_with_gdal(source_im, s_bbox, s_epsg, t_bbox, t_epsg, t_size):
         outputBounds=[t_ulx, t_lry, t_lrx, t_uly],
         width=t_w,
         height=t_h,
-        resampleAlg="cubic",
+        resampleAlg=RP.gdal_resampling(warp_resampling),
     )
     if warped_ds is None:
         raise RuntimeError("GDAL warp failed")
@@ -2156,8 +2164,11 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
                 ImageFilter.GaussianBlur(tile.sea_texture_blur * 2 ** (true_zl - 17))
             )
         if crop:
-            true_im = true_im.crop((pixx0, pixy0, pixx1, pixy1)).resize(
-                (4096, 4096), Image.Resampling.BICUBIC
+            true_im = RP.tile_resize_image(
+                tile,
+                "texture_resize_resampling",
+                true_im.crop((pixx0, pixy0, pixx1, pixy1)),
+                (4096, 4096),
             )
         UI.vprint(2, "Finished imprinting", til_x_left, til_y_top)
         return true_im
@@ -2213,8 +2224,11 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
                 ImageFilter.GaussianBlur(tile.sea_texture_blur * 2 ** (true_zl - 17))
             )
         if crop:
-            true_im = true_im.crop((pixx0, pixy0, pixx1, pixy1)).resize(
-                (4096, 4096), Image.Resampling.BICUBIC
+            true_im = RP.tile_resize_image(
+                tile,
+                "texture_resize_resampling",
+                true_im.crop((pixx0, pixy0, pixx1, pixy1)),
+                (4096, 4096),
             )
         # in case the smoothing of the extent mask was too strong we remove the
         # the mask (where it is nor 0 nor 255) the pixels for which the true_im
@@ -2336,7 +2350,11 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         )
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
-            big_image.putalpha(mask_im.resize((4096, 4096), Image.Resampling.BICUBIC))
+            big_image.putalpha(
+                RP.tile_resize_image(
+                    tile, "mask_resize_resampling", mask_im, (4096, 4096)
+                )
+            )
             if type == DDS_OUTPUT_TYPE:
                 try:
                     os.remove(
@@ -2369,7 +2387,11 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
             )
         if masked_texture:
             UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
-            big_image.putalpha(mask_im.resize((4096, 4096), Image.Resampling.BICUBIC))
+            big_image.putalpha(
+                RP.tile_resize_image(
+                    tile, "mask_resize_resampling", mask_im, (4096, 4096)
+                )
+            )
             if type == DDS_OUTPUT_TYPE:
                 try:
                     os.remove(

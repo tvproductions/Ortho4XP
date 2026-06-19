@@ -8,12 +8,21 @@ into mask-derived data paths.
 import re
 import unittest
 from pathlib import Path
+from typing import cast
 
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
-from O4_Cfg_Vars import cfg_app_vars, cfg_vars, list_app_vars
+from O4_Cfg_Vars import (
+    cfg_app_vars,
+    cfg_global_tile_vars,
+    cfg_tile_vars,
+    cfg_vars,
+    list_app_vars,
+    list_global_tile_vars,
+    list_tile_vars,
+)
 from O4_Config_Models import (
     UnsupportedWaterTechError,
     coerce_config_value,
@@ -46,6 +55,54 @@ class ConfigModelTests(unittest.TestCase):
             coerce_config_value("normalize_texture_colors", "True", cfg_vars),
             True,
         )
+
+    def test_resampling_policy_keys_are_tile_and_global_tile_settings(self):
+        expected = {
+            "texture_resize_resampling": "lanczos",
+            "mask_resize_resampling": "nearest",
+            "warp_resampling": "bicubic",
+            "normalization_resampling": "bilinear",
+            "dem_resampling": "bicubic",
+            "airport_smoothing_resampling": "bicubic",
+        }
+
+        for key, default in expected.items():
+            with self.subTest(key=key):
+                definition = cfg_tile_vars[key]
+                global_key = f"global_{key}"
+
+                self.assertIs(definition["type"], str)
+                self.assertEqual(definition["default"], default)
+                self.assertEqual(
+                    definition["values"],
+                    ("nearest", "bilinear", "bicubic", "lanczos"),
+                )
+                hint = cast(str, definition["hint"])
+                self.assertIsInstance(hint, str)
+                self.assertIn("resampling", hint.lower())
+                self.assertIn(key, cfg_vars)
+                self.assertIn(key, list_tile_vars)
+                self.assertIn(global_key, cfg_global_tile_vars)
+                self.assertIn(global_key, list_global_tile_vars)
+
+    def test_resampling_policy_keys_validate_allowed_values(self):
+        for key in (
+            "texture_resize_resampling",
+            "mask_resize_resampling",
+            "warp_resampling",
+            "normalization_resampling",
+            "dem_resampling",
+            "airport_smoothing_resampling",
+        ):
+            for method in ("nearest", "bilinear", "bicubic", "lanczos"):
+                with self.subTest(key=key, method=method):
+                    self.assertEqual(coerce_config_value(key, method, cfg_vars), method)
+
+            with (
+                self.subTest(key=key, method="average"),
+                self.assertRaisesRegex(ValueError, key),
+            ):
+                coerce_config_value(key, "average", cfg_vars)
 
     def test_list_typed_scalar_compatibility_is_preserved(self):
         self.assertEqual(coerce_config_value("masks_width", "100", cfg_vars), 100)

@@ -5,6 +5,7 @@ from osgeo import gdal
 
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
+import O4_Resampling_Policy as RP
 import O4_Texture_Encoder as TEX
 import O4_UI_Utils as UI
 
@@ -160,7 +161,7 @@ def _run_warp_with_retry(output_path, tmp_tif, *, tile, out_file_name):
                 dstSRS="EPSG:4326",
                 width=4096,
                 height=4096,
-                resampleAlg="bilinear",
+                resampleAlg=RP.tile_gdal_resampling(tile, "warp_resampling"),
             )
             return
         except Exception:

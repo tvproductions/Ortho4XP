@@ -3,6 +3,7 @@
 import O4_OSM_Utils as OSM
 
 global_prefix = "global_"
+resampling_method_values = ("nearest", "bilinear", "bicubic", "lanczos")
 overpass_server_keys = sorted(OSM.overpass_servers.keys())
 overpass_server_values = (
     ["random"] + overpass_server_keys
@@ -333,6 +334,34 @@ cfg_tile_vars = {
         "default": 18,
         "hint": "The zoomlevel with which to cover the airports zone when high_zl_airports is set. Note that if the cover_zl is lower than the zoomlevel which would otherwise be applied on a specific zone, the latter is used.",
     },
+    "texture_resize_resampling": {
+        "module": "IMG",
+        "type": str,
+        "default": "lanczos",
+        "values": resampling_method_values,
+        "hint": "Resampling method for continuous-tone texture resizing, provider downsampling, combined-provider crop resizing, and final orthophoto resize. Default: lanczos.",
+    },
+    "mask_resize_resampling": {
+        "module": "IMG",
+        "type": str,
+        "default": "nearest",
+        "values": resampling_method_values,
+        "hint": "Resampling method for extent masks, sea masks, and alpha-mask imprinting. Default: nearest.",
+    },
+    "warp_resampling": {
+        "module": "IMG",
+        "type": str,
+        "default": "bicubic",
+        "values": resampling_method_values,
+        "hint": "Resampling method for GDAL imagery reprojection, GeoTIFF export, and standalone geotag warp paths. Default: bicubic.",
+    },
+    "normalization_resampling": {
+        "module": "IMG",
+        "type": str,
+        "default": "bilinear",
+        "values": resampling_method_values,
+        "hint": "Resampling method reserved for future color-normalization edge or neighbor sampling resize policy. Default: bilinear.",
+    },
     "sea_texture_blur": {
         "type": float,
         "default": 0.0,
@@ -369,6 +398,19 @@ cfg_tile_vars = {
         "type": float,
         "default": 1.0,
         "hint": 'Orthophotos by essence already contain the part of the shading burned in (here by shading we mean the amount of reflected light in the camera direction as a function of the terrain slope, not the shadows). This option allows to tweak the normal coordinates of the mesh in the DSF to avoid "overshading", but it has side effects on the way X-Plane computes scenery shadows. Used to be 0.3 by default in earlier versions, the default is now 1 which means exact normals.',
+    },
+    "dem_resampling": {
+        "module": "DEM",
+        "type": str,
+        "default": "bicubic",
+        "values": resampling_method_values,
+        "hint": "Resampling method for DEM-derived normal-map band resizing. Default: bicubic.",
+    },
+    "airport_smoothing_resampling": {
+        "type": str,
+        "default": "bicubic",
+        "values": resampling_method_values,
+        "hint": "Resampling method for airport smoothing raster downsampling. Default: bicubic.",
     },
     "terrain_casts_shadows": {
         "type": bool,
@@ -474,6 +516,10 @@ list_dsf_vars = [
     "cover_airports_with_highres",
     "cover_extent",
     "cover_zl",
+    "texture_resize_resampling",
+    "mask_resize_resampling",
+    "warp_resampling",
+    "normalization_resampling",
     "water_tech",
     "ratio_bathy",
     "ratio_water",
@@ -482,6 +528,8 @@ list_dsf_vars = [
     # "add_low_res_sea_ovl",
     # "experimental_water",
     "normal_map_strength",
+    "dem_resampling",
+    "airport_smoothing_resampling",
     "terrain_casts_shadows",
     "use_decal_on_terrain",
 ]
