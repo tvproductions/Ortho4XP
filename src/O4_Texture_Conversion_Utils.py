@@ -5,7 +5,7 @@ from osgeo import gdal
 
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
-import O4_Resampling_Policy as RP
+import O4_Geotiff_Options as GTO
 import O4_Texture_Encoder as TEX
 import O4_UI_Utils as UI
 
@@ -106,31 +106,26 @@ class _GeotiffFailure(Exception):
 def _run_geotag(bounds, file_to_convert, tmp_tif):
     _latmax, _lonmin, _latmin, _lonmax, xmin, ymin, xmax, ymax = bounds
     try:
-        gdal.Translate(
-            tmp_tif,
-            file_to_convert,
-            format="GTiff",
-            creationOptions=["COMPRESS=JPEG"],
-            outputBounds=[xmin, ymin, xmax, ymax],
-            outputSRS="EPSG:3857",
+        GTO.geotag(
+            gdal, (tmp_tif, file_to_convert, [xmin, ymin, xmax, ymax], "EPSG:3857")
         )
     except Exception:
         raise _GeotagFailure("Could not geotag texture") from None
 
 
 def _run_translate_with_retry(
-    output_path, file_to_convert, *, output_bounds, output_srs, tile, out_file_name
+    output_path,
+    file_to_convert,
+    *,
+    output_bounds,
+    output_srs,
+    tile,
+    out_file_name,
 ):
     for tentative in range(1, 11):
         try:
-            gdal.Translate(
-                output_path,
-                file_to_convert,
-                format="GTiff",
-                creationOptions=["COMPRESS=JPEG"],
-                outputBounds=output_bounds,
-                outputSRS=output_srs,
-            )
+            request = (output_path, file_to_convert, output_bounds, output_srs, tile)
+            GTO.translate(gdal, request)
             return
         except Exception:
             if tentative == 10:
@@ -152,17 +147,7 @@ def _run_translate_with_retry(
 def _run_warp_with_retry(output_path, tmp_tif, *, tile, out_file_name):
     for tentative in range(1, 11):
         try:
-            gdal.Warp(
-                output_path,
-                tmp_tif,
-                format="GTiff",
-                creationOptions=["COMPRESS=JPEG"],
-                srcSRS="EPSG:3857",
-                dstSRS="EPSG:4326",
-                width=4096,
-                height=4096,
-                resampleAlg=RP.tile_gdal_resampling(tile, "warp_resampling"),
-            )
+            GTO.warp(gdal, (output_path, tmp_tif, tile))
             return
         except Exception:
             if tentative == 10:

@@ -2248,16 +2248,16 @@
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Texture_Conversion_Utils.py|121|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )": {
-      "line": 121,
+    "lizard_ccn|src/O4_Texture_Conversion_Utils.py|116|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )": {
+      "line": 116,
       "metric": "lizard_ccn",
-      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )",
+      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )",
       "path": "src/O4_Texture_Conversion_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "lizard_ccn|src/O4_Texture_Conversion_Utils.py|152|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
-      "line": 152,
+    "lizard_ccn|src/O4_Texture_Conversion_Utils.py|147|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
+      "line": 147,
       "metric": "lizard_ccn",
       "name": "_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )",
       "path": "src/O4_Texture_Conversion_Utils.py",
@@ -4808,6 +4808,14 @@
       "severity": "advise",
       "value": 2.0
     },
+    "lizard_nesting_depth|src/O4_Geotiff_Options.py|66|build_overviews_if_enabled( gdal_module , output_path , tile )": {
+      "line": 66,
+      "metric": "lizard_nesting_depth",
+      "name": "build_overviews_if_enabled( gdal_module , output_path , tile )",
+      "path": "src/O4_Geotiff_Options.py",
+      "severity": "advise",
+      "value": 2.0
+    },
     "lizard_nesting_depth|src/O4_Imagery_Failures.py|139|failures_for_texture( texture_filename , provider_code )": {
       "line": 139,
       "metric": "lizard_nesting_depth",
@@ -5672,16 +5680,16 @@
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Texture_Conversion_Utils.py|121|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )": {
-      "line": 121,
+    "lizard_nesting_depth|src/O4_Texture_Conversion_Utils.py|116|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )": {
+      "line": 116,
       "metric": "lizard_nesting_depth",
-      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )",
+      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )",
       "path": "src/O4_Texture_Conversion_Utils.py",
       "severity": "warn",
       "value": 3.0
     },
-    "lizard_nesting_depth|src/O4_Texture_Conversion_Utils.py|152|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
-      "line": 152,
+    "lizard_nesting_depth|src/O4_Texture_Conversion_Utils.py|147|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
+      "line": 147,
       "metric": "lizard_nesting_depth",
       "name": "_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )",
       "path": "src/O4_Texture_Conversion_Utils.py",
@@ -8136,6 +8144,14 @@
       "severity": "warn",
       "value": 31.0
     },
+    "lizard_nloc|src/O4_Geotiff_Options.py|50|warp( gdal_module , request )": {
+      "line": 50,
+      "metric": "lizard_nloc",
+      "name": "warp( gdal_module , request )",
+      "path": "src/O4_Geotiff_Options.py",
+      "severity": "advise",
+      "value": 14.0
+    },
     "lizard_nloc|src/O4_Imagery_Failures.py|149|record_incomplete_texture( file_dir , file_name , texture_attributes )": {
       "line": 149,
       "metric": "lizard_nloc",
@@ -8872,29 +8888,21 @@
       "severity": "advise",
       "value": 15.0
     },
-    "lizard_nloc|src/O4_Texture_Conversion_Utils.py|106|_run_geotag( bounds , file_to_convert , tmp_tif )": {
-      "line": 106,
+    "lizard_nloc|src/O4_Texture_Conversion_Utils.py|116|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )": {
+      "line": 116,
       "metric": "lizard_nloc",
-      "name": "_run_geotag( bounds , file_to_convert , tmp_tif )",
-      "path": "src/O4_Texture_Conversion_Utils.py",
-      "severity": "advise",
-      "value": 13.0
-    },
-    "lizard_nloc|src/O4_Texture_Conversion_Utils.py|121|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )": {
-      "line": 121,
-      "metric": "lizard_nloc",
-      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )",
+      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )",
       "path": "src/O4_Texture_Conversion_Utils.py",
       "severity": "warn",
       "value": 29.0
     },
-    "lizard_nloc|src/O4_Texture_Conversion_Utils.py|152|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
-      "line": 152,
+    "lizard_nloc|src/O4_Texture_Conversion_Utils.py|147|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
+      "line": 147,
       "metric": "lizard_nloc",
       "name": "_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )",
       "path": "src/O4_Texture_Conversion_Utils.py",
-      "severity": "warn",
-      "value": 30.0
+      "severity": "advise",
+      "value": 20.0
     },
     "lizard_nloc|src/O4_Texture_Conversion_Utils.py|18|texture_encode_request( tile , texture_attrs , conversion_input )": {
       "line": 18,
@@ -9855,6 +9863,46 @@
       "path": "tests/test_cli_run.py",
       "severity": "advise",
       "value": 19.0
+    },
+    "lizard_nloc|tests/test_cog_geotiff_export.py|113|test_large_tile_cog_export_uses_tiled_options_on_final_warp( self )": {
+      "line": 113,
+      "metric": "lizard_nloc",
+      "name": "test_large_tile_cog_export_uses_tiled_options_on_final_warp( self )",
+      "path": "tests/test_cog_geotiff_export.py",
+      "severity": "advise",
+      "value": 17.0
+    },
+    "lizard_nloc|tests/test_cog_geotiff_export.py|45|_small_tile_patches( )": {
+      "line": 45,
+      "metric": "lizard_nloc",
+      "name": "_small_tile_patches( )",
+      "path": "tests/test_cog_geotiff_export.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|tests/test_cog_geotiff_export.py|61|_large_tile_patches( )": {
+      "line": 61,
+      "metric": "lizard_nloc",
+      "name": "_large_tile_patches( )",
+      "path": "tests/test_cog_geotiff_export.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|tests/test_cog_geotiff_export.py|77|test_cog_export_is_opt_in_tile_setting( self )": {
+      "line": 77,
+      "metric": "lizard_nloc",
+      "name": "test_cog_export_is_opt_in_tile_setting( self )",
+      "path": "tests/test_cog_geotiff_export.py",
+      "severity": "advise",
+      "value": 13.0
+    },
+    "lizard_nloc|tests/test_cog_geotiff_export.py|97|test_small_tile_cog_export_uses_tiled_options_and_builds_overviews( self )": {
+      "line": 97,
+      "metric": "lizard_nloc",
+      "name": "test_small_tile_cog_export_uses_tiled_options_and_builds_overviews( self )",
+      "path": "tests/test_cog_geotiff_export.py",
+      "severity": "advise",
+      "value": 14.0
     },
     "lizard_nloc|tests/test_color_normalization.py|77|test_normalize_image_with_neighbors_returns_unchanged_without_valid_neighbors( self , )": {
       "line": 77,
@@ -11968,6 +12016,14 @@
       "severity": "advise",
       "value": 3.0
     },
+    "lizard_param_count|src/O4_Geotiff_Options.py|66|build_overviews_if_enabled( gdal_module , output_path , tile )": {
+      "line": 66,
+      "metric": "lizard_param_count",
+      "name": "build_overviews_if_enabled( gdal_module , output_path , tile )",
+      "path": "src/O4_Geotiff_Options.py",
+      "severity": "advise",
+      "value": 3.0
+    },
     "lizard_param_count|src/O4_Imagery_Failures.py|129|record_failure( url , status_code , connect_retries , bad_data_retries , reason , context )": {
       "line": 129,
       "metric": "lizard_param_count",
@@ -12680,24 +12736,24 @@
       "severity": "advise",
       "value": 3.0
     },
-    "lizard_param_count|src/O4_Texture_Conversion_Utils.py|121|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )": {
-      "line": 121,
+    "lizard_param_count|src/O4_Texture_Conversion_Utils.py|116|_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )": {
+      "line": 116,
       "metric": "lizard_param_count",
-      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name )",
+      "name": "_run_translate_with_retry( output_path , file_to_convert , * , output_bounds , output_srs , tile , out_file_name , )",
       "path": "src/O4_Texture_Conversion_Utils.py",
       "severity": "block",
       "value": 6.0
     },
-    "lizard_param_count|src/O4_Texture_Conversion_Utils.py|152|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
-      "line": 152,
+    "lizard_param_count|src/O4_Texture_Conversion_Utils.py|147|_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )": {
+      "line": 147,
       "metric": "lizard_param_count",
       "name": "_run_warp_with_retry( output_path , tmp_tif , * , tile , out_file_name )",
       "path": "src/O4_Texture_Conversion_Utils.py",
       "severity": "warn",
       "value": 4.0
     },
-    "lizard_param_count|src/O4_Texture_Conversion_Utils.py|184|_geotag_failure_result( tile , provider_code , out_file_name )": {
-      "line": 184,
+    "lizard_param_count|src/O4_Texture_Conversion_Utils.py|169|_geotag_failure_result( tile , provider_code , out_file_name )": {
+      "line": 169,
       "metric": "lizard_param_count",
       "name": "_geotag_failure_result( tile , provider_code , out_file_name )",
       "path": "src/O4_Texture_Conversion_Utils.py",
@@ -13333,6 +13389,14 @@
       "metric": "lizard_param_count",
       "name": "_step( calls , name , interrupt_step )",
       "path": "tests/test_build_core_interrupts.py",
+      "severity": "advise",
+      "value": 3.0
+    },
+    "lizard_param_count|tests/test_cog_geotiff_export.py|139|_assert_overviews_built( testcase , gdal_mock , output_path )": {
+      "line": 139,
+      "metric": "lizard_param_count",
+      "name": "_assert_overviews_built( testcase , gdal_mock , output_path )",
+      "path": "tests/test_cog_geotiff_export.py",
       "severity": "advise",
       "value": 3.0
     },
@@ -15864,16 +15928,16 @@
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Texture_Conversion_Utils.py|121|_run_translate_with_retry": {
-      "line": 121,
+    "radon_cc|src/O4_Texture_Conversion_Utils.py|116|_run_translate_with_retry": {
+      "line": 116,
       "metric": "radon_cc",
       "name": "_run_translate_with_retry",
       "path": "src/O4_Texture_Conversion_Utils.py",
       "severity": "advise",
       "value": 4.0
     },
-    "radon_cc|src/O4_Texture_Conversion_Utils.py|152|_run_warp_with_retry": {
-      "line": 152,
+    "radon_cc|src/O4_Texture_Conversion_Utils.py|147|_run_warp_with_retry": {
+      "line": 147,
       "metric": "radon_cc",
       "name": "_run_warp_with_retry",
       "path": "src/O4_Texture_Conversion_Utils.py",
@@ -17262,7 +17326,7 @@
       "name": "<module>",
       "path": "src/O4_Cfg_Vars.py",
       "severity": "warn",
-      "value": 60.15918027307594
+      "value": 60.149146431168816
     },
     "radon_mi|src/O4_Color_Correction.py||<module>": {
       "line": null,
@@ -17391,6 +17455,14 @@
       "path": "src/O4_Geotag.py",
       "severity": "block",
       "value": 48.07196821299979
+    },
+    "radon_mi|src/O4_Geotiff_Options.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "src/O4_Geotiff_Options.py",
+      "severity": "warn",
+      "value": 57.57586111068057
     },
     "radon_mi|src/O4_Imagery_Failures.py||<module>": {
       "line": null,
@@ -17589,8 +17661,8 @@
       "metric": "radon_mi",
       "name": "<module>",
       "path": "src/O4_Texture_Conversion_Utils.py",
-      "severity": "block",
-      "value": 49.931860586438546
+      "severity": "warn",
+      "value": 50.19379365055546
     },
     "radon_mi|src/O4_Texture_Download_Scheduler.py||<module>": {
       "line": null,
@@ -17887,6 +17959,14 @@
       "path": "tests/test_cli_utils.py",
       "severity": "advise",
       "value": 78.7228711420987
+    },
+    "radon_mi|tests/test_cog_geotiff_export.py||<module>": {
+      "line": null,
+      "metric": "radon_mi",
+      "name": "<module>",
+      "path": "tests/test_cog_geotiff_export.py",
+      "severity": "warn",
+      "value": 61.875049444613055
     },
     "radon_mi|tests/test_color_normalization.py||<module>": {
       "line": null,
@@ -18443,6 +18523,7 @@
     "src/O4_GUI_Utils.py",
     "src/O4_Geo_Utils.py",
     "src/O4_Geotag.py",
+    "src/O4_Geotiff_Options.py",
     "src/O4_Imagery_Failures.py",
     "src/O4_Imagery_Utils.py",
     "src/O4_Mask_Alpha.py",
@@ -18508,6 +18589,7 @@
     "tests/test_cli_jobs.py",
     "tests/test_cli_run.py",
     "tests/test_cli_utils.py",
+    "tests/test_cog_geotiff_export.py",
     "tests/test_color_normalization.py",
     "tests/test_config_import_safety.py",
     "tests/test_config_loading.py",

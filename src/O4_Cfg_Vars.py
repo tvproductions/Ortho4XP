@@ -362,6 +362,7 @@ cfg_tile_vars = {
         "values": resampling_method_values,
         "hint": "Resampling method reserved for future color-normalization edge or neighbor sampling resize policy. Default: bilinear.",
     },
+    "cog_export": {"type": bool, "default": False, "hint": "COG export."},
     "sea_texture_blur": {
         "type": float,
         "default": 0.0,
@@ -534,7 +535,7 @@ list_dsf_vars = [
     "use_decal_on_terrain",
 ]
 
-list_other_vars = ["custom_dem", "fill_nodata"]
+list_other_vars = ["custom_dem", "fill_nodata", "cog_export"]
 
 list_tile_vars = (
     list_vector_vars

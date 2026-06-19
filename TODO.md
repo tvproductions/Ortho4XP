@@ -898,7 +898,7 @@ Suggested labels: `performance`, `architecture`, `gdal`
 
 ### TODO-033: COG-Style GeoTIFF Export
 
-Status: Pending
+Status: Done (2026-06-19)
 
 Add optional Cloud-Optimized GeoTIFF mode with tiling and overviews.
 
@@ -909,6 +909,17 @@ Acceptance criteria:
 - Adds `gdal.AddOverview()` for pyramid levels
 - Documents COG benefits (streaming, progressive loading)
 - Adds tests for COG export
+
+Completion evidence:
+
+- Added `cog_export` / `global_cog_export` config with default `False`.
+- Added final GeoTIFF COG-style creation options:
+  `COMPRESS=JPEG`, `TILED=YES`, `BLOCKXSIZE=512`, `BLOCKYSIZE=512`.
+- Added overview pyramid generation with `BuildOverviews("AVERAGE", [2, 4, 8, 16])`.
+- Documented COG-style export behavior and benefits in `README.md`.
+- Added `tests/test_cog_geotiff_export.py`.
+- Verified with `uv run python -m unittest discover -s tests`.
+- Verified with `uv run python .codex/skills/quality-check/scripts/quality_check.py`.
 
 Suggested labels: `geotiff`, `quality`
 

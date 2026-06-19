@@ -170,6 +170,17 @@ with failed texture counts by imagery provider. Full external command details,
 return codes, and stderr summaries continue to be written to
 `Ortho4XP.log.json` by the shared subprocess runner.
 
+## GeoTIFF export
+
+GeoTIFF export is available from the Build GeoTIFFs workflow. By default,
+generated GeoTIFFs preserve the legacy JPEG-compressed output layout.
+
+Set `cog_export=True` in a tile config, or `global_cog_export=True` in the
+global config, to write COG-style tiled GeoTIFFs. This mode keeps the same
+filenames and coordinate reference system, adds 512x512 internal tiling, and
+builds overview pyramids so GIS tools can stream and progressively preview the
+large texture rasters more efficiently.
+
 ## Texture color normalization
 
 `normalize_texture_colors` is an opt-in texture preprocessing setting. When
