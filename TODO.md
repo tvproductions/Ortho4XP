@@ -870,9 +870,16 @@ Suggested labels: `config`, `quality`, `quick-win`
 
 ### TODO-032: In-Memory VRT Pipeline
 
-Status: In Progress
+Status: Done
 
 GitHub Issue: #35
+
+Completion note: implemented by adding explicit in-memory texture source
+artifacts, GDAL MEM and /vsimem/ VRT helpers, streaming
+download-to-conversion queue handoff for active DDS generation, and legacy
+cache fallback for cache-dependent workflows. Focused tests, full unittest
+discovery, Ruff, Ruff format, ty, complexity baseline verification, Python
+quality-check, and full native quality-check verification passed.
 
 Implement zero-intermediate-files streaming pipeline: HTTP tiles → VRT stitch →
 warp → color → normalize → DDS, eliminating all intermediate JPEG/PNG/GeoTIFF
