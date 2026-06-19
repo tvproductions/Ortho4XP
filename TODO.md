@@ -872,6 +872,8 @@ Suggested labels: `config`, `quality`, `quick-win`
 
 Status: Pending
 
+GitHub Issue: #35
+
 Implement zero-intermediate-files streaming pipeline: HTTP tiles → VRT stitch →
 warp → color → normalize → DDS, eliminating all intermediate JPEG/PNG/GeoTIFF
 writes.
