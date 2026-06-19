@@ -7,6 +7,7 @@ from typing import Any
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
 import O4_UI_Utils as UI
+from O4_Texture_Source import TextureBuildResult
 
 
 @dataclass
@@ -108,10 +109,10 @@ async def _record_download_result(runtime, attrs, ok):
 
 async def _build_texture(runtime, attrs):
     try:
-        return await IMG.async_build_jpeg_ortho(runtime.tile, *attrs)
+        return await IMG.async_build_texture_source(runtime.tile, *attrs)
     except Exception as err:
         UI.vprint(2, f"Download failed: {err}")
-        return 0
+        return TextureBuildResult.failure(tuple(attrs), attrs[3], str(err))
 
 
 async def _download_task(runtime, attrs):
@@ -121,17 +122,18 @@ async def _download_task(runtime, attrs):
     attrs = tuple(attrs)
     async with runtime.semaphore:
         await _mark_download_started(runtime)
-        ok = await _build_texture(runtime, attrs)
+        result = await _build_texture(runtime, attrs)
+        ok = result.ok
         should_retry = await _record_download_result(runtime, attrs, ok)
-        await _queue_download_result(runtime, attrs, ok, should_retry)
+        await _queue_download_result(runtime, attrs, result, should_retry)
         if UI.red_flag:
             runtime.state.interrupted = True
         return 1 if ok else 0
 
 
-async def _queue_download_result(runtime, attrs, ok, should_retry):
-    if ok:
-        runtime.convert_queue.put((runtime.tile, *attrs))
+async def _queue_download_result(runtime, attrs, result, should_retry):
+    if result.ok and result.source is not None:
+        runtime.convert_queue.put((runtime.tile, result.source))
     elif should_retry:
         runtime.download_queue.put(attrs)
         async with runtime.state.progress_lock:
