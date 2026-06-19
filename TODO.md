@@ -870,7 +870,7 @@ Suggested labels: `config`, `quality`, `quick-win`
 
 ### TODO-032: In-Memory VRT Pipeline
 
-Status: Pending
+Status: In Progress
 
 GitHub Issue: #35
 
