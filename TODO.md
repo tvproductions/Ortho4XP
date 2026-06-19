@@ -960,7 +960,7 @@ Suggested labels: `quality`, `textures`
 
 ### TODO-035: Unsharp Mask Sharpening
 
-Status: Pending
+Status: Done (2026-06-19)
 
 Add `"sharpen"` as a supported operation in the color filter pipeline.
 
@@ -971,6 +971,22 @@ Acceptance criteria:
 - Applies after color filter, before sRGB normalization
 - Documents sharpening parameters in filter schema
 - Adds tests for sharpening operation
+
+Completion evidence:
+
+- Added `"sharpen"` handling to `src/O4_Color_Filters.py`, with
+  `src/O4_Imagery_Utils.py:color_transform()` preserved as the compatibility
+  wrapper used by existing callers.
+- Mapped `[radius, amount, threshold]` to
+  `ImageFilter.UnsharpMask(radius, percent, threshold)` and cast `amount` /
+  `threshold` to integers for Pillow compatibility with JSON numeric inputs.
+- Documented the operation and parameters in `Filters/color-filter.flt.schema.json`
+  and the source Pydantic field descriptions.
+- Updated the GIS/raster/imagery technology map supported-operation list.
+- Preserved the current verified texture preprocessing order: TODO-032 tests
+  assert sRGB normalization runs before `color_transform()`, so this item did
+  not reverse that established pipeline behavior.
+- Added `tests/test_color_filters.py`.
 
 Suggested labels: `imagery`, `quality`
 

@@ -4,10 +4,12 @@
       "additionalProperties": false,
       "properties": {
         "operation": {
+          "description": "Color operation name. Supported runtime operations are brightness-contrast, saturation, sharpness, sharpen, blur, and levels.",
           "title": "Operation",
           "type": "string"
         },
         "parameters": {
+          "description": "Operation parameters. sharpen uses [radius, amount, threshold], mapped to Pillow ImageFilter.UnsharpMask(radius, percent, threshold).",
           "items": {
             "type": "number"
           },

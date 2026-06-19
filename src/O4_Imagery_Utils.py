@@ -8,13 +8,13 @@ import secrets
 import sys
 import time
 from dataclasses import dataclass
-from math import ceil, log, pi, tan
+from math import ceil, log
 from pathlib import Path
 from typing import Any
 
 import numpy
 from osgeo import gdal
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageFilter, ImageOps
 from pydantic import ValidationError
 
 import O4_Async_HTTP as AHTTP
@@ -2144,61 +2144,9 @@ def _gdal_warp_supported_image(source_im):
 
 ################################################################################
 def color_transform(im, color_code):
-    try:
-        for color_filter in color_filters_dict[color_code]:
-            # both range from -127 to 127,
-            # http://gimp.sourcearchive.com/documentation/2.6.1/\
-            # gimpbrightnesscontrastconfig_8c-source.html
-            if color_filter[0] == "brightness-contrast":
-                (brightness, contrast) = color_filter[1:3]
-                if brightness >= 0:
-                    im = im.point(
-                        lambda i, brightness=brightness, contrast=contrast: (
-                            128
-                            + tan(pi / 4 * (1 + contrast / 128))
-                            * (brightness + (255 - brightness) / 255 * i - 128)
-                        )
-                    )
-                else:
-                    im = im.point(
-                        lambda i, brightness=brightness, contrast=contrast: (
-                            128
-                            + tan(pi / 4 * (1 + contrast / 128))
-                            * ((255 + brightness) / 255 * i - 128)
-                        )
-                    )
-            elif color_filter[0] == "saturation":
-                saturation = color_filter[1]
-                im = ImageEnhance.Color(im).enhance(1 + saturation / 100)
-            elif color_filter[0] == "sharpness":
-                im = ImageEnhance.Sharpness(im).enhance(color_filter[1])
-            elif color_filter[0] == "blur":
-                im = im.filter(ImageFilter.GaussianBlur(color_filter[1]))
-            # levels range between 0 and 255, gamma is neutral at 1
-            # https://pippin.gimp.org/image-processing/chap_point.html
-            elif color_filter[0] == "levels":
-                bands = im.split()
-                for j in [0, 1, 2]:
-                    in_min, gamma, in_max, out_min, out_max = color_filter[
-                        5 * j + 1 : 5 * j + 6
-                    ]
-                    bands[j].paste(
-                        bands[j].point(
-                            lambda i, in_min=in_min, gamma=gamma, in_max=in_max, out_min=out_min, out_max=out_max: (
-                                out_min
-                                + (out_max - out_min)
-                                * (
-                                    (max(in_min, min(i, in_max)) - in_min)
-                                    / (in_max - in_min)
-                                )
-                                ** (1 / gamma)
-                            )
-                        )
-                    )
-                im = Image.merge(im.mode, bands)
-        return im
-    except (TypeError, ValueError):
-        return im
+    from O4_Color_Filters import color_transform as apply_color_transform
+
+    return apply_color_transform(im, color_code, color_filters_dict)
 
 
 ################################################################################

@@ -342,10 +342,13 @@ Located in `Filters/`. Seven files define filter chains:
 | `PCN06_N46E011.flt.json` | `levels` (per-channel gamma), `brightness-contrast` (-20, +20) |
 | `AltoAdige1415.flt.json` | `brightness-contrast` (-20, 0) |
 
-**Supported operations** (in `color_transform()`, `O4_Imagery_Utils.py:2108-2163`):
+**Supported operations** (in `O4_Color_Filters.py`, reached through
+`O4_Imagery_Utils.color_transform()`):
 - `brightness-contrast`: GIMP-style tangent curve, params `[brightness, contrast]`
 - `saturation`: `ImageEnhance.Color().enhance(1 + sat/100)`
 - `sharpness`: `ImageEnhance.Sharpness().enhance(value)`
+- `sharpen`: `ImageFilter.UnsharpMask(radius, percent, threshold)`, params
+  `[radius, amount, threshold]`
 - `blur`: `ImageFilter.GaussianBlur(radius)`
 - `levels`: Per-channel `[in_min, gamma, in_max, out_min, out_max]` via `.point()`
 
@@ -466,10 +469,10 @@ macOS ARM), CUDA runtime requirement for GPU backend.
 
 ### 7.7 Sharpening / Post-Processing Pipeline (Medium impact, Medium effort)
 
-**Decision**: Add `"sharpen"` as a supported operation in the color filter
-pipeline (`O4_Imagery_Utils.py:color_transform()`). Parameters `[radius,
-amount, threshold]` mapped to Pillow `ImageFilter.UnsharpMask()`. Applied
-after color filter, before sRGB normalization.
+**Decision**: `"sharpen"` is supported in the color filter pipeline
+(`O4_Color_Filters.py`, through `O4_Imagery_Utils.py:color_transform()`).
+Parameters `[radius, amount, threshold]` map to Pillow
+`ImageFilter.UnsharpMask(radius, percent, threshold)`.
 
 ### 7.8 Overview and Pyramided Output (Low impact, Medium effort)
 

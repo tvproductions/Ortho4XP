@@ -92,8 +92,19 @@ class ExtentDefinition(BaseModel):
 class ColorFilterStep(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
-    operation: str
-    parameters: list[float] = Field(default_factory=list)
+    operation: str = Field(
+        description=(
+            "Color operation name. Supported runtime operations are "
+            "brightness-contrast, saturation, sharpness, sharpen, blur, and levels."
+        )
+    )
+    parameters: list[float] = Field(
+        default_factory=list,
+        description=(
+            "Operation parameters. sharpen uses [radius, amount, threshold], "
+            "mapped to Pillow ImageFilter.UnsharpMask(radius, percent, threshold)."
+        ),
+    )
 
     def to_runtime_list(self) -> list[Any]:
         return [self.operation, *self.parameters]
