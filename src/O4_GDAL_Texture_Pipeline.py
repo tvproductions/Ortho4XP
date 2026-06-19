@@ -6,6 +6,7 @@ import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from typing import Any
 
 import numpy
 from osgeo import gdal
@@ -17,10 +18,19 @@ gdal.UseExceptions()
 @dataclass
 class VsimemVRT:
     path: str
-    dataset: object | None
+    dataset: Any
 
 
-def memory_dataset_from_image(image: Image.Image, bbox, epsg) -> object:
+@dataclass(frozen=True)
+class WarpRequest:
+    target_bbox: tuple[float, float, float, float]
+    target_epsg: int | str
+    target_size: tuple[int, int]
+    resampling: str
+    mode: str
+
+
+def memory_dataset_from_image(image: Image.Image, bbox, epsg) -> Any:
     supported = image if image.mode in ("L", "RGB", "RGBA") else image.convert("RGB")
     array = numpy.asarray(supported)
     bands = 1 if supported.mode == "L" else len(supported.getbands())
@@ -52,7 +62,9 @@ def memory_dataset_from_image(image: Image.Image, bbox, epsg) -> object:
 
 
 @contextmanager
-def vsimem_vrt_from_sources(sources, vrt_name: str | None = None) -> Iterator[VsimemVRT]:
+def vsimem_vrt_from_sources(
+    sources, vrt_name: str | None = None
+) -> Iterator[VsimemVRT]:
     name = vrt_name or uuid.uuid4().hex
     path = f"/vsimem/ortho4xp/{name}.vrt"
     dataset = gdal.BuildVRT(path, list(sources))
@@ -70,30 +82,35 @@ def vsimem_vrt_from_sources(sources, vrt_name: str | None = None) -> Iterator[Vs
 def image_from_dataset(dataset, mode: str) -> Image.Image:
     if mode == "L":
         return Image.fromarray(dataset.GetRasterBand(1).ReadAsArray(), "L")
-    bands = [dataset.GetRasterBand(index + 1).ReadAsArray() for index in range(len(mode))]
+    bands = [
+        dataset.GetRasterBand(index + 1).ReadAsArray() for index in range(len(mode))
+    ]
     return Image.fromarray(numpy.dstack(bands), mode)
 
 
-def warp_dataset_to_image(
-    dataset,
-    target_bbox,
-    target_epsg,
-    target_size,
-    resampling,
-    mode,
-) -> Image.Image:
-    ulx, uly, lrx, lry = target_bbox
-    width, height = target_size
+def warp_dataset_to_image(dataset, target, *warp_args) -> Image.Image:
+    request = _warp_request(target, warp_args)
+    ulx, uly, lrx, lry = request.target_bbox
+    width, height = request.target_size
     warped = gdal.Warp(
         "",
         dataset,
         format="MEM",
-        dstSRS=f"EPSG:{target_epsg}",
+        dstSRS=f"EPSG:{request.target_epsg}",
         outputBounds=[ulx, lry, lrx, uly],
         width=width,
         height=height,
-        resampleAlg=resampling,
+        resampleAlg=request.resampling,
     )
     if warped is None:
         raise RuntimeError("GDAL warp failed")
-    return image_from_dataset(warped, mode)
+    return image_from_dataset(warped, request.mode)
+
+
+def _warp_request(target, warp_args) -> WarpRequest:
+    if isinstance(target, WarpRequest):
+        if warp_args:
+            raise TypeError("WarpRequest cannot be combined with extra warp arguments")
+        return target
+    target_epsg, target_size, resampling, mode = warp_args
+    return WarpRequest(target, target_epsg, target_size, resampling, mode)

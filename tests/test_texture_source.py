@@ -37,7 +37,6 @@ class TextureSourceTests(unittest.TestCase):
     def test_failure_result_has_attributes_without_source(self):
         result = TextureBuildResult.failure(
             (32, 48, 16, "BI"),
-            "BI",
             "GDAL warp failed",
             incomplete=True,
         )

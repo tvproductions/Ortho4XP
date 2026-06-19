@@ -29,7 +29,7 @@ def run_texture_conversion_scheduler(convert_queue, result_holder, max_convert_s
         result_holder["result"] = TCS.run_texture_conversion_queue(
             convert_queue,
             max_convert_slots,
-            convert_texture=IMG.convert_texture,
+            convert_texture=_convert_texture_job,
         )
     except Exception as exc:
         result_holder["exception"] = exc
@@ -61,3 +61,9 @@ def _texture_conversion_provider_counts(failures):
     return ", ".join(
         f"{provider}={count}" for provider, count in sorted(counts.items())
     )
+
+
+def _convert_texture_job(*args, texture_source=None):
+    if texture_source is not None:
+        return IMG.convert_texture_source(texture_source)
+    return IMG.convert_texture(*args)

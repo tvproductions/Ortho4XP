@@ -74,7 +74,7 @@ class AsyncTextureDownloadTests(unittest.TestCase):
 
         async def fail_build(_tile, *attrs):
             calls.append(attrs)
-            return TextureBuildResult.failure(tuple(attrs), attrs[3], "download failed")
+            return TextureBuildResult.failure(tuple(attrs), "download failed")
 
         def summary(tile_coords, final_failures):
             summaries.append((tile_coords, final_failures))

@@ -50,10 +50,12 @@ class ImageryTextureSourceTests(unittest.TestCase):
                 "jpeg_file_dir_from_attributes",
                 return_value=cache_dir,
             ),
-            mock.patch.object(IMG, "build_texture_from_tilbox", return_value=(1, image)),
+            mock.patch.object(
+                IMG, "build_texture_from_tilbox", return_value=(1, image)
+            ),
         ):
             result = IMG.build_texture_source(
-                tile, 32, 48, 16, "BI", persist_cache=False
+                tile, (32, 48, 16, "BI"), persist_cache=False
             )
 
         self.assertIsInstance(result, TextureBuildResult)
@@ -70,9 +72,7 @@ class ImageryTextureSourceTests(unittest.TestCase):
         with mock.patch.object(
             IMG, "_assemble_ortho_image", return_value=(1, image, False)
         ):
-            ok = IMG.download_jpeg_ortho(
-                file_dir, "32_48_BI16.jpg", 32, 48, 16, "BI"
-            )
+            ok = IMG.download_jpeg_ortho(file_dir, "32_48_BI16.jpg", 32, 48, 16, "BI")
 
         self.assertEqual(ok, 1)
         self.assertTrue(os.path.isfile(os.path.join(file_dir, "32_48_BI16.jpg")))

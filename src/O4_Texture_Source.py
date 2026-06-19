@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TypeAlias
 
 from PIL import Image
 
-TextureAttributes: TypeAlias = tuple[int, int, int, str]
+type TextureAttributes = tuple[int, int, int, str]
 
 
 @dataclass(frozen=True)
@@ -62,18 +61,15 @@ class TextureBuildResult:
     def failure(
         cls,
         attrs: TextureAttributes,
-        provider_code: str,
         error_summary: str,
-        *,
-        incomplete: bool = False,
-        interrupted: bool = False,
+        **flags: bool,
     ) -> TextureBuildResult:
         return cls(
             attrs=attrs,
-            provider_code=provider_code,
+            provider_code=attrs[3],
             error_summary=error_summary,
-            incomplete=incomplete,
-            interrupted=interrupted,
+            incomplete=flags.get("incomplete", False),
+            interrupted=flags.get("interrupted", False),
         )
 
     @property

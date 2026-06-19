@@ -44,8 +44,8 @@ class _ProviderFailureConverter:
     def __init__(self, failed_provider):
         self.failed_provider = failed_provider
 
-    def __call__(self, *args):
-        provider_code = args[4]
+    def __call__(self, *args, texture_source=None):
+        provider_code = texture_source.provider_code if texture_source else args[4]
         if provider_code == self.failed_provider:
             return TEX.TextureConversionResult.failure(
                 "bad.dds",

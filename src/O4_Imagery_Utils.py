@@ -1466,65 +1466,94 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
 
 
 ################################################################################
-def _assemble_ortho_image(
-    til_x_left,
-    til_y_top,
-    zoomlevel,
-    provider_code,
-    file_name,
-    super_resol_factor=1,
-):
+def _assemble_ortho_image(texture_attrs, file_name, super_resol_factor=1):
+    til_x_left, til_y_top, zoomlevel, provider_code = texture_attrs
     provider = providers_dict[provider_code]
+    super_resol_factor = _effective_super_resol_factor(
+        provider, zoomlevel, super_resol_factor
+    )
+    width = height = int(4096 * super_resol_factor)
+    provider = _provider_with_ortho_context(provider, file_name, texture_attrs)
+    success, big_image = _build_provider_ortho_image(
+        texture_attrs,
+        provider,
+        super_resol_factor,
+        (width, height),
+    )
+    output_image = _final_ortho_output_image(big_image, width, super_resol_factor)
+    return success, output_image, not success
+
+
+def _effective_super_resol_factor(provider, zoomlevel, super_resol_factor):
     if ("super_resol_factor" in provider) and (super_resol_factor == 1):
         super_resol_factor = int(provider["super_resol_factor"])
     if "max_zl" in provider:
         max_zl = int(provider["max_zl"])
         if zoomlevel > max_zl:
-            super_resol_factor = 2 ** (max_zl - zoomlevel)
-    width = height = int(4096 * super_resol_factor)
+            return 2 ** (max_zl - zoomlevel)
+    return super_resol_factor
+
+
+def _provider_with_ortho_context(provider, file_name, texture_attrs):
+    til_x_left, til_y_top, zoomlevel, _provider_code = texture_attrs
     texture_context = {
         "texture_filename": file_name,
         "tile_x": til_x_left,
         "tile_y": til_y_top,
         "zoomlevel": zoomlevel,
     }
-    provider = IFAIL.provider_with_texture_context(provider, texture_context)
+    return IFAIL.provider_with_texture_context(provider, texture_context)
+
+
+def _build_provider_ortho_image(
+    texture_attrs, provider, super_resol_factor, texture_size
+):
     # we treat first the case of webmercator grid type servers
     if "grid_type" in provider and provider["grid_type"] == "webmercator":
-        tilbox = [til_x_left, til_y_top, til_x_left + 16, til_y_top + 16]
-        tilbox_mod = [int(round(p * super_resol_factor)) for p in tilbox]
-        zoom_shift = round(log(super_resol_factor) / log(2))
-        (success, big_image) = build_texture_from_tilbox(
-            tilbox_mod,
-            zoomlevel + zoom_shift,
-            provider,
+        return _build_webmercator_ortho_image(
+            texture_attrs, provider, super_resol_factor
         )
     # if not we are in the world of epsg:3857 bboxes
-    else:
-        [latmax, lonmin] = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
-        [latmin, lonmax] = GEO.gtile_to_wgs84(
-            til_x_left + 16, til_y_top + 16, zoomlevel
-        )
-        [xmin, ymax] = GEO.geo_to_webm(lonmin, latmax)
-        [xmax, ymin] = GEO.geo_to_webm(lonmax, latmin)
-        (success, big_image) = build_texture_from_bbox_and_size(
-            [xmin, ymax, xmax, ymin],
-            "3857",
-            (width, height),
-            provider,
-        )
+    return _build_bbox_ortho_image(texture_attrs, provider, texture_size)
+
+
+def _build_webmercator_ortho_image(texture_attrs, provider, super_resol_factor):
+    til_x_left, til_y_top, zoomlevel, _provider_code = texture_attrs
+    tilbox = [til_x_left, til_y_top, til_x_left + 16, til_y_top + 16]
+    tilbox_mod = [int(round(p * super_resol_factor)) for p in tilbox]
+    zoom_shift = round(log(super_resol_factor) / log(2))
+    return build_texture_from_tilbox(
+        tilbox_mod,
+        zoomlevel + zoom_shift,
+        provider,
+    )
+
+
+def _build_bbox_ortho_image(texture_attrs, provider, texture_size):
+    til_x_left, til_y_top, zoomlevel, _provider_code = texture_attrs
+    [latmax, lonmin] = GEO.gtile_to_wgs84(til_x_left, til_y_top, zoomlevel)
+    [latmin, lonmax] = GEO.gtile_to_wgs84(til_x_left + 16, til_y_top + 16, zoomlevel)
+    [xmin, ymax] = GEO.geo_to_webm(lonmin, latmax)
+    [xmax, ymin] = GEO.geo_to_webm(lonmax, latmin)
+    return build_texture_from_bbox_and_size(
+        [xmin, ymax, xmax, ymin],
+        "3857",
+        texture_size,
+        provider,
+    )
+
+
+def _final_ortho_output_image(big_image, width, super_resol_factor):
     if super_resol_factor == 1:
-        output_image = big_image.convert("RGB")
-    else:
-        output_image = RP.resize_image(
-            texture_resize_resampling,
-            big_image,
-            (
-                int(width / super_resol_factor),
-                int(height / super_resol_factor),
-            ),
-        ).convert("RGB")
-    return success, output_image, not success
+        return big_image.convert("RGB")
+    return RP.resize_image(
+        texture_resize_resampling,
+        big_image,
+        (
+            int(width / super_resol_factor),
+            int(width / super_resol_factor),
+        ),
+    ).convert("RGB")
 
 
 ################################################################################
@@ -1542,10 +1571,7 @@ def download_jpeg_ortho(
 ):
     texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     success, output_image, incomplete = _assemble_ortho_image(
-        til_x_left,
-        til_y_top,
-        zoomlevel,
-        provider_code,
+        texture_attrs,
         file_name,
         super_resol_factor,
     )
@@ -1579,22 +1605,58 @@ def download_jpeg_ortho(
 ################################################################################
 
 
-def build_texture_source(
-    tile,
-    til_x_left,
-    til_y_top,
-    zoomlevel,
-    provider_code,
-    *,
-    persist_cache=False,
-):
-    attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
-    if provider_code not in providers_dict or provider_code in local_combined_providers_dict:
+def build_texture_source(tile, texture_attrs, *, persist_cache=False):
+    attrs = tuple(texture_attrs)
+    unsupported = _unsupported_streaming_texture(attrs)
+    if unsupported is not None:
+        return unsupported
+    return _build_supported_texture_source(tile, attrs, persist_cache)
+
+
+def _build_supported_texture_source(tile, attrs, persist_cache):
+    file_name, file_dir, cache_path = _texture_source_cache_info(tile, attrs)
+    assembled = _assemble_texture_source_image(attrs, file_name)
+    if isinstance(assembled, TextureBuildResult):
+        return assembled
+    success, output_image, incomplete = assembled
+    if UI.red_flag:
         return TextureBuildResult.failure(
             attrs,
-            provider_code,
-            "Streaming texture source is only available for concrete providers",
+            "Texture source build interrupted",
+            interrupted=True,
         )
+    if incomplete:
+        _record_incomplete_ortho(file_dir, file_name, attrs)
+    wrote_cache = _write_optional_texture_cache(
+        persist_cache, file_dir, cache_path, output_image
+    )
+    source = TextureSource(tile, attrs, output_image, cache_path, wrote_cache)
+    return TextureBuildResult.success(source, incomplete=incomplete and not success)
+
+
+def _assemble_texture_source_image(attrs, file_name):
+    try:
+        return _assemble_ortho_image(attrs, file_name)
+    except Exception as exc:
+        UI.vprint(2, f"Texture source build failed: {exc}")
+        return TextureBuildResult.failure(attrs, str(exc))
+
+
+def _unsupported_streaming_texture(attrs):
+    provider_code = attrs[3]
+    if (
+        provider_code in providers_dict
+        and provider_code not in local_combined_providers_dict
+    ):
+        return None
+    return TextureBuildResult.failure(
+        attrs,
+        "Streaming texture source is only available for concrete providers",
+    )
+
+
+def _texture_source_cache_info(tile, attrs):
+    _til_x_left, _til_y_top, zoomlevel, provider_code = attrs
     file_name = FNAMES.jpeg_file_name_from_attributes(*attrs)
     file_dir = FNAMES.jpeg_file_dir_from_attributes(
         tile.lat,
@@ -1602,49 +1664,34 @@ def build_texture_source(
         zoomlevel,
         providers_dict[provider_code],
     )
-    cache_path = os.path.join(file_dir, file_name)
-    try:
-        success, output_image, incomplete = _assemble_ortho_image(
-            til_x_left,
-            til_y_top,
-            zoomlevel,
-            provider_code,
-            file_name,
-        )
-    except Exception as exc:
-        UI.vprint(2, f"Texture source build failed: {exc}")
-        return TextureBuildResult.failure(attrs, provider_code, str(exc))
-    if UI.red_flag:
-        return TextureBuildResult.failure(
-            attrs,
-            provider_code,
-            "Texture source build interrupted",
-            interrupted=True,
-        )
-    if incomplete:
-        UI.lvprint(
-            1,
-            "Part of image",
-            file_name,
-            "could not be obtained ",
-            "(even at lower ZL), it was filled with white there.",
-        )
-        record_incomplete_texture(file_dir, file_name, attrs)
-    wrote_cache = False
-    if persist_cache:
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
-        output_image.save(cache_path)
-        wrote_cache = True
-    source = TextureSource(tile, attrs, output_image, cache_path, wrote_cache)
-    return TextureBuildResult.success(source, incomplete=incomplete and not success)
+    return file_name, file_dir, os.path.join(file_dir, file_name)
+
+
+def _record_incomplete_ortho(file_dir, file_name, texture_attrs):
+    UI.lvprint(
+        1,
+        "Part of image",
+        file_name,
+        "could not be obtained ",
+        "(even at lower ZL), it was filled with white there.",
+    )
+    record_incomplete_texture(file_dir, file_name, texture_attrs)
+
+
+def _write_optional_texture_cache(persist_cache, file_dir, cache_path, output_image):
+    if not persist_cache:
+        return False
+    if not os.path.exists(file_dir):
+        os.makedirs(file_dir)
+    output_image.save(cache_path)
+    return True
 
 
 async def async_build_texture_source(tile, *attrs, persist_cache=False):
     return await asyncio.to_thread(
         build_texture_source,
         tile,
-        *attrs,
+        tuple(attrs),
         persist_cache=persist_cache,
     )
 
@@ -2301,6 +2348,126 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
 ################################################################################
 
 
+def convert_texture_source(texture_source, type=DDS_OUTPUT_TYPE):
+    if type != DDS_OUTPUT_TYPE:
+        return convert_texture(texture_source.tile, *texture_source.attrs, type=type)
+    tile = texture_source.tile
+    texture_attrs = texture_source.attrs
+    provider_code = texture_source.provider_code
+    out_file_name = FNAMES.dds_file_name_from_attributes(*texture_attrs)
+    png_file_name = out_file_name.replace(DDS_OUTPUT_TYPE, "png")
+    UI.vprint(1, "   Converting orthophoto(s) to build texture " + out_file_name + ".")
+
+    big_image = _prepare_texture_source_image(texture_source)
+    masked_texture, mask_im = _dds_texture_mask(tile, texture_attrs)
+    dxt5 = False
+    if masked_texture:
+        UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
+        big_image.putalpha(
+            RP.tile_resize_image(tile, "mask_resize_resampling", mask_im, (4096, 4096))
+        )
+        _remove_dds_mask_file(tile, texture_attrs)
+        dxt5 = True
+
+    file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
+    big_image.save(file_to_convert)
+    return convert_dds_texture(
+        tile,
+        texture_attrs,
+        (file_to_convert, out_file_name, dxt5),
+        (True, png_file_name),
+    )
+
+
+def _prepare_texture_source_image(texture_source):
+    provider_code = texture_source.provider_code
+    image = texture_source.image.convert("RGB")
+    color_context = TCN.texture_color_context(
+        _texture_source_cache_dir(texture_source),
+        texture_source.attrs,
+        normalize_texture_colors,
+    )
+    image = TCN.normalize_texture_image_if_enabled(image, color_context)
+    if providers_dict[provider_code]["color_filters"] != "none":
+        return color_transform(image, providers_dict[provider_code]["color_filters"])
+    return image
+
+
+def _texture_source_cache_dir(texture_source):
+    if not texture_source.cache_path:
+        return None
+    return os.path.dirname(texture_source.cache_path)
+
+
+def _dds_texture_mask(tile, texture_attrs):
+    if not tile.imprint_masks_to_dds:
+        return False, None
+    mask_path = _dds_mask_path(tile, texture_attrs)
+    if not os.path.exists(mask_path):
+        return False, None
+    return True, Image.open(mask_path).convert("L")
+
+
+def _dds_mask_path(tile, texture_attrs):
+    return os.path.join(
+        tile.build_dir,
+        "textures",
+        FNAMES.mask_file(*texture_attrs),
+    )
+
+
+def _remove_dds_mask_file(tile, texture_attrs):
+    try:
+        os.remove(_dds_mask_path(tile, texture_attrs))
+    except OSError as exc:
+        UI.vprint(3, exc)
+
+
+def _legacy_texture_mask(tile, texture_attrs, output_type):
+    if not tile.imprint_masks_to_dds:
+        return False, None
+    if output_type == DDS_OUTPUT_TYPE:
+        return _dds_texture_mask(tile, texture_attrs)
+    return _legacy_tif_texture_mask(tile, texture_attrs)
+
+
+def _legacy_tif_texture_mask(tile, texture_attrs):
+    til_x_left, til_y_top, zoomlevel, _provider_code = texture_attrs
+    if int(zoomlevel) < tile.mask_zl:
+        return False, None
+    factor = 2 ** (zoomlevel - tile.mask_zl)
+    m_til_x = (int(til_x_left / factor) // 16) * 16
+    m_til_y = (int(til_y_top / factor) // 16) * 16
+    rx = int((til_x_left - factor * m_til_x) / 16)
+    ry = int((til_y_top - factor * m_til_y) / 16)
+    mask_file = os.path.join(
+        FNAMES.mask_dir(tile.lat, tile.lon),
+        FNAMES.legacy_mask(m_til_x, m_til_y),
+    )
+    if not os.path.isfile(mask_file):
+        return False, None
+    mask_im = _legacy_tif_mask_crop(mask_file, rx, ry, factor)
+    small_array = numpy.array(mask_im, dtype=numpy.uint8)
+    return small_array.max() > 30, mask_im
+
+
+def _legacy_tif_mask_crop(mask_file, rx, ry, factor):
+    big_img = Image.open(mask_file)
+    x0 = int(rx * 4096 / factor)
+    y0 = int(ry * 4096 / factor)
+    return big_img.crop((x0, y0, x0 + 4096 // factor, y0 + 4096 // factor))
+
+
+def _apply_texture_alpha_mask(tile, big_image, mask_im):
+    UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
+    big_image.putalpha(
+        RP.tile_resize_image(tile, "mask_resize_resampling", mask_im, (4096, 4096))
+    )
+
+
+################################################################################
+
+
 def convert_texture(
     tile,
     til_x_left,
@@ -2308,8 +2475,6 @@ def convert_texture(
     zoomlevel,
     provider_code,
     type="dds",
-    *,
-    texture_source=None,
 ):
     texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     if type == DDS_OUTPUT_TYPE:
@@ -2334,44 +2499,7 @@ def convert_texture(
     erase_tmp_png = False
 
     dxt5 = False
-    masked_texture = False
-    if tile.imprint_masks_to_dds and type == DDS_OUTPUT_TYPE:
-        masked_texture = os.path.exists(
-            os.path.join(
-                tile.build_dir,
-                "textures",
-                FNAMES.mask_file(til_x_left, til_y_top, zoomlevel, provider_code),
-            )
-        )
-        if masked_texture:
-            mask_im = Image.open(
-                os.path.join(
-                    tile.build_dir,
-                    "textures",
-                    FNAMES.mask_file(til_x_left, til_y_top, zoomlevel, provider_code),
-                )
-            ).convert("L")
-    elif tile.imprint_masks_to_dds:  # type = 'tif'
-        if int(zoomlevel) >= tile.mask_zl:
-            factor = 2 ** (zoomlevel - tile.mask_zl)
-            m_til_x = (int(til_x_left / factor) // 16) * 16
-            m_til_y = (int(til_y_top / factor) // 16) * 16
-            rx = int((til_x_left - factor * m_til_x) / 16)
-            ry = int((til_y_top - factor * m_til_y) / 16)
-            mask_file = os.path.join(
-                FNAMES.mask_dir(tile.lat, tile.lon),
-                FNAMES.legacy_mask(m_til_x, m_til_y),
-            )
-            if os.path.isfile(mask_file):
-                big_img = Image.open(mask_file)
-                x0 = int(rx * 4096 / factor)
-                y0 = int(ry * 4096 / factor)
-                mask_im = big_img.crop(
-                    (x0, y0, x0 + 4096 // factor, y0 + 4096 // factor)
-                )
-                small_array = numpy.array(mask_im, dtype=numpy.uint8)
-                if small_array.max() > 30:
-                    masked_texture = True
+    masked_texture, mask_im = _legacy_texture_mask(tile, texture_attrs, type)
 
     file_dir = cached_texture_path = ""
     if provider_code in providers_dict:
@@ -2385,9 +2513,6 @@ def convert_texture(
     color_context = TCN.texture_color_context(
         file_dir or None, texture_attrs, normalize_texture_colors
     )
-    streaming_image = None
-    if texture_source is not None:
-        streaming_image = texture_source.image.convert("RGB")
     if (provider_code in local_combined_providers_dict) and (
         TCN.texture_path_missing(cached_texture_path)
     ):
@@ -2401,25 +2526,9 @@ def convert_texture(
             normalize_texture_colors,
         )
         if masked_texture:
-            UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
-            big_image.putalpha(
-                RP.tile_resize_image(
-                    tile, "mask_resize_resampling", mask_im, (4096, 4096)
-                )
-            )
+            _apply_texture_alpha_mask(tile, big_image, mask_im)
             if type == DDS_OUTPUT_TYPE:
-                try:
-                    os.remove(
-                        os.path.join(
-                            tile.build_dir,
-                            "textures",
-                            FNAMES.mask_file(
-                                til_x_left, til_y_top, zoomlevel, provider_code
-                            ),
-                        )
-                    )
-                except OSError as exc:
-                    UI.vprint(3, exc)
+                _remove_dds_mask_file(tile, texture_attrs)
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
@@ -2430,39 +2539,17 @@ def convert_texture(
         #     'textures', out_file_name.replace('dds', 'jpg')), quality=70)
     # now if provider_code was not in local_combined_providers_dict but
     # color correction is required.
-    elif (
-        streaming_image is not None
-        or providers_dict[provider_code]["color_filters"] != "none"
-        or masked_texture
-    ):
-        big_image = streaming_image or Image.open(cached_texture_path, "r").convert(
-            "RGB"
-        )
+    elif (providers_dict[provider_code]["color_filters"] != "none") or masked_texture:
+        big_image = Image.open(cached_texture_path, "r").convert("RGB")
         big_image = TCN.normalize_texture_image_if_enabled(big_image, color_context)
         if providers_dict[provider_code]["color_filters"] != "none":
             big_image = color_transform(
                 big_image, providers_dict[provider_code]["color_filters"]
             )
         if masked_texture:
-            UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
-            big_image.putalpha(
-                RP.tile_resize_image(
-                    tile, "mask_resize_resampling", mask_im, (4096, 4096)
-                )
-            )
+            _apply_texture_alpha_mask(tile, big_image, mask_im)
             if type == DDS_OUTPUT_TYPE:
-                try:
-                    os.remove(
-                        os.path.join(
-                            tile.build_dir,
-                            "textures",
-                            FNAMES.mask_file(
-                                til_x_left, til_y_top, zoomlevel, provider_code
-                            ),
-                        )
-                    )
-                except OSError as exc:
-                    UI.vprint(3, exc)
+                _remove_dds_mask_file(tile, texture_attrs)
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True

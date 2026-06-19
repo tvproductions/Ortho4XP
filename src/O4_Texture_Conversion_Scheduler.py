@@ -1,12 +1,11 @@
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 import O4_File_Names as FNAMES
 import O4_UI_Utils as UI
 from O4_Texture_Source import TextureSource
 
-ConvertTexture = Callable[[object, int, int, int, str], object]
+ConvertTexture = Any
 
 
 class TextureConversionQueue(Protocol):

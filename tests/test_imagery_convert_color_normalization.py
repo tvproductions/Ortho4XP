@@ -31,14 +31,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         )
 
         with self._convert_texture_patches("STREAM") as conversion:
-            result = IMG.convert_texture(
-                tile,
-                32,
-                48,
-                16,
-                "STREAM",
-                texture_source=source,
-            )
+            result = IMG.convert_texture_source(source)
 
         self.assertTrue(result.ok)
         self.assertTrue(conversion.encode_request.source_path.endswith(".png"))
@@ -73,14 +66,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
             conversion.color_transform.side_effect = color_transform
             IMG.normalize_texture_colors = True
 
-            IMG.convert_texture(
-                tile,
-                32,
-                48,
-                16,
-                "STREAMFILTER",
-                texture_source=source,
-            )
+            IMG.convert_texture_source(source)
 
         self.assertEqual(call_order, ["normalize", "color_transform"])
 

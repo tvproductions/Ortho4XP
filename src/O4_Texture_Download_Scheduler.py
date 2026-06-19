@@ -112,7 +112,7 @@ async def _build_texture(runtime, attrs):
         return await IMG.async_build_texture_source(runtime.tile, *attrs)
     except Exception as err:
         UI.vprint(2, f"Download failed: {err}")
-        return TextureBuildResult.failure(tuple(attrs), attrs[3], str(err))
+        return TextureBuildResult.failure(tuple(attrs), str(err))
 
 
 async def _download_task(runtime, attrs):

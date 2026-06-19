@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 
 import aiohttp
+from PIL import Image
 
 try:
     import _path  # noqa: F401
@@ -18,6 +19,7 @@ import O4_Imagery_Failures as IFAIL
 import O4_Imagery_Utils as IMG
 import O4_Tile_Utils as TILE
 import O4_UI_Utils as UI
+from O4_Texture_Source import TextureBuildResult, TextureSource
 
 
 class FakeResponse:
@@ -226,12 +228,14 @@ class TextureDownloadRetryTests(unittest.TestCase):
         TILE.max_texture_download_retries = 2
         calls = []
 
-        def fail_build(_tile, *attrs):
+        async def fail_build(_tile, *attrs):
             calls.append(attrs)
-            return 0
+            return TextureBuildResult.failure(tuple(attrs), "download failed")
 
         with (
-            mock.patch.object(IMG, "build_jpeg_ortho", side_effect=fail_build),
+            mock.patch.object(
+                IMG, "async_build_texture_source", side_effect=fail_build
+            ),
             mock.patch.object(IMG, "imagery_download_summary", return_value=None),
             mock.patch.object(IMG, "failures_for_texture", return_value=[]),
             contextlib.redirect_stdout(io.StringIO()),
@@ -256,7 +260,13 @@ class TextureDownloadRetryTests(unittest.TestCase):
             }
 
         with (
-            mock.patch.object(IMG, "build_jpeg_ortho", return_value=0),
+            mock.patch.object(
+                IMG,
+                "async_build_texture_source",
+                return_value=TextureBuildResult.failure(
+                    (1, 2, 16, "BI"), "download failed"
+                ),
+            ),
             mock.patch.object(IMG, "imagery_download_summary", side_effect=summary),
             mock.patch.object(IMG, "failures_for_texture", return_value=[]),
             contextlib.redirect_stdout(io.StringIO()),
@@ -273,22 +283,28 @@ class TextureDownloadRetryTests(unittest.TestCase):
 
     def test_successful_retry_is_not_in_final_failure_summary(self):
         TILE.max_texture_download_retries = 3
-        outcomes = [0, 1]
+        tile = self._tile()
+        outcomes = [
+            TextureBuildResult.failure((1, 2, 16, "BI"), "download failed"),
+            TextureBuildResult.success(
+                TextureSource(tile, (1, 2, 16, "BI"), Image.new("RGB", (4, 4)))
+            ),
+        ]
 
-        def flaky_build(_tile, *_attrs):
+        async def flaky_build(_tile, *_attrs):
             return outcomes.pop(0)
 
         with (
-            mock.patch.object(IMG, "build_jpeg_ortho", side_effect=flaky_build),
+            mock.patch.object(
+                IMG, "async_build_texture_source", side_effect=flaky_build
+            ),
             mock.patch.object(
                 IMG, "imagery_download_summary", return_value=None
             ) as summary,
             mock.patch.object(IMG, "failures_for_texture", return_value=[]),
             contextlib.redirect_stdout(io.StringIO()),
         ):
-            TILE.download_textures(
-                self._tile(), self._queue(), queue.Queue(), workers=1
-            )
+            TILE.download_textures(tile, self._queue(), queue.Queue(), workers=1)
 
         self.assertEqual(summary.call_args.args[1], [])
 

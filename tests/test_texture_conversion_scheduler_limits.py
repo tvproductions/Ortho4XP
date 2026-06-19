@@ -45,8 +45,8 @@ class _WorkerLimitConverter:
         self.max_active = 0
         self.lock = threading.Lock()
 
-    def __call__(self, *args):
-        provider_code = args[4]
+    def __call__(self, *args, texture_source=None):
+        provider_code = texture_source.provider_code if texture_source else args[4]
         with self.lock:
             self.active += 1
             self.max_active = max(self.max_active, self.active)
