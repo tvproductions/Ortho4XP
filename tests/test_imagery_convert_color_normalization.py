@@ -10,6 +10,7 @@ except ModuleNotFoundError:
 
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
+from O4_Texture_Source import TextureSource
 from tests._imagery_color_normalization_helpers import (
     ConvertTexturePatchMixin,
 )
@@ -20,6 +21,69 @@ from tests._imagery_geotiff_conversion_helpers import (
 
 
 class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
+    def test_convert_texture_uses_streaming_image_when_cached_jpeg_is_missing(self):
+        tile = self._tile_for_conversion()
+        source = TextureSource(
+            tile,
+            (32, 48, 16, "STREAM"),
+            Image.new("RGB", (16, 16), (1, 2, 3)),
+            cache_path=None,
+        )
+
+        with self._convert_texture_patches("STREAM") as conversion:
+            result = IMG.convert_texture(
+                tile,
+                32,
+                48,
+                16,
+                "STREAM",
+                texture_source=source,
+            )
+
+        self.assertTrue(result.ok)
+        self.assertTrue(conversion.encode_request.source_path.endswith(".png"))
+        self.assertFalse(os.path.exists(conversion.encode_request.source_path))
+
+    def test_streaming_conversion_normalizes_before_color_filter(self):
+        tile = self._tile_for_conversion()
+        source = TextureSource(
+            tile,
+            (32, 48, 16, "STREAMFILTER"),
+            Image.new("RGB", (16, 16), (10, 10, 10)),
+            cache_path=os.path.join(self.temp_dir.name, "32_48_STREAMFILTER16.jpg"),
+        )
+        call_order = []
+        normalized = Image.new("RGB", (16, 16), (120, 120, 120))
+
+        def normalize(image, *args):
+            call_order.append("normalize")
+            return normalized
+
+        def color_transform(image, color_code):
+            call_order.append("color_transform")
+            self.assertEqual(color_code, "FILTER")
+            self.assertEqual(image.getpixel((0, 0)), (120, 120, 120))
+            return Image.new("RGB", image.size, (130, 130, 130))
+
+        with self._convert_texture_patches(
+            "STREAMFILTER",
+            color_filters="FILTER",
+        ) as conversion:
+            conversion.normalize.side_effect = normalize
+            conversion.color_transform.side_effect = color_transform
+            IMG.normalize_texture_colors = True
+
+            IMG.convert_texture(
+                tile,
+                32,
+                48,
+                16,
+                "STREAMFILTER",
+                texture_source=source,
+            )
+
+        self.assertEqual(call_order, ["normalize", "color_transform"])
+
     def test_convert_texture_disabled_uses_cached_jpeg_directly(self):
         cached_path = self._write_cached_jpeg("DIRECT")
         tile = self._tile_for_conversion()

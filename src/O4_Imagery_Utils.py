@@ -2358,7 +2358,16 @@ def combine_textures(tile, til_x_left, til_y_top, zoomlevel, provider_code):
 ################################################################################
 
 
-def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type="dds"):
+def convert_texture(
+    tile,
+    til_x_left,
+    til_y_top,
+    zoomlevel,
+    provider_code,
+    type="dds",
+    *,
+    texture_source=None,
+):
     texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     if type == DDS_OUTPUT_TYPE:
         out_file_name = FNAMES.dds_file_name_from_attributes(
@@ -2433,6 +2442,9 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
     color_context = TCN.texture_color_context(
         file_dir or None, texture_attrs, normalize_texture_colors
     )
+    streaming_image = None
+    if texture_source is not None:
+        streaming_image = texture_source.image.convert("RGB")
     if (provider_code in local_combined_providers_dict) and (
         TCN.texture_path_missing(cached_texture_path)
     ):
@@ -2475,8 +2487,14 @@ def convert_texture(tile, til_x_left, til_y_top, zoomlevel, provider_code, type=
         #     'textures', out_file_name.replace('dds', 'jpg')), quality=70)
     # now if provider_code was not in local_combined_providers_dict but
     # color correction is required.
-    elif (providers_dict[provider_code]["color_filters"] != "none") or masked_texture:
-        big_image = Image.open(cached_texture_path, "r").convert("RGB")
+    elif (
+        streaming_image is not None
+        or providers_dict[provider_code]["color_filters"] != "none"
+        or masked_texture
+    ):
+        big_image = streaming_image or Image.open(cached_texture_path, "r").convert(
+            "RGB"
+        )
         big_image = TCN.normalize_texture_image_if_enabled(big_image, color_context)
         if providers_dict[provider_code]["color_filters"] != "none":
             big_image = color_transform(
