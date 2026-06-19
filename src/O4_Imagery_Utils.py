@@ -41,6 +41,7 @@ from O4_Texture_Conversion_Utils import (
     convert_dds_texture,
     convert_geotiff_texture,
 )
+from O4_Texture_Source import TextureBuildResult, TextureSource
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
 gdal.UseExceptions()
@@ -1464,17 +1465,15 @@ def build_texture_from_bbox_and_size(t_bbox, t_epsg, t_size, provider):
 
 
 ################################################################################
-def download_jpeg_ortho(
-    file_dir,
-    file_name,
+def _assemble_ortho_image(
     til_x_left,
     til_y_top,
     zoomlevel,
     provider_code,
+    file_name,
     super_resol_factor=1,
 ):
     provider = providers_dict[provider_code]
-    texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
     if ("super_resol_factor" in provider) and (super_resol_factor == 1):
         super_resol_factor = int(provider["super_resol_factor"])
     if "max_zl" in provider:
@@ -1513,10 +1512,46 @@ def download_jpeg_ortho(
             (width, height),
             provider,
         )
+    if super_resol_factor == 1:
+        output_image = big_image.convert("RGB")
+    else:
+        output_image = RP.resize_image(
+            texture_resize_resampling,
+            big_image,
+            (
+                int(width / super_resol_factor),
+                int(height / super_resol_factor),
+            ),
+        ).convert("RGB")
+    return success, output_image, not success
+
+
+################################################################################
+
+
+################################################################################
+def download_jpeg_ortho(
+    file_dir,
+    file_name,
+    til_x_left,
+    til_y_top,
+    zoomlevel,
+    provider_code,
+    super_resol_factor=1,
+):
+    texture_attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
+    success, output_image, incomplete = _assemble_ortho_image(
+        til_x_left,
+        til_y_top,
+        zoomlevel,
+        provider_code,
+        file_name,
+        super_resol_factor,
+    )
     # if stop flag we do not wish to imprint a white texture
     if UI.red_flag:
         return 0
-    if not success:
+    if incomplete:
         UI.lvprint(
             1,
             "Part of image",
@@ -1528,17 +1563,6 @@ def download_jpeg_ortho(
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
     try:
-        if super_resol_factor == 1:
-            output_image = big_image.convert("RGB")
-        else:
-            output_image = RP.resize_image(
-                texture_resize_resampling,
-                big_image,
-                (
-                    int(width / super_resol_factor),
-                    int(height / super_resol_factor),
-                ),
-            ).convert("RGB")
         output_image.save(os.path.join(file_dir, file_name))
     except Exception as e:
         UI.lvprint(
@@ -1549,6 +1573,79 @@ def download_jpeg_ortho(
         )
         return 0
     return 1
+
+
+################################################################################
+
+
+def build_texture_source(
+    tile,
+    til_x_left,
+    til_y_top,
+    zoomlevel,
+    provider_code,
+    *,
+    persist_cache=False,
+):
+    attrs = (til_x_left, til_y_top, zoomlevel, provider_code)
+    if provider_code not in providers_dict or provider_code in local_combined_providers_dict:
+        return TextureBuildResult.failure(
+            attrs,
+            provider_code,
+            "Streaming texture source is only available for concrete providers",
+        )
+    file_name = FNAMES.jpeg_file_name_from_attributes(*attrs)
+    file_dir = FNAMES.jpeg_file_dir_from_attributes(
+        tile.lat,
+        tile.lon,
+        zoomlevel,
+        providers_dict[provider_code],
+    )
+    cache_path = os.path.join(file_dir, file_name)
+    try:
+        success, output_image, incomplete = _assemble_ortho_image(
+            til_x_left,
+            til_y_top,
+            zoomlevel,
+            provider_code,
+            file_name,
+        )
+    except Exception as exc:
+        UI.vprint(2, f"Texture source build failed: {exc}")
+        return TextureBuildResult.failure(attrs, provider_code, str(exc))
+    if UI.red_flag:
+        return TextureBuildResult.failure(
+            attrs,
+            provider_code,
+            "Texture source build interrupted",
+            interrupted=True,
+        )
+    if incomplete:
+        UI.lvprint(
+            1,
+            "Part of image",
+            file_name,
+            "could not be obtained ",
+            "(even at lower ZL), it was filled with white there.",
+        )
+        record_incomplete_texture(file_dir, file_name, attrs)
+    wrote_cache = False
+    if persist_cache:
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)
+        output_image.save(cache_path)
+        wrote_cache = True
+    source = TextureSource(tile, attrs, output_image, cache_path, wrote_cache)
+    return TextureBuildResult.success(source, incomplete=incomplete and not success)
+
+
+async def async_build_texture_source(tile, *attrs, persist_cache=False):
+    return await asyncio.to_thread(
+        build_texture_source,
+        tile,
+        *attrs,
+        persist_cache=persist_cache,
+    )
 
 
 ################################################################################
