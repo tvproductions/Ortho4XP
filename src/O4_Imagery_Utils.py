@@ -19,6 +19,7 @@ from pydantic import ValidationError
 
 import O4_Async_HTTP as AHTTP
 import O4_File_Names as FNAMES
+import O4_GDAL_Texture_Pipeline as GTP
 import O4_Geo_Utils as GEO
 import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
@@ -2074,79 +2075,21 @@ def create_tile_preview(lat, lon, zoomlevel, provider_code):
 ################################################################################
 def warp_image_with_gdal(source_im, s_bbox, s_epsg, t_bbox, t_epsg, t_size):
     source_im = _gdal_warp_supported_image(source_im)
-    source_array = numpy.asarray(source_im)
-    source_bands = _gdal_band_count_for_image(source_im)
-
-    source_ds = _memory_raster_from_image(source_im, source_array, source_bands, s_bbox)
-    source_ds.SetProjection(f"EPSG:{s_epsg}")
-
-    t_ulx, t_uly, t_lrx, t_lry = t_bbox
-    t_w, t_h = t_size
-    warped_ds = gdal.Warp(
-        "",
+    source_ds = GTP.memory_dataset_from_image(source_im, s_bbox, s_epsg)
+    return GTP.warp_dataset_to_image(
         source_ds,
-        format="MEM",
-        srcSRS=f"EPSG:{s_epsg}",
-        dstSRS=f"EPSG:{t_epsg}",
-        outputBounds=[t_ulx, t_lry, t_lrx, t_uly],
-        width=t_w,
-        height=t_h,
-        resampleAlg=RP.gdal_resampling(warp_resampling),
+        t_bbox,
+        t_epsg,
+        t_size,
+        RP.gdal_resampling(warp_resampling),
+        source_im.mode,
     )
-    if warped_ds is None:
-        raise RuntimeError("GDAL warp failed")
-    return _image_from_memory_raster(warped_ds, source_im.mode)
 
 
 def _gdal_warp_supported_image(source_im):
     if source_im.mode in ("L", "RGB", "RGBA"):
         return source_im
     return source_im.convert("RGB")
-
-
-def _gdal_band_count_for_image(source_im):
-    if source_im.mode == "L":
-        return 1
-    return len(source_im.getbands())
-
-
-def _memory_raster_from_image(source_im, source_array, source_bands, bbox):
-    s_ulx, s_uly, s_lrx, s_lry = bbox
-    source_ds = gdal.GetDriverByName("MEM").Create(
-        "",
-        source_im.width,
-        source_im.height,
-        source_bands,
-        gdal.GDT_Byte,
-    )
-    source_ds.SetGeoTransform(
-        [
-            s_ulx,
-            (s_lrx - s_ulx) / source_im.width,
-            0,
-            s_uly,
-            0,
-            (s_lry - s_uly) / source_im.height,
-        ]
-    )
-    if source_bands == 1:
-        source_ds.GetRasterBand(1).WriteArray(source_array)
-    else:
-        for band_index in range(source_bands):
-            source_ds.GetRasterBand(band_index + 1).WriteArray(
-                source_array[:, :, band_index]
-            )
-    return source_ds
-
-
-def _image_from_memory_raster(raster, mode):
-    if mode == "L":
-        return Image.fromarray(raster.GetRasterBand(1).ReadAsArray(), "L")
-    bands = [
-        raster.GetRasterBand(band_index + 1).ReadAsArray()
-        for band_index in range(len(mode))
-    ]
-    return Image.fromarray(numpy.dstack(bands), mode)
 
 
 ################################################################################

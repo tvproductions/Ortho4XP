@@ -14,10 +14,10 @@ from PIL import Image
 gdal.UseExceptions()
 
 
-@dataclass(frozen=True)
+@dataclass
 class VsimemVRT:
     path: str
-    dataset: object
+    dataset: object | None
 
 
 def memory_dataset_from_image(image: Image.Image, bbox, epsg) -> object:
@@ -58,9 +58,11 @@ def vsimem_vrt_from_sources(sources, vrt_name: str | None = None) -> Iterator[Vs
     dataset = gdal.BuildVRT(path, list(sources))
     if dataset is None:
         raise RuntimeError("GDAL BuildVRT failed")
+    vrt = VsimemVRT(path, dataset)
     try:
-        yield VsimemVRT(path, dataset)
+        yield vrt
     finally:
+        vrt.dataset = None
         dataset = None
         gdal.Unlink(path)
 

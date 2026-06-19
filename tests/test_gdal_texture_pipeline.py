@@ -35,13 +35,37 @@ class GDALTexturePipelineTests(unittest.TestCase):
         dataset = GTP.memory_dataset_from_image(image, (0, 2, 2, 0), 4326)
         unlinked = []
 
-        with mock.patch.object(GTP.gdal, "Unlink", side_effect=unlinked.append):
-            with GTP.vsimem_vrt_from_sources([dataset], vrt_name="unit-test") as vrt:
-                self.assertEqual(vrt.dataset.RasterXSize, 2)
-                self.assertEqual(vrt.dataset.RasterYSize, 2)
-                self.assertEqual(vrt.path, "/vsimem/ortho4xp/unit-test.vrt")
+        with (
+            mock.patch.object(GTP.gdal, "Unlink", side_effect=unlinked.append),
+            GTP.vsimem_vrt_from_sources([dataset], vrt_name="unit-test") as vrt,
+        ):
+            self.assertEqual(vrt.dataset.RasterXSize, 2)
+            self.assertEqual(vrt.dataset.RasterYSize, 2)
+            self.assertEqual(vrt.path, "/vsimem/ortho4xp/unit-test.vrt")
 
         self.assertEqual(unlinked, ["/vsimem/ortho4xp/unit-test.vrt"])
+
+    def test_vrt_combines_adjacent_memory_sources(self):
+        left = GTP.memory_dataset_from_image(
+            Image.new("RGB", (2, 2), (255, 0, 0)), (0, 2, 2, 0), 4326
+        )
+        right = GTP.memory_dataset_from_image(
+            Image.new("RGB", (2, 2), (0, 255, 0)), (2, 2, 4, 0), 4326
+        )
+
+        with GTP.vsimem_vrt_from_sources([left, right], vrt_name="adjacent") as vrt:
+            image = GTP.warp_dataset_to_image(
+                vrt.dataset,
+                (0, 2, 4, 0),
+                4326,
+                (4, 2),
+                "near",
+                "RGB",
+            )
+
+        arr = numpy.array(image)
+        self.assertGreater(arr[0, 0, 0], 200)
+        self.assertGreater(arr[0, 3, 1], 200)
 
     def test_warp_dataset_to_image_returns_requested_size(self):
         source = Image.new("RGB", (4, 4), (200, 10, 20))
