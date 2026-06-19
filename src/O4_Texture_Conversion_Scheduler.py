@@ -4,6 +4,7 @@ from typing import Protocol
 
 import O4_File_Names as FNAMES
 import O4_UI_Utils as UI
+from O4_Texture_Source import TextureSource
 
 ConvertTexture = Callable[[object, int, int, int, str], object]
 
@@ -23,9 +24,21 @@ class TextureConversionJob:
     til_y_top: int
     zoomlevel: int
     provider_code: str
+    source: TextureSource | None = None
 
     @classmethod
     def from_queue_item(cls, item):
+        if len(item) == 2 and isinstance(item[1], TextureSource):
+            tile, source = item
+            til_x_left, til_y_top, zoomlevel, provider_code = source.attrs
+            return cls(
+                tile,
+                til_x_left,
+                til_y_top,
+                zoomlevel,
+                provider_code,
+                source,
+            )
         tile, til_x_left, til_y_top, zoomlevel, provider_code = item
         return cls(tile, til_x_left, til_y_top, zoomlevel, provider_code)
 

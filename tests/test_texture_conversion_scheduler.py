@@ -3,6 +3,8 @@ import unittest
 from types import SimpleNamespace
 from unittest import mock
 
+from PIL import Image
+
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
@@ -10,6 +12,7 @@ except ModuleNotFoundError:
 
 import O4_Texture_Conversion_Scheduler as TCS
 import O4_Texture_Encoder as TEX
+from O4_Texture_Source import TextureSource
 
 
 class FakeUI:
@@ -53,6 +56,27 @@ class _ProviderFailureConverter:
 
 
 class TextureConversionSchedulerFailureTests(unittest.TestCase):
+    def test_conversion_job_from_streaming_source_item(self):
+        tile = object()
+        source = TextureSource(tile, (32, 48, 16, "BI"), Image.new("RGB", (4, 4)))
+
+        job = TCS.TextureConversionJob.from_queue_item((tile, source))
+
+        self.assertIs(job.tile, tile)
+        self.assertIs(job.source, source)
+        self.assertEqual(job.til_x_left, 32)
+        self.assertEqual(job.til_y_top, 48)
+        self.assertEqual(job.zoomlevel, 16)
+        self.assertEqual(job.provider_code, "BI")
+
+    def test_conversion_job_from_legacy_tuple_has_no_source(self):
+        tile = object()
+
+        job = TCS.TextureConversionJob.from_queue_item((tile, 32, 48, 16, "BI"))
+
+        self.assertIsNone(job.source)
+        self.assertEqual(job.provider_code, "BI")
+
     def test_scheduler_aggregates_failed_jobs(self):
         ui = FakeUI()
 

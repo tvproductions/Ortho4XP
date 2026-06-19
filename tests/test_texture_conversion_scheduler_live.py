@@ -40,6 +40,7 @@ class _LiveQueueScenario:
         self.lock = threading.Lock()
         self.completed_codes = []
         self.errors = []
+        self.calls = []
         self.first_started = threading.Event()
         self.second_queued = threading.Event()
         self.convert_queue = queue.Queue()
@@ -72,8 +73,9 @@ class _LiveQueueScenario:
         with self.lock:
             return len(self.completed_codes)
 
-    def convert_texture(self, *args):
-        provider_code = args[4]
+    def convert_texture(self, *args, texture_source=None):
+        self.calls.append((args, texture_source))
+        provider_code = texture_source.provider_code if texture_source else args[4]
         if provider_code == "FIRST":
             self.first_started.set()
             if not self.second_queued.wait(timeout=1):

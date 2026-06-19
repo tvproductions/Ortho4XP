@@ -111,13 +111,23 @@ class TextureConversionQueueRunner:
 
 def _run_job(job: TCS.TextureConversionJob, convert_texture: TCS.ConvertTexture):
     try:
-        result = convert_texture(
-            job.tile,
-            job.til_x_left,
-            job.til_y_top,
-            job.zoomlevel,
-            job.provider_code,
-        )
+        if job.source is not None:
+            result = convert_texture(
+                job.tile,
+                job.til_x_left,
+                job.til_y_top,
+                job.zoomlevel,
+                job.provider_code,
+                texture_source=job.source,
+            )
+        else:
+            result = convert_texture(
+                job.tile,
+                job.til_x_left,
+                job.til_y_top,
+                job.zoomlevel,
+                job.provider_code,
+            )
         return TEX.coerce_conversion_result(
             result,
             job.display_name,
