@@ -362,7 +362,18 @@ cfg_tile_vars = {
         "values": resampling_method_values,
         "hint": "Resampling method reserved for future color-normalization edge or neighbor sampling resize policy. Default: bilinear.",
     },
+    # Output QA/export toggles are tile settings so batch builds can vary them.
     "cog_export": {"type": bool, "default": False, "hint": "COG export."},
+    "dds_qa_enabled": {
+        "type": bool,
+        "default": False,
+        "hint": "Run DDS compression QA.",
+    },
+    "dds_qa_psnr_threshold": {
+        "type": float,
+        "default": 30.0,
+        "hint": "Warn below this DDS QA PSNR.",
+    },
     "sea_texture_blur": {
         "type": float,
         "default": 0.0,
@@ -535,7 +546,13 @@ list_dsf_vars = [
     "use_decal_on_terrain",
 ]
 
-list_other_vars = ["custom_dem", "fill_nodata", "cog_export"]
+list_other_vars = [
+    "custom_dem",
+    "fill_nodata",
+    "cog_export",
+    "dds_qa_enabled",
+    "dds_qa_psnr_threshold",
+]
 
 list_tile_vars = (
     list_vector_vars

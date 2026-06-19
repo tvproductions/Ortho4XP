@@ -3,6 +3,7 @@ import time
 
 from osgeo import gdal
 
+import O4_DDS_Quality as DQA
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Geotiff_Options as GTO
@@ -43,6 +44,8 @@ def convert_dds_texture(tile, texture_attrs, conversion_input, cleanup_input):
     request = texture_encode_request(tile, texture_attrs, conversion_input)
     try:
         encode_result = TEX.encode_texture(request)
+        # Optional QA observes successful DDS output without changing conversion status.
+        DQA.run_enabled_dds_quality_check(tile, encode_result)
         return TEX.TextureConversionResult.from_encode_result(encode_result)
     finally:
         cleanup_conversion_temps(*cleanup_input)

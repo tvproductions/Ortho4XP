@@ -170,6 +170,18 @@ with failed texture counts by imagery provider. Full external command details,
 return codes, and stderr summaries continue to be written to
 `Ortho4XP.log.json` by the shared subprocess runner.
 
+### DDS compression QA
+
+DDS compression QA is disabled by default. Set `dds_qa_enabled=True` in a tile
+config, or `global_dds_qa_enabled=True` in the global config, to decode each
+successfully generated DDS texture back to a temporary PNG and compare it with
+the source PNG used for encoding.
+
+The comparison reports MSE and PSNR. `dds_qa_psnr_threshold` defaults to
+`30.0` dB; if a texture falls below that threshold, Step 3 prints a warning with
+the measured PSNR and MSE. Decode or metric failures are reported as warnings
+and do not turn an otherwise successful DDS conversion into a failed conversion.
+
 ## GeoTIFF export
 
 GeoTIFF export is available from the Build GeoTIFFs workflow. By default,

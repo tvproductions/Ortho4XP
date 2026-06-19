@@ -925,7 +925,7 @@ Suggested labels: `geotiff`, `quality`
 
 ### TODO-034: DDS Compression QA
 
-Status: Pending
+Status: Done (2026-06-19)
 
 Add optional compression-aware quality assurance step comparing source PNG with
 compressed DDS using PSNR/SSIM metrics.
@@ -937,6 +937,24 @@ Acceptance criteria:
 - Computes PSNR, SSIM, or MSE between source and decoded
 - Warns if quality drops below configurable threshold
 - Adds tests for QA metrics computation
+
+Completion evidence:
+
+- Added `dds_qa_enabled` / `global_dds_qa_enabled` config with default `False`.
+- Added `dds_qa_psnr_threshold` / `global_dds_qa_psnr_threshold` with default
+  `30.0` dB.
+- Added `O4_DDS_Quality` to decode generated DDS files to temporary PNGs via
+  Pillow, compute MSE and PSNR, and warn when PSNR is below threshold.
+- Wired DDS QA into successful DDS conversion results without changing
+  conversion success/failure status or cleanup behavior.
+- Documented DDS compression QA in `README.md`.
+- Added `tests/test_dds_quality.py`, `tests/test_dds_quality_config.py`, and
+  `tests/test_dds_quality_conversion.py`.
+- Verified with focused DDS/config/conversion/encoder/COG tests.
+- Verified with `uv run python -m unittest discover -s tests`.
+- Verified with changed-file Ruff, Ruff format, and ty checks.
+- Verified with `uv run python .codex/skills/quality-check/scripts/quality_check.py`.
+- Checked GitHub issues for `TODO-034`; no open matching issue exists.
 
 Suggested labels: `quality`, `textures`
 
