@@ -17294,7 +17294,7 @@
       "name": "<module>",
       "path": ".codex/skills/repo-hygiene/scripts/hygiene.py",
       "severity": "block",
-      "value": 33.29463713358278
+      "value": 33.028
     },
     "radon_mi|Ortho4XP.py||<module>": {
       "line": null,
@@ -18382,7 +18382,7 @@
       "name": "<module>",
       "path": "tests/test_repo_hygiene.py",
       "severity": "warn",
-      "value": 53.024656294028624
+      "value": 52.6671
     },
     "radon_mi|tests/test_resampling_policy.py||<module>": {
       "line": null,

@@ -30,6 +30,7 @@ class RepoHygienePatternTests(unittest.TestCase):
         self.assertIsNone(re.search(pattern, "numpy.testing.assert_array_equal"))
         self.assertIsNotNone(re.search(pattern, legacy_py_dot_test))
         self.assertIsNotNone(re.search(pattern, legacy_pytest))
+        self.assertIn(["uv", "build"], hygiene.PYTHON_HYGIENE_COMMANDS)
 
 
 if __name__ == "__main__":

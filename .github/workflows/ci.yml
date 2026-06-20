@@ -42,6 +42,9 @@ jobs:
       - name: Python syntax smoke test
         run: uv run python -m compileall -q Ortho4XP.py src
 
+      - name: Python distribution build
+        run: uv build
+
       - name: Python import smoke test
         run: uv run python -c "import os, sys; sys.path.append(os.path.abspath('src')); import O4_File_Names, O4_Geo_Utils, O4_Imagery_Utils; print('Core imports succeeded.')"
 
@@ -97,6 +100,9 @@ jobs:
       - name: Python syntax smoke test
         run: uv run python -m compileall -q Ortho4XP.py src
 
+      - name: Python distribution build
+        run: uv build
+
       - name: Python import smoke test
         run: uv run python -c "import os, sys; sys.path.append(os.path.abspath('src')); import O4_File_Names, O4_Geo_Utils, O4_Imagery_Utils; print('Core imports succeeded.')"
 
@@ -151,6 +157,9 @@ jobs:
 
       - name: Python syntax smoke test
         run: uv run python -m compileall -q Ortho4XP.py src
+
+      - name: Python distribution build
+        run: uv build
 
       - name: Python import smoke test
         run: uv run python -c "import os, sys; sys.path.append(os.path.abspath('src')); import O4_File_Names, O4_Geo_Utils, O4_Imagery_Utils; print('Core imports succeeded.')"

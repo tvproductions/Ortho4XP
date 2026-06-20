@@ -9,6 +9,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 TY_BASELINE = ["tests", "src/O4_Geo_Utils.py", "src/O4_File_Names.py"]
+PYTHON_HYGIENE_COMMANDS = [
+    ["uv", "sync", "--dev"],
+    ["uv", "build"],
+    ["uv", "run", "python", "-m", "unittest", "discover", "-s", "tests"],
+    ["uv", "run", "ruff", "check", "Ortho4XP.py", "src"],
+    ["uv", "run", "ty", "check", *TY_BASELINE],
+]
 NATIVE_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
 NATIVE_PATHS = ["Utils/src"]
 LLVM_TOOL_DIRS = [
@@ -266,6 +273,11 @@ def run_complexity_quality(scope: str) -> None:
     )
 
 
+def run_python_hygiene_commands() -> None:
+    for command in PYTHON_HYGIENE_COMMANDS:
+        run(command)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run Ortho4XP hygiene checks.")
     parser.add_argument(
@@ -280,10 +292,7 @@ def main() -> int:
 
     run(["git", "status", "--short", "--branch"], check=False)
     scan_forbidden_patterns()
-    run(["uv", "sync", "--dev"])
-    run(["uv", "run", "python", "-m", "unittest", "discover", "-s", "tests"])
-    run(["uv", "run", "ruff", "check", "Ortho4XP.py", "src"])
-    run(["uv", "run", "ty", "check", *TY_BASELINE])
+    run_python_hygiene_commands()
 
     changed = changed_python_files()
     run(["uv", "run", "ruff", "format", "--check", *format_check_targets(changed)])

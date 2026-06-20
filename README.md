@@ -135,6 +135,12 @@ Run the deterministic unit test suite with:
 uv run python -m unittest discover -s tests
 ```
 
+Build source and wheel distributions with:
+
+```bash
+uv build
+```
+
 Runtime diagnostics are written as newline-delimited JSON to
 `Ortho4XP.log.json`. Console and GUI output stays human-readable; verbosity
 only controls what users see, while enabled structured logging can still record

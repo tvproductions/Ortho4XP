@@ -29,6 +29,7 @@ Never introduce alternate test runners, legacy `pip`/manual-venv setup, or MSVC-
    - Prefer `git diff --name-only --diff-filter=ACMRTUXB HEAD -- "*.py"`.
 3. Run hygiene checks:
    - `uv sync --dev`
+   - `uv build`
    - `uv run python -m unittest discover -s tests`
    - `uv run ruff check Ortho4XP.py src`
    - `uv run ruff format --check <changed-python-files>`
