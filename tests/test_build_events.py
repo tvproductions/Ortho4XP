@@ -27,6 +27,27 @@ def _event_summary(events):
     ]
 
 
+def _tile_plan(
+    lat=12,
+    lon=-123,
+    *,
+    steps=("vector", "mesh"),
+    override_tile_config=False,
+):
+    import O4_Build_Models as MODELS
+
+    return MODELS.BuildTilePlan(
+        lat=lat,
+        lon=lon,
+        provider="BI",
+        zoom_level=16,
+        output_dir="Tiles",
+        custom_build_dir="Tiles/",
+        steps=steps,
+        override_tile_config=override_tile_config,
+    )
+
+
 class BuildAllEventTests(unittest.TestCase):
     def setUp(self):
         EVENTS.event_bus().clear()
@@ -107,3 +128,82 @@ class BuildAllEventTests(unittest.TestCase):
         )
         self.assertNotIn("TILE_COMPLETE", [event.name.value for event in self.events])
 
+
+class BuildBatchEventTests(unittest.TestCase):
+    def setUp(self):
+        EVENTS.event_bus().clear()
+        self.events = []
+        for name in EVENTS.EventName:
+            EVENTS.subscribe(name, self.events.append)
+
+    def tearDown(self):
+        EVENTS.event_bus().clear()
+
+    def _patch_tile_class(self):
+        return mock.patch.object(
+            CORE.CFG,
+            "Tile",
+            side_effect=lambda lat, lon, custom: SimpleNamespace(
+                lat=lat,
+                lon=lon,
+                custom_build_dir=custom,
+                build_dir=f"build-{lat}-{lon}",
+                dem=None,
+                default_website="",
+                default_zl=0,
+                make_dirs=mock.Mock(),
+                read_from_config=mock.Mock(return_value=1),
+            ),
+        )
+
+    def test_batch_build_emits_selected_step_events_and_completion_callback(self):
+        import O4_Build_Models as MODELS
+
+        completed = []
+        with (
+            self._patch_tile_class(),
+            mock.patch.object(CORE.VMAP, "build_poly_file", return_value=1),
+            mock.patch.object(CORE.MESH, "build_mesh", return_value=1),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            result = CORE.build_batch(
+                MODELS.BuildPlan((_tile_plan(steps=("vector", "mesh")),)),
+                on_tile_complete=completed.append,
+            )
+
+        self.assertTrue(result.ok)
+        self.assertEqual(completed, list(result.tiles))
+        self.assertEqual(
+            _event_summary(self.events),
+            [
+                ("TILE_START", None, None, None),
+                ("PIPELINE_STEP", "vector", "start", None),
+                ("PIPELINE_STEP", "vector", "complete", None),
+                ("TILE_PROGRESS", None, None, None),
+                ("PIPELINE_STEP", "mesh", "start", None),
+                ("PIPELINE_STEP", "mesh", "complete", None),
+                ("TILE_PROGRESS", None, None, None),
+                ("TILE_COMPLETE", "all", None, None),
+            ],
+        )
+        self.assertTrue(all(event.payload["mode"] == "batch" for event in self.events))
+
+    def test_falsey_batch_step_emits_tile_error(self):
+        import O4_Build_Models as MODELS
+
+        with (
+            self._patch_tile_class(),
+            mock.patch.object(CORE.MESH, "build_mesh", return_value=0),
+            mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
+            mock.patch.object(CORE.UI, "lvprint"),
+        ):
+            result = CORE.build_batch(MODELS.BuildPlan((_tile_plan(steps=("mesh",)),)))
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.tiles[0].message, "mesh failed")
+        self.assertIn(
+            ("TILE_ERROR", "mesh", None, "mesh failed"),
+            _event_summary(self.events),
+        )
+        self.assertNotIn("TILE_COMPLETE", [event.name.value for event in self.events])

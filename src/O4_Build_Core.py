@@ -185,6 +185,7 @@ def _build_tile_plan(
     tile_plan: MODELS.BuildTilePlan, ctx: BC.BuildContext
 ) -> MODELS.BuildTileResult:
     tile = CFG.Tile(tile_plan.lat, tile_plan.lon, tile_plan.custom_build_dir)
+    _publish_tile_start(tile, mode="batch")
     tile.default_website = tile_plan.provider
     tile.default_zl = tile_plan.zoom_level
     tile.custom_build_dir = tile_plan.custom_build_dir
@@ -195,12 +196,21 @@ def _build_tile_plan(
         tile.read_from_config()
     if _steps_need_tile_directory(tile_plan.steps):
         tile.make_dirs()
+    total_steps = len(tile_plan.steps)
+    completed_steps = 0
     for step in MODELS.ALL_STEPS:
         if step not in tile_plan.steps:
             continue
+        _publish_step(tile, mode="batch", step=step, status="start")
         ok = _run_batch_step(step, tile, ctx)
         if ctx.red_flag:
             UI.exit_message_and_bottom_line("")
+            _publish_tile_error(
+                tile,
+                mode="batch",
+                step=step,
+                message="interrupted",
+            )
             return MODELS.BuildTileResult(
                 tile_plan.lat,
                 tile_plan.lon,
@@ -209,13 +219,24 @@ def _build_tile_plan(
                 "interrupted",
             )
         if not ok:
+            message = f"{step} failed"
+            _publish_tile_error(tile, mode="batch", step=step, message=message)
             return MODELS.BuildTileResult(
                 tile_plan.lat,
                 tile_plan.lon,
                 False,
                 step,
-                f"{step} failed",
+                message,
             )
+        completed_steps += 1
+        _publish_step(tile, mode="batch", step=step, status="complete")
+        _publish_progress(
+            tile,
+            mode="batch",
+            completed_steps=completed_steps,
+            total_steps=total_steps,
+        )
+    _publish_tile_complete(tile, mode="batch")
     return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, True, "all")
 
 
