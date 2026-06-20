@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import O4_Build_Context as BC
 import O4_Build_Models as MODELS
 import O4_Config_Utils as CFG
+import O4_Event_Bus as EVENTS
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
 import O4_Mask_Utils as MASK
@@ -27,24 +28,42 @@ TileCompleteCallback = Callable[[MODELS.BuildTileResult], None]
 def build_tile_all(tile) -> BuildResult:
     """Run the current all-in-one tile sequence and return its structured result."""
     ctx = BC.BuildContext()
+    _publish_tile_start(tile, mode="all")
     interrupted = _run_build_steps(tile, ctx)
     if interrupted:
+        _publish_tile_error(
+            tile, mode="all", step=interrupted.step, message=interrupted.message
+        )
         return interrupted
 
     interrupted = _retry_incomplete_textures_if_needed(tile, ctx)
     if interrupted:
+        _publish_tile_error(
+            tile, mode="all", step=interrupted.step, message=interrupted.message
+        )
         return interrupted
 
     ctx.is_working = False
     _report_remaining_incomplete_textures()
+    _publish_tile_complete(tile, mode="all")
     return BuildResult(ok=True, step="all")
 
 
 def _run_build_steps(tile, ctx) -> BuildResult | None:
-    for step, build_step in _build_steps():
+    steps = _build_steps()
+    total_steps = len(steps)
+    for completed_steps, (step, build_step) in enumerate(steps, start=1):
+        _publish_step(tile, mode="all", step=step, status="start")
         build_step(tile, ctx=ctx)
         if ctx.red_flag:
             return _interrupted(step)
+        _publish_step(tile, mode="all", step=step, status="complete")
+        _publish_progress(
+            tile,
+            mode="all",
+            completed_steps=completed_steps,
+            total_steps=total_steps,
+        )
     return None
 
 
@@ -54,6 +73,55 @@ def _build_steps():
         ("mesh", MESH.build_mesh),
         ("masks", MASK.build_masks),
         ("tile", TILE.build_tile),
+    )
+
+
+def _tile_event_payload(tile, *, mode: str) -> dict[str, object]:
+    return {"lat": tile.lat, "lon": tile.lon, "mode": mode}
+
+
+def _publish_tile_start(tile, *, mode: str) -> None:
+    EVENTS.publish(EVENTS.EventName.TILE_START, **_tile_event_payload(tile, mode=mode))
+
+
+def _publish_tile_complete(tile, *, mode: str, step: str = "all") -> None:
+    EVENTS.publish(
+        EVENTS.EventName.TILE_COMPLETE,
+        **_tile_event_payload(tile, mode=mode),
+        step=step,
+    )
+
+
+def _publish_tile_error(tile, *, mode: str, step: str, message: str) -> None:
+    EVENTS.publish(
+        EVENTS.EventName.TILE_ERROR,
+        **_tile_event_payload(tile, mode=mode),
+        step=step,
+        message=message,
+    )
+
+
+def _publish_step(tile, *, mode: str, step: str, status: str) -> None:
+    EVENTS.publish(
+        EVENTS.EventName.PIPELINE_STEP,
+        **_tile_event_payload(tile, mode=mode),
+        step=step,
+        status=status,
+    )
+
+
+def _publish_progress(
+    tile,
+    *,
+    mode: str,
+    completed_steps: int,
+    total_steps: int,
+) -> None:
+    EVENTS.publish(
+        EVENTS.EventName.TILE_PROGRESS,
+        **_tile_event_payload(tile, mode=mode),
+        completed_steps=completed_steps,
+        total_steps=total_steps,
     )
 
 
