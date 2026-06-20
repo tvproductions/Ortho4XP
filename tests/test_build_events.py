@@ -16,6 +16,7 @@ def _tile():
     return SimpleNamespace(lat=12, lon=-123, build_dir="build")
 
 
+# The event assertions only care about the stable lifecycle fields.
 def _event_summary(events):
     return [
         (
@@ -28,28 +29,53 @@ def _event_summary(events):
     ]
 
 
-def _tile_plan(
-    lat=12,
-    lon=-123,
-    *,
-    steps=("vector", "mesh"),
-    override_tile_config=False,
-):
+def _assert_event_payloads(test_case, events, mode):
+    test_case.assertTrue(all(event.payload["lat"] == 12 for event in events))
+    test_case.assertTrue(all(event.payload["lon"] == -123 for event in events))
+    test_case.assertTrue(all(event.payload["mode"] == mode for event in events))
+
+
+# This sequence is the exact all-in-one lifecycle contract.
+ALL_MODE_LIFECYCLE_EVENTS = [
+    ("TILE_START", None, None, None),
+    ("PIPELINE_STEP", "vector", "start", None),
+    ("PIPELINE_STEP", "vector", "complete", None),
+    ("TILE_PROGRESS", None, None, None),
+    ("PIPELINE_STEP", "mesh", "start", None),
+    ("PIPELINE_STEP", "mesh", "complete", None),
+    ("TILE_PROGRESS", None, None, None),
+    ("PIPELINE_STEP", "masks", "start", None),
+    ("PIPELINE_STEP", "masks", "complete", None),
+    ("TILE_PROGRESS", None, None, None),
+    ("PIPELINE_STEP", "tile", "start", None),
+    ("PIPELINE_STEP", "tile", "complete", None),
+    ("TILE_PROGRESS", None, None, None),
+    ("TILE_COMPLETE", "all", None, None),
+]
+
+
+BATCH_MODE_SELECTED_STEP_EVENTS = ALL_MODE_LIFECYCLE_EVENTS[:7] + [
+    ALL_MODE_LIFECYCLE_EVENTS[-1]
+]
+
+
+def _tile_plan(*, steps=("vector", "mesh")):
     import O4_Build_Models as MODELS
 
     return MODELS.BuildTilePlan(
-        lat=lat,
-        lon=lon,
+        lat=12,
+        lon=-123,
         provider="BI",
         zoom_level=16,
         output_dir="Tiles",
         custom_build_dir="Tiles/",
         steps=steps,
-        override_tile_config=override_tile_config,
+        override_tile_config=False,
     )
 
 
-class BuildAllEventTests(unittest.TestCase):
+class EventSubscriptionTests(unittest.TestCase):
+    # Each test captures the full event stream and asserts on the published order.
     def setUp(self):
         EVENTS.event_bus().clear()
         self.events = []
@@ -59,7 +85,9 @@ class BuildAllEventTests(unittest.TestCase):
     def tearDown(self):
         EVENTS.event_bus().clear()
 
-    def test_build_tile_all_emits_lifecycle_events(self):
+
+class BuildAllEventTests(EventSubscriptionTests):
+    def _run_build_tile_all(self):
         with (
             mock.patch.object(CORE.UI, "red_flag", False),
             mock.patch.object(CORE.IMG, "incomplete_imgs", {}),
@@ -70,36 +98,19 @@ class BuildAllEventTests(unittest.TestCase):
             mock.patch.object(CORE.UI, "lvprint"),
             mock.patch.object(CORE.UI, "exit_message_and_bottom_line"),
         ):
-            result = CORE.build_tile_all(_tile())
+            return CORE.build_tile_all(_tile())
 
-        self.assertEqual(result, CORE.BuildResult(ok=True, step="all"))
-        self.assertEqual(
-            _event_summary(self.events),
-            [
-                ("TILE_START", None, None, None),
-                ("PIPELINE_STEP", "vector", "start", None),
-                ("PIPELINE_STEP", "vector", "complete", None),
-                ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "mesh", "start", None),
-                ("PIPELINE_STEP", "mesh", "complete", None),
-                ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "masks", "start", None),
-                ("PIPELINE_STEP", "masks", "complete", None),
-                ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "tile", "start", None),
-                ("PIPELINE_STEP", "tile", "complete", None),
-                ("TILE_PROGRESS", None, None, None),
-                ("TILE_COMPLETE", "all", None, None),
-            ],
-        )
-        self.assertTrue(all(event.payload["lat"] == 12 for event in self.events))
-        self.assertTrue(all(event.payload["lon"] == -123 for event in self.events))
-        self.assertTrue(all(event.payload["mode"] == "all" for event in self.events))
+    def test_build_tile_all_emits_lifecycle_events(self):
+        result = self._run_build_tile_all()
         progress_payloads = [
             event.payload
             for event in self.events
             if event.name == EVENTS.EventName.TILE_PROGRESS
         ]
+
+        self.assertEqual(result, CORE.BuildResult(ok=True, step="all"))
+        self.assertEqual(_event_summary(self.events), ALL_MODE_LIFECYCLE_EVENTS)
+        _assert_event_payloads(self, self.events, "all")
         self.assertEqual(
             [(p["completed_steps"], p["total_steps"]) for p in progress_payloads],
             [(1, 4), (2, 4), (3, 4), (4, 4)],
@@ -132,16 +143,7 @@ class BuildAllEventTests(unittest.TestCase):
         self.assertNotIn("TILE_COMPLETE", [event.name.value for event in self.events])
 
 
-class BuildBatchEventTests(unittest.TestCase):
-    def setUp(self):
-        EVENTS.event_bus().clear()
-        self.events = []
-        for name in EVENTS.EventName:
-            EVENTS.subscribe(name, self.events.append)
-
-    def tearDown(self):
-        EVENTS.event_bus().clear()
-
+class BuildBatchEventTests(EventSubscriptionTests):
     def _patch_tile_class(self):
         return mock.patch.object(
             CORE.CFG,
@@ -177,20 +179,8 @@ class BuildBatchEventTests(unittest.TestCase):
 
         self.assertTrue(result.ok)
         self.assertEqual(completed, list(result.tiles))
-        self.assertEqual(
-            _event_summary(self.events),
-            [
-                ("TILE_START", None, None, None),
-                ("PIPELINE_STEP", "vector", "start", None),
-                ("PIPELINE_STEP", "vector", "complete", None),
-                ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "mesh", "start", None),
-                ("PIPELINE_STEP", "mesh", "complete", None),
-                ("TILE_PROGRESS", None, None, None),
-                ("TILE_COMPLETE", "all", None, None),
-            ],
-        )
-        self.assertTrue(all(event.payload["mode"] == "batch" for event in self.events))
+        self.assertEqual(_event_summary(self.events), BATCH_MODE_SELECTED_STEP_EVENTS)
+        _assert_event_payloads(self, self.events, "batch")
 
     def test_falsey_batch_step_emits_tile_error(self):
         import O4_Build_Models as MODELS

@@ -28,24 +28,22 @@ TileCompleteCallback = Callable[[MODELS.BuildTileResult], None]
 def build_tile_all(tile) -> BuildResult:
     """Run the current all-in-one tile sequence and return its structured result."""
     ctx = BC.BuildContext()
-    _publish_tile_start(tile, mode="all")
-    interrupted = _run_build_steps(tile, ctx)
-    if interrupted:
-        _publish_tile_error(
-            tile, mode="all", step=interrupted.step, message=interrupted.message
-        )
-        return interrupted
-
-    interrupted = _retry_incomplete_textures_if_needed(tile, ctx)
-    if interrupted:
-        _publish_tile_error(
-            tile, mode="all", step=interrupted.step, message=interrupted.message
-        )
-        return interrupted
+    _publish_event(EVENTS.EventName.TILE_START, tile, mode="all")
+    for build_phase in (_run_build_steps, _retry_incomplete_textures_if_needed):
+        interrupted = build_phase(tile, ctx)
+        if interrupted:
+            _publish_event(
+                EVENTS.EventName.TILE_ERROR,
+                tile,
+                mode="all",
+                step=interrupted.step,
+                message=interrupted.message,
+            )
+            return interrupted
 
     ctx.is_working = False
     _report_remaining_incomplete_textures()
-    _publish_tile_complete(tile, mode="all")
+    _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="all", step="all")
     return BuildResult(ok=True, step="all")
 
 
@@ -53,16 +51,17 @@ def _run_build_steps(tile, ctx) -> BuildResult | None:
     steps = _build_steps()
     total_steps = len(steps)
     for completed_steps, (step, build_step) in enumerate(steps, start=1):
-        _publish_step(tile, mode="all", step=step, status="start")
+        _publish_event(
+            EVENTS.EventName.PIPELINE_STEP, tile, mode="all", step=step, status="start"
+        )
         build_step(tile, ctx=ctx)
         if ctx.red_flag:
             return _interrupted(step)
-        _publish_step(tile, mode="all", step=step, status="complete")
-        _publish_progress(
+        _publish_step_complete(
             tile,
             mode="all",
-            completed_steps=completed_steps,
-            total_steps=total_steps,
+            step=step,
+            progress=(completed_steps, total_steps),
         )
     return None
 
@@ -76,50 +75,25 @@ def _build_steps():
     )
 
 
-def _tile_event_payload(tile, *, mode: str) -> dict[str, object]:
-    return {"lat": tile.lat, "lon": tile.lon, "mode": mode}
+def _publish_event(event_name: EVENTS.EventName, tile, *, mode: str, **payload) -> None:
+    EVENTS.publish(event_name, lat=tile.lat, lon=tile.lon, mode=mode, **payload)
 
 
-def _publish_tile_start(tile, *, mode: str) -> None:
-    EVENTS.publish(EVENTS.EventName.TILE_START, **_tile_event_payload(tile, mode=mode))
-
-
-def _publish_tile_complete(tile, *, mode: str, step: str = "all") -> None:
-    EVENTS.publish(
-        EVENTS.EventName.TILE_COMPLETE,
-        **_tile_event_payload(tile, mode=mode),
-        step=step,
-    )
-
-
-def _publish_tile_error(tile, *, mode: str, step: str, message: str) -> None:
-    EVENTS.publish(
-        EVENTS.EventName.TILE_ERROR,
-        **_tile_event_payload(tile, mode=mode),
-        step=step,
-        message=message,
-    )
-
-
-def _publish_step(tile, *, mode: str, step: str, status: str) -> None:
-    EVENTS.publish(
-        EVENTS.EventName.PIPELINE_STEP,
-        **_tile_event_payload(tile, mode=mode),
-        step=step,
-        status=status,
-    )
-
-
-def _publish_progress(
+def _publish_step_complete(
     tile,
     *,
     mode: str,
-    completed_steps: int,
-    total_steps: int,
+    step: str,
+    progress: tuple[int, int],
 ) -> None:
-    EVENTS.publish(
+    completed_steps, total_steps = progress
+    _publish_event(
+        EVENTS.EventName.PIPELINE_STEP, tile, mode=mode, step=step, status="complete"
+    )
+    _publish_event(
         EVENTS.EventName.TILE_PROGRESS,
-        **_tile_event_payload(tile, mode=mode),
+        tile,
+        mode=mode,
         completed_steps=completed_steps,
         total_steps=total_steps,
     )
@@ -185,7 +159,25 @@ def _build_tile_plan(
     tile_plan: MODELS.BuildTilePlan, ctx: BC.BuildContext
 ) -> MODELS.BuildTileResult:
     tile = CFG.Tile(tile_plan.lat, tile_plan.lon, tile_plan.custom_build_dir)
-    _publish_tile_start(tile, mode="batch")
+    _publish_event(EVENTS.EventName.TILE_START, tile, mode="batch")
+    _prepare_batch_tile(tile, tile_plan)
+    selected_steps = [step for step in MODELS.ALL_STEPS if step in tile_plan.steps]
+    total_steps = len(selected_steps)
+    for completed_steps, step in enumerate(selected_steps, start=1):
+        failure = _run_batch_plan_step(tile_plan, tile, ctx, step)
+        if failure is not None:
+            return failure
+        _publish_step_complete(
+            tile,
+            mode="batch",
+            step=step,
+            progress=(completed_steps, total_steps),
+        )
+    _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="batch", step="all")
+    return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, True, "all")
+
+
+def _prepare_batch_tile(tile, tile_plan: MODELS.BuildTilePlan) -> None:
     tile.default_website = tile_plan.provider
     tile.default_zl = tile_plan.zoom_level
     tile.custom_build_dir = tile_plan.custom_build_dir
@@ -196,66 +188,53 @@ def _build_tile_plan(
         tile.read_from_config()
     if _steps_need_tile_directory(tile_plan.steps):
         tile.make_dirs()
-    total_steps = len(tile_plan.steps)
-    completed_steps = 0
-    for step in MODELS.ALL_STEPS:
-        if step not in tile_plan.steps:
-            continue
-        _publish_step(tile, mode="batch", step=step, status="start")
-        ok = _run_batch_step(step, tile, ctx)
-        if ctx.red_flag:
-            UI.exit_message_and_bottom_line("")
-            _publish_tile_error(
-                tile,
-                mode="batch",
-                step=step,
-                message="interrupted",
-            )
-            return MODELS.BuildTileResult(
-                tile_plan.lat,
-                tile_plan.lon,
-                False,
-                step,
-                "interrupted",
-            )
-        if not ok:
-            message = f"{step} failed"
-            _publish_tile_error(tile, mode="batch", step=step, message=message)
-            return MODELS.BuildTileResult(
-                tile_plan.lat,
-                tile_plan.lon,
-                False,
-                step,
-                message,
-            )
-        completed_steps += 1
-        _publish_step(tile, mode="batch", step=step, status="complete")
-        _publish_progress(
-            tile,
-            mode="batch",
-            completed_steps=completed_steps,
-            total_steps=total_steps,
-        )
-    _publish_tile_complete(tile, mode="batch")
-    return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, True, "all")
+
+
+def _run_batch_plan_step(
+    tile_plan: MODELS.BuildTilePlan,
+    tile,
+    ctx: BC.BuildContext,
+    step: str,
+) -> MODELS.BuildTileResult | None:
+    _publish_event(
+        EVENTS.EventName.PIPELINE_STEP, tile, mode="batch", step=step, status="start"
+    )
+    ok = _run_batch_step(step, tile, ctx)
+    if ctx.red_flag:
+        UI.exit_message_and_bottom_line("")
+        message = "interrupted"
+    elif ok:
+        return None
+    else:
+        message = f"{step} failed"
+    _publish_event(
+        EVENTS.EventName.TILE_ERROR,
+        tile,
+        mode="batch",
+        step=step,
+        message=message,
+    )
+    return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, False, step, message)
 
 
 def _steps_need_tile_directory(steps: tuple[str, ...]) -> bool:
     return bool({"vector", "mesh", "tile"}.intersection(steps))
 
 
+_BATCH_STEP_RUNNERS = {
+    "vector": lambda tile, ctx: VMAP.build_poly_file(tile, ctx=ctx),
+    "mesh": lambda tile, ctx: MESH.build_mesh(tile, ctx=ctx),
+    "masks": lambda tile, ctx: MASK.build_masks(tile, ctx=ctx),
+    "tile": lambda tile, ctx: _run_batch_tile_step(tile, ctx),
+    "overlays": lambda tile, ctx: OVL.build_overlay(tile.lat, tile.lon),
+}
+
+
 def _run_batch_step(step: str, tile, ctx: BC.BuildContext) -> int:
-    if step == "vector":
-        return VMAP.build_poly_file(tile, ctx=ctx)
-    if step == "mesh":
-        return MESH.build_mesh(tile, ctx=ctx)
-    if step == "masks":
-        return MASK.build_masks(tile, ctx=ctx)
-    if step == "tile":
-        return _run_batch_tile_step(tile, ctx)
-    if step == "overlays":
-        return OVL.build_overlay(tile.lat, tile.lon)
-    raise ValueError(f"unknown build step: {step}")
+    try:
+        return _BATCH_STEP_RUNNERS[step](tile, ctx)
+    except KeyError as exc:
+        raise ValueError(f"unknown build step: {step}") from exc
 
 
 def _run_batch_tile_step(tile, ctx: BC.BuildContext) -> int:
