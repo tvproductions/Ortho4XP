@@ -992,8 +992,18 @@ Suggested labels: `imagery`, `quality`
 
 ### TODO-036: Event Bus
 
-Status: Pending
+Status: Done
 GitHub Issue: #36
+
+Completion note: implemented an infrastructure-first event bus with typed event
+names, thread-safe publish/subscribe, subscriber exception isolation, and
+coarse build lifecycle emissions from the existing all-in-one and batch build
+boundaries. `CACHE_HIT` is defined but intentionally not emitted until
+TODO-038 implements smart cache behavior.
+
+Verification note: focused event/build event tests, build regression tests,
+full `unittest` discovery, changed-file Ruff, changed-file `ty`, and the full
+repository quality gate passed.
 
 Add event-driven architecture for module communication. Reference:
 ORTHO4XP_V3 `O4_EventBus`.

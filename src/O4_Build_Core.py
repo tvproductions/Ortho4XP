@@ -3,6 +3,9 @@ from dataclasses import dataclass
 
 import O4_Build_Context as BC
 import O4_Build_Models as MODELS
+import O4_Build_Plan_Batch as PLAN_BATCH
+import O4_Build_Plan_State as PLAN_STATE
+import O4_Build_Plan_Steps as PLAN_STEPS
 import O4_Config_Utils as CFG
 import O4_Event_Bus as EVENTS
 import O4_File_Names as FNAMES
@@ -169,100 +172,22 @@ def build_batch(
     ctx = BC.BuildContext()
     if ctx.is_working:
         return MODELS.BuildBatchResult(False, (), "build already in progress")
-    results: list[MODELS.BuildTileResult] = []
-    for tile_plan in plan.tiles:
-        result = _build_tile_plan(tile_plan, ctx)
-        results.append(result)
-        if on_tile_complete is not None:
-            on_tile_complete(result)
-        if not result.ok:
-            return MODELS.BuildBatchResult(False, tuple(results), result.message)
-    _report_remaining_incomplete_textures()
-    return MODELS.BuildBatchResult(MODELS.batch_ok(tuple(results)), tuple(results))
-
-
-def _build_tile_plan(
-    tile_plan: MODELS.BuildTilePlan, ctx: BC.BuildContext
-) -> MODELS.BuildTileResult:
-    tile = CFG.Tile(tile_plan.lat, tile_plan.lon, tile_plan.custom_build_dir)
-    _publish_tile_start(tile, mode="batch")
-    tile.default_website = tile_plan.provider
-    tile.default_zl = tile_plan.zoom_level
-    tile.custom_build_dir = tile_plan.custom_build_dir
-    tile.dem = None
-    if tile_plan.override_tile_config:
-        tile.read_from_config(use_global=True)
-    else:
-        tile.read_from_config()
-    if _steps_need_tile_directory(tile_plan.steps):
-        tile.make_dirs()
-    total_steps = len(tile_plan.steps)
-    completed_steps = 0
-    for step in MODELS.ALL_STEPS:
-        if step not in tile_plan.steps:
-            continue
-        _publish_step(tile, mode="batch", step=step, status="start")
-        ok = _run_batch_step(step, tile, ctx)
-        if ctx.red_flag:
-            UI.exit_message_and_bottom_line("")
-            _publish_tile_error(
-                tile,
-                mode="batch",
-                step=step,
-                message="interrupted",
-            )
-            return MODELS.BuildTileResult(
-                tile_plan.lat,
-                tile_plan.lon,
-                False,
-                step,
-                "interrupted",
-            )
-        if not ok:
-            message = f"{step} failed"
-            _publish_tile_error(tile, mode="batch", step=step, message=message)
-            return MODELS.BuildTileResult(
-                tile_plan.lat,
-                tile_plan.lon,
-                False,
-                step,
-                message,
-            )
-        completed_steps += 1
-        _publish_step(tile, mode="batch", step=step, status="complete")
-        _publish_progress(
-            tile,
-            mode="batch",
-            completed_steps=completed_steps,
-            total_steps=total_steps,
-        )
-    _publish_tile_complete(tile, mode="batch")
-    return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, True, "all")
-
-
-def _steps_need_tile_directory(steps: tuple[str, ...]) -> bool:
-    return bool({"vector", "mesh", "tile"}.intersection(steps))
-
-
-def _run_batch_step(step: str, tile, ctx: BC.BuildContext) -> int:
-    if step == "vector":
-        return VMAP.build_poly_file(tile, ctx=ctx)
-    if step == "mesh":
-        return MESH.build_mesh(tile, ctx=ctx)
-    if step == "masks":
-        return MASK.build_masks(tile, ctx=ctx)
-    if step == "tile":
-        return _run_batch_tile_step(tile, ctx)
-    if step == "overlays":
-        return OVL.build_overlay(tile.lat, tile.lon)
-    raise ValueError(f"unknown build step: {step}")
-
-
-def _run_batch_tile_step(tile, ctx: BC.BuildContext) -> int:
-    result = TILE.build_tile(tile, ctx=ctx)
-    tile_coords = FNAMES.short_latlon(tile.lat, tile.lon)
-    if tile_coords in IMG.incomplete_imgs:
-        _retry_incomplete_textures(tile, ctx, tile_coords)
-    if ctx.red_flag:
-        return 0
+    publishers = _build_batch_publishers(on_tile_complete)
+    result = PLAN_BATCH.run_build_batch(plan, ctx, publishers)
+    if result.ok:
+        _report_remaining_incomplete_textures()
     return result
+
+
+def _build_batch_publishers(
+    on_tile_complete: TileCompleteCallback | None,
+) -> PLAN_STATE.BuildTilePlanPublishers:
+    return PLAN_STATE.BuildTilePlanPublishers(
+        PLAN_STEPS.run_batch_step,
+        _publish_tile_start,
+        _publish_tile_complete,
+        _publish_step,
+        _publish_progress,
+        _publish_tile_error,
+        on_tile_complete,
+    )
