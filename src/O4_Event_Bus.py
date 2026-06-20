@@ -8,6 +8,8 @@ from enum import StrEnum
 from threading import RLock
 from typing import Any
 
+import O4_UI_Utils as UI
+
 
 class EventName(StrEnum):
     TILE_START = "TILE_START"
@@ -61,7 +63,16 @@ class EventBus:
         with self._lock:
             handlers = tuple(self._handlers.get(event_name, ()))
         for handler in handlers:
-            handler(event)
+            try:
+                handler(event)
+            except Exception as exc:
+                UI.log_exception(
+                    exc,
+                    context={
+                        "event_name": event.name.value,
+                        "handler": repr(handler),
+                    },
+                )
         return event
 
     def clear(self) -> None:
