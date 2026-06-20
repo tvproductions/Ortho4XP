@@ -9,6 +9,7 @@ except ModuleNotFoundError:
 
 import O4_Build_Core as CORE
 import O4_Event_Bus as EVENTS
+import O4_Build_Context as BC
 
 
 def _tile():
@@ -105,7 +106,8 @@ class BuildAllEventTests(unittest.TestCase):
         )
 
     def test_interrupted_all_in_one_emits_tile_error_not_complete(self):
-        def interrupting_mesh(_tile, ctx=None):
+        def interrupting_mesh(_tile, ctx: BC.BuildContext | None = None):
+            assert ctx is not None
             ctx.red_flag = True
             return 0
 
