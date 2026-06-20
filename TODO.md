@@ -993,6 +993,7 @@ Suggested labels: `imagery`, `quality`
 ### TODO-036: Event Bus
 
 Status: Pending
+GitHub Issue: #36
 
 Add event-driven architecture for module communication. Reference:
 ORTHO4XP_V3 `O4_EventBus`.
