@@ -122,7 +122,7 @@ Modify `src/O4_Build_Core.py` only at existing build boundaries.
 | Event | Timing | Payload |
 | --- | --- | --- |
 | `TILE_START` | Immediately after context creation | `lat`, `lon`, `mode="all"` |
-| `PIPELINE_STEP` | Before each step | `lat`, `lon`, `step`, `status="start"`, `mode="all"` |
+| `PIPELINE_STEP` | Before each step | `lat`, `lon`, `step`, `status="running"`, `mode="all"` |
 | `PIPELINE_STEP` | After each step returns without interruption | `lat`, `lon`, `step`, `status="complete"`, `mode="all"` |
 | `TILE_PROGRESS` | After each completed step | `lat`, `lon`, `completed_steps`, `total_steps`, `mode="all"` |
 | `TILE_ERROR` | If `ctx.red_flag` interrupts a step or retry | `lat`, `lon`, `step`, `message="interrupted"`, `mode="all"` |
@@ -205,7 +205,7 @@ Cover event infrastructure behavior:
 
 Cover build integration:
 
-- `build_tile_all()` emits `TILE_START`, paired `PIPELINE_STEP` start/complete
+- `build_tile_all()` emits `TILE_START`, paired `PIPELINE_STEP` running/complete
   events for `vector`, `mesh`, `masks`, and `tile`, four `TILE_PROGRESS`
   events, and `TILE_COMPLETE`.
 - Interrupted all-in-one builds emit `TILE_ERROR` and do not emit

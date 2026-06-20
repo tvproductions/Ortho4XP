@@ -1020,7 +1020,20 @@ Suggested labels: `architecture`, `events`
 
 ### TODO-037: Pipeline Orchestrator
 
-Status: Pending
+Status: Done
+
+GitHub Issue: #37
+
+Completion note: implemented a named-step pipeline orchestrator with explicit
+step states, per-step timing, `PIPELINE_STEP` event publication, and controlled
+stop-on-failure behavior. The existing all-in-one and batch build step loops now
+delegate step execution to the pipeline while preserving public build result
+contracts and tile lifecycle events.
+
+Verification note: focused pipeline/build event tests, build-core regression
+tests, full `unittest` discovery, changed-file Ruff/format/ty checks, and the
+full repository quality gate passed, including complexity and native LLVM/CMake
+checks.
 
 Add named-step pipeline orchestration with timing, status tracking, and clean
 failure handling. Reference: ORTHO4XP_V3 `O4_Pipeline`.

@@ -495,16 +495,16 @@ class BuildAllEventTests(unittest.TestCase):
             _event_summary(self.events),
             [
                 ("TILE_START", None, None, None),
-                ("PIPELINE_STEP", "vector", "start", None),
+                ("PIPELINE_STEP", "vector", "running", None),
                 ("PIPELINE_STEP", "vector", "complete", None),
                 ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "mesh", "start", None),
+                ("PIPELINE_STEP", "mesh", "running", None),
                 ("PIPELINE_STEP", "mesh", "complete", None),
                 ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "masks", "start", None),
+                ("PIPELINE_STEP", "masks", "running", None),
                 ("PIPELINE_STEP", "masks", "complete", None),
                 ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "tile", "start", None),
+                ("PIPELINE_STEP", "tile", "running", None),
                 ("PIPELINE_STEP", "tile", "complete", None),
                 ("TILE_PROGRESS", None, None, None),
                 ("TILE_COMPLETE", "all", None, None),
@@ -656,7 +656,7 @@ def _run_build_steps(tile, ctx) -> BuildResult | None:
     steps = _build_steps()
     total_steps = len(steps)
     for completed_steps, (step, build_step) in enumerate(steps, start=1):
-        _publish_step(tile, mode="all", step=step, status="start")
+        _publish_step(tile, mode="all", step=step, status="running")
         build_step(tile, ctx=ctx)
         if ctx.red_flag:
             return _interrupted(step)
@@ -797,10 +797,10 @@ class BuildBatchEventTests(unittest.TestCase):
             _event_summary(self.events),
             [
                 ("TILE_START", None, None, None),
-                ("PIPELINE_STEP", "vector", "start", None),
+                ("PIPELINE_STEP", "vector", "running", None),
                 ("PIPELINE_STEP", "vector", "complete", None),
                 ("TILE_PROGRESS", None, None, None),
-                ("PIPELINE_STEP", "mesh", "start", None),
+                ("PIPELINE_STEP", "mesh", "running", None),
                 ("PIPELINE_STEP", "mesh", "complete", None),
                 ("TILE_PROGRESS", None, None, None),
                 ("TILE_COMPLETE", "all", None, None),
@@ -863,7 +863,7 @@ def _build_tile_plan(
     for step in MODELS.ALL_STEPS:
         if step not in tile_plan.steps:
             continue
-        _publish_step(tile, mode="batch", step=step, status="start")
+        _publish_step(tile, mode="batch", step=step, status="running")
         ok = _run_batch_step(step, tile, ctx)
         if ctx.red_flag:
             UI.exit_message_and_bottom_line("")

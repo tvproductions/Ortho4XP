@@ -21,6 +21,7 @@ def _event_summary(events):
     return [
         (
             event.name.value,
+            event.payload.get("pipeline"),
             event.payload.get("step"),
             event.payload.get("status"),
             event.payload.get("message"),
@@ -37,25 +38,32 @@ def _assert_event_payloads(test_case, events, mode):
 
 # This sequence is the exact all-in-one lifecycle contract.
 ALL_MODE_LIFECYCLE_EVENTS = [
-    ("TILE_START", None, None, None),
-    ("PIPELINE_STEP", "vector", "start", None),
-    ("PIPELINE_STEP", "vector", "complete", None),
-    ("TILE_PROGRESS", None, None, None),
-    ("PIPELINE_STEP", "mesh", "start", None),
-    ("PIPELINE_STEP", "mesh", "complete", None),
-    ("TILE_PROGRESS", None, None, None),
-    ("PIPELINE_STEP", "masks", "start", None),
-    ("PIPELINE_STEP", "masks", "complete", None),
-    ("TILE_PROGRESS", None, None, None),
-    ("PIPELINE_STEP", "tile", "start", None),
-    ("PIPELINE_STEP", "tile", "complete", None),
-    ("TILE_PROGRESS", None, None, None),
-    ("TILE_COMPLETE", "all", None, None),
+    ("TILE_START", None, None, None, None),
+    ("PIPELINE_STEP", "all", "vector", "running", None),
+    ("PIPELINE_STEP", "all", "vector", "complete", None),
+    ("TILE_PROGRESS", None, None, None, None),
+    ("PIPELINE_STEP", "all", "mesh", "running", None),
+    ("PIPELINE_STEP", "all", "mesh", "complete", None),
+    ("TILE_PROGRESS", None, None, None, None),
+    ("PIPELINE_STEP", "all", "masks", "running", None),
+    ("PIPELINE_STEP", "all", "masks", "complete", None),
+    ("TILE_PROGRESS", None, None, None, None),
+    ("PIPELINE_STEP", "all", "tile", "running", None),
+    ("PIPELINE_STEP", "all", "tile", "complete", None),
+    ("TILE_PROGRESS", None, None, None, None),
+    ("TILE_COMPLETE", None, "all", None, None),
 ]
 
 
-BATCH_MODE_SELECTED_STEP_EVENTS = ALL_MODE_LIFECYCLE_EVENTS[:7] + [
-    ALL_MODE_LIFECYCLE_EVENTS[-1]
+BATCH_MODE_SELECTED_STEP_EVENTS = [
+    ("TILE_START", None, None, None, None),
+    ("PIPELINE_STEP", "batch", "vector", "running", None),
+    ("PIPELINE_STEP", "batch", "vector", "complete", None),
+    ("TILE_PROGRESS", None, None, None, None),
+    ("PIPELINE_STEP", "batch", "mesh", "running", None),
+    ("PIPELINE_STEP", "batch", "mesh", "complete", None),
+    ("TILE_PROGRESS", None, None, None, None),
+    ("TILE_COMPLETE", None, "all", None, None),
 ]
 
 
@@ -137,7 +145,11 @@ class BuildAllEventTests(EventSubscriptionTests):
 
         self.assertEqual(result, CORE.BuildResult(False, "mesh", "interrupted"))
         self.assertIn(
-            ("TILE_ERROR", "mesh", None, "interrupted"),
+            ("PIPELINE_STEP", "all", "mesh", "error", "interrupted"),
+            _event_summary(self.events),
+        )
+        self.assertIn(
+            ("TILE_ERROR", None, "mesh", None, "interrupted"),
             _event_summary(self.events),
         )
         self.assertNotIn("TILE_COMPLETE", [event.name.value for event in self.events])
@@ -196,7 +208,11 @@ class BuildBatchEventTests(EventSubscriptionTests):
         self.assertFalse(result.ok)
         self.assertEqual(result.tiles[0].message, "mesh failed")
         self.assertIn(
-            ("TILE_ERROR", "mesh", None, "mesh failed"),
+            ("PIPELINE_STEP", "batch", "mesh", "error", "mesh failed"),
+            _event_summary(self.events),
+        )
+        self.assertIn(
+            ("TILE_ERROR", None, "mesh", None, "mesh failed"),
             _event_summary(self.events),
         )
         self.assertNotIn("TILE_COMPLETE", [event.name.value for event in self.events])

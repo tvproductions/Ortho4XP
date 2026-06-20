@@ -1,8 +1,19 @@
+"""Core tile-build orchestration boundaries.
+
+This module owns Ortho4XP build policy: tile lifecycle events, current
+all-in-one step order, batch-plan preparation, retry behavior for incomplete
+imagery, and mapping controlled failures back to public build result objects.
+The generic named-step execution mechanics live in `O4_Pipeline`; the small
+build-facing adapter in `O4_Build_Pipeline` keeps those mechanics out of this
+legacy build surface.
+"""
+
 from collections.abc import Callable
 from dataclasses import dataclass
 
 import O4_Build_Context as BC
 import O4_Build_Models as MODELS
+import O4_Build_Pipeline as BPIPE
 import O4_Config_Utils as CFG
 import O4_Event_Bus as EVENTS
 import O4_File_Names as FNAMES
@@ -10,6 +21,7 @@ import O4_Imagery_Utils as IMG
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_Overlay_Utils as OVL
+import O4_Pipeline as PIPELINE
 import O4_Tile_Utils as TILE
 import O4_UI_Utils as UI
 import O4_Vector_Map as VMAP
@@ -48,22 +60,35 @@ def build_tile_all(tile) -> BuildResult:
 
 
 def _run_build_steps(tile, ctx) -> BuildResult | None:
-    steps = _build_steps()
-    total_steps = len(steps)
-    for completed_steps, (step, build_step) in enumerate(steps, start=1):
-        _publish_event(
-            EVENTS.EventName.PIPELINE_STEP, tile, mode="all", step=step, status="start"
-        )
-        build_step(tile, ctx=ctx)
-        if ctx.red_flag:
-            return _interrupted(step)
-        _publish_step_complete(
-            tile,
+    result = BPIPE.run_named_steps(
+        tile,
+        BPIPE.BuildPipelineSpec(
             mode="all",
-            step=step,
-            progress=(completed_steps, total_steps),
-        )
-    return None
+            steps=_build_steps(),
+            run_step=lambda build_step: _run_all_in_one_step(build_step, tile, ctx),
+            on_step_complete=lambda _state, completed, total: _publish_progress(
+                tile,
+                mode="all",
+                progress=(completed, total),
+            ),
+        ),
+    )
+    return _build_result_from_pipeline(result)
+
+
+def _build_result_from_pipeline(result: PIPELINE.PipelineResult) -> BuildResult | None:
+    if result.ok:
+        return None
+    if result.message == "interrupted":
+        return _interrupted(result.failed_step or "unknown")
+    return BuildResult(False, result.failed_step or "unknown", result.message)
+
+
+def _run_all_in_one_step(build_step, tile, ctx) -> PIPELINE.StepOutcome:
+    build_step(tile, ctx=ctx)
+    if ctx.red_flag:
+        return PIPELINE.StepOutcome(False, "interrupted")
+    return PIPELINE.StepOutcome()
 
 
 def _build_steps():
@@ -79,17 +104,13 @@ def _publish_event(event_name: EVENTS.EventName, tile, *, mode: str, **payload) 
     EVENTS.publish(event_name, lat=tile.lat, lon=tile.lon, mode=mode, **payload)
 
 
-def _publish_step_complete(
+def _publish_progress(
     tile,
     *,
     mode: str,
-    step: str,
     progress: tuple[int, int],
 ) -> None:
     completed_steps, total_steps = progress
-    _publish_event(
-        EVENTS.EventName.PIPELINE_STEP, tile, mode=mode, step=step, status="complete"
-    )
     _publish_event(
         EVENTS.EventName.TILE_PROGRESS,
         tile,
@@ -162,16 +183,31 @@ def _build_tile_plan(
     _publish_event(EVENTS.EventName.TILE_START, tile, mode="batch")
     _prepare_batch_tile(tile, tile_plan)
     selected_steps = [step for step in MODELS.ALL_STEPS if step in tile_plan.steps]
-    total_steps = len(selected_steps)
-    for completed_steps, step in enumerate(selected_steps, start=1):
-        failure = _run_batch_plan_step(tile_plan, tile, ctx, step)
-        if failure is not None:
-            return failure
-        _publish_step_complete(
+    result = BPIPE.run_named_steps(
+        tile,
+        BPIPE.BuildPipelineSpec(
+            mode="batch",
+            steps=((step, step) for step in selected_steps),
+            run_step=lambda step: _run_batch_plan_step(tile, ctx, step),
+            on_step_complete=lambda _state, completed, total: _publish_progress(
+                tile,
+                mode="batch",
+                progress=(completed, total),
+            ),
+        ),
+    )
+    if not result.ok:
+        message = result.message
+        step = result.failed_step or "unknown"
+        _publish_event(
+            EVENTS.EventName.TILE_ERROR,
             tile,
             mode="batch",
             step=step,
-            progress=(completed_steps, total_steps),
+            message=message,
+        )
+        return MODELS.BuildTileResult(
+            tile_plan.lat, tile_plan.lon, False, step, message
         )
     _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="batch", step="all")
     return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, True, "all")
@@ -191,30 +227,17 @@ def _prepare_batch_tile(tile, tile_plan: MODELS.BuildTilePlan) -> None:
 
 
 def _run_batch_plan_step(
-    tile_plan: MODELS.BuildTilePlan,
     tile,
     ctx: BC.BuildContext,
     step: str,
-) -> MODELS.BuildTileResult | None:
-    _publish_event(
-        EVENTS.EventName.PIPELINE_STEP, tile, mode="batch", step=step, status="start"
-    )
+) -> PIPELINE.StepOutcome:
     ok = _run_batch_step(step, tile, ctx)
     if ctx.red_flag:
         UI.exit_message_and_bottom_line("")
-        message = "interrupted"
-    elif ok:
-        return None
-    else:
-        message = f"{step} failed"
-    _publish_event(
-        EVENTS.EventName.TILE_ERROR,
-        tile,
-        mode="batch",
-        step=step,
-        message=message,
-    )
-    return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, False, step, message)
+        return PIPELINE.StepOutcome(False, "interrupted")
+    if ok:
+        return PIPELINE.StepOutcome()
+    return PIPELINE.StepOutcome(False, f"{step} failed")
 
 
 def _steps_need_tile_directory(steps: tuple[str, ...]) -> bool:
