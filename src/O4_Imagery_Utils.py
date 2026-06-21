@@ -25,6 +25,7 @@ import O4_Imagery_Failures as IFAIL
 import O4_Mask_Utils as MASK
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
+import O4_Provider_Scoring as P
 import O4_Resampling_Policy as RP
 import O4_Texture_Color_Normalization as TCN
 import O4_UI_Utils as UI
@@ -1599,7 +1600,7 @@ def download_jpeg_ortho(
             e,
         )
         return 0
-    return 1
+    return P.scored_value(1, texture_attrs, output_image)
 
 
 ################################################################################
@@ -1630,7 +1631,7 @@ def _build_supported_texture_source(tile, attrs, persist_cache):
     wrote_cache = _write_optional_texture_cache(
         persist_cache, file_dir, cache_path, output_image
     )
-    source = TextureSource(tile, attrs, output_image, cache_path, wrote_cache)
+    source = P.texture_source(tile, attrs, output_image, (cache_path, wrote_cache))
     return TextureBuildResult.success(source, incomplete=incomplete and not success)
 
 
@@ -2003,7 +2004,6 @@ def build_geotiffs(tile, texture_attributes_list):
         if UI.red_flag:
             UI.exit_message_and_bottom_line()
     UI.timings_and_bottom_line(timer)
-    return
 
 
 ################################################################################

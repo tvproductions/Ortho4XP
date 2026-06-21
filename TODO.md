@@ -1077,7 +1077,19 @@ Suggested labels: `performance`, `cache`
 
 ### TODO-039: Provider Scoring
 
-Status: Pending
+Status: Done
+
+Completion note: implemented deterministic provider imagery scoring for
+downloaded orthophoto texture images. Successful concrete-provider downloads
+now compute noise, JPEG block artifact, cloud, color drift, and seam risk
+metrics, derive a 0-100 global quality score with a quality label, and write a
+structured `Provider imagery score` log event with provider and texture
+coordinates.
+
+Verification note: focused provider scoring and imagery texture-source tests,
+full `unittest` discovery, changed-file Ruff/format/ty checks, complexity
+baseline verification, and the full repository quality gate passed, including
+native LLVM/CMake checks.
 
 Add automatic quality scoring for downloaded imagery. Reference: ORTHO4XP_V3
 `O4_Provider_Score`.
