@@ -1050,7 +1050,18 @@ Suggested labels: `architecture`, `pipeline`
 
 ### TODO-038: Smart Cache
 
-Status: Pending
+Status: Done
+
+Completion note: implemented a full-tile smart cache using `tile_meta.json`
+metadata in the tile build directory. The cache hashes the canonical tile
+parameter snapshot with SHA256, skips unchanged all-in-one builds and full
+default batch builds, emits `CACHE_HIT`, and leaves partial batch steps
+uncached so targeted rebuild requests still run.
+
+Verification note: focused cache/build/event tests passed, full `unittest`
+discovery passed with 402 tests, changed-file Ruff/format/ty checks passed, and
+the full repository quality gate passed, including complexity and native
+LLVM/CMake checks.
 
 Add SHA256-based tile parameter caching to skip rebuilds when parameters are
 unchanged. Reference: ORTHO4XP_V3 `O4_Dependency`.

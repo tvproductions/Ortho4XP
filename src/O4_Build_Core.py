@@ -11,6 +11,7 @@ legacy build surface.
 from collections.abc import Callable
 from dataclasses import dataclass
 
+import O4_Build_Cache as CACHE
 import O4_Build_Context as BC
 import O4_Build_Models as MODELS
 import O4_Build_Pipeline as BPIPE
@@ -41,22 +42,37 @@ def build_tile_all(tile) -> BuildResult:
     """Run the current all-in-one tile sequence and return its structured result."""
     ctx = BC.BuildContext()
     _publish_event(EVENTS.EventName.TILE_START, tile, mode="all")
+    if _publish_cache_hit_if_current(tile, mode="all"):
+        ctx.is_working = False
+        _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="all", step="all")
+        return BuildResult(ok=True, step="all")
+    interrupted = _run_all_build_phases(tile, ctx)
+    if interrupted:
+        _publish_all_build_error(tile, interrupted)
+        return interrupted
+    ctx.is_working = False
+    _report_remaining_incomplete_textures()
+    _write_cache_metadata_if_complete(tile)
+    _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="all", step="all")
+    return BuildResult(ok=True, step="all")
+
+
+def _run_all_build_phases(tile, ctx) -> BuildResult | None:
     for build_phase in (_run_build_steps, _retry_incomplete_textures_if_needed):
         interrupted = build_phase(tile, ctx)
         if interrupted:
-            _publish_event(
-                EVENTS.EventName.TILE_ERROR,
-                tile,
-                mode="all",
-                step=interrupted.step,
-                message=interrupted.message,
-            )
             return interrupted
+    return None
 
-    ctx.is_working = False
-    _report_remaining_incomplete_textures()
-    _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="all", step="all")
-    return BuildResult(ok=True, step="all")
+
+def _publish_all_build_error(tile, result: BuildResult) -> None:
+    _publish_event(
+        EVENTS.EventName.TILE_ERROR,
+        tile,
+        mode="all",
+        step=result.step,
+        message=result.message,
+    )
 
 
 def _run_build_steps(tile, ctx) -> BuildResult | None:
@@ -155,6 +171,30 @@ def _report_remaining_incomplete_textures() -> None:
         )
 
 
+def _publish_cache_hit_if_current(tile, *, mode: str) -> bool:
+    hit = CACHE.read_cache_hit(tile)
+    if hit is None:
+        return False
+    _publish_event(
+        EVENTS.EventName.CACHE_HIT,
+        tile,
+        mode=mode,
+        metadata_path=hit.metadata_path,
+        parameter_hash=hit.parameter_hash,
+    )
+    return True
+
+
+def _write_cache_metadata_if_complete(tile) -> None:
+    if _tile_has_incomplete_textures(tile):
+        return
+    CACHE.write_cache_metadata(tile)
+
+
+def _tile_has_incomplete_textures(tile) -> bool:
+    return FNAMES.short_latlon(tile.lat, tile.lon) in IMG.incomplete_imgs
+
+
 def build_batch(
     plan: MODELS.BuildPlan,
     *,
@@ -182,8 +222,30 @@ def _build_tile_plan(
     tile = CFG.Tile(tile_plan.lat, tile_plan.lon, tile_plan.custom_build_dir)
     _publish_event(EVENTS.EventName.TILE_START, tile, mode="batch")
     _prepare_batch_tile(tile, tile_plan)
-    selected_steps = [step for step in MODELS.ALL_STEPS if step in tile_plan.steps]
-    result = BPIPE.run_named_steps(
+    selected_steps = _selected_batch_steps(tile_plan)
+    if _is_full_tile_build(selected_steps) and _publish_cache_hit_if_current(
+        tile, mode="batch"
+    ):
+        return _complete_batch_tile(tile_plan, tile)
+    result = _run_batch_pipeline(tile, ctx, selected_steps)
+    failed_result = _failed_batch_result(tile_plan, tile, result)
+    if failed_result is not None:
+        return failed_result
+    if _is_full_tile_build(selected_steps):
+        _write_cache_metadata_if_complete(tile)
+    return _complete_batch_tile(tile_plan, tile)
+
+
+def _selected_batch_steps(tile_plan: MODELS.BuildTilePlan) -> list[str]:
+    return [step for step in MODELS.ALL_STEPS if step in tile_plan.steps]
+
+
+def _run_batch_pipeline(
+    tile,
+    ctx: BC.BuildContext,
+    selected_steps: list[str],
+) -> PIPELINE.PipelineResult:
+    return BPIPE.run_named_steps(
         tile,
         BPIPE.BuildPipelineSpec(
             mode="batch",
@@ -196,6 +258,13 @@ def _build_tile_plan(
             ),
         ),
     )
+
+
+def _failed_batch_result(
+    tile_plan: MODELS.BuildTilePlan,
+    tile,
+    result: PIPELINE.PipelineResult,
+) -> MODELS.BuildTileResult | None:
     if not result.ok:
         message = result.message
         step = result.failed_step or "unknown"
@@ -209,8 +278,18 @@ def _build_tile_plan(
         return MODELS.BuildTileResult(
             tile_plan.lat, tile_plan.lon, False, step, message
         )
+    return None
+
+
+def _complete_batch_tile(
+    tile_plan: MODELS.BuildTilePlan, tile
+) -> MODELS.BuildTileResult:
     _publish_event(EVENTS.EventName.TILE_COMPLETE, tile, mode="batch", step="all")
     return MODELS.BuildTileResult(tile_plan.lat, tile_plan.lon, True, "all")
+
+
+def _is_full_tile_build(steps: list[str]) -> bool:
+    return tuple(steps) == MODELS.DEFAULT_STEPS
 
 
 def _prepare_batch_tile(tile, tile_plan: MODELS.BuildTilePlan) -> None:
