@@ -6,6 +6,8 @@ from typing import Any
 
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
+import O4_Provider_Failover as FAILOVER
+import O4_Texture_Download_Failover as TDF
 import O4_UI_Utils as UI
 from O4_Texture_Source import TextureBuildResult
 
@@ -35,6 +37,7 @@ class DownloadTextureRuntime:
     semaphore: asyncio.Semaphore
     state: DownloadTextureState
     max_attempts: int
+    failover_registry: Any = FAILOVER.default_registry
 
 
 def _worker_count(options):
@@ -89,22 +92,17 @@ async def _mark_download_started(runtime):
         _update_progress(runtime)
 
 
-async def _record_download_result(runtime, attrs, ok):
-    should_retry = False
+async def _record_download_result(runtime, attrs, result):
     async with runtime.state.progress_lock:
         runtime.state.progress["pending"] -= 1
-        if ok:
-            runtime.state.progress["done"] += 1
-            runtime.state.attempts.pop(attrs, None)
+        if result.ok:
+            retry_attrs = TDF.record_successful_download(runtime, attrs, result)
         else:
-            attempt = runtime.state.attempts[attrs] + 1
-            runtime.state.attempts[attrs] = attempt
-            should_retry = attempt < runtime.max_attempts and not UI.red_flag
-            if not should_retry:
-                runtime.state.final_failures.append(_texture_failure_context(attrs))
-                runtime.state.attempts.pop(attrs, None)
+            retry_attrs = TDF.record_failed_download(
+                runtime, attrs, IMG.providers_dict, _texture_failure_context
+            )
         _update_progress(runtime)
-    return should_retry
+    return retry_attrs
 
 
 async def _build_texture(runtime, attrs):
@@ -123,19 +121,18 @@ async def _download_task(runtime, attrs):
     async with runtime.semaphore:
         await _mark_download_started(runtime)
         result = await _build_texture(runtime, attrs)
-        ok = result.ok
-        should_retry = await _record_download_result(runtime, attrs, ok)
-        await _queue_download_result(runtime, attrs, result, should_retry)
+        retry_attrs = await _record_download_result(runtime, attrs, result)
+        await _queue_download_result(runtime, attrs, result, retry_attrs)
         if UI.red_flag:
             runtime.state.interrupted = True
-        return 1 if ok else 0
+        return 1 if result.ok else 0
 
 
-async def _queue_download_result(runtime, attrs, result, should_retry):
+async def _queue_download_result(runtime, attrs, result, retry_attrs):
     if result.ok and result.source is not None:
         runtime.convert_queue.put((runtime.tile, result.source))
-    elif should_retry:
-        runtime.download_queue.put(attrs)
+    elif retry_attrs is not None:
+        runtime.download_queue.put(retry_attrs)
         async with runtime.state.progress_lock:
             _update_progress(runtime)
 
@@ -145,7 +142,8 @@ async def _run_ready_tasks(runtime, tasks):
         attrs = runtime.download_queue.get()
         if isinstance(attrs, str) and attrs == "quit":
             continue
-        tasks.add(asyncio.create_task(_download_task(runtime, tuple(attrs))))
+        active_attrs = TDF.active_attrs(runtime, tuple(attrs), IMG.providers_dict)
+        tasks.add(asyncio.create_task(_download_task(runtime, active_attrs)))
     return tasks
 
 

@@ -1106,7 +1106,22 @@ Suggested labels: `imagery`, `quality`
 
 ### TODO-040: Provider Failover
 
-Status: Pending
+Status: Done
+
+Completion note: implemented concrete-provider failover in the async texture
+download path with a thread-safe provider health registry. Providers are
+blacklisted after 3 consecutive failed texture attempts for a 5-minute timeout;
+successful downloads reset provider health. When a blacklisted concrete
+provider has an eligible replacement in `providers_dict`, the scheduler requeues
+the same texture coordinates and zoom level with the replacement provider while
+preserving existing retry and failure-summary behavior when no replacement is
+available.
+
+Verification note: focused failover, scheduler, and imagery failure tests
+passed; full `unittest` discovery passed with 414 tests; changed-file Ruff,
+Ruff format, and ty checks passed; changed-scope complexity verification
+passed; the full repository quality gate passed, including native LLVM/CMake
+checks.
 
 Add automatic provider failover with blacklist. Reference: ORTHO4XP_V3
 `O4_Provider_Abstraction`.
