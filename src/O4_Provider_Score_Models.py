@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
@@ -72,7 +73,7 @@ class ProviderScoreResult:
             "global_score": round(self.global_score, 2),
             "quality_label": self.quality_label,
             "metrics": self.metrics.to_context(),
-            "details": self.metrics.details,
+            "details": copy.deepcopy(self.metrics.details),
         }
 
 
