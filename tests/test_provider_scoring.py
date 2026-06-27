@@ -67,6 +67,30 @@ class ProviderScoringTests(unittest.TestCase):
         self.assertEqual(result.metrics.clouds, 0)
         self.assertEqual(result.to_context()["provider_code"], "Arc")
 
+    def test_metric_details_are_preserved_in_score_context(self):
+        metrics = SCORE.ProviderScoreMetrics(
+            noise=0,
+            jpeg_compression=0,
+            clouds=12.345,
+            color_drift=0,
+            seam_risk=23.456,
+            details={
+                "clouds": {"cloud_coverage_pct": 8.2},
+                "seam_risk": {"worst_edge": "right"},
+            },
+        )
+
+        result = SCORE.provider_score_from_metrics("BI", (32, 48, 16, "BI"), metrics)
+        context = result.to_context()
+
+        self.assertEqual(context["metrics"]["clouds"], 12.35)
+        self.assertEqual(context["metrics"]["seam_risk"], 23.46)
+        self.assertEqual(
+            context["details"]["clouds"],
+            {"cloud_coverage_pct": 8.2},
+        )
+        self.assertEqual(context["details"]["seam_risk"], {"worst_edge": "right"})
+
 
 if __name__ == "__main__":
     unittest.main()

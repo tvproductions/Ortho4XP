@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from typing import Any
 
 TextureAttributes = tuple[int, int, int, str]
+
+
+@dataclass(frozen=True)
+class ProviderScoreContext:
+    neighbor_edges: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -15,6 +21,7 @@ class ProviderScoreMetrics:
     clouds: float
     color_drift: float
     seam_risk: float
+    details: dict[str, Any] = field(default_factory=dict)
 
     def clamped(self) -> ProviderScoreMetrics:
         return ProviderScoreMetrics(
@@ -23,6 +30,7 @@ class ProviderScoreMetrics:
             clouds=_clamp_metric(self.clouds),
             color_drift=_clamp_metric(self.color_drift),
             seam_risk=_clamp_metric(self.seam_risk),
+            details=dict(self.details),
         )
 
     def to_context(self) -> dict[str, float]:
@@ -64,6 +72,7 @@ class ProviderScoreResult:
             "global_score": round(self.global_score, 2),
             "quality_label": self.quality_label,
             "metrics": self.metrics.to_context(),
+            "details": self.metrics.details,
         }
 
 
