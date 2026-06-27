@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import numpy
 
+from O4_Provider_Score_Channel_Data import channel_data
+from O4_Provider_Score_Cloud_Data import cloud_masks, coverage_percent
+
 
 def cloud_score(sample: numpy.ndarray) -> float:
     score, _details = cloud_score_details(sample)
@@ -14,25 +17,11 @@ def cloud_score_details(sample: numpy.ndarray) -> tuple[float, dict[str, float]]
     if sample.size == 0 or sample.ndim != 3 or sample.shape[2] < 3:
         return 0.0, _cloud_details(0.0, 0.0, 0.0, 0.0)
 
-    rgb = sample[:, :, :3].astype(numpy.float64)
-    red = rgb[:, :, 0]
-    green = rgb[:, :, 1]
-    blue = rgb[:, :, 2]
-    max_channel = numpy.max(rgb, axis=2)
-    min_channel = numpy.min(rgb, axis=2)
-    luminance = (red + green + blue) / 3.0
-    saturation = max_channel - min_channel
-
-    dense_cloud = (luminance >= 220) & (saturation <= 28)
-    local_std = _local_luminance_std(luminance, block_size=4)
-    veil = (luminance >= 180) & (saturation <= 38) & (local_std <= 8.0)
-    blue_sky = (blue > red + 10) & (blue > green + 5) & (luminance >= 145)
-    cloud_mask = (dense_cloud | veil) & ~blue_sky
-
-    cloud_coverage = float(numpy.mean(cloud_mask) * 100)
-    dense_coverage = float(numpy.mean(dense_cloud & ~blue_sky) * 100)
-    veil_coverage = float(numpy.mean(veil & ~blue_sky) * 100)
-    blue_sky_coverage = float(numpy.mean(blue_sky) * 100)
+    masks = cloud_masks(channel_data(sample))
+    cloud_coverage = coverage_percent(masks.cloud)
+    dense_coverage = coverage_percent(masks.dense)
+    veil_coverage = coverage_percent(masks.veil)
+    blue_sky_coverage = coverage_percent(masks.blue_sky)
     risk = min(100.0, max(0.0, (cloud_coverage - 5.0) * 2.1))
     return risk, _cloud_details(
         cloud_coverage,
@@ -40,18 +29,6 @@ def cloud_score_details(sample: numpy.ndarray) -> tuple[float, dict[str, float]]
         veil_coverage,
         blue_sky_coverage,
     )
-
-
-def _local_luminance_std(luminance: numpy.ndarray, block_size: int) -> numpy.ndarray:
-    height, width = luminance.shape
-    std_map = numpy.zeros((height, width), dtype=numpy.float64)
-    for y_start in range(0, height, block_size):
-        y_end = min(height, y_start + block_size)
-        for x_start in range(0, width, block_size):
-            x_end = min(width, x_start + block_size)
-            block = luminance[y_start:y_end, x_start:x_end]
-            std_map[y_start:y_end, x_start:x_end] = float(numpy.std(block))
-    return std_map
 
 
 def _cloud_details(

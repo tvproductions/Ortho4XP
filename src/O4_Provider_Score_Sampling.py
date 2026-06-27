@@ -29,3 +29,15 @@ def mean_of_arrays(*arrays: numpy.ndarray) -> float:
     if not values:
         return 0.0
     return sum(values) / len(values)
+
+
+def local_luminance_std(luminance: numpy.ndarray, block_size: int) -> numpy.ndarray:
+    height, width = luminance.shape
+    std_map = numpy.zeros((height, width), dtype=numpy.float64)
+    for y_start in range(0, height, block_size):
+        y_end = min(height, y_start + block_size)
+        for x_start in range(0, width, block_size):
+            x_end = min(width, x_start + block_size)
+            block = luminance[y_start:y_end, x_start:x_end]
+            std_map[y_start:y_end, x_start:x_end] = float(numpy.std(block))
+    return std_map
