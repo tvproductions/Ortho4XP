@@ -1138,9 +1138,7 @@ Suggested labels: `reliability`, `network`
 
 ### TODO-041: AI Cloud/Seam Detection
 
-Status: In Progress
-
-Task 2 complete: cloud and haze scoring now emits cloud detail metrics. Task 3 still owns seam detail work.
+Status: Pending
 
 Add AI-based cloud and seam detection for imagery quality control. Reference:
 ORTHO4XP_V3 `O4_Provider_Score` enhanced.
