@@ -108,6 +108,55 @@ class ProviderScoringTests(unittest.TestCase):
 
         self.assertEqual(result.metrics.details["clouds"]["cloud_coverage_pct"], 8.2)
 
+    def test_small_cloud_coverage_under_tolerance_is_not_penalized(self):
+        image = Image.new("RGB", (20, 20), (80, 130, 85))
+        pixels = [(80, 130, 85)] * 400
+        for index in range(16):
+            pixels[index] = (242, 242, 242)
+        image.putdata(pixels)
+
+        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+
+        self.assertEqual(result.metrics.clouds, 0)
+        self.assertLess(
+            result.metrics.details["clouds"]["cloud_coverage_pct"],
+            5.0,
+        )
+
+    def test_dense_cloud_coverage_above_tolerance_increases_cloud_risk(self):
+        image = Image.new("RGB", (20, 20), (80, 130, 85))
+        pixels = [(80, 130, 85)] * 400
+        for index in range(80):
+            pixels[index] = (242, 242, 242)
+        image.putdata(pixels)
+
+        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+
+        self.assertGreater(result.metrics.clouds, 20)
+        self.assertGreater(
+            result.metrics.details["clouds"]["dense_cloud_pct"],
+            15,
+        )
+
+    def test_blue_sky_like_pixels_are_excluded_from_cloud_coverage(self):
+        image = Image.new("RGB", (20, 20), (110, 155, 230))
+
+        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+
+        self.assertEqual(result.metrics.clouds, 0)
+        self.assertGreater(
+            result.metrics.details["clouds"]["blue_sky_excluded_pct"],
+            90,
+        )
+
+    def test_low_variance_haze_increases_cloud_risk(self):
+        image = Image.new("RGB", (20, 20), (188, 188, 185))
+
+        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+
+        self.assertGreater(result.metrics.clouds, 80)
+        self.assertGreater(result.metrics.details["clouds"]["veil_pct"], 90)
+
 
 if __name__ == "__main__":
     unittest.main()
