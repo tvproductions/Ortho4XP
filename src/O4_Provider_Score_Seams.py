@@ -37,15 +37,13 @@ def seam_risk_score_details(
     band = max(1, min(rgb.shape[0], rgb.shape[1]) // 16)
     interior = _interior(rgb, band)
     neighbor_edges = scoring_context.neighbor_edges if scoring_context else None
-    edge_details = _edge_details(rgb, band, interior, neighbor_edges)
+    edge_details, neighbor_compared = _edge_details(rgb, band, interior, neighbor_edges)
     worst_edge = max(edge_details, key=lambda edge: edge_details[edge]["risk"])
     score = float(edge_details[worst_edge]["risk"])
     return score, {
         "worst_edge": worst_edge,
         "edges": edge_details,
-        "neighbor_compared": any(
-            details["neighbor_drift"] > 0 for details in edge_details.values()
-        ),
+        "neighbor_compared": neighbor_compared,
     }
 
 
@@ -54,13 +52,15 @@ def _edge_details(
     band: int,
     interior: numpy.ndarray,
     neighbor_edges: Any,
-) -> dict[str, dict[str, float]]:
+) -> tuple[dict[str, dict[str, float]], bool]:
     # The comparison baseline comes from the tile interior, while border pairs
     # isolate the immediate seam transition against the adjacent interior band.
     stats = interior_stats(interior)
     borders = border_pairs(rgb, band)
-    return {
-        edge_name: _edge_detail(
+    edge_details: dict[str, dict[str, float]] = {}
+    neighbor_compared = False
+    for edge_name, edge in named_edge_arrays(rgb, band).items():
+        edge_detail, edge_neighbor_compared = _edge_detail(
             EdgeInput(
                 border_pair=borders.get(edge_name),
                 edge=edge,
@@ -69,8 +69,9 @@ def _edge_details(
             stats,
             neighbor_edges,
         )
-        for edge_name, edge in named_edge_arrays(rgb, band).items()
-    }
+        edge_details[edge_name] = edge_detail
+        neighbor_compared = neighbor_compared or edge_neighbor_compared
+    return edge_details, neighbor_compared
 
 
 def _interior(sample: numpy.ndarray, band: int) -> numpy.ndarray:
@@ -86,7 +87,7 @@ def _edge_detail(
     edge_input: EdgeInput,
     interior_stats: InteriorStats,
     neighbor_edges: Any,
-) -> dict[str, float]:
+) -> tuple[dict[str, float], bool]:
     # Risk is the strongest of the independent seam indicators for a single
     # edge: luminance drift, RGB drift, border discontinuity, or neighbor drift.
     edge_luma = luminance(edge_input.edge)
@@ -95,7 +96,7 @@ def _edge_detail(
         numpy.mean(numpy.abs(rgb_mean(edge_input.edge) - interior_stats.rgb_mean))
     )
     border_gradient = _border_gradient(edge_input.border_pair)
-    edge_neighbor_drift = neighbor_drift(
+    edge_neighbor_drift, edge_neighbor_compared = neighbor_drift(
         edge_input.edge, edge_input.edge_name, neighbor_edges
     )
     return {
@@ -107,7 +108,7 @@ def _edge_detail(
         "rgb_drift": round(rgb_drift, 2),
         "border_gradient": round(border_gradient, 2),
         "neighbor_drift": round(edge_neighbor_drift, 2),
-    }
+    }, edge_neighbor_compared
 
 
 def _border_gradient(border_pair: tuple[numpy.ndarray, numpy.ndarray] | None) -> float:

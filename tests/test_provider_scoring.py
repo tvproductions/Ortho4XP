@@ -187,6 +187,22 @@ class ProviderScoringTests(unittest.TestCase):
         self.assertTrue(result.metrics.details["seam_risk"]["neighbor_compared"])
         self.assertEqual(result.metrics.details["seam_risk"]["worst_edge"], "right")
 
+    def test_matching_neighbor_edge_marks_neighbor_as_compared_even_with_zero_drift(
+        self,
+    ):
+        image = uniform_image((95, 130, 95))
+        neighbor_edge = numpy.asarray(image)[:, -2:, :]
+        scoring_context = SCORE.ProviderScoreContext(
+            neighbor_edges={"right": neighbor_edge}
+        )
+
+        result = score_image(image, scoring_context=scoring_context)
+
+        self.assertEqual(
+            result.metrics.details["seam_risk"]["edges"]["right"]["neighbor_drift"], 0.0
+        )
+        self.assertTrue(result.metrics.details["seam_risk"]["neighbor_compared"])
+
 
 if __name__ == "__main__":
     unittest.main()

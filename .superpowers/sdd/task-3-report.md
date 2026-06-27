@@ -261,3 +261,43 @@ Result summary:
   during full-gate verification.
 - Left `TODO.md` unchanged; this pass fixed the quality gate but did not close
   `TODO-041` on its own.
+
+## Task 3 review fix
+
+Addressed the review finding that `neighbor_compared` was derived from
+`neighbor_drift > 0` instead of from the presence of a valid neighbor
+comparison. The seam detail payload now reports `neighbor_compared: True` when
+neighbor context is supplied and accepted, even if the drift is exactly `0.0`
+or rounds to `0.0`.
+
+### Regression evidence
+
+Added a focused regression test in `tests/test_provider_scoring.py`:
+
+- `test_matching_neighbor_edge_marks_neighbor_as_compared_even_with_zero_drift`
+
+The test uses `ProviderScoreContext(neighbor_edges={"right": ...})` with a
+matching right-edge sample and asserts:
+
+- `result.metrics.details["seam_risk"]["neighbor_compared"] is True`
+- `result.metrics.details["seam_risk"]["edges"]["right"]["neighbor_drift"] == 0.0`
+
+### Verification commands
+
+```powershell
+uv run python -m unittest tests.test_provider_scoring.ProviderScoringTests.test_matching_neighbor_edge_marks_neighbor_as_compared_even_with_zero_drift
+uv run python -m unittest tests.test_provider_scoring -q
+uv run ruff check src/O4_Provider_Score_Seams.py src/O4_Provider_Score_Seam_Stats.py tests/test_provider_scoring.py
+uv run ruff format --check src/O4_Provider_Score_Seams.py src/O4_Provider_Score_Seam_Stats.py tests/test_provider_scoring.py
+uv run ty check src/O4_Provider_Score_Seams.py src/O4_Provider_Score_Seam_Stats.py tests/test_provider_scoring.py
+uv run python .codex/skills/quality-check/scripts/quality_check.py
+```
+
+Observed results:
+
+- The focused regression test failed before the fix with
+  `AssertionError: False is not true`, then passed after the seam comparison
+  flag was separated from numeric drift.
+- The provider-scoring test suite passed: `Ran 13 tests` / `OK`
+- Changed-file Ruff, Ruff format, and ty checks passed
+- Full quality gate passed with `Ran 424 tests` / `OK`

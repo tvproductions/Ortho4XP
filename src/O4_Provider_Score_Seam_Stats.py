@@ -56,15 +56,18 @@ def neighbor_drift(
     edge: numpy.ndarray,
     edge_name: str,
     neighbor_edges: Any,
-) -> float:
+) -> tuple[float, bool]:
     # Neighbor comparisons are optional and must remain tolerant of partial or
     # malformed context payloads from callers.
     if not neighbor_edges or edge_name not in neighbor_edges:
-        return 0.0
+        return 0.0, False
     neighbor = numpy.asarray(neighbor_edges[edge_name], dtype=numpy.float64)
     if neighbor.size == 0 or neighbor.ndim != 3 or neighbor.shape[2] < 3:
-        return 0.0
-    return float(numpy.mean(numpy.abs(rgb_mean(edge) - rgb_mean(neighbor[:, :, :3]))))
+        return 0.0, False
+    return (
+        float(numpy.mean(numpy.abs(rgb_mean(edge) - rgb_mean(neighbor[:, :, :3])))),
+        True,
+    )
 
 
 def empty_details(edge_names: tuple[str, ...]) -> dict[str, Any]:
