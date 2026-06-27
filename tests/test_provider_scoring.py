@@ -1,6 +1,9 @@
+"""Regression coverage for provider imagery scoring heuristics."""
+
 import math
 import unittest
 
+import numpy
 from PIL import Image
 
 try:
@@ -12,10 +15,27 @@ import O4_Provider_Scoring as SCORE
 
 
 class ProviderScoringTests(unittest.TestCase):
+    def _score_image(
+        self,
+        image: Image.Image,
+        scoring_context: SCORE.ProviderScoreContext | None = None,
+    ) -> SCORE.ProviderScoreResult:
+        return SCORE.score_provider_image(
+            "BI",
+            (32, 48, 16, "BI"),
+            image,
+            scoring_context=scoring_context,
+        )
+
+    def _image_from_coords(self, pixel_fn) -> Image.Image:
+        image = Image.new("RGB", (32, 32))
+        image.putdata([pixel_fn(x, y) for y in range(32) for x in range(32)])
+        return image
+
     def test_uniform_low_risk_image_scores_high_quality(self):
         image = Image.new("RGB", (32, 32), (96, 128, 96))
 
-        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+        result = self._score_image(image)
 
         self.assertEqual(result.provider_code, "BI")
         self.assertEqual(result.quality_label, "excellent")
@@ -41,7 +61,7 @@ class ProviderScoringTests(unittest.TestCase):
         image = Image.new("RGB", (32, 32))
         image.putdata(pixels)
 
-        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+        result = self._score_image(image)
 
         self.assertEqual(result.quality_label, "poor")
         self.assertLess(result.global_score, 60)
@@ -115,7 +135,7 @@ class ProviderScoringTests(unittest.TestCase):
             pixels[index] = (242, 242, 242)
         image.putdata(pixels)
 
-        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+        result = self._score_image(image)
 
         self.assertEqual(result.metrics.clouds, 0)
         self.assertLess(
@@ -130,7 +150,7 @@ class ProviderScoringTests(unittest.TestCase):
             pixels[index] = (242, 242, 242)
         image.putdata(pixels)
 
-        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+        result = self._score_image(image)
 
         self.assertGreater(result.metrics.clouds, 20)
         self.assertGreater(
@@ -141,7 +161,7 @@ class ProviderScoringTests(unittest.TestCase):
     def test_blue_sky_like_pixels_are_excluded_from_cloud_coverage(self):
         image = Image.new("RGB", (20, 20), (110, 155, 230))
 
-        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+        result = self._score_image(image)
 
         self.assertEqual(result.metrics.clouds, 0)
         self.assertGreater(
@@ -152,10 +172,50 @@ class ProviderScoringTests(unittest.TestCase):
     def test_low_variance_haze_increases_cloud_risk(self):
         image = Image.new("RGB", (20, 20), (188, 188, 185))
 
-        result = SCORE.score_provider_image("BI", (32, 48, 16, "BI"), image)
+        result = self._score_image(image)
 
         self.assertGreater(result.metrics.clouds, 80)
         self.assertGreater(result.metrics.details["clouds"]["veil_pct"], 90)
+
+    def test_single_problematic_edge_increases_seam_risk_and_identifies_edge(self):
+        image = self._image_from_coords(
+            lambda x, _y: (210, 210, 210) if x >= 30 else (95, 130, 95)
+        )
+
+        result = self._score_image(image)
+
+        self.assertGreater(result.metrics.seam_risk, 20)
+        self.assertEqual(result.metrics.details["seam_risk"]["worst_edge"], "right")
+        self.assertGreater(
+            result.metrics.details["seam_risk"]["edges"]["right"]["risk"],
+            result.metrics.details["seam_risk"]["edges"]["left"]["risk"],
+        )
+
+    def test_abrupt_border_gradient_increases_seam_risk(self):
+        image = self._image_from_coords(
+            lambda _x, y: (225, 225, 225) if y == 1 else (90, 125, 90)
+        )
+
+        result = self._score_image(image)
+
+        self.assertGreater(result.metrics.seam_risk, 10)
+        self.assertGreater(
+            result.metrics.details["seam_risk"]["edges"]["top"]["border_gradient"],
+            50,
+        )
+
+    def test_neighbor_edge_mismatch_increases_seam_risk_when_context_is_supplied(self):
+        image = Image.new("RGB", (32, 32), (95, 130, 95))
+        neighbor_edge = numpy.full((32, 2, 3), 230.0)
+        scoring_context = SCORE.ProviderScoreContext(
+            neighbor_edges={"right": neighbor_edge}
+        )
+
+        result = self._score_image(image, scoring_context=scoring_context)
+
+        self.assertGreater(result.metrics.seam_risk, 20)
+        self.assertTrue(result.metrics.details["seam_risk"]["neighbor_compared"])
+        self.assertEqual(result.metrics.details["seam_risk"]["worst_edge"], "right")
 
 
 if __name__ == "__main__":

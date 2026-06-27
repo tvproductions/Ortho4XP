@@ -7,6 +7,7 @@ from PIL import Image
 import O4_UI_Utils as UI
 from O4_Provider_Score_Metrics import compute_provider_score_metrics
 from O4_Provider_Score_Models import (
+    ProviderScoreContext,
     ProviderScoreMetrics,
     ProviderScoreResult,
     TextureAttributes,
@@ -18,8 +19,9 @@ def score_provider_image(
     provider_code: str,
     texture_attributes: TextureAttributes,
     image: Image.Image,
+    scoring_context: ProviderScoreContext | None = None,
 ) -> ProviderScoreResult:
-    metrics = compute_provider_score_metrics(image)
+    metrics = compute_provider_score_metrics(image, scoring_context)
     return provider_score_from_metrics(provider_code, texture_attributes, metrics)
 
 
@@ -54,8 +56,14 @@ def score_and_log_provider_image(
     provider_code: str,
     texture_attributes: TextureAttributes,
     image: Image.Image,
+    scoring_context: ProviderScoreContext | None = None,
 ) -> ProviderScoreResult:
-    result = score_provider_image(provider_code, texture_attributes, image)
+    result = score_provider_image(
+        provider_code,
+        texture_attributes,
+        image,
+        scoring_context,
+    )
     log_provider_score(result)
     return result
 
