@@ -1138,7 +1138,18 @@ Suggested labels: `reliability`, `network`
 
 ### TODO-041: AI Cloud/Seam Detection
 
-Status: Pending
+Status: Done
+
+Completion note: implemented deterministic provider imagery cloud and seam
+detection enhancements in the existing provider scoring modules. Cloud scoring
+now combines dense-cloud, atmospheric-veil, blue-sky exclusion, and 5 percent
+tolerance logic. Seam scoring now analyzes all four edges independently,
+records worst-edge diagnostics, detects abrupt border gradients, and accepts
+optional neighbor-edge context without adding required CV or ML dependencies.
+
+Verification note: focused provider scoring tests, provider scoring integration
+tests, full unittest discovery, changed-file Ruff/format/ty checks, and the full
+repository quality gate passed.
 
 Add AI-based cloud and seam detection for imagery quality control. Reference:
 ORTHO4XP_V3 `O4_Provider_Score` enhanced.

@@ -64,6 +64,7 @@ class ProviderScoringIntegrationTests(unittest.TestCase):
         self.assertEqual(score_context["zoomlevel"], 16)
         self.assertEqual(score_context["quality_label"], "excellent")
         self.assertGreaterEqual(score_context["global_score"], 90)
+        self._assert_score_details(score_context)
 
     def test_download_jpeg_ortho_records_provider_score(self):
         file_dir = os.path.join(self.temp_dir.name, "cache")
@@ -81,6 +82,16 @@ class ProviderScoringIntegrationTests(unittest.TestCase):
         score_context = _provider_score_context(log_event)
         self.assertEqual(score_context["provider_code"], "BI")
         self.assertEqual(score_context["quality_label"], "excellent")
+
+    def _assert_score_details(self, score_context):
+        self.assertIn("details", score_context)
+        self.assertIn("clouds", score_context["details"])
+        self.assertIn("seam_risk", score_context["details"])
+        self.assertIn(
+            "cloud_coverage_pct",
+            score_context["details"]["clouds"],
+        )
+        self.assertIn("worst_edge", score_context["details"]["seam_risk"])
 
 
 def _provider_score_context(log_event):
