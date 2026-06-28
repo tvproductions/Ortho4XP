@@ -1151,6 +1151,9 @@ Verification note: focused provider scoring tests, provider scoring integration
 tests, full unittest discovery, changed-file Ruff/format/ty checks, and the full
 repository quality gate passed.
 
+Issue tracking note: checked GitHub issues for `TODO-041` / AI Cloud Seam
+Detection; no matching issue exists.
+
 Add AI-based cloud and seam detection for imagery quality control. Reference:
 ORTHO4XP_V3 `O4_Provider_Score` enhanced.
 
