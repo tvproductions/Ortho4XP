@@ -13,21 +13,26 @@ evidence used for human engineering review. Upstream changes enter this
 repository only after they are reproduced where practical, covered by local
 tests, and implemented through this project's architecture.
 
-## Monitored Repositories
+## Authoritative Source and Passive Fork
 
-The chore monitors two repositories independently:
+The chore recognizes these repositories in different roles:
 
 - Authoritative source: `https://github.com/Ypsos/ORTHO4XP_V3`
-- Project mirror: `https://github.com/tvproductions/ORTHO4XP_V3`
+- Passive synchronization fork: `https://github.com/tvproductions/ORTHO4XP_V3`
 
 The authoritative source determines whether new work is available for review.
-The mirror check determines whether the GitHub mirror is current, behind, or
-diverged. Mirror synchronization does not mark author changes as reviewed.
+The `tvproductions` fork is not an independent development line. Its status is
+an informational checkpoint showing whether GitHub's passive fork has been
+synchronized with the author. Synchronizing that fork does not mark author
+changes as reviewed, and leaving it behind does not block an audit or baseline
+advancement. An ahead or diverged passive fork is a configuration anomaly to
+investigate, not a normal engineering state.
 
 The committed state records the monitored branches, the last fully reviewed
-author commit, the mirror commit observed during that review, the audit date,
-the audit identifier, a digest of the reviewed change manifest, and a schema
-version. A reviewed baseline may advance only through a completed audit.
+author commit, the audit date, the audit identifier, a digest of the reviewed
+change manifest, and a schema version. A reviewed baseline may advance only
+through a completed audit. Passive-fork state is observed at runtime and is not
+part of the accepted engineering baseline.
 
 ## Components
 
@@ -41,11 +46,16 @@ reopens, updates, or resolves one issue labeled `upstream-watch`.
 The detector reports these states separately:
 
 - author changes awaiting review;
-- mirror lag;
-- mirror divergence;
+- passive fork synchronized or behind;
+- unexpected passive-fork commits or divergence;
 - rewritten or non-ancestor author history;
 - invalid or stale audit state;
 - no outstanding changes.
+
+Normal passive-fork lag is informational and does not keep the engineering
+review issue open after the author baseline is current. Unexpected commits or
+divergence on the passive fork do keep the issue open as a configuration
+anomaly.
 
 The detector never modifies `TODO.md`, the audit ledger, or the reviewed
 baseline. Scheduled failures do not block normal push or pull-request CI.
@@ -77,7 +87,7 @@ records:
 
 - audit identifier and date;
 - exact base and head SHAs;
-- mirror SHA and synchronization state;
+- passive-fork synchronization state observed during the audit;
 - commit list and authorship;
 - findings and affected paths;
 - disposition and rationale for every finding;
@@ -103,7 +113,7 @@ An audit report contains:
 - Python syntax results from parsing without importing upstream modules;
 - targeted static-analysis results;
 - X-Plane 11 and X-Plane 12 compatibility signals;
-- authoritative-source and mirror synchronization status.
+- authoritative-source and passive-fork synchronization status.
 
 Every changed path must be assigned to a finding or to an explicit
 `reviewed-no-action` record. Each finding has exactly one disposition:
@@ -125,7 +135,7 @@ without new evidence.
 For candidate behavior, the engineering review follows this sequence:
 
 1. Extract the intended behavior and the real-world problem it addresses.
-2. Reproduce that problem in this fork where practical.
+2. Reproduce that problem in this active Ortho4XP repository where practical.
 3. Add a failing deterministic `unittest` or fixture before changing behavior.
 4. Implement the solution through local architecture and dependency policy.
 5. Compare observable results with the sister-project behavior or supplied
@@ -152,16 +162,18 @@ when it created them, except when an explicit output path requests retention.
 
 The local command uses these exit statuses:
 
-- `0`: state is valid and no author or mirror work is outstanding;
+- `0`: the author state is valid and no engineering review is outstanding;
 - `1`: an operational or validation failure prevented a trustworthy result;
-- `2`: author changes require review, with any mirror drift included in the
+- `2`: author changes require review, with passive-fork status included in the
   report;
-- `3`: the author baseline is current but the mirror is behind or ahead;
-- `4`: rewritten author history or repository divergence requires manual
-  intervention and a full-tree audit.
+- `3`: the author baseline is current but the passive fork has unexpected
+  commits or has diverged;
+- `4`: rewritten author history requires manual intervention and a full-tree
+  audit.
 
-The detector resolves the tracking issue only for exit status `0`. Tests assert
-the status precedence as well as each individual status.
+Normal passive-fork lag does not change exit status `0` or prevent baseline
+advancement. The detector resolves the tracking issue only for exit status `0`.
+Tests assert the status precedence as well as each individual status.
 
 ## Testing
 
@@ -172,7 +184,8 @@ Coverage includes:
 - no-change and new-commit detection;
 - additions, modifications, renames, copies, and deletions;
 - author ancestry and rewritten history;
-- mirror current, behind, ahead, and diverged states;
+- passive fork synchronized and normally behind states;
+- unexpected passive-fork commits and divergence;
 - API pagination, rate limits, and malformed responses;
 - incomplete path coverage and invalid dispositions;
 - prohibited baseline advancement;
@@ -199,11 +212,13 @@ ledger decision. The automated detector never edits backlog priorities.
 
 The chore is complete when:
 
-- scheduled and manually dispatched detection report author and mirror states;
+- scheduled and manually dispatched detection report author progress and
+  passive-fork synchronization state;
 - the local command produces reproducible reports for explicit SHA ranges;
 - incomplete audits cannot advance the committed baseline;
 - a completed audit updates state and retains a durable ledger entry;
-- rewritten history and mirror divergence are visibly distinguished;
+- rewritten author history and passive-fork anomalies are visibly
+  distinguished;
 - all tests pass without network access;
 - stale backlog references are independently specified;
 - repository quality checks pass.
