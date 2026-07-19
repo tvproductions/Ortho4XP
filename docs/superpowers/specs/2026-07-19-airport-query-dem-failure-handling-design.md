@@ -30,19 +30,20 @@ water, and the orthogrid all consume elevation data, so it is a required vector
 build dependency even when optional airport data is unavailable. This may move
 the existing DEM cost earlier, but it does not add a second construction.
 
-After DEM initialization, `build_poly_file()` calls `include_patches()` exactly
-once. The resulting patch area and patch-name list exist independently of the
-airport query. `include_airports()` receives those values so airport encoding
-can retain its patch-conflict behavior, but it no longer owns DEM or patch
-initialization.
+`include_airports()` no longer owns DEM initialization. It attempts the airport
+query and, when successful, retains the existing airport discovery, geometry
+construction, and DEM smoothing behavior. It then calls `include_patches()`
+exactly once regardless of query success. Keeping patch processing after
+airport smoothing on the successful path preserves the elevations currently
+used by custom patches, while placing it outside the success-only branch keeps
+patches available during an airport-query outage.
 
-When its OSM query succeeds, `include_airports()` retains the existing airport
-discovery, geometry construction, DEM smoothing, encoding, and airport-mask
-behavior. It returns the airport boolean mask and the
-runway/taxiway/apron-area geometry. The builder unions that airport area with
-the independently produced patch area before passing the treated area to road
-processing. Helipad flattening receives the same union internally, preserving
-its current exclusions.
+On success, airport encoding retains the patch-name conflict input and helipad
+flattening retains the union of patch and airport areas. `include_airports()`
+returns three values with separate meanings: the airport boolean mask, the
+runway/taxiway/apron-area geometry, and the patch-area geometry. The builder
+unions the two areas before passing the combined treated area to road
+processing.
 
 When the airport query fails, `include_airports()`:
 
@@ -57,6 +58,7 @@ When the airport query fails, `include_airports()`:
   `action="continue_without_airport_data"`;
 - returns a `1001 x 1001` NumPy boolean array containing only `False` values;
 - returns an empty Shapely `Polygon` for the airport area; and
+- returns the independently processed patch area as its third result; and
 - skips airport discovery, geometry, smoothing, and airport encoding work.
 
 The builder still retains and encodes custom patches when the airport query
@@ -97,6 +99,7 @@ entire log-line serialization:
   `tile.dem`;
 - custom patches are processed once and remain in the road-exclusion area when
   the airport query fails;
+- successful builds continue processing patches after airport DEM smoothing;
 - an empty airport `Polygon` passes through the real Shapely
   buffer/difference path used by road processing without a type error; and
 - the successful airport path reuses the builder-initialized DEM rather than
