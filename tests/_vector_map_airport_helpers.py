@@ -3,8 +3,6 @@ from contextlib import ExitStack, contextmanager
 from types import SimpleNamespace
 from unittest import mock
 
-import numpy
-
 try:
     import _path  # noqa: F401
 except ModuleNotFoundError:
@@ -30,14 +28,24 @@ def airport_tile():
 
 @contextmanager
 def failed_airport_mocks(patch_area):
+    order = []
+
+    def record_patches(*_args):
+        order.append("patches")
+        return (patch_area, ["custom"])
+
+    def record_output(*args, **_kwargs):
+        if args == (1, WARNING):
+            order.append("warning")
+
     with (
         mock.patch.object(VMAP.OSM, "OSM_layer", return_value=object()),
         mock.patch.object(VMAP.OSM, "OSM_queries_to_OSM_layer", return_value=False),
         mock.patch.object(
-            VMAP, "include_patches", return_value=(patch_area, ["custom"])
+            VMAP, "include_patches", side_effect=record_patches
         ) as include_patches,
         mock.patch.object(VMAP.APT_DISC, "discover_airport_names") as discover,
-        mock.patch.object(VMAP.UI, "vprint") as vprint,
+        mock.patch.object(VMAP.UI, "vprint", side_effect=record_output) as vprint,
         mock.patch.object(VMAP.UI, "log_event") as log_event,
     ):
         yield SimpleNamespace(
@@ -45,6 +53,7 @@ def failed_airport_mocks(patch_area):
             discover=discover,
             vprint=vprint,
             log_event=log_event,
+            order=order,
         )
 
 

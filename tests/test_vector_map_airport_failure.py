@@ -35,6 +35,7 @@ class AirportQueryFailureTests(unittest.TestCase):
         calls.include_patches.assert_called_once_with(vector_map, tile)
         calls.discover.assert_not_called()
         calls.vprint.assert_any_call(1, HELP.WARNING)
+        self.assertEqual(calls.order, ["warning", "patches"])
         calls.log_event.assert_called_once_with(
             "Airport OSM query failed",
             level="WARNING",

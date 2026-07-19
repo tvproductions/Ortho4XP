@@ -174,8 +174,8 @@ def include_airports(vector_map, tile):
         cached_suffix="airports",
     )
     if not airport_query_succeeded:
-        patches_area, _patches_list = include_patches(vector_map, tile)
         airport_mask, airport_area = INPUTS.report_airport_query_failure(tile)
+        patches_area, _patches_list = include_patches(vector_map, tile)
         return (airport_mask, airport_area, patches_area)
     dico_airports = {}
     APT_DISC.discover_airport_names(airport_layer, dico_airports)
