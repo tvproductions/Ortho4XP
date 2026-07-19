@@ -12,11 +12,11 @@ import O4_Airport_Geometry as APT_GEOM
 import O4_Build_Context as BC
 
 # from PIL import Image, ImageDraw, ImageFilter
-import O4_DEM_Utils as DEM
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_OSM_Utils as OSM
 import O4_UI_Utils as UI
+import O4_Vector_Map_Inputs as INPUTS
 import O4_Vector_Utils as VECT
 
 good_imagery_list = ()
@@ -30,10 +30,6 @@ def build_poly_file(tile, ctx=None):
         return 0
     ctx.is_working = True
     ctx.red_flag = False
-    # in case that was forgotten by the user
-    tile.iterate = 0
-    # update the lat/lon scaling factor in VECT
-    VECT.scalx = cos((tile.lat + 0.5) * pi / 180)
     # Let's go !
     UI.logprint("Step 1 for tile lat=", tile.lat, ", lon=", tile.lon, ": starting.")
     UI.vprint(
@@ -50,23 +46,14 @@ def build_poly_file(tile, ctx=None):
         os.makedirs(FNAMES.osm_dir(tile.lat, tile.lon))
     node_file = FNAMES.input_node_file(tile)
     poly_file = FNAMES.input_poly_file(tile)
-    vector_map = VECT.Vector_Map()
-    UI.vprint(1, "   Loading elevation data.")
-    tile.dem = DEM.DEM(
-        tile.lat,
-        tile.lon,
-        tile.custom_dem,
-        tile.fill_nodata or "to zero",
-        info_only=False,
-    )
+    vector_map = INPUTS.prepare(tile)
 
     if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
     # Airports
-    (apt_array, airport_area, patches_area) = include_airports(vector_map, tile)
-    treated_area = ops.unary_union([patches_area, airport_area])
+    apt_array, airport_area, patches_area = include_airports(vector_map, tile)
     UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
     if ctx.red_flag:
@@ -74,7 +61,9 @@ def build_poly_file(tile, ctx=None):
         return 0
 
     # Roads
-    include_roads(vector_map, tile, apt_array, treated_area)
+    include_roads(
+        vector_map, tile, apt_array, ops.unary_union([patches_area, airport_area])
+    )
     if tile.road_level:
         UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
@@ -185,23 +174,8 @@ def include_airports(vector_map, tile):
         cached_suffix="airports",
     )
     if not airport_query_succeeded:
-        warning = (
-            "WARNING: Airport OSM query failed; continuing vector construction "
-            "without airport data."
-        )
-        UI.vprint(1, warning)
-        UI.log_event(
-            "Airport OSM query failed",
-            level="WARNING",
-            context={
-                "lat": tile.lat,
-                "lon": tile.lon,
-                "action": "continue_without_airport_data",
-            },
-        )
         patches_area, _patches_list = include_patches(vector_map, tile)
-        airport_mask = numpy.zeros((1001, 1001), dtype=bool)
-        airport_area = geometry.Polygon()
+        airport_mask, airport_area = INPUTS.report_airport_query_failure(tile)
         return (airport_mask, airport_area, patches_area)
     dico_airports = {}
     APT_DISC.discover_airport_names(airport_layer, dico_airports)
