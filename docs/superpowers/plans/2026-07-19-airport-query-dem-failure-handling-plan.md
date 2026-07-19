@@ -451,11 +451,11 @@ git add TODO.md docs/superpowers/plans/2026-07-19-airport-query-dem-failure-hand
 git commit -m "docs: complete airport failure backlog item"
 ```
 
-- [ ] **Step 5: Update and close GitHub issue #38**
+- [x] **Step 5: Update and close GitHub issue #38**
 
 Post a comment summarizing the implementation, exact verification commands, observed test count, quality-gate result, and the two implementation/evidence commit SHAs. Then close issue #38 as completed.
 
-- [ ] **Step 6: Confirm final repository and issue state**
+- [x] **Step 6: Confirm final repository and issue state**
 
 Run:
 
