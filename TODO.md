@@ -1170,9 +1170,22 @@ Suggested labels: `imagery`, `quality`, `ai`
 
 ### TODO-041-1: Complete Airport-Query and DEM Failure Handling
 
-Status: Pending
+Status: Done
 
 GitHub Issue: #38
+
+Completion note: vector-map input preparation now owns required DEM creation
+before airport and road processing. A failed airport OSM query emits an
+immediate human-readable warning and structured event, returns a boolean empty
+airport mask plus an empty Shapely polygon, preserves independent custom-patch
+processing, and continues through the non-fatal vector-build path. Successful
+airport builds retain DEM smoothing before patch encoding, and airport/patch
+areas remain separate until the builder forms the road-exclusion union.
+
+Verification note: three deterministic airport-failure and DEM-ordering tests
+passed; full `unittest` discovery passed with 427 tests; changed-file Ruff,
+format, and ty checks passed; and the full repository quality gate passed,
+including complexity and native LLVM/CMake verification.
 
 Implement a focused reliability fix for airport-query failures without allowing
 downstream road processing to access an uninitialized DEM.

@@ -4,9 +4,16 @@
 
 **Goal:** Keep vector-map construction safe and complete when the optional airport OSM query fails, without losing custom patches or exposing downstream stages to an uninitialized DEM.
 
-**Architecture:** `build_poly_file()` will own the required DEM initialization. `include_airports()` will keep successful patch processing after airport smoothing, execute patches on the query-failure path, and return airport and patch areas separately so the builder can form the road-exclusion union without conflating typed-empty airport data with valid patches.
+**Architecture:** The vector-input preparation boundary owns required DEM initialization before `build_poly_file()` invokes airport or road processing. `include_airports()` keeps successful patch processing after airport smoothing, executes patches on the query-failure path, and returns airport and patch areas separately so the builder can form the road-exclusion union without conflating typed-empty airport data with valid patches.
 
 **Tech Stack:** Python 3.13, standard-library `unittest` and `unittest.mock`, NumPy, Shapely, `uv`, Ruff, ty.
+
+**Execution note:** Completed on 2026-07-19. Complexity feedback led to the
+small `O4_Vector_Map_Inputs` preparation boundary and split deterministic test
+helpers. The implementation also replaced deprecated Shapely `resolution`
+keywords with `quad_segs` after the real empty geometry exposed the warning.
+The final review added an ordering assertion so failure reporting is guaranteed
+to precede custom-patch processing.
 
 ## Global Constraints
 
@@ -23,14 +30,18 @@
 
 **Files:**
 - Modify: `src/O4_Vector_Map.py:26-230`
+- Modify: `src/O4_Vector_Utils.py`
+- Create: `src/O4_Vector_Map_Inputs.py`
+- Create: `tests/_vector_map_airport_helpers.py`
 - Create: `tests/test_vector_map_airport_failure.py`
+- Create: `tests/test_vector_map_dem_ordering.py`
 
 **Interfaces:**
 - Consumes: `DEM.DEM(lat, lon, custom_dem, fill_nodata, info_only=False)`, `include_patches(vector_map, tile) -> tuple[BaseGeometry, list[str]]`, and the existing airport discovery/encoding modules.
 - Produces: `include_airports(vector_map, tile) -> tuple[numpy.ndarray, BaseGeometry, BaseGeometry]`, where the results are airport mask, airport area, and patch area respectively.
-- Produces: `build_poly_file()` initializes `tile.dem`, unions airport and patch areas, and passes the combined area plus the airport mask to `include_roads()`.
+- Produces: `O4_Vector_Map_Inputs.prepare()` initializes `tile.dem`; `build_poly_file()` unions airport and patch areas and passes the combined area plus the airport mask to `include_roads()`.
 
-- [ ] **Step 1: Write the failing airport-query test**
+- [x] **Step 1: Write the failing airport-query test**
 
 Create `tests/test_vector_map_airport_failure.py` with a test that patches only the network query, logging surfaces, patch boundary, and airport-discovery boundary:
 
@@ -109,7 +120,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run the focused test and verify RED**
+- [x] **Step 2: Run the focused test and verify RED**
 
 Run:
 
@@ -119,7 +130,7 @@ uv run python -m unittest tests.test_vector_map_airport_failure.AirportQueryFail
 
 Expected: FAIL because the current failure path returns two integer sentinels, does not process patches, and emits no warning event.
 
-- [ ] **Step 3: Implement the minimal failed-query contract**
+- [x] **Step 3: Implement the minimal failed-query contract**
 
 In `include_airports()`, store the query result, emit the exact warning/event when false, skip discovery/smoothing, call `include_patches()` once, and return:
 
@@ -143,13 +154,13 @@ UI.log_event(
 )
 ```
 
-- [ ] **Step 4: Re-run the focused test and verify GREEN**
+- [x] **Step 4: Re-run the focused test and verify GREEN**
 
 Run the command from Step 2.
 
 Expected: PASS with the real NumPy mask, Shapely polygon, and geometry operations.
 
-- [ ] **Step 5: Write the failing successful-path regression test**
+- [x] **Step 5: Write the failing successful-path regression test**
 
 Add this second test to `AirportQueryFailureTests`:
 
@@ -222,7 +233,7 @@ Add this second test to `AirportQueryFailureTests`:
         self.assertTrue(flatten_helipads.call_args.args[-1].equals(expected_union))
 ```
 
-- [ ] **Step 6: Run the successful-path test and verify RED**
+- [x] **Step 6: Run the successful-path test and verify RED**
 
 Run:
 
@@ -232,7 +243,7 @@ uv run python -m unittest tests.test_vector_map_airport_failure.AirportQueryFail
 
 Expected: FAIL because `include_airports()` still constructs the DEM itself and returns a two-value combined-area tuple.
 
-- [ ] **Step 7: Implement the successful three-value contract**
+- [x] **Step 7: Implement the successful three-value contract**
 
 Remove `DEM.DEM(...)` from `include_airports()`, retain `smooth_raster_over_airports()` before `include_patches()`, and return:
 
@@ -242,7 +253,7 @@ return (apt_array, runway_taxiway_apron_area, patches_area)
 
 Continue using `ops.unary_union([patches_area, runway_taxiway_apron_area])` only for the existing `flatten_helipads()` exclusion input.
 
-- [ ] **Step 8: Re-run both direct airport tests and verify GREEN**
+- [x] **Step 8: Re-run both direct airport tests and verify GREEN**
 
 Run:
 
@@ -252,7 +263,7 @@ uv run python -m unittest tests.test_vector_map_airport_failure.AirportQueryFail
 
 Expected: both tests PASS.
 
-- [ ] **Step 9: Write the failing builder-order integration test**
+- [x] **Step 9: Write the failing builder-order integration test**
 
 Add this class to the test module:
 
@@ -332,7 +343,7 @@ class VectorMapDemOrderingTests(unittest.TestCase):
         )
 ```
 
-- [ ] **Step 10: Run the builder-order test and verify RED**
+- [x] **Step 10: Run the builder-order test and verify RED**
 
 Run:
 
@@ -342,7 +353,7 @@ uv run python -m unittest tests.test_vector_map_airport_failure.VectorMapDemOrde
 
 Expected: FAIL because the existing builder calls airports before DEM initialization and expects only two return values.
 
-- [ ] **Step 11: Move required DEM construction into the builder**
+- [x] **Step 11: Move required DEM construction into the builder**
 
 Immediately after `vector_map = VECT.Vector_Map()`, add:
 
@@ -365,7 +376,7 @@ treated_area = ops.unary_union([patches_area, airport_area])
 include_roads(vector_map, tile, apt_array, treated_area)
 ```
 
-- [ ] **Step 12: Run the focused module and verify GREEN**
+- [x] **Step 12: Run the focused module and verify GREEN**
 
 Run:
 
@@ -375,7 +386,7 @@ uv run python -m unittest tests.test_vector_map_airport_failure -v
 
 Expected: all tests PASS with no warnings or errors.
 
-- [ ] **Step 13: Run changed-file checks**
+- [x] **Step 13: Run changed-file checks**
 
 Run:
 
@@ -387,7 +398,7 @@ uv run ty check src/O4_Vector_Map.py tests/test_vector_map_airport_failure.py
 
 Expected: all commands exit 0.
 
-- [ ] **Step 14: Commit the tested implementation**
+- [x] **Step 14: Commit the tested implementation**
 
 ```powershell
 git add src/O4_Vector_Map.py tests/test_vector_map_airport_failure.py docs/superpowers/specs/2026-07-19-airport-query-dem-failure-handling-design.md
@@ -406,7 +417,7 @@ git commit -m "fix: continue vector build after airport query failure"
 - Consumes: the verified behavior and test counts from Task 1.
 - Produces: completed `TODO-041-1` evidence and a closed GitHub issue #38.
 
-- [ ] **Step 1: Run full repository verification**
+- [x] **Step 1: Run full repository verification**
 
 Run:
 
@@ -417,11 +428,11 @@ uv run python .codex/skills/quality-check/scripts/quality_check.py
 
 Expected: the complete unit suite and every quality stage pass, including Ruff, formatting, ty, whitespace, complexity, and native LLVM/CMake verification.
 
-- [ ] **Step 2: Record observed evidence in `TODO.md`**
+- [x] **Step 2: Record observed evidence in `TODO.md`**
 
 Change `TODO-041-1` to `Status: Done` and add a completion note naming the separated DEM ownership, typed empty airport values, preserved patches, and non-fatal continuation. Add a verification note containing only the observed commands, test count, and quality-gate result from Step 1.
 
-- [ ] **Step 3: Mark this plan complete and run documentation checks**
+- [x] **Step 3: Mark this plan complete and run documentation checks**
 
 Check every plan box that was actually completed, then run:
 
@@ -433,7 +444,7 @@ uv run ruff format --check src/O4_Vector_Map.py tests/test_vector_map_airport_fa
 
 Expected: all commands exit 0.
 
-- [ ] **Step 4: Commit completion evidence**
+- [x] **Step 4: Commit completion evidence**
 
 ```powershell
 git add TODO.md docs/superpowers/plans/2026-07-19-airport-query-dem-failure-handling-plan.md
