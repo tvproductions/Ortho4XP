@@ -200,6 +200,11 @@ state-transition semantics so local and scheduled behavior cannot drift.
 
 ## Backlog Integration
 
+The upstream-watch implementation is sequenced as `TODO-041-3` and tracked by
+GitHub Issue #40. It follows the two focused reliability fixes identified by the
+same audit and precedes provider, DEM, imagery-workbench, and speculative XP12
+feature work.
+
 The implementation rewrites `TODO-044` and `TODO-045` so their acceptance
 criteria stand independently of sister-project files that no longer exist at
 the author's current head. Historical source commits remain linked as research

@@ -1168,6 +1168,176 @@ Acceptance criteria:
 
 Suggested labels: `imagery`, `quality`, `ai`
 
+### TODO-041-1: Complete Airport-Query and DEM Failure Handling
+
+Status: Pending
+
+GitHub Issue: #38
+
+Implement a focused reliability fix for airport-query failures without allowing
+downstream road processing to access an uninitialized DEM.
+
+Acceptance criteria:
+
+- Airport-query failure emits a useful warning and returns typed empty airport
+  geometry and mask values.
+- DEM initialization is independent of successful airport retrieval and occurs
+  before any road processing that consumes `tile.dem`.
+- Failure paths do not return the ambiguous tuple `(0, 0)`.
+- Vector-map construction continues safely where the failed airport query is
+  non-fatal.
+- Deterministic `unittest` coverage simulates the query failure without network
+  access and verifies downstream behavior.
+- The change remains strictly X-Plane 12 compatible.
+
+Suggested labels: `bug`, `quality`, `tests`
+
+### TODO-041-2: Harden XP12 Coastal Masks and Texture Lifecycle
+
+Status: Pending
+
+GitHub Issue: #39
+
+Apply the agreed narrow X-Plane 12 coastal reliability fixes without restoring
+XP11+bathy behavior or replacing the local sea-texture architecture.
+
+Acceptance criteria:
+
+- Missing coastal masks fall back safely before `BORDER_TEX` processing.
+- Ocean triangles never receive land decals.
+- Sand-mask width and shape are validated before use.
+- Imprinted DDS mask files are removed only after confirmed DDS conversion
+  success.
+- Masks referenced by `BORDER_TEX` are never removed by conversion cleanup.
+- Explicit provider extents take precedence over inferred coastal fill.
+- Patch and DDS naming uses the resolved `TextureSource` provider rather than a
+  default provider.
+- Deterministic `unittest` coverage exercises success, failure, missing-mask,
+  ocean, extent-precedence, and provider-naming cases.
+- XP11+bathy behavior is not reintroduced.
+
+Suggested labels: `bug`, `xp12max`, `imagery`, `tests`
+
+### TODO-041-3: Add Sister-Project Upstream-Watch Chore
+
+Status: Pending
+
+GitHub Issue: #40
+
+Add the approved hybrid process for detecting and reviewing progress in
+`Ypsos/ORTHO4XP_V3`. The `tvproductions/ORTHO4XP_V3` repository is a passive
+synchronization fork, not an independent development line. Design:
+`docs/superpowers/specs/2026-07-19-sister-project-upstream-watch-design.md`.
+
+Acceptance criteria:
+
+- A weekly and manually dispatched GitHub workflow detects unreviewed author
+  commits and manages one tracking issue.
+- A cross-platform local Python command produces explicit-SHA audit reports and
+  validates audit coverage.
+- Every changed path receives a disposition or `reviewed-no-action` record
+  before the author baseline advances.
+- A committed state file records the accepted author baseline and audit digest.
+- A durable Markdown ledger records findings, decisions, rationale, XP12
+  compatibility, evidence, and linked work items.
+- Passive-fork lag is informational and does not block baseline advancement;
+  unexpected fork commits or divergence are reported as anomalies.
+- Upstream code is parsed and statically analyzed but never executed.
+- Deterministic `unittest` coverage uses temporary Git repositories and mocked
+  remote responses without network access.
+- Stale `TODO-044` and `TODO-045` source references are replaced with
+  independently testable requirements.
+
+Suggested labels: `ci`, `quality`, `documentation`, `architecture`
+
+### TODO-041-4: Audit Sister-Project Provider Definitions
+
+Status: Pending
+
+GitHub Issue: #41
+
+Audit provider changes from `Ypsos/ORTHO4XP_V3` before importing any regional
+or global definitions.
+
+Acceptance criteria:
+
+- Global and French regional providers are inventoried and assessed separately.
+- Duplicate or conflicting settings, inactive URLs, embedded credentials,
+  obsolete service versions, fixed historical imagery identifiers, and
+  insecure HTTP endpoints are identified.
+- Licensing, attribution, geographic coverage, credential requirements, and
+  current service behavior are verified before adoption.
+- No hard-coded access token or personal credential is committed.
+- Accepted definitions use the repository schema-backed JSON provider format.
+- Credential-bound or unverifiable providers remain disabled and retain a
+  documented rejection rationale.
+- Deterministic parser and schema tests require no live provider or network
+  access.
+- Audit evidence links every upstream provider path to an adoption or rejection
+  decision.
+
+Suggested labels: `providers`, `quality`, `schema`
+
+### TODO-041-5: Build a Streamed GDAL DEM Preparation Workbench
+
+Status: Pending
+
+GitHub Issue: #42
+
+Reimplement the useful DEM preparation workflow from the sister project through
+the existing GDAL dependency and project architecture rather than importing its
+Rasterio GUI module.
+
+Acceptance criteria:
+
+- Discovers DEM sources in a country-organized elevation store.
+- Requires explicit CRS input when source metadata is missing; no
+  France-specific fallback CRS is assumed.
+- Reprojects sources to EPSG:4326 and supports controlled resolution reduction.
+- Assembles overlapping tile coverage with streamed or windowed processing
+  rather than a whole-mosaic memory load.
+- Produces `custom_dem`-compatible output and exposes a clear optional QGIS
+  handoff.
+- Separates reusable processing core, configuration, and GUI integration.
+- Reports missing coverage, incompatible sources, and GDAL failures explicitly.
+- Deterministic `unittest` coverage uses small fixtures or mocked GDAL
+  boundaries and requires no network, X-Plane installation, or GDAL
+  command-line tools.
+- Windows 11, current Apple Silicon macOS, and Ubuntu behavior is accounted for.
+
+Suggested labels: `gis`, `architecture`, `enhancement`, `performance`
+
+### TODO-041-6: Build an Imagery QA and Correction Workbench
+
+Status: Pending
+
+GitHub Issue: #43
+
+Build a cache-aware imagery QA workflow around the local provider scoring and
+`TextureSource` architecture rather than importing the sister project's GUI
+module.
+
+Acceptance criteria:
+
+- Builds DDS mosaics and full-size browsing views without recursively
+  rescanning the complete imagery tree for each operation.
+- Uses indexed imagery lookup, provider score sorting and highlighting, and
+  background thumbnail generation.
+- Copies source JPEGs into the patch workflow and launches configured editors
+  through centralized subprocess handling.
+- Supports targeted delete and redownload with explicit imagery and smart-cache
+  invalidation so stale cache entries cannot skip rebuilds.
+- Records structured manual-review metadata including status, reason, provider,
+  and coordinates.
+- Researches sea-aware provider-nodata repair with deterministic and real-image
+  fixtures; it must not alter land or invent a uniform ocean color.
+- Omits JOSM integration until a concrete correction workflow is specified.
+- Keeps core correction operations separate from GUI state.
+- Deterministic `unittest` coverage verifies lookup, invalidation, review state,
+  provider identity, and sea-only repair boundaries.
+
+Suggested labels: `imagery`, `quality`, `enhancement`, `color-pipeline`
+
 ### TODO-042: XP12 Materials
 
 Status: Pending
