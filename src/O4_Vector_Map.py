@@ -51,13 +51,22 @@ def build_poly_file(tile, ctx=None):
     node_file = FNAMES.input_node_file(tile)
     poly_file = FNAMES.input_poly_file(tile)
     vector_map = VECT.Vector_Map()
+    UI.vprint(1, "   Loading elevation data.")
+    tile.dem = DEM.DEM(
+        tile.lat,
+        tile.lon,
+        tile.custom_dem,
+        tile.fill_nodata or "to zero",
+        info_only=False,
+    )
 
     if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
 
     # Airports
-    (apt_array, apt_area) = include_airports(vector_map, tile)
+    (apt_array, airport_area, patches_area) = include_airports(vector_map, tile)
+    treated_area = ops.unary_union([patches_area, airport_area])
     UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
     if ctx.red_flag:
@@ -65,7 +74,7 @@ def build_poly_file(tile, ctx=None):
         return 0
 
     # Roads
-    include_roads(vector_map, tile, apt_array, apt_area)
+    include_roads(vector_map, tile, apt_array, treated_area)
     if tile.road_level:
         UI.vprint(1, "   Number of edges at this point:", len(vector_map.dico_edges))
 
@@ -167,15 +176,33 @@ def include_airports(vector_map, tile):
     airport_layer = OSM.OSM_layer()
     queries = [('node["aeroway"]', 'way["aeroway"]', 'rel["aeroway"]')]
     tags_of_interest = ["all"]
-    if not OSM.OSM_queries_to_OSM_layer(
+    airport_query_succeeded = OSM.OSM_queries_to_OSM_layer(
         queries,
         airport_layer,
         tile.lat,
         tile.lon,
         tags_of_interest,
         cached_suffix="airports",
-    ):
-        return (0, 0)
+    )
+    if not airport_query_succeeded:
+        warning = (
+            "WARNING: Airport OSM query failed; continuing vector construction "
+            "without airport data."
+        )
+        UI.vprint(1, warning)
+        UI.log_event(
+            "Airport OSM query failed",
+            level="WARNING",
+            context={
+                "lat": tile.lat,
+                "lon": tile.lon,
+                "action": "continue_without_airport_data",
+            },
+        )
+        patches_area, _patches_list = include_patches(vector_map, tile)
+        airport_mask = numpy.zeros((1001, 1001), dtype=bool)
+        airport_area = geometry.Polygon()
+        return (airport_mask, airport_area, patches_area)
     dico_airports = {}
     APT_DISC.discover_airport_names(airport_layer, dico_airports)
     APT_DISC.attach_surfaces_to_airports(airport_layer, dico_airports)
@@ -186,14 +213,7 @@ def include_airports(vector_map, tile):
     APT_GEOM.build_taxiway_areas(tile, airport_layer, dico_airports)
     APT_GEOM.update_airport_boundaries(tile, dico_airports)
     APT_DISC.list_airports_and_runways(dico_airports)
-    UI.vprint(1, "   Loading elevation data and smoothing it over airports.")
-    tile.dem = DEM.DEM(
-        tile.lat,
-        tile.lon,
-        tile.custom_dem,
-        tile.fill_nodata or "to zero",
-        info_only=False,
-    )
+    UI.vprint(1, "   Smoothing elevation data over airports.")
     APT_GEOM.smooth_raster_over_airports(tile, dico_airports)
     (patches_area, patches_list) = include_patches(vector_map, tile)
     runway_taxiway_apron_area = APT_ENC.encode_runways_taxiways_and_aprons(
@@ -204,7 +224,7 @@ def include_airports(vector_map, tile):
     APT_ENC.flatten_helipads(airport_layer, vector_map, tile, treated_area)
     # APT.encode_aprons(tile,dico_airports,vector_map)
     apt_array = APT_GEOM.build_airport_array(tile, dico_airports)
-    return (apt_array, treated_area)
+    return (apt_array, runway_taxiway_apron_area, patches_area)
 
 
 ################################################################################
