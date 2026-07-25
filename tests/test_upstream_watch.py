@@ -8,6 +8,11 @@ import unittest
 from pathlib import Path
 from typing import Any, cast
 
+from scripts.upstream_watch_core.audit import (
+    build_audit_report,
+    inspect_python_blob,
+    write_report,
+)
 from scripts.upstream_watch_core.git_repo import (
     GitCommandError,
     GitRunner,
@@ -21,7 +26,9 @@ from scripts.upstream_watch_core.models import (
     ForkState,
     StateValidationError,
     WatchExit,
+    WatchState,
     canonical_json_bytes,
+    load_report,
     load_state,
 )
 from tests._path import ROOT_DIR  # noqa: F401
@@ -219,3 +226,126 @@ class GitRepositoryTests(unittest.TestCase):
                 ["show", "https://secret-token@github.com/example/repo.git"]
             )
         self.assertNotIn("secret-token", str(context.exception))
+
+
+class AuditReportTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary_directory.cleanup)
+        self.repo = Path(self.temporary_directory.name, "repo")
+        self.repo.mkdir()
+        self._git("init", "-q")
+        self._git("config", "user.name", "Upstream Author")
+        self._git("config", "user.email", "author@example.invalid")
+        self._write("README.md", "base\n")
+        self._git("add", ".")
+        self._git("commit", "-q", "-m", "base")
+        self.base = self._git("rev-parse", "HEAD")
+
+        self._write(
+            "src/must_not_execute.py",
+            'raise RuntimeError("must not execute")\nXP_MODE = "XP11 + bathy"\n',
+        )
+        self._write("src/invalid.py", "def broken(:\n")
+        self._write("Providers/Global/Test.lay", "request_type=xyz\n")
+        self._write("requirements-dev.txt", "ruff\n")
+        self._git("add", ".")
+        self._git("commit", "-q", "-m", "candidate")
+        self.head = self._git("rev-parse", "HEAD")
+        self.runner = GitRunner(self.repo)
+        self.state = WatchState.from_dict(
+            {
+                "schema_version": 1,
+                "author": {
+                    "repository": "Ypsos/ORTHO4XP_V3",
+                    "branch": "ORTHO4XP_V3",
+                },
+                "passive_fork": {
+                    "repository": "tvproductions/ORTHO4XP_V3",
+                    "branch": "ORTHO4XP_V3",
+                },
+                "baseline": {
+                    "reviewed_sha": self.base,
+                    "audit_id": "bootstrap-existing-baseline",
+                    "audit_date": "2026-06-16",
+                    "manifest_sha256": EMPTY_SHA256,
+                    "path_count": 0,
+                },
+            }
+        )
+
+    def _git(self, *args: str) -> str:
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "GIT_AUTHOR_DATE": "2026-07-19T12:00:00Z",
+                "GIT_COMMITTER_DATE": "2026-07-19T12:00:00Z",
+            }
+        )
+        result = subprocess.run(  # noqa: S603 - local test Git only.
+            ["git", *args],  # noqa: S607 - PATH-resolved test dependency.
+            cwd=self.repo,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=environment,
+        )
+        return result.stdout.strip()
+
+    def _write(self, relative: str, content: str) -> None:
+        path = Path(self.repo, relative)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_builds_deterministic_report_without_executing_source(self) -> None:
+        first = build_audit_report(
+            self.state,
+            self.base,
+            self.head,
+            "2026-07-19T12:00:00Z",
+            self.runner,
+            ruff_executable=None,
+        )
+        second = build_audit_report(
+            self.state,
+            self.base,
+            self.head,
+            "2026-07-20T12:00:00Z",
+            self.runner,
+            ruff_executable=None,
+        )
+        self.assertEqual(first.manifest_sha256(), second.manifest_sha256())
+        self.assertEqual(first.audit_id, f"ypsos-{self.base[:12]}-{self.head[:12]}")
+        self.assertEqual(
+            [change.path for change in first.changes],
+            sorted(change.path for change in first.changes),
+        )
+        self.assertEqual(first.provider_changes, ("Providers/Global/Test.lay",))
+        self.assertEqual(first.dependency_changes, ("requirements-dev.txt",))
+        self.assertIn("xp11-bathy", first.compatibility_signals)
+        by_path = {inspection.path: inspection for inspection in first.inspections}
+        self.assertTrue(by_path["src/must_not_execute.py"].syntax_ok)
+        self.assertFalse(by_path["src/invalid.py"].syntax_ok)
+        self.assertIn("invalid syntax", by_path["src/invalid.py"].syntax_error or "")
+        self.assertEqual(len(first.commits), 1)
+        self.assertEqual(first.commits[0].subject, "candidate")
+
+    def test_python_inspection_records_syntax_error_as_data(self) -> None:
+        result = inspect_python_blob("bad.py", b"def broken(:\n")
+        self.assertFalse(result.syntax_ok)
+        self.assertIn("invalid syntax", result.syntax_error or "")
+
+    def test_write_report_is_atomic_and_round_trips(self) -> None:
+        report = build_audit_report(
+            self.state,
+            self.base,
+            self.head,
+            "2026-07-19T12:00:00Z",
+            self.runner,
+            ruff_executable=None,
+        )
+        output = Path(self.temporary_directory.name, "reports", "audit.json")
+        write_report(output, report)
+        self.assertEqual(load_report(output), report)
+        self.assertTrue(output.read_bytes().endswith(b"\n"))
