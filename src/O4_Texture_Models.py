@@ -1,8 +1,6 @@
 from dataclasses import dataclass, replace
 from typing import Literal
 
-from O4_Texture_Mask_Lifecycle import TextureCleanupPlan
-
 # Texture model policy:
 # - Data classes stay backend-neutral so CPU and GPU encoders share contracts.
 # - Conversion results preserve legacy truthy behavior at the facade boundary.
@@ -10,8 +8,18 @@ from O4_Texture_Mask_Lifecycle import TextureCleanupPlan
 # - Resolution metadata records both terrain-requested and provider-resolved
 #   identities so finalization can validate exact DDS and terrain artifacts.
 # - Cleanup ownership remains an explicit immutable conversion input.
+# - Cleanup plans contain paths only; filesystem/PIL lifecycle code consumes
+#   them without becoming a dependency of this backend-neutral model module.
 #
 TextureCodec = Literal["bc1", "bc3"]
+
+
+@dataclass(frozen=True)
+class TextureCleanupPlan:
+    """Paths removed after every attempt and only after accepted success."""
+
+    always_paths: tuple[str, ...] = ()
+    success_paths: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

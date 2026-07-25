@@ -32,7 +32,7 @@ def coastal_artifact(tile, texture_attributes, tri_type, artifacts):
     """Return one cached coastal decision together with its inferred mask."""
     terrain_attributes = (texture_attributes, tri_type)
     if terrain_attributes in artifacts:
-        return artifacts[terrain_attributes]
+        return artifacts[terrain_attributes], None
     explicit_extent = provider_uses_explicit_extent(texture_attributes[3])
     mask_im = load_inferred_coastal_mask(
         tile,
@@ -45,7 +45,7 @@ def coastal_artifact(tile, texture_attributes, tri_type, artifacts):
         mask_file_name=FNAMES.mask_file(*texture_attributes) if mask_im else None,
         explicit_provider_extent=explicit_extent,
     )
-    artifacts[terrain_attributes] = (decision, mask_im)
+    artifacts[terrain_attributes] = decision
     if decision.creates_custom_terrain:
         UI.vprint(2, "      Use of an alpha mask.")
     return decision, mask_im

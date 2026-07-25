@@ -49,6 +49,20 @@ def mask_name_for_texture(tile, til_x_left, til_y_top, zl, *args):
 def needs_mask(tile, til_x_left, til_y_top, zl, *args):
     if int(zl) < tile.mask_zl:
         return False
+    mask_file, bounds = _mask_crop_request(tile, til_x_left, til_y_top, zl)
+    if not os.path.isfile(mask_file):
+        return False
+    small_img = _cropped_mask_image(mask_file, bounds)
+    small_array = numpy.array(small_img, dtype=numpy.uint8)
+    if small_array.max() <= 30:
+        small_img.close()
+        return False
+    else:
+        return small_img
+
+
+def _mask_crop_request(tile, til_x_left, til_y_top, zl):
+    """Return the legacy mask path and crop geometry for one texture."""
     factor = 2 ** (zl - tile.mask_zl)
     m_til_x = (int(til_x_left / factor) // 16) * 16
     m_til_y = (int(til_y_top / factor) // 16) * 16
@@ -57,17 +71,18 @@ def needs_mask(tile, til_x_left, til_y_top, zl, *args):
     mask_file = os.path.join(
         FNAMES.mask_dir(tile.lat, tile.lon), FNAMES.legacy_mask(m_til_x, m_til_y)
     )
-    if not os.path.isfile(mask_file):
-        return False
-    big_img = Image.open(mask_file)
     x0 = int(rx * 4096 / factor)
     y0 = int(ry * 4096 / factor)
-    small_img = big_img.crop((x0, y0, x0 + 4096 // factor, y0 + 4096 // factor))
-    small_array = numpy.array(small_img, dtype=numpy.uint8)
-    if small_array.max() <= 30:
-        return False
-    else:
-        return small_img
+    return mask_file, (x0, y0, x0 + 4096 // factor, y0 + 4096 // factor)
+
+
+def _cropped_mask_image(mask_file, bounds):
+    """Return a detached crop while closing the source mask immediately."""
+    source_image = Image.open(mask_file)
+    try:
+        return source_image.crop(bounds)
+    finally:
+        source_image.close()
 
 
 ################################################################################

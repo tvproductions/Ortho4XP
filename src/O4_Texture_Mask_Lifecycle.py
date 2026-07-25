@@ -12,6 +12,7 @@ from PIL import Image
 
 import O4_File_Names as FNAMES
 import O4_UI_Utils as UI
+from O4_Texture_Models import TextureCleanupPlan
 
 
 @dataclass(frozen=True)
@@ -20,14 +21,6 @@ class DdsMaskInput:
 
     image: Image.Image
     path: str
-
-
-@dataclass(frozen=True)
-class TextureCleanupPlan:
-    """Paths removed after every attempt and only after accepted success."""
-
-    always_paths: tuple[str, ...] = ()
-    success_paths: tuple[str, ...] = ()
 
 
 def load_dds_mask(tile, texture_attrs) -> DdsMaskInput | None:

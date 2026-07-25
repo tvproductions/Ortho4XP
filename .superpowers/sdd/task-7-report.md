@@ -95,3 +95,67 @@ quality remediation preserves the approved behavior and extracts only
 responsibilities implicated by reproduced metrics. No new failure class or
 untriggered cleanup was introduced. Issue #39 remains open and uncommented
 until independent Task 7 and whole-branch review completes.
+
+## Independent review remediation
+
+The independent Task 7 review returned three findings. Changes below are
+limited to those reproduced failure classes.
+
+| Finding | Root cause | Correction |
+| --- | --- | --- |
+| Critical: DSF raster retention | `coastal_artifacts` stored `(CoastalMaskDecision, PIL.Image)` and returned the retained image on cache hits; `needs_mask` did not explicitly close its opened source image. | Cache only the immutable decision; return the inferred crop only on the cache miss and return `None` on hits without reloading. Explicitly close the source image after cropping and close rejected crops. |
+| Important: model dependency inversion | `O4_Texture_Models` imported `TextureCleanupPlan` from `O4_Texture_Mask_Lifecycle`, which imports filesystem, PIL, filename, and UI backends. | Define `TextureCleanupPlan` in the backend-neutral model module and import it from the lifecycle consumer. Validate an isolated direct model import while guarding against lifecycle-backend imports. |
+| Minor: terrain file modes | Transaction staging wrote fresh candidate and rollback files with process-default modes despite the documented original-mode contract. | Apply `shutil.copymode` from the original terrain to both candidate and backup during preparation; any mode-copy `OSError` follows the existing preparation cleanup/error path. |
+
+### RED/GREEN evidence
+
+| Cycle | RED | GREEN |
+| --- | --- | --- |
+| Decision-only coastal cache | `test_cache_retains_only_decision_and_returns_mask_once` failed because the cache value was `(decision, PIL.Image)`, not `CoastalMaskDecision`. | The same test passed; the second lookup returned the same decision and `None` without invoking the loader. |
+| Inferred-mask source ownership | `test_inferred_mask_source_is_closed_after_crop` failed because `close()` had 0 calls. | Both DSF ownership regressions passed after explicit source/rejected-crop closure. |
+| Backend-neutral model import | `test_direct_import_does_not_load_mask_lifecycle_backend` failed because direct model execution attempted to import `O4_Texture_Mask_Lifecycle`. | Isolated direct model execution plus all five mask-lifecycle tests passed (6 tests). |
+| Terrain mode propagation | `test_staged_candidate_and_backup_preserve_original_mode` failed because `copymode` had no calls. | The test passed with exact candidate/backup calls and matching portable permission bits. |
+| Mode-copy preparation cleanup | With the mode-copy calls mutation-reverted, `test_mode_copy_failure_removes_staged_files` failed because no `TextureFinalizationError` was raised. | With the fix restored, both mode tests passed; the injected `OSError` retained original terrain bytes and left no staging artifacts. |
+
+Focused post-fix checkpoint:
+
+- `uv run python -m unittest tests.test_dsf_coastal_artifacts
+  tests.test_texture_artifact_finalizer tests.test_texture_models
+  tests.test_texture_mask_lifecycle -v`
+- Result: 39 tests passed.
+
+### Review-fix quality traceability
+
+The full complexity gate exposed only regressions attributable to the review
+fixes. Each correction stayed within that reproduced failure class:
+
+| Reproduced condition | Correction |
+| --- | --- |
+| `needs_mask` CC 5 versus baseline 4, nesting 4 versus baseline 3, and nloc 26 versus baseline 22 | Extract `_cropped_mask_image` for owned source-image handling, then `_mask_crop_request` for the pure crop geometry. |
+| `O4_Texture_Models` module MI 64.3877 versus baseline 64.4917 | Document the backend-neutral cleanup-plan ownership contract. |
+| `test_cache_retains_only_decision_and_returns_mask_once` nloc 42 | Extract the repeated coastal-artifact lookup setup. |
+| `tests/test_texture_artifact_finalizer.py` module MI 47.0315 | Move the transaction-specific mode regressions into `tests/test_terrain_artifact_transaction.py`. |
+| Ruff S603 on the first subprocess-based model-boundary test | Replace the subprocess mechanism with isolated `importlib` execution and a guarded import boundary. |
+
+The first full complexity rerun after the review fix exited `1` with the
+`needs_mask` CC/nesting/nloc findings, the model MI warning, the cache-test
+nloc block, and the finalizer-test MI block. After the exact-class corrections,
+the second rerun exposed only the `needs_mask` nloc warning. The final helper
+extraction removed that last regression, and the final complexity rerun exited
+`0` with `Complexity baseline check passed`.
+
+### Review-fix final verification
+
+| Command | Result |
+| --- | --- |
+| Exact 15-module Task 7 command from `task-7-brief.md` | 111 tests passed. |
+| Focused DSF/finalizer/transaction/model/lifecycle regressions | 39 tests passed. |
+| Changed-file `ruff format`; repository `ruff check`; changed-file and `tests` ty | Passed; 9 files unchanged by formatter. |
+| `uv run python -m unittest discover -s tests` | 503 tests passed. |
+| `uv run python .codex/skills/quality-check/scripts/quality_check.py --complexity-only --scope all` | Exit 0; `Complexity baseline check passed`. |
+| `uv run python .codex/skills/repo-hygiene/scripts/hygiene.py --full` | Exit 0; 503 tests, Ruff, ty, format, complexity, package build, CMake/Clang-Tidy configuration, and native build passed. |
+| `uv run python .codex/skills/quality-check/scripts/quality_check.py` | Exit 0; unittest, Ruff, ty, format, whitespace, code quality, complexity, Clang-Tidy, CMake, and native build passed. |
+
+The full quality run reported 19 nonblocking legacy/size warnings and 0
+blocks. No review-fix verification stage was skipped. GitHub Issue #39 remains
+open and uncommented for whole-branch review.

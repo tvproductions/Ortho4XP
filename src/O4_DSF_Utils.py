@@ -594,7 +594,7 @@ def build_dsf(tile, download_queue):
 
         # Do we need to build new terrain file(s) ?
         if terrain_attributes in dico_terrains:
-            coastal_decision, _mask_im = coastal_artifacts[terrain_attributes]
+            coastal_decision = coastal_artifacts[terrain_attributes]
             terrain_idx = dico_terrains[terrain_attributes]  # ty:ignore[invalid-argument-type]
             is_overlay = coastal_decision.is_overlay
         else:

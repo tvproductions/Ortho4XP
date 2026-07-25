@@ -8,6 +8,7 @@ exact recoverable backup and reports its path.
 
 import contextlib
 import os
+import shutil
 
 from O4_Texture_Finalization_Models import TextureFinalizationError
 
@@ -27,7 +28,9 @@ def _stage_terrain_files(updated_files):
             backup = terrain_file.with_name(terrain_file.name + ".finalizing-backup")
             staged.append((terrain_file, candidate, backup))
             candidate.write_bytes(updated)
+            shutil.copymode(terrain_file, candidate)
             backup.write_bytes(original)
+            shutil.copymode(terrain_file, backup)
     except OSError as exc:
         _cleanup_staged_files(staged)
         raise TextureFinalizationError(
