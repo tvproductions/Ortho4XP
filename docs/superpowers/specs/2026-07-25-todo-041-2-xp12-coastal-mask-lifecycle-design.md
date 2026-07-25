@@ -108,8 +108,9 @@ chosen.
 Decision order:
 
 1. Determine whether the triangle is land, inland water, or ocean.
-2. Resolve whether the selected provider has an explicit non-global coverage
-   extent.
+2. Resolve whether the requested provider has an explicit non-global coverage
+   extent. Provider failover candidates must preserve this decision-relevant
+   extent class.
 3. If an explicit provider extent governs coverage, do not synthesize an
    additional coastal-fill decision that can override it.
 4. Otherwise locate and validate the coastal mask.
@@ -135,9 +136,12 @@ authority. Inferred coastal fill must not expand, replace, or contradict that
 extent. This rule applies equally to external-border and imprinted-alpha modes
 so toggling `imprint_masks_to_dds` cannot change provider coverage.
 
-Extent lookup uses the resolved texture provider/layer inventory already loaded
-by `O4_Imagery_Utils`; it does not depend on the sister project's ZonePhoto
-global state.
+Extent lookup uses the provider/layer inventory already loaded by
+`O4_Imagery_Utils`; it does not depend on the sister project's ZonePhoto global
+state. DSF planning uses the requested provider because asynchronous failover
+has not happened yet. A replacement provider is eligible only when it has the
+same explicit-versus-global extent class, so later source resolution cannot
+invalidate the already-selected mask disposition.
 
 ## Mask Ownership and Conversion
 
