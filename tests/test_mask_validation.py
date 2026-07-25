@@ -25,6 +25,20 @@ class SandMaskValidationTests(unittest.TestCase):
             with self.subTest(width=width), self.assertRaises(ValueError):
                 MV.validate_sand_mask(width, 2.0, (6144, 6144))
 
+    def test_rejects_invalid_pixel_scales(self):
+        for pixel_size in (0, -2.0, True, "2.0", math.nan, math.inf, -math.inf):
+            with self.subTest(pixel_size=pixel_size), self.assertRaises(ValueError):
+                MV.validate_sand_mask(100, pixel_size, (6144, 6144))
+
+    def test_rejects_width_and_pixel_scale_overflow(self):
+        overflow = 10**10000
+        for case, width, pixel_size in (
+            ("width", overflow, 2.0),
+            ("pixel_size", 100, overflow),
+        ):
+            with self.subTest(case=case), self.assertRaises(ValueError):
+                MV.validate_sand_mask(width, pixel_size, (6144, 6144))
+
     def test_rejects_invalid_image_shapes(self):
         for shape in (None, 0, (), (6144,), (0, 6144), (2, 3, 4)):
             with self.subTest(shape=shape), self.assertRaises(ValueError):

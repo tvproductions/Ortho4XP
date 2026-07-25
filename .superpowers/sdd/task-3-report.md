@@ -48,3 +48,44 @@ fixed the malformed-shape exception-type gap; no remaining findings.
 
 None. Test output includes expected fixture diagnostics from existing CLI and
 configuration tests, while unittest completed successfully.
+
+## Independent-review follow-up
+
+Addressed every Important review finding in a follow-up commit:
+
+- `_is_finite_real()` now catches `OverflowError` from conversion of an
+  oversized numeric input, preserving the documented user-readable `ValueError`
+  for both width and pixel scale.
+- Pixel-scale validation now has deterministic coverage for zero, negative,
+  boolean, non-numeric, `NaN`, and both infinities.
+- Overflow regressions cover a huge integer width and a huge integer pixel
+  scale, asserting `ValueError` rather than an uncaught `OverflowError`.
+
+### Follow-up TDD evidence
+
+RED command:
+
+```powershell
+uv run python -m unittest tests.test_mask_validation -v
+```
+
+Result: `test_rejects_width_and_pixel_scale_overflow` failed before the fix
+with `OverflowError: int too large to convert to float` at the width conversion.
+
+GREEN command:
+
+```powershell
+uv run python -m unittest tests.test_mask_validation -v
+```
+
+Result: 6 tests passed.
+
+### Follow-up verification
+
+```powershell
+uv run python -m unittest tests.test_mask_validation tests.test_mask_alpha tests.test_config_models -v
+uv run ruff check src/O4_Mask_Validation.py tests/test_mask_validation.py
+uv run ty check src/O4_Mask_Validation.py
+```
+
+Results: 30 tests passed; Ruff and ty both reported `All checks passed!`.

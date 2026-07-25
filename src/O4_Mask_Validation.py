@@ -9,18 +9,25 @@ class SandMaskGeometry:
     kernel_size: int
 
 
+def _is_finite_real(value):
+    try:
+        return math.isfinite(float(value))
+    except OverflowError:
+        return False
+
+
 def validate_sand_mask(width_meters, pixel_size, image_shape):
     if (
         isinstance(width_meters, bool)
         or not isinstance(width_meters, Real)
-        or not math.isfinite(float(width_meters))
+        or not _is_finite_real(width_meters)
         or width_meters < 0
     ):
         raise ValueError("sand masks_width must be one finite non-negative number")
     if (
         isinstance(pixel_size, bool)
         or not isinstance(pixel_size, Real)
-        or not math.isfinite(float(pixel_size))
+        or not _is_finite_real(pixel_size)
         or pixel_size <= 0
     ):
         raise ValueError("sand mask pixel size must be finite and positive")
@@ -33,7 +40,10 @@ def validate_sand_mask(width_meters, pixel_size, image_shape):
         for size in image_shape
     ):
         raise ValueError("sand mask input must be a non-empty 2D array")
-    width_pixels = int(width_meters / pixel_size)
+    try:
+        width_pixels = int(width_meters / pixel_size)
+    except OverflowError:
+        raise ValueError("sand mask width in pixels must be finite") from None
     kernel_size = 0 if width_pixels == 0 else 2 * width_pixels - 1
     if kernel_size > min(image_shape):
         raise ValueError(
