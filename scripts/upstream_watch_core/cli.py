@@ -79,7 +79,7 @@ def create_audit_from_remotes(
 
     validate_sha(base_sha, "base_sha")
     validate_sha(head_sha, "head_sha")
-    with fetch_repositories(state) as fetched:
+    with fetch_repositories(state, (base_sha, head_sha)) as fetched:
         ensure_authoritative_candidate(
             GitRunner(fetched.repo), head_sha, fetched.author_head
         )

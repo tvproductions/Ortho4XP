@@ -69,6 +69,9 @@ Raw reports under `.upstream-watch/` are ignored local evidence. The durable
 decisions belong in `docs/upstream/ORTHO4XP_V3-audit.md` as exact single-line
 `upstream-watch:audit`, `upstream-watch:finding`, and
 `upstream-watch:reviewed-no-action` records.
+For rewritten history, `audit` attempts to recover the explicit reviewed base
+from both monitored repositories and performs a full-tree comparison. It stops
+with a clear error if neither repository can supply that immutable object.
 
 Validate exact path coverage and evidence consistency:
 

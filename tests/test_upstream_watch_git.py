@@ -16,6 +16,7 @@ from scripts.upstream_watch_core.git_repo import (
     classify_author_history,
     classify_passive_fork,
     ensure_authoritative_candidate,
+    fetch_required_objects,
     list_changes,
     read_blob,
 )
@@ -113,6 +114,41 @@ class GitRepositoryTests(unittest.TestCase):
         with self.assertRaisesRegex(GitCommandError, "authoritative"):
             ensure_authoritative_candidate(
                 self.runner, self.fork_ahead, self.author_head
+            )
+
+    def test_fetches_orphaned_required_object_by_exact_sha(self) -> None:
+        # A rewritten branch can still be audited when either remote retains
+        # the immutable reviewed object outside its current branch history.
+        target = Path(self.temporary_directory.name, "target.git")
+        self._git("init", "--bare", str(target))
+        target_runner = GitRunner(target)
+        target_runner.run(
+            [
+                "fetch",
+                "--no-tags",
+                str(self.repo),
+                f"{self.author_head}:refs/upstream-watch/author",
+            ]
+        )
+        with self.assertRaises(GitCommandError):
+            target_runner.run(["cat-file", "-e", f"{self.fork_diverged}^{{commit}}"])
+        fetch_required_objects(
+            target_runner,
+            (self.fork_diverged,),
+            (str(self.repo),),
+        )
+        target_runner.run(["cat-file", "-e", f"{self.fork_diverged}^{{commit}}"])
+
+    def test_reports_unavailable_required_object_for_full_tree_audit(self) -> None:
+        # When both repositories have discarded the object, operators receive
+        # an explicit recovery failure instead of a misleading Git error.
+        target = Path(self.temporary_directory.name, "missing.git")
+        self._git("init", "--bare", str(target))
+        with self.assertRaisesRegex(GitCommandError, "full-tree"):
+            fetch_required_objects(
+                GitRunner(target),
+                ("e" * 40,),
+                (str(self.repo),),
             )
 
     def test_classifies_passive_fork_relationships(self) -> None:

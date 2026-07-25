@@ -131,6 +131,35 @@ class GitHubIssueTests(unittest.TestCase):
             ["GET", "GET", "GET", "PATCH"],
         )
 
+    def test_retry_posts_missing_transition_with_original_previous_fingerprint(
+        self,
+    ) -> None:
+        previous = make_observation(author_head="c" * 40)
+        current = make_observation()
+        current_fingerprint = observation_fingerprint(current)
+        previous_fingerprint = observation_fingerprint(previous)
+        pending_body = render_observation_body(current).replace(
+            f"commented-fingerprint {current_fingerprint}",
+            f"commented-fingerprint {previous_fingerprint}",
+        )
+        transport = FakeTransport(
+            [
+                json_response(200, {"name": "upstream-watch"}),
+                json_response(200, [issue_payload(current, {"body": pending_body})]),
+                json_response(200, []),
+                json_response(201, {"id": 1}),
+                json_response(200, issue_payload(current)),
+            ]
+        )
+        reconcile_tracking_issue(
+            GitHubClient("token", transport=transport),
+            repository="tvproductions/Ortho4XP",
+            observation=current,
+        )
+        comment = cast(str, transport.requests[-2]["body"])
+        self.assertIn(previous_fingerprint, comment)
+        self.assertIn(current_fingerprint, comment)
+
     def test_failed_issue_update_never_posts_transition_comment(self) -> None:
         # Failed persistence cannot leave an orphaned history comment.
         previous = make_observation(author_head="c" * 40)

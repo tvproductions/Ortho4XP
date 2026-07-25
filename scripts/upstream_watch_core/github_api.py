@@ -497,7 +497,7 @@ def reconcile_tracking_issue(
             client.add_comment(
                 repository,
                 issue.number,
-                _transition_comment(existing_fingerprint, fingerprint),
+                _transition_comment(commented_fingerprint, fingerprint),
             )
         client.update_issue(
             repository,

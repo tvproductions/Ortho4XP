@@ -150,6 +150,39 @@ def ensure_authoritative_candidate(
         )
 
 
+def fetch_required_objects(
+    runner: GitRunner,
+    required_shas: Sequence[str],
+    repository_urls: Sequence[str],
+) -> None:
+    """Recover explicit audit objects from either monitored repository."""
+
+    for sha in dict.fromkeys(required_shas):
+        validate_sha(sha, "required_sha")
+        if _object_exists(runner, sha):
+            continue
+        for url in repository_urls:
+            try:
+                runner.run(
+                    [
+                        "fetch",
+                        "--no-tags",
+                        "--no-recurse-submodules",
+                        url,
+                        f"{sha}:refs/upstream-watch/required/{sha}",
+                    ]
+                )
+            except GitCommandError:
+                continue
+            if _object_exists(runner, sha):
+                break
+        else:
+            raise GitCommandError(
+                f"Required audit object {sha} is unavailable from both monitored "
+                "repositories; full-tree comparison cannot proceed"
+            )
+
+
 def classify_passive_fork(
     runner: GitRunner, author_head: str, passive_head: str
 ) -> ForkState:
@@ -388,7 +421,9 @@ class FetchedRepositories:
         self.close()
 
 
-def fetch_repositories(state: WatchState) -> FetchedRepositories:
+def fetch_repositories(
+    state: WatchState, required_shas: Sequence[str] = ()
+) -> FetchedRepositories:
     """Fetch only the monitored branch heads into a temporary bare repository."""
 
     temporary_directory = tempfile.TemporaryDirectory(prefix="ortho4xp-upstream-watch-")
@@ -418,6 +453,11 @@ def fetch_repositories(state: WatchState) -> FetchedRepositories:
                 passive_url,
                 f"{passive_head}:refs/upstream-watch/passive",
             ]
+        )
+        fetch_required_objects(
+            local_runner,
+            required_shas,
+            (author_url, passive_url),
         )
     except Exception:
         temporary_directory.cleanup()
