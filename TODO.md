@@ -1245,9 +1245,20 @@ Completion evidence:
 
 ### TODO-041-3: Add Sister-Project Upstream-Watch Chore
 
-Status: Pending
+Status: Done
 
 GitHub Issue: #40
+
+Completed by adding the weekly/manual detector, explicit-SHA local audit CLI,
+validated machine state, durable structured ledger, exact path-coverage and
+atomic baseline gates, and single-issue GitHub reconciliation. The initial
+author audit observed 7 commits and 48 changed paths for
+`4ca0a8d404b078ad899979bafde84769a0fb235b..8a25af093af758292b4ef4c2caff93719cb1a54a`
+with manifest digest
+`8134be1ce57afa90f160268367301b901b15dea6ec2ef72df66f818f1b5284b3`.
+All paths have ledger coverage; the provider finding deliberately remains
+`investigate`, so TODO-041-4 blocks baseline advancement without blocking
+completion of the watch infrastructure.
 
 Add the approved hybrid process for detecting and reviewing progress in
 `Ypsos/ORTHO4XP_V3`. The `tvproductions/ORTHO4XP_V3` repository is a passive
@@ -1404,16 +1415,25 @@ Suggested labels: `xp12max`, `night`, `osm`
 
 Status: Pending
 
-Add GPU-accelerated texture processing with silent CPU fallback. Reference:
-ORTHO4XP_V3 `O4_GPU_Backend` + TODO-018.
+Add optional GPU-accelerated texture processing behind a backend-neutral
+interface, building on TODO-018 without coupling the pipeline to one GPU
+library or vendor.
 
 Acceptance criteria:
 
-- Detects GPU availability (NVIDIA CUDA via CuPy or PyTorch)
-- Routes histogram, color transfer, and feathering operations to GPU when available
-- Falls back silently to CPU when no GPU
-- Benchmarks CPU vs GPU performance
-- Adds tests for GPU/CPU path selection
+- Detects accelerator capabilities through a backend-neutral contract rather
+  than importing optional GPU libraries during normal startup.
+- Keeps optional GPU dependencies isolated; unavailable or incompatible
+  backends select the deterministic CPU implementation without failing a build.
+- Bounds host/device transfer size and memory use for histogram, color
+  transfer, feathering, and other accepted kernels.
+- Defines numerical-equivalence tolerances against the CPU reference for every
+  accelerated operation.
+- Establishes reproducible CPU/GPU benchmark fixtures and minimum benefit
+  thresholds before any GPU path is enabled by default.
+- Adds deterministic tests for capability detection, backend selection,
+  dependency failure, CPU fallback, bounded batching, and CPU/GPU equivalence
+  without requiring GPU hardware.
 
 Suggested labels: `performance`, `gpu`
 
@@ -1421,16 +1441,26 @@ Suggested labels: `performance`, `gpu`
 
 Status: Pending
 
-Add timestamped automatic backups with 1-click rollback. Reference:
-ORTHO4XP_V3 `O4_Backup_Manager`.
+Add transactional automatic backups and verified rollback for user-modified
+source, configuration, imagery, and texture artifacts.
 
 Acceptance criteria:
 
-- Backs up critical files (`.py`, `.comb`, `.ccorr`, `.dds`, `.cfg`) before modification
-- Stores timestamped backups with reason metadata
-- Maximum 10 backups per file (auto-purge oldest)
-- Provides `rollback.py` script for 1-click restore
-- Adds tests for backup/rollback behavior
+- Writes a versioned manifest for every backup transaction with timestamp,
+  reason, source path, size, and SHA-256 checksum.
+- Backs up configured critical file types, including `.py`, `.comb`, `.ccorr`,
+  `.dds`, and `.cfg`, before replacement or in-place modification.
+- Restores through verified temporary files and atomic replacement; checksum or
+  manifest failure leaves the current target unchanged.
+- Retains at most 10 successful backups per source by default, with
+  deterministic oldest-first pruning that never removes the only known-good
+  recovery point.
+- Reports interrupted backup, partial-copy, restore, and retention failures
+  explicitly and supports recovery from incomplete transactions.
+- Separates the reusable backup/restore core from any CLI or GUI entry point.
+- Adds cross-platform deterministic tests for manifests, checksums, atomic
+  restore, retention, interruption recovery, read-only targets, and Windows,
+  macOS, and Linux path behavior.
 
 Suggested labels: `reliability`, `developer-experience`
 

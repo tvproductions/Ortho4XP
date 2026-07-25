@@ -43,6 +43,7 @@ from scripts.upstream_watch_core.ledger import (
 from scripts.upstream_watch_core.models import (
     AuditReport,
     ChangeStatus,
+    CommitRecord,
     ForkState,
     PathChange,
     StateValidationError,
@@ -130,6 +131,18 @@ class WatchStateTests(unittest.TestCase):
         baseline["path_count"] = True
         with self.assertRaisesRegex(StateValidationError, "path_count"):
             self._load(payload)
+
+    def test_commit_timestamp_accepts_rfc3339_timezone_offset(self) -> None:
+        record = CommitRecord.from_dict(
+            {
+                "sha": "1" * 40,
+                "author_name": "Upstream Author",
+                "author_email": "author@example.invalid",
+                "authored_at": "2026-07-19T07:15:52+02:00",
+                "subject": "candidate",
+            }
+        )
+        self.assertEqual(record.authored_at, "2026-07-19T07:15:52+02:00")
 
 
 class GitRepositoryTests(unittest.TestCase):
@@ -1014,3 +1027,54 @@ class CliTests(unittest.TestCase):
                 main(["check", "--state", str(self.state_path)]),
                 130,
             )
+
+
+class RepositorySurfaceTests(unittest.TestCase):
+    def test_committed_state_and_ledger_preserve_repository_roles(self) -> None:
+        state = load_state(ROOT_DIR / ".github" / "upstream-watch.json")
+        self.assertEqual(state.author.repository, "Ypsos/ORTHO4XP_V3")
+        self.assertEqual(state.passive_fork.repository, "tvproductions/ORTHO4XP_V3")
+        self.assertEqual(
+            state.baseline.reviewed_sha,
+            "4ca0a8d404b078ad899979bafde84769a0fb235b",
+        )
+
+        entries = parse_ledger(ROOT_DIR / "docs" / "upstream" / "ORTHO4XP_V3-audit.md")
+        entry = next(
+            item
+            for item in entries
+            if item.audit.audit_id == "ypsos-4ca0a8d404b0-8a25af093af7"
+        )
+        self.assertEqual(
+            entry.audit.head_sha,
+            "8a25af093af758292b4ef4c2caff93719cb1a54a",
+        )
+        paths = [path for finding in entry.findings for path in finding.paths] + [
+            record.path for record in entry.reviewed_no_action
+        ]
+        self.assertEqual(len(paths), 48)
+        self.assertEqual(len(paths), len(set(paths)))
+
+    def test_backlog_records_completion_and_independent_followup_requirements(
+        self,
+    ) -> None:
+        text = (ROOT_DIR / "TODO.md").read_text(encoding="utf-8")
+        section_041_3 = text.split("### TODO-041-3:", 1)[1].split("### ", 1)[0]
+        section_044 = text.split("### TODO-044:", 1)[1].split("### ", 1)[0]
+        section_045 = text.split("### TODO-045:", 1)[1].split("### ", 1)[0]
+        self.assertIn("Status: Done", section_041_3)
+        self.assertNotIn("O4_GPU_Backend", section_044)
+        self.assertNotIn("O4_Backup_Manager", section_045)
+        self.assertNotIn("rollback.py", section_045)
+        self.assertIn("benchmark", section_044.casefold())
+        self.assertIn("checksum", section_045.casefold())
+
+    def test_workflow_has_narrow_permissions_and_expected_triggers(self) -> None:
+        workflow = (
+            ROOT_DIR / ".github" / "workflows" / "upstream-watch.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn('cron: "17 13 * * 1"', workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("contents: read", workflow)
+        self.assertIn("issues: write", workflow)
+        self.assertNotIn("contents: write", workflow)

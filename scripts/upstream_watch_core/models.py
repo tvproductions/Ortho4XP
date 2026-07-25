@@ -16,6 +16,9 @@ REPOSITORY_RE = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
 SHA_RE = re.compile(r"[0-9a-f]{40}")
 SHA256_RE = re.compile(r"[0-9a-f]{64}")
 AUDIT_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}")
+RFC3339_TIMESTAMP_RE = re.compile(
+    r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})"
+)
 
 
 class StateValidationError(ValueError):
@@ -178,14 +181,22 @@ def _validate_date(value: object, field: str) -> str:
 
 
 def _validate_timestamp(value: object, field: str) -> str:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        raise ReportValidationError(f"{field} must be an RFC 3339 UTC timestamp")
+    if not isinstance(value, str) or RFC3339_TIMESTAMP_RE.fullmatch(value) is None:
+        raise ReportValidationError(
+            f"{field} must be an RFC 3339 timestamp with a timezone"
+        )
     try:
-        datetime.fromisoformat(value[:-1] + "+00:00")
+        parsed = datetime.fromisoformat(
+            value[:-1] + "+00:00" if value.endswith("Z") else value
+        )
     except ValueError as exc:
         raise ReportValidationError(
-            f"{field} must be an RFC 3339 UTC timestamp"
+            f"{field} must be an RFC 3339 timestamp with a timezone"
         ) from exc
+    if parsed.utcoffset() is None:
+        raise ReportValidationError(
+            f"{field} must be an RFC 3339 timestamp with a timezone"
+        )
     return value
 
 
