@@ -16,6 +16,7 @@ import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Imagery_Utils as IMG
 import O4_Mask_Alpha as MA
+import O4_Mask_Build_Validation as MBV
 import O4_Mask_Validation as MV
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
@@ -96,29 +97,8 @@ def build_masks(tile, for_imagery=False, ctx=None):
 
     timer = time.time()
 
-    # Check we have a mesh for this tile
-    if not os.path.exists(FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon)):
-        UI.lvprint(
-            0,
-            "ERROR: Mesh file ",
-            FNAMES.mesh_file(tile.build_dir, tile.lat, tile.lon),
-            "absent.",
-        )
-        UI.exit_message_and_bottom_line("")
+    if not MBV.mask_build_inputs_are_valid(tile):
         return 0
-
-    if tile.masking_mode == "sand":
-        pixel_size = GEO.webmercator_pixel_size(tile.lat + 0.5, tile.mask_zl)
-        try:
-            MV.validate_sand_mask(
-                tile.masks_width,
-                pixel_size,
-                (4096 + 2 * 1024, 4096 + 2 * 1024),
-            )
-        except ValueError as exc:
-            UI.lvprint(0, f"ERROR: Invalid sand mask configuration: {exc}")
-            UI.exit_message_and_bottom_line("")
-            return 0
 
     # Check or create dest dir
     dest_dir = (
@@ -684,24 +664,7 @@ def blur_mask(img_array, tile, sea_level):
     ##########################################
     pxscal = GEO.webmercator_pixel_size(tile.lat + 0.5, tile.mask_zl)
     if tile.masking_mode == "sand":
-        geometry = MV.validate_sand_mask(tile.masks_width, pxscal, img_array.shape)
-        blur_width = geometry.width_pixels
-        if blur_width:
-            # convolution with a hat function
-            b_img_array = numpy.array(img_array)
-            kernel = numpy.array(range(1, 2 * blur_width))
-            kernel[blur_width:] = range(blur_width - 1, 0, -1)
-            kernel = kernel / blur_width**2
-            for i in range(0, len(b_img_array)):
-                b_img_array[i] = numpy.convolve(b_img_array[i], kernel, "same")
-            b_img_array = b_img_array.transpose()
-            for i in range(0, len(b_img_array)):
-                b_img_array[i] = numpy.convolve(b_img_array[i], kernel, "same")
-            b_img_array = b_img_array.transpose()
-            b_img_array = 2 * numpy.minimum(b_img_array, 127)
-            b_img_array = numpy.array(b_img_array, dtype=numpy.uint8)
-        else:
-            b_img_array = numpy.array(img_array, dtype=numpy.uint8)
+        b_img_array = MV.blur_sand_mask(img_array, tile.masks_width, pxscal)
     # Rocks mode
     elif tile.masking_mode == "rocks":
         blur_width = tile.masks_width / (2 * pxscal)

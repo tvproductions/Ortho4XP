@@ -4,6 +4,7 @@ import io
 import queue
 import unittest
 from dataclasses import FrozenInstanceError
+from typing import Any, cast
 from unittest import mock
 
 from PIL import Image
@@ -18,6 +19,15 @@ import O4_Texture_Download_Scheduler as TDS
 import O4_Tile_Utils as TILE
 from O4_Texture_Source import TextureBuildResult, TextureSource
 
+# Failover scheduler invariants:
+# - retries preserve the requested terrain identity;
+# - only the active provider identity changes;
+# - explicit provider extents suppress inferred coastal-mask reuse;
+# - failed providers are counted once per attempt;
+# - successful sources carry both identities into conversion;
+# - queue shutdown remains deterministic under retry and interruption.
+#
+
 
 class ProviderFailoverSchedulerTests(unittest.TestCase):
     def setUp(self):
@@ -26,8 +36,8 @@ class ProviderFailoverSchedulerTests(unittest.TestCase):
 
     def test_download_request_replaces_only_active_identity(self):
         request = TDS.TextureDownloadRequest(
-            [1, 2, 16, "BI"],
-            [1, 2, 16, "BI"],
+            cast(Any, [1, 2, 16, "BI"]),
+            cast(Any, [1, 2, 16, "BI"]),
         )
 
         replacement = request.with_active_attrs((1, 2, 16, "Arc"))
@@ -39,7 +49,7 @@ class ProviderFailoverSchedulerTests(unittest.TestCase):
         self.assertEqual(replacement.requested_attrs, (1, 2, 16, "BI"))
         self.assertEqual(replacement.active_attrs, (1, 2, 16, "Arc"))
         with self.assertRaises(FrozenInstanceError):
-            request.active_attrs = (1, 2, 16, "LOCAL")
+            cast(Any, request).active_attrs = (1, 2, 16, "LOCAL")
 
     def test_async_download_accepts_request_payload_with_distinct_identities(self):
         tile = _tile()

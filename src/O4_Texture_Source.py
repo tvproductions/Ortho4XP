@@ -8,6 +8,11 @@ from PIL import Image
 
 import O4_File_Names as FNAMES
 
+# A source can be resolved from a fallback provider while still representing
+# the terrain texture requested by DSF assembly. The pair of identities flows
+# through conversion results so finalization can atomically rewrite only exact
+# BASE_TEX_NOWRAP references. Output naming always follows the resolved source.
+#
 type TextureAttributes = tuple[int, int, int, str]
 
 

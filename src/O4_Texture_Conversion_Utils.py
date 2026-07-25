@@ -8,9 +8,15 @@ import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Geotiff_Options as GTO
 import O4_Texture_Encoder as TEX
+import O4_Texture_Mask_Lifecycle as TML
 import O4_UI_Utils as UI
 from O4_Texture_Models import TextureCleanupPlan
 
+# DDS conversion has two cleanup phases. Temporary encoder inputs are always
+# owned by the attempt; coastal masks remain source artifacts until both the
+# encoder and optional decoded-image quality check accept the output. This
+# distinction prevents a retry from losing the only valid alpha source.
+#
 gdal.UseExceptions()
 
 
@@ -41,19 +47,8 @@ def cleanup_conversion_temps(erase_tmp_png, png_file_name, tmp_tif_file_name=Non
         _remove_conversion_temp(tmp_tif_file_name)
 
 
-def cleanup_conversion_paths(paths: tuple[str, ...]) -> None:
-    for path in paths:
-        _remove_conversion_temp(path)
-
-
-def save_conversion_temp(image, path: str) -> None:
-    saved = False
-    try:
-        image.save(path)
-        saved = True
-    finally:
-        if not saved:
-            cleanup_conversion_paths((path,))
+cleanup_conversion_paths = TML.cleanup_conversion_paths
+save_conversion_temp = TML.save_conversion_temp
 
 
 def convert_dds_texture(

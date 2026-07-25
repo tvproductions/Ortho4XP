@@ -17,6 +17,12 @@ import O4_Package_Metadata as PKG
 import O4_Texture_Download_Scheduler as TDS
 import O4_Tile_Texture_Conversion as TTC
 import O4_UI_Utils as UI
+
+# Step 3 activates a DSF only after its texture scheduler has stopped and the
+# complete result batch has passed artifact finalization. Download, conversion,
+# terrain-reference rewrite, and DSF replacement remain ordered boundaries;
+# failure at any boundary leaves the previously active tile intact.
+#
 import O4_Vector_Map as VMAP
 
 max_download_slots: int = 1
@@ -179,14 +185,7 @@ def build_tile(tile, ctx=None):
             convert_queue.put("quit")
             convert_thread.join()
             TTC.handle_texture_conversion_scheduler_result(tile, convert_result_holder)
-    if ctx.red_flag:
-        UI.exit_message_and_bottom_line()
-        return 0
-    if convert_launched and not TTC.finalize_texture_conversion(
-        tile,
-        convert_result_holder,
-    ):
-        UI.vprint(1, "Tile activation stopped after texture conversion failure.")
+    if _activation_is_blocked(ctx, tile, convert_launched, convert_result_holder):
         return 0
     UI.vprint(1, " *Activating DSF file.")
     dsf_file_name = os.path.join(
@@ -230,6 +229,17 @@ def build_tile(tile, ctx=None):
     UI.timings_and_bottom_line(timer)
     UI.logprint("Step 3 for tile lat=", tile.lat, ", lon=", tile.lon, ": normal exit.")
     return 1
+
+
+def _activation_is_blocked(ctx, tile, convert_launched, result_holder):
+    """Report either interruption or finalization failure before DSF activation."""
+    if ctx.red_flag:
+        UI.exit_message_and_bottom_line()
+        return True
+    if convert_launched and not TTC.finalize_texture_conversion(tile, result_holder):
+        UI.vprint(1, "Tile activation stopped after texture conversion failure.")
+        return True
+    return False
 
 
 ################################################################################

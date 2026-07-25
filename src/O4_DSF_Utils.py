@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw
 import O4_Bathymetry as BATHY
 import O4_Bathymetry_Input as BATHY_INPUT
 import O4_Coastal_Artifact_Policy as CAP
+import O4_DSF_Coastal_Artifacts as DCA
 import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Mask_Utils as MASK
@@ -21,6 +22,12 @@ import O4_Mesh_Utils as MESH
 import O4_Overlay_Utils as OVL
 import O4_Subprocess_Utils as SP
 import O4_UI_Utils as UI
+
+#
+# DSF assembly keeps legacy mesh serialization local to this module.
+# XP12 coastal policy and mask discovery are delegated so the main triangle
+# loop consumes one stable decision instead of reproducing provider rules.
+#
 from O4_DSF_Header_Bridge import splice_native_dsf_headers_for_tile
 
 quad_init_level = 3
@@ -35,26 +42,6 @@ XP12_EMPTY_BATHYMETRY_RASTERS = (b"", b"")
 XP12_SKIP_BATHYMETRY_MESSAGE = (
     "-> No water triangles detected; skipping XP12 bathymetry input"
 )
-
-
-def provider_uses_explicit_extent(provider_code):
-    import O4_Imagery_Utils as IMG
-
-    return CAP.provider_uses_explicit_extent(
-        provider_code,
-        IMG.providers_dict,
-        IMG.local_combined_providers_dict,
-    )
-
-
-def _load_inferred_coastal_mask(tile, texture_attributes, explicit_extent):
-    if explicit_extent:
-        return False
-    try:
-        return MASK.needs_mask(tile, *texture_attributes)
-    except OSError as exc:
-        UI.vprint(3, exc)
-        return False
 
 
 ################################################################################
@@ -291,26 +278,13 @@ def create_terrain_file(
     til_x_left,
     til_y_top,
     zoomlevel,
-    provider_code,
     tri_type,
     is_overlay,
     *,
     coastal_decision: CAP.CoastalMaskDecision | None = None,
 ):
 
-    if (
-        coastal_decision is not None
-        and coastal_decision.disposition
-        == CAP.CoastalMaskDisposition.EXTERNAL_BORDER
-    ):
-        mask_file_name = cast(str, coastal_decision.mask_file_name)
-        mask_path = os.path.join(
-            tile.build_dir,
-            "textures",
-            mask_file_name,
-        )
-        if not os.path.isfile(mask_path):
-            raise FileNotFoundError(f"Missing BORDER_TEX mask: {mask_path}")
+    CAP.require_external_border_mask(tile.build_dir, coastal_decision)
 
     if not os.path.exists(os.path.join(tile.build_dir, "terrain")):
         os.makedirs(os.path.join(tile.build_dir, "terrain"))
@@ -357,7 +331,7 @@ def create_terrain_file(
                     os.path.join(tile.build_dir, "textures"),
                 )
         elif (
-            coastal_decision is not None
+            coastal_decision
             and coastal_decision.disposition
             == CAP.CoastalMaskDisposition.EXTERNAL_BORDER
         ):
@@ -367,11 +341,7 @@ def create_terrain_file(
                 f"{4096 // 2 ** (zoomlevel - tile.mask_zl)}\n"
             )
             mask_file_name = cast(str, coastal_decision.mask_file_name)
-            f.write(
-                "BORDER_TEX ../textures/"
-                + mask_file_name
-                + "\n"
-            )
+            f.write("BORDER_TEX ../textures/" + mask_file_name + "\n")
 
         if tri_type == 0 and tile.use_decal_on_terrain:
             f.write("DECAL_LIB lib/g10/decals/maquify_2_green_key.dcl\n")
@@ -553,10 +523,9 @@ def build_dsf(tile, download_queue):
 
     ##########################
     dico_terrains = {}
-    coastal_decisions = {}
+    coastal_artifacts = {}
     overlay_terrains = set()
     treated_textures = set()
-    skipped_terrains_for_masking = set()
     dsf_pools = {}
     # we need more pools for textured nodes than for nodes : land, UV masked
     # water, and XP water
@@ -625,40 +594,20 @@ def build_dsf(tile, download_queue):
 
         # Do we need to build new terrain file(s) ?
         if terrain_attributes in dico_terrains:
-            coastal_decision = coastal_decisions[terrain_attributes]
+            coastal_decision, _mask_im = coastal_artifacts[terrain_attributes]
             terrain_idx = dico_terrains[terrain_attributes]  # ty:ignore[invalid-argument-type]
             is_overlay = coastal_decision.is_overlay
         else:
-            needs_new_terrain = False
-            if terrain_attributes in coastal_decisions:
-                coastal_decision = coastal_decisions[terrain_attributes]
-            else:
-                mask_name = FNAMES.mask_file(*texture_attributes)
-                explicit_extent = provider_uses_explicit_extent(
-                    texture_attributes[3]
-                )
-                mask_im = _load_inferred_coastal_mask(
-                    tile,
-                    texture_attributes,
-                    explicit_extent,
-                )
-                coastal_decision = CAP.decide_coastal_mask(
-                    tri_type=tri_type,
-                    imprint_masks_to_dds=tile.imprint_masks_to_dds,
-                    mask_file_name=mask_name if mask_im else None,
-                    mask_available=bool(mask_im),
-                    explicit_provider_extent=explicit_extent,
-                )
-                coastal_decisions[terrain_attributes] = coastal_decision
-                if coastal_decision.creates_custom_terrain:
-                    UI.vprint(2, "      Use of an alpha mask.")
+            coastal_decision, mask_im = DCA.coastal_artifact(
+                tile,
+                texture_attributes,
+                tri_type,
+                coastal_artifacts,
+            )
             if not coastal_decision.creates_custom_terrain:
-                skipped_terrains_for_masking.add(terrain_attributes)
                 terrain_idx = 0
             else:
-                needs_new_terrain = True
                 is_overlay = coastal_decision.is_overlay
-            if needs_new_terrain:
                 terrain_idx = len(dico_terrains)
                 textured_tris[terrain_idx] = defaultdict(lambda: array.array("H"))
                 dico_terrains[terrain_attributes] = terrain_idx  # ty:ignore[invalid-assignment]
@@ -725,8 +674,10 @@ def build_dsf(tile, download_queue):
                 terrain_file_name = create_terrain_file(
                     tile,
                     texture_file_name,
-                    *texture_attributes,
-                    tri_type,  # ty:ignore[too-many-positional-arguments]
+                    texture_attributes[0],
+                    texture_attributes[1],
+                    texture_attributes[2],
+                    tri_type,
                     is_overlay,
                     coastal_decision=coastal_decision,
                 )
@@ -753,9 +704,7 @@ def build_dsf(tile, download_queue):
                     # BEWARE : normal coordinates are pointing (EAST,SOUTH)
                     # in X-Plane, not (EAST,NORTH) ! (cfr DSF specs), so v -> -v
                     idx_dsfpool = idx_pool + pool_nbr
-                    dsf_pools[idx_dsfpool].extend(
-                        node_icoords[5 * n : 5 * n + 5]
-                    )
+                    dsf_pools[idx_dsfpool].extend(node_icoords[5 * n : 5 * n + 5])
                     if is_overlay:
                         ratio_fetch = 1
                         ratio_bathy = 0
@@ -766,10 +715,8 @@ def build_dsf(tile, download_queue):
                         ratio_fetch = 1
                     coords = CAP.water_texture_coordinates(
                         coastal_decision,
-                        s,
-                        t,
-                        ratio_fetch,
-                        ratio_bathy,
+                        (s, t),
+                        (ratio_fetch, ratio_bathy),
                     )
                     dsf_pools[idx_dsfpool].extend(
                         int(round(value * 65535)) for value in coords
@@ -883,8 +830,10 @@ def build_dsf(tile, download_queue):
             terrain_file_name = create_terrain_file(
                 tile,
                 texture_file_name,
-                *texture_attributes,
-                tri_type,  # ty:ignore[too-many-positional-arguments]
+                texture_attributes[0],
+                texture_attributes[1],
+                texture_attributes[2],
+                tri_type,
                 is_overlay,
             )
             bTERT += bytes("terrain/" + terrain_file_name + "\0", "ascii")

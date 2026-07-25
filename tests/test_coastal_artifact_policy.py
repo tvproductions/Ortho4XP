@@ -14,7 +14,6 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
             tri_type=2,
             imprint_masks_to_dds=False,
             mask_file_name=None,
-            mask_available=False,
             explicit_provider_extent=False,
         )
         self.assertEqual(
@@ -29,7 +28,6 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
             tri_type=2,
             imprint_masks_to_dds=False,
             mask_file_name="48_32_ZL16.png",
-            mask_available=True,
             explicit_provider_extent=False,
         )
         self.assertEqual(
@@ -45,7 +43,6 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
             tri_type=2,
             imprint_masks_to_dds=True,
             mask_file_name="48_32_ZL16.png",
-            mask_available=True,
             explicit_provider_extent=False,
         )
         self.assertEqual(
@@ -63,7 +60,6 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
                     tri_type=2,
                     imprint_masks_to_dds=imprint,
                     mask_file_name="48_32_ZL16.png",
-                    mask_available=True,
                     explicit_provider_extent=True,
                 )
                 self.assertEqual(
@@ -90,11 +86,11 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
         external = CAP.CoastalMaskDecision.external_border("mask.png")
         imprinted = CAP.CoastalMaskDecision.imprinted_alpha("mask.png")
         self.assertEqual(
-            CAP.water_texture_coordinates(external, 0.2, 0.3, 1.0, 0.4),
+            CAP.water_texture_coordinates(external, (0.2, 0.3), (1.0, 0.4)),
             (0.2, 0.3, 0.2, 0.3),
         )
         self.assertEqual(
-            CAP.water_texture_coordinates(imprinted, 0.2, 0.3, 1.0, 0.4),
+            CAP.water_texture_coordinates(imprinted, (0.2, 0.3), (1.0, 0.4)),
             (1.0, 0.4, 0.2, 0.3),
         )
 
@@ -103,11 +99,10 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
             tri_type=2,
             imprint_masks_to_dds=False,
             mask_file_name=None,
-            mask_available=False,
             explicit_provider_extent=False,
         )
         with self.assertRaises(ValueError):
-            CAP.water_texture_coordinates(decision, 0.2, 0.3, 1.0, 0.4)
+            CAP.water_texture_coordinates(decision, (0.2, 0.3), (1.0, 0.4))
 
 
 if __name__ == "__main__":

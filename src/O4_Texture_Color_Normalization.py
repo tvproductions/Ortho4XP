@@ -23,6 +23,10 @@ import O4_UI_Utils as UI
 from O4_Color_Normalization import normalize_image_with_neighbors
 from O4_Texture_Conversion_Utils import save_conversion_temp
 
+# Normalized temporary images use the same partial-write cleanup contract as
+# streamed and masked texture conversion inputs.
+#
+
 
 @dataclass(frozen=True)
 class TextureColorContext:

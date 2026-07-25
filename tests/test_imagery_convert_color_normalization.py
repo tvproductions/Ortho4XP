@@ -23,8 +23,45 @@ from tests._imagery_geotiff_conversion_helpers import (
     convert_geotiff_with_failed_geotag,
 )
 
+# Conversion integration contract exercised below:
+# - streamed and cached sources share canonical resolved DDS naming;
+# - requested terrain identity survives provider failover;
+# - color normalization precedes provider-specific color filters;
+# - DDS alpha masks select BC3 without affecting explicit border masks;
+# - mask deletion occurs only after accepted encoder and QA success;
+# - encoder, QA, and partial-save failures retain the reusable mask source;
+# - temporary PNG ownership is independent from persistent JPEG caches;
+# - normalized temporary inputs are removed after every encode attempt;
+# - combined-provider conversion keeps its cache-directory context;
+# - GeoTIFF conversion retains its established geotag and retry behavior.
+#
+# Providers, encoders, and filesystem boundaries are patched deliberately.
+# Assertions cover lifecycle semantics without real provider, GDAL, encoder,
+# X-Plane, or sample-tile dependencies.
+# Exact call-order assertions keep normalization and cleanup boundaries visible.
+# Resolved-name assertions keep failover identity separate from terrain identity.
+# Partial-save cases observe both temporary removal and source-mask retention.
+#
 
-class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
+
+def _partial_save_failure(_image, path, *args, **kwargs):
+    del args, kwargs
+    Path(path).write_bytes(b"partial")
+    raise OSError("partial save failed")
+
+
+class _ConvertTextureColorNormalizationTestCase(ConvertTexturePatchMixin):
+    def _write_dds_mask(self, tile, texture_attrs):
+        mask_path = os.path.join(
+            tile.build_dir,
+            "textures",
+            FNAMES.mask_file(*texture_attrs),
+        )
+        Image.new("L", (16, 16), 255).save(mask_path)
+        return mask_path
+
+
+class StreamingTextureConversionTests(_ConvertTextureColorNormalizationTestCase):
     def test_resolved_source_uses_canonical_dds_name_and_preserves_resolution(self):
         tile = self._tile_for_conversion()
         tile.default_website = "GO2"
@@ -159,7 +196,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
                 Image.Image,
                 "save",
                 autospec=True,
-                side_effect=self._partial_save_failure,
+                side_effect=_partial_save_failure,
             ),
             self.assertRaisesRegex(OSError, "partial save failed"),
         ):
@@ -224,7 +261,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
                 Image.Image,
                 "save",
                 autospec=True,
-                side_effect=self._partial_save_failure,
+                side_effect=_partial_save_failure,
             ),
             self.assertRaisesRegex(OSError, "partial save failed"),
         ):
@@ -235,6 +272,8 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         self.assertTrue(os.path.exists(mask_path))
         conversion.encode_texture.assert_not_called()
 
+
+class CachedTextureConversionTests(_ConvertTextureColorNormalizationTestCase):
     def test_streaming_conversion_normalizes_before_color_filter(self):
         tile = self._tile_for_conversion()
         source = TextureSource(
@@ -315,7 +354,7 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
                 Image.Image,
                 "save",
                 autospec=True,
-                side_effect=self._partial_save_failure,
+                side_effect=_partial_save_failure,
             ),
             self.assertRaisesRegex(OSError, "partial save failed"),
         ):
@@ -420,20 +459,6 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         remove.assert_any_call(
             os.path.join(tmp_dir, expected_name.replace("4326", "3857"))
         )
-
-    def _write_dds_mask(self, tile, texture_attrs):
-        mask_path = os.path.join(
-            tile.build_dir,
-            "textures",
-            FNAMES.mask_file(*texture_attrs),
-        )
-        Image.new("L", (16, 16), 255).save(mask_path)
-        return mask_path
-
-    def _partial_save_failure(self, _image, path, *args, **kwargs):
-        del args, kwargs
-        Path(path).write_bytes(b"partial")
-        raise OSError("partial save failed")
 
 
 def _dds_tmp_png_path(provider_code, tmp_dir):

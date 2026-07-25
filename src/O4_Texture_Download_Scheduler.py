@@ -9,6 +9,12 @@ import O4_Imagery_Utils as IMG
 import O4_Provider_Failover as FAILOVER
 import O4_Texture_Download_Failover as TDF
 import O4_UI_Utils as UI
+
+# Download requests retain two identities: the originally requested terrain
+# texture and the provider currently selected by failover. Scheduler retries
+# may change only the active identity; conversion and finalization still need
+# the original identity to rewrite terrain references deterministically.
+#
 from O4_Texture_Source import TextureBuildResult
 
 
@@ -161,13 +167,17 @@ async def _run_ready_tasks(runtime, tasks):
         queue_item = runtime.download_queue.get()
         if isinstance(queue_item, str) and queue_item == "quit":
             continue
-        if isinstance(queue_item, TextureDownloadRequest):
-            request = queue_item
-        else:
-            request = TextureDownloadRequest.initial(queue_item)
+        request = _download_request(queue_item)
         active_request = TDF.active_request(runtime, request, IMG.providers_dict)
         tasks.add(asyncio.create_task(_download_task(runtime, active_request)))
     return tasks
+
+
+def _download_request(queue_item):
+    """Preserve an existing request identity or initialize one from legacy input."""
+    if isinstance(queue_item, TextureDownloadRequest):
+        return queue_item
+    return TextureDownloadRequest.initial(queue_item)
 
 
 async def _collect_completed_tasks(tasks):

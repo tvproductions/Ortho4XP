@@ -5,6 +5,10 @@ import O4_File_Names as FNAMES
 import O4_UI_Utils as UI
 from O4_Texture_Source import TextureSource
 
+# Scheduler contracts distinguish aggregate counts from the ordered per-job
+# results consumed by atomic terrain-reference finalization. Keeping both in
+# the immutable batch result prevents activation from trusting partial output.
+#
 ConvertTexture = Any
 
 

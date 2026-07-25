@@ -1207,7 +1207,7 @@ Suggested labels: `bug`, `quality`, `tests`
 
 ### TODO-041-2: Harden XP12 Coastal Masks and Texture Lifecycle
 
-Status: Pending
+Status: Completed
 
 GitHub Issue: #39
 
@@ -1230,6 +1230,18 @@ Acceptance criteria:
 - XP11+bathy behavior is not reintroduced.
 
 Suggested labels: `bug`, `xp12max`, `imagery`, `tests`
+
+Completion evidence:
+
+- Coastal disposition is selected before XP12 DSF pool allocation.
+- External masks are retained; imprinted masks are removed only after successful
+  DDS encoding.
+- Provider extent class is stable across failover and resolved DDS references
+  are finalized before tile activation.
+- Deterministic `unittest` coverage includes missing-mask, ocean, extent,
+  cleanup success/failure, sand validation, and provider-naming cases.
+- Full repository quality verification passed; command evidence is recorded in
+  the Task 7 closeout report pending the GitHub Issue #39 closeout review.
 
 ### TODO-041-3: Add Sister-Project Upstream-Watch Chore
 

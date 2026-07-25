@@ -14,6 +14,16 @@ import O4_Texture_Conversion_Scheduler as TCS
 import O4_Texture_Encoder as TEX
 from O4_Texture_Source import TextureSource
 
+# Scheduler contract covered by these isolated executor tests:
+# - every completed job contributes exactly one ordered result;
+# - failures remain available for deterministic provider summaries;
+# - source-aware jobs preserve requested and resolved identities;
+# - legacy tuple jobs receive identity metadata at the runner boundary;
+# - explicit conversion metadata is never overwritten;
+# - one quit sentinel drains active work before shutdown;
+# - interruption prevents submissions without losing completed results.
+#
+
 
 class FakeUI:
     def __init__(self):

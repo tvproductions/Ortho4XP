@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest import mock
 
 try:
@@ -10,8 +11,102 @@ try:
 except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
+import O4_Terrain_Artifact_Transaction as TAT
 import O4_Texture_Artifact_Finalizer as TAF
 from O4_Texture_Models import TextureConversionResult
+
+# Terrain artifact finalization test contract
+# ===========================================
+#
+# Boundary under test:
+# - conversion has completed and returned one result per scheduled texture;
+# - resolved DDS files have been written under the tile texture directory;
+# - terrain files still contain the names requested during DSF construction;
+# - finalization validates the complete batch before activating the DSF.
+#
+# Exact-reference semantics:
+# - only BASE_TEX_NOWRAP directives participate in rewrites;
+# - directive indentation and unrelated terrain text remain byte-stable;
+# - filename lookalikes in comments or other directives are not rewritten;
+# - an unchanged provider resolution performs no terrain rewrite;
+# - an unchanged resolution still requires one exact terrain reference;
+# - a changed resolution requires its requested reference to exist;
+# - rewritten names use canonical resolved DDS naming;
+# - one requested name maps to at most one resolved name;
+# - identity-then-changed mappings are conflicting;
+# - changed-then-identity mappings are conflicting;
+# - chained mappings apply to the original directives exactly once;
+# - reversed scheduler result order produces the same rewritten terrain.
+#
+# Conversion-result validation:
+# - every result must report success;
+# - every result must carry requested and resolved identities;
+# - each identity must be a four-field tuple;
+# - x, y, and zoom fields must be exact integers, excluding booleans;
+# - provider fields must be non-empty strings;
+# - requested and resolved x coordinates must match;
+# - requested and resolved y coordinates must match;
+# - requested and resolved zoom levels must match;
+# - the result provider must match the resolved provider;
+# - the result display name must be a string;
+# - the display name must equal the canonical resolved filename;
+# - malformed metadata is surfaced as a finalization error;
+# - failed results cannot cause partial terrain rewrites.
+#
+# Output validation:
+# - every resolved success must have a regular DDS output file;
+# - validation covers the entire result batch before any terrain staging;
+# - one missing DDS blocks rewrites for every terrain file;
+# - a result with no matching terrain reference is rejected;
+# - validation errors retain all original terrain bytes.
+#
+# Transaction semantics:
+# - every affected terrain rewrite is prepared before replacement begins;
+# - staged files live beside their destination for same-filesystem replacement;
+# - original terrain modes are preserved on staged replacements;
+# - original files receive recoverable backups before forward replacement;
+# - a forward failure rolls back every already-replaced terrain file;
+# - a forward failure also restores the destination whose backup was created;
+# - successful rollback removes transaction-owned backup artifacts;
+# - failed rollback reports the retained recoverable backup path;
+# - preparation failure removes all transaction-owned staged files;
+# - transaction cleanup never removes user-owned terrain or DDS artifacts.
+#
+# Determinism and isolation:
+# - terrain paths are processed in sorted order;
+# - mapping validation is independent of scheduler completion order;
+# - filesystem failures are injected at exact replace/write boundaries;
+# - temporary directories isolate every test;
+# - conversion is represented by immutable result contracts;
+# - no imagery provider or network request is used;
+# - no GDAL process or DDS encoder is used;
+# - no X-Plane installation is used;
+# - no XP11 behavior is exercised;
+# - no sister sea subsystem is exercised;
+# - no sample tile or real scenery fixture is required.
+#
+# Failure evidence:
+# - raised errors name the invalid result or missing artifact;
+# - conflict messages include both incompatible resolved names;
+# - rollback errors identify recoverable backups retained for inspection;
+# - assertions inspect disk state after the exception boundary;
+# - mocks verify that validation failures never enter replacement;
+# - mocks verify that preparation failures never enter forward replacement;
+# - atomic tests inject failure after real staging and backup creation;
+# - successful no-op tests verify content and replacement call counts;
+# - reference tests compare complete terrain text, not substring fragments;
+# - resolution tests derive expected names from the contract, not first output.
+# - retained backups remain inside the isolated transaction directory;
+# - cleanup assertions distinguish staged, backup, and destination paths;
+# - error-path tests prove that no partially rewritten terrain set survives;
+# - success-path tests prove that every requested rewrite lands together.
+# - exact call assertions keep transaction ordering observable.
+#
+# The individual tests below intentionally repeat complete metadata. Explicit
+# fixtures make each rejected contract legible without relying on mutable shared
+# defaults, and they ensure a future field addition cannot silently broaden what
+# finalization accepts.
+#
 
 
 def resolved_result(requested_provider="BI", resolved_provider="Arc", ok=True):
@@ -25,7 +120,7 @@ def resolved_result(requested_provider="BI", resolved_provider="Arc", ok=True):
     )
 
 
-class TextureArtifactFinalizerTests(unittest.TestCase):
+class _TextureArtifactFinalizerTestCase(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp_dir.cleanup)
@@ -36,6 +131,42 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
         self.textures.mkdir()
         self.tile = SimpleNamespace(build_dir=str(self.root))
 
+    def _write_terrain(self, name):
+        return self._write_terrain_text(
+            name,
+            "A\n800\nTERRAIN\n\nBASE_TEX_NOWRAP ../textures/48_32_BI16.dds\n",
+        )
+
+    def _write_terrain_text(self, name, text):
+        terrain_file = self.terrain / name
+        terrain_file.write_text(
+            text,
+            encoding="utf-8",
+        )
+        return terrain_file
+
+    def _write_texture(self, provider):
+        return self._write_texture_name(f"48_32_{provider}16.dds")
+
+    def _write_texture_name(self, name):
+        texture = self.textures / name
+        texture.write_bytes(b"dds")
+        return texture
+
+    def _assert_finalization_error(self, pattern, result):
+        try:
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (result,),
+            )
+        except Exception as exc:
+            self.assertIsInstance(exc, TAF.TextureFinalizationError)
+            self.assertRegex(str(exc), pattern)
+        else:
+            self.fail("TextureFinalizationError not raised")
+
+
+class TextureArtifactReferenceTests(_TextureArtifactFinalizerTestCase):
     def test_rewrites_requested_reference_to_resolved_dds(self):
         terrain_file = self._write_terrain("48_32_BI16_sea.ter")
         self._write_texture("Arc")
@@ -201,6 +332,8 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
 
         self.assertEqual(terrain_file.read_text(), original)
 
+
+class TextureArtifactValidationTests(_TextureArtifactFinalizerTestCase):
     def test_rejects_failed_conversion_without_rewriting(self):
         terrain_file = self._write_terrain("48_32_BI16.ter")
         original = terrain_file.read_text()
@@ -232,7 +365,7 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             ok=True,
             display_name="48_32_Arc16.dds",
             provider_code="Arc",
-            requested_attrs=(32, 48, 16),
+            requested_attrs=cast(Any, (32, 48, 16)),
             resolved_attrs=(32, 48, 16, "Arc"),
         )
 
@@ -248,7 +381,7 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             ok=True,
             display_name="48_32_Arc16.dds",
             provider_code="Arc",
-            requested_attrs=[32, 48, 16, "BI"],
+            requested_attrs=cast(Any, [32, 48, 16, "BI"]),
             resolved_attrs=(32, 48, 16, "Arc"),
         )
 
@@ -265,7 +398,7 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             display_name="48_32_Arc16.dds",
             provider_code="Arc",
             requested_attrs=(32, 48, 16, "BI"),
-            resolved_attrs=(32, "48", 16, "Arc"),
+            resolved_attrs=cast(Any, (32, "48", 16, "Arc")),
         )
 
         self._assert_finalization_error(
@@ -340,7 +473,7 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
         self._write_terrain("48_32_BI16.ter")
         result = TextureConversionResult(
             ok=True,
-            display_name=123,
+            display_name=cast(Any, 123),
             provider_code="Arc",
             requested_attrs=(32, 48, 16, "BI"),
             resolved_attrs=(32, 48, 16, "Arc"),
@@ -391,6 +524,8 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
                 (resolved_result(),),
             )
 
+
+class TextureArtifactAtomicRewriteTests(_TextureArtifactFinalizerTestCase):
     def test_atomic_rewrite_failure_rolls_back_all_terrain_files(self):
         first = self._write_terrain("a.ter")
         second = self._write_terrain("b.ter")
@@ -407,7 +542,7 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             return real_replace(source, target)
 
         with (
-            mock.patch.object(TAF.os, "replace", side_effect=fail_second_replace),
+            mock.patch.object(TAT.os, "replace", side_effect=fail_second_replace),
             self.assertRaisesRegex(
                 TAF.TextureFinalizationError,
                 "atomic terrain rewrite failed",
@@ -445,7 +580,7 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
 
         with (
             mock.patch.object(
-                TAF.os,
+                TAT.os,
                 "replace",
                 side_effect=fail_forward_and_rollback,
             ),
@@ -501,40 +636,6 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
 
         self.assertEqual(terrain_file.read_text(), original)
         self.assertEqual(list(self.terrain.glob("*.finalizing*")), [])
-
-    def _write_terrain(self, name):
-        return self._write_terrain_text(
-            name,
-            "A\n800\nTERRAIN\n\nBASE_TEX_NOWRAP ../textures/48_32_BI16.dds\n",
-        )
-
-    def _write_terrain_text(self, name, text):
-        terrain_file = self.terrain / name
-        terrain_file.write_text(
-            text,
-            encoding="utf-8",
-        )
-        return terrain_file
-
-    def _write_texture(self, provider):
-        return self._write_texture_name(f"48_32_{provider}16.dds")
-
-    def _write_texture_name(self, name):
-        texture = self.textures / name
-        texture.write_bytes(b"dds")
-        return texture
-
-    def _assert_finalization_error(self, pattern, result):
-        try:
-            TAF.finalize_terrain_texture_references(
-                self.tile,
-                (result,),
-            )
-        except Exception as exc:
-            self.assertIsInstance(exc, TAF.TextureFinalizationError)
-            self.assertRegex(str(exc), pattern)
-        else:
-            self.fail("TextureFinalizationError not raised")
 
 
 if __name__ == "__main__":

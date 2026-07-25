@@ -1,4 +1,5 @@
 import unittest
+from typing import Any, cast
 
 from PIL import Image
 
@@ -9,6 +10,10 @@ except ModuleNotFoundError:
 
 from O4_Texture_Source import TextureBuildResult, TextureSource
 
+# Source tests distinguish requested terrain identity from resolved provider
+# identity while preserving the legacy success/failure facade contract.
+#
+
 
 class TextureSourceTests(unittest.TestCase):
     def test_source_preserves_requested_identity_after_provider_resolution(self):
@@ -16,7 +21,7 @@ class TextureSourceTests(unittest.TestCase):
             object(),
             (32, 48, 16, "Arc"),
             Image.new("RGB", (4, 4)),
-        ).with_requested_attrs([32, 48, 16, "BI"])
+        ).with_requested_attrs(cast(Any, [32, 48, 16, "BI"]))
 
         self.assertEqual(source.provider_code, "Arc")
         self.assertEqual(source.terrain_attrs, (32, 48, 16, "BI"))

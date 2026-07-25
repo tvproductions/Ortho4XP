@@ -10,6 +10,7 @@ except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
 import O4_Coastal_Artifact_Policy as CAP
+import O4_DSF_Coastal_Artifacts as DCA
 import O4_DSF_Utils as DSF
 
 
@@ -28,14 +29,17 @@ class DsfCoastalArtifactTests(unittest.TestCase):
         )
 
     def _terrain_text(self, tri_type, decision=None):
-        with mock.patch.object(
-            DSF.GEO,
-            "gtile_to_wgs84",
-            return_value=(45.0, -90.0),
-        ), mock.patch.object(
-            DSF.GEO,
-            "webmercator_pixel_size",
-            return_value=2.0,
+        with (
+            mock.patch.object(
+                DSF.GEO,
+                "gtile_to_wgs84",
+                return_value=(45.0, -90.0),
+            ),
+            mock.patch.object(
+                DSF.GEO,
+                "webmercator_pixel_size",
+                return_value=2.0,
+            ),
         ):
             name = DSF.create_terrain_file(
                 self.tile,
@@ -43,7 +47,6 @@ class DsfCoastalArtifactTests(unittest.TestCase):
                 32,
                 48,
                 16,
-                "BI",
                 tri_type,
                 bool(decision and decision.is_overlay),
                 coastal_decision=decision,
@@ -74,7 +77,7 @@ class DsfCoastalArtifactTests(unittest.TestCase):
             "needs_mask",
             side_effect=OSError("unreadable"),
         ):
-            mask = DSF._load_inferred_coastal_mask(
+            mask = DCA.load_inferred_coastal_mask(
                 self.tile,
                 texture_attributes,
                 explicit_extent=False,

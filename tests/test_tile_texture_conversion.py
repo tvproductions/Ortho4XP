@@ -9,6 +9,26 @@ from unittest import mock
 # External DSF, download, filesystem, and conversion work are patched out.
 # The assertions stay at the user-visible lifecycle rather than thread internals.
 # This keeps the tests stable while conversion backends evolve.
+#
+# Activation contract:
+# - the DSF producer finishes before download shutdown is signaled;
+# - the conversion scheduler receives exactly one quit sentinel;
+# - exceptions, interruption, and failed or missing batches stop activation;
+# - aggregate/result count drift stops activation before finalization;
+# - successful DDS outputs must exist before terrain rewrites;
+# - finalization errors retain the previous active DSF;
+# - only a complete, validated batch reaches atomic DSF replacement.
+#
+# Reporting contract:
+# - successful completion keeps the established user-facing message;
+# - interruption is distinguished from provider conversion failure;
+# - failure summaries group deterministic counts by provider;
+# - diagnostics do not substitute for the separate activation gate.
+#
+# Threads use in-memory queues and patched collaborators. No network, provider
+# credentials, encoder, GDAL, X-Plane installation, or sample tile is required.
+# Replacement-call assertions keep the final activation boundary observable.
+# Queue assertions preserve scheduler shutdown ordering as part of activation.
 
 try:
     import _path  # noqa: F401
@@ -69,6 +89,39 @@ class _RecordingQueue(queue.Queue):
         return super().put(item, *args, **kwargs)
 
 
+class _SuccessfulSchedulerHarness:
+    def __init__(self):
+        self.queues = [_RecordingQueue(), _RecordingQueue()]
+        success = TEX.TextureConversionResult(
+            ok=True,
+            display_name="48_32_BI16.dds",
+            provider_code="BI",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, 48, 16, "BI"),
+        )
+        self.result = TCS.TextureConversionBatchResult(
+            completed=1,
+            failed=0,
+            interrupted=False,
+            failures=(),
+            results=(success,),
+        )
+        self.consumed_sentinels = []
+        self.scheduler_queues = []
+        self.queue_index = 0
+
+    def queue_factory(self):
+        queue_instance = self.queues[self.queue_index]
+        self.queue_index += 1
+        return queue_instance
+
+    def run_scheduler(self, convert_queue, _max_workers, *, convert_texture):
+        del convert_texture
+        self.scheduler_queues.append(convert_queue)
+        self.consumed_sentinels.append(convert_queue.get(timeout=1))
+        return self.result
+
+
 class TileTextureConversionSummaryTests(unittest.TestCase):
     def test_reports_failed_conversion_providers(self):
         result = TCS.TextureConversionBatchResult(
@@ -122,43 +175,15 @@ class TileTextureConversionSummaryTests(unittest.TestCase):
 class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
     def test_build_tile_sends_one_quit_joins_scheduler_and_reports_result(self):
         tile = _tile()
-        queues = [_RecordingQueue(), _RecordingQueue()]
-        success = TEX.TextureConversionResult(
-            ok=True,
-            display_name="48_32_BI16.dds",
-            provider_code="BI",
-            requested_attrs=(32, 48, 16, "BI"),
-            resolved_attrs=(32, 48, 16, "BI"),
-        )
-        result = TCS.TextureConversionBatchResult(
-            completed=1,
-            failed=0,
-            interrupted=False,
-            failures=(),
-            results=(success,),
-        )
-        consumed_sentinels = []
-        scheduler_queues = []
-
-        queue_factory_calls = [0]
-
-        def queue_factory():
-            queue_factory_calls[0] += 1
-            return queues[queue_factory_calls[0] - 1]
-
-        def run_scheduler(convert_queue, _max_workers, *, convert_texture):
-            scheduler_queues.append(convert_queue)
-            consumed_sentinels.append(convert_queue.get(timeout=1))
-            return result
-
+        scheduler = _SuccessfulSchedulerHarness()
         vprint = mock.Mock()
         with (
             _build_tile_patches(tile, vprint=vprint),
-            mock.patch.object(TILE.queue, "Queue", side_effect=queue_factory),
+            mock.patch.object(TILE.queue, "Queue", side_effect=scheduler.queue_factory),
             mock.patch.object(
                 TTC.TCS,
                 "run_texture_conversion_queue",
-                side_effect=run_scheduler,
+                side_effect=scheduler.run_scheduler,
             ),
             mock.patch.object(
                 TTC.TAF,
@@ -168,10 +193,10 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
         ):
             self.assertEqual(TILE.build_tile(tile), 1)
 
-        convert_queue = queues[1]
-        self.assertIs(scheduler_queues[0], convert_queue)
+        convert_queue = scheduler.queues[1]
+        self.assertIs(scheduler.scheduler_queues[0], convert_queue)
         self.assertEqual(convert_queue.put_calls, ["quit"])
-        self.assertEqual(consumed_sentinels, ["quit"])
+        self.assertEqual(scheduler.consumed_sentinels, ["quit"])
         vprint.assert_any_call(1, " *DDS conversion of textures completed.")
 
     def test_scheduler_failure_aborts_before_dsf_activation(self):

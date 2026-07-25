@@ -1,5 +1,13 @@
+"""XP12 coastal-mask decisions shared by DSF and texture generation.
+
+The policy deliberately owns no provider downloads or image processing.  It
+turns validated resource facts into one immutable terrain disposition early
+enough for DSF coordinate selection and later cleanup to agree.
+"""
+
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
 from typing import Any
 
 
@@ -48,12 +56,9 @@ def provider_uses_explicit_extent(
     layers = combined_providers.get(provider_code)
     if layers is not None:
         return any(
-            _is_explicit_extent(layer.get("extent_code", "global"))
-            for layer in layers
+            _is_explicit_extent(layer.get("extent_code", "global")) for layer in layers
         )
-    return _is_explicit_extent(
-        providers.get(provider_code, {}).get("extent", "global")
-    )
+    return _is_explicit_extent(providers.get(provider_code, {}).get("extent", "global"))
 
 
 def _is_explicit_extent(extent_code: object) -> bool:
@@ -66,9 +71,24 @@ def decide_coastal_mask(
     tri_type: int,
     imprint_masks_to_dds: bool,
     mask_file_name: str | None,
-    mask_available: bool,
     explicit_provider_extent: bool,
 ) -> CoastalMaskDecision:
+    """Select one XP12 coastal disposition from validated planning facts."""
+    native_decision = _native_water_decision(
+        tri_type,
+        mask_file_name,
+        explicit_provider_extent,
+    )
+    if native_decision is not None:
+        return native_decision
+    return _masked_water_decision(imprint_masks_to_dds, mask_file_name)
+
+
+def _native_water_decision(
+    tri_type: int,
+    mask_file_name: str | None,
+    explicit_provider_extent: bool,
+) -> CoastalMaskDecision | None:
     if tri_type not in (1, 2):
         return CoastalMaskDecision(CoastalMaskDisposition.UNMASKED_LAND)
     if explicit_provider_extent:
@@ -76,13 +96,20 @@ def decide_coastal_mask(
             CoastalMaskDisposition.NATIVE_WATER,
             reason="explicit provider extent",
         )
-    if not mask_available:
+    if not mask_file_name:
         return CoastalMaskDecision(
             CoastalMaskDisposition.NATIVE_WATER,
             reason="coastal mask unavailable",
         )
-    if not mask_file_name:
-        raise ValueError("available coastal mask requires a file name")
+    return None
+
+
+def _masked_water_decision(
+    imprint_masks_to_dds: bool,
+    mask_file_name: str | None,
+) -> CoastalMaskDecision:
+    if mask_file_name is None:
+        raise ValueError("masked coastal water requires a file name")
     if imprint_masks_to_dds:
         return CoastalMaskDecision.imprinted_alpha(mask_file_name)
     return CoastalMaskDecision.external_border(mask_file_name)
@@ -90,13 +117,28 @@ def decide_coastal_mask(
 
 def water_texture_coordinates(
     decision: CoastalMaskDecision,
-    s: float,
-    t: float,
-    ratio_fetch: float,
-    ratio_bathy: float,
+    texture_st: tuple[float, float],
+    water_ratios: tuple[float, float],
 ) -> tuple[float, float, float, float]:
+    """Return the four post-normal coordinates for custom XP12 water."""
+    s, t = texture_st
     if decision.disposition == CoastalMaskDisposition.EXTERNAL_BORDER:
         return s, t, s, t
     if decision.disposition == CoastalMaskDisposition.IMPRINTED_ALPHA:
+        ratio_fetch, ratio_bathy = water_ratios
         return ratio_fetch, ratio_bathy, s, t
     raise ValueError(f"{decision.disposition} has no custom water coordinates")
+
+
+def require_external_border_mask(
+    build_dir: str,
+    decision: CoastalMaskDecision | None,
+) -> None:
+    """Reject a stale external-border decision before opening its terrain file."""
+    if decision is None:
+        return
+    if decision.disposition != CoastalMaskDisposition.EXTERNAL_BORDER:
+        return
+    mask_path = Path(build_dir) / "textures" / str(decision.mask_file_name)
+    if not mask_path.is_file():
+        raise FileNotFoundError(f"Missing BORDER_TEX mask: {mask_path}")

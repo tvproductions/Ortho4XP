@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 
 import O4_Texture_Conversion_Scheduler as TCS
 import O4_Texture_Encoder as TEX
+import O4_Texture_Resolution as TR
 
 
 # Queue runner invariants:
@@ -18,6 +19,9 @@ import O4_Texture_Encoder as TEX
 # - Polling is short and injectable so tests can prove live progress behavior.
 # - Future GPU backends can reuse the same bounded scheduling contract.
 # - Result aggregation stays provider-aware for concise Step 3 summaries.
+# - Ordered results preserve requested and resolved artifact identities.
+# - Batch freezing occurs only after active futures have drained.
+#
 @dataclass
 class TextureConversionQueueRunner:
     convert_queue: TCS.TextureConversionQueue
@@ -48,6 +52,10 @@ class TextureConversionQueueRunner:
                     time.sleep(self.options.poll_interval)
 
         TCS.UI.progress_bar(self.options.progress_bar, 100)
+        return self._batch_result()
+
+    def _batch_result(self):
+        """Freeze ordered results and failure summary at queue shutdown."""
         return TCS.TextureConversionBatchResult(
             self.completed,
             len(self.failures),
@@ -114,48 +122,38 @@ class TextureConversionQueueRunner:
 
 def _run_job(job: TCS.TextureConversionJob, convert_texture: TCS.ConvertTexture):
     try:
-        if job.source is not None:
-            result = convert_texture(
-                job.tile,
-                job.til_x_left,
-                job.til_y_top,
-                job.zoomlevel,
-                job.provider_code,
-                texture_source=job.source,
-            )
-        else:
-            result = convert_texture(
-                job.tile,
-                job.til_x_left,
-                job.til_y_top,
-                job.zoomlevel,
-                job.provider_code,
-            )
-        result = TEX.coerce_conversion_result(
-            result,
-            job.display_name,
-            job.provider_code,
-        )
+        result = _coerced_job_result(job, convert_texture)
     except Exception as exc:
         result = TEX.TextureConversionResult.failure(
             job.display_name, job.provider_code, str(exc)
         )
-    return _with_job_texture_resolution(job, result)
+    return TR.with_job_texture_resolution(job, result)
 
 
-def _with_job_texture_resolution(job, result):
-    if result.requested_attrs is not None or result.resolved_attrs is not None:
-        return result
-    resolved_attrs = (
-        job.til_x_left,
-        job.til_y_top,
-        job.zoomlevel,
+def _coerced_job_result(job, convert_texture):
+    """Run one legacy or streaming conversion and normalize its result."""
+    if job.source is not None:
+        result = convert_texture(
+            job.tile,
+            job.til_x_left,
+            job.til_y_top,
+            job.zoomlevel,
+            job.provider_code,
+            texture_source=job.source,
+        )
+    else:
+        result = convert_texture(
+            job.tile,
+            job.til_x_left,
+            job.til_y_top,
+            job.zoomlevel,
+            job.provider_code,
+        )
+    return TEX.coerce_conversion_result(
+        result,
+        job.display_name,
         job.provider_code,
     )
-    requested_attrs = (
-        job.source.terrain_attrs if job.source is not None else resolved_attrs
-    )
-    return result.with_texture_resolution(requested_attrs, resolved_attrs)
 
 
 def _update_progress(progress_bar, completed, remaining):

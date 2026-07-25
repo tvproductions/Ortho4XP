@@ -11,6 +11,12 @@ from PIL import Image
 import O4_File_Names as FNAMES
 import O4_UI_Utils as UI
 
+# DDS QA is advisory to conversion success but authoritative for source-mask
+# cleanup. A skipped or passing check permits cleanup; decoding errors and
+# below-threshold metrics retain retryable source artifacts.
+# Dispositions make that ownership decision explicit to the conversion layer
+# without allowing advisory QA to rewrite encoder success.
+#
 # DDS QA policy:
 # - Disabled unless tile config opts in.
 # - Runs only after the native DDS encoder reports success.
@@ -106,26 +112,36 @@ def run_dds_quality_check(request: DdsQualityRequest) -> DdsQualityCheckResult:
             request.source_png_path, request.decoded_png_path
         )
     except Exception as exc:
-        error_summary = f"{type(exc).__name__}: {exc}"
-        UI.vprint(
-            1,
-            "WARNING: DDS QA failed for",
-            request.display_name,
-            error_summary,
-        )
-        return DdsQualityCheckResult("error", error_summary=error_summary)
+        return _quality_error(request, exc)
 
     if metrics.psnr < request.threshold:
-        UI.vprint(
-            1,
-            "WARNING: DDS QA quality below threshold for",
-            request.display_name,
-            f"PSNR={metrics.psnr:.2f} dB",
-            f"threshold={request.threshold:.2f} dB",
-            f"MSE={metrics.mse:.2f}",
-        )
-        return DdsQualityCheckResult("below_threshold", metrics)
+        return _below_threshold(request, metrics)
     return DdsQualityCheckResult("passed", metrics)
+
+
+def _quality_error(request, exc):
+    """Report a caught QA failure without changing encoder success."""
+    error_summary = f"{type(exc).__name__}: {exc}"
+    UI.vprint(
+        1,
+        "WARNING: DDS QA failed for",
+        request.display_name,
+        error_summary,
+    )
+    return DdsQualityCheckResult("error", error_summary=error_summary)
+
+
+def _below_threshold(request, metrics):
+    """Report unacceptable decoded-image quality and retain source artifacts."""
+    UI.vprint(
+        1,
+        "WARNING: DDS QA quality below threshold for",
+        request.display_name,
+        f"PSNR={metrics.psnr:.2f} dB",
+        f"threshold={request.threshold:.2f} dB",
+        f"MSE={metrics.mse:.2f}",
+    )
+    return DdsQualityCheckResult("below_threshold", metrics)
 
 
 def _comparable_images(source_image, decoded_image):

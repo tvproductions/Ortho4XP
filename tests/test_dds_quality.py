@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from unittest import mock
 
 import numpy
@@ -14,6 +15,25 @@ except ModuleNotFoundError:
     from tests import _path  # noqa: F401
 
 import O4_DDS_Quality as DQA
+
+# Quality tests cover decoded-image metrics, disposition reporting, and the
+# enabled-check request boundary independently from native decoder processes.
+# Real temporary PNGs keep metric assertions faithful to runtime image modes,
+# while decoder and UI patches isolate the disposition contract.
+# Request assertions keep QA thresholds and decoded-output naming observable.
+# Error assertions preserve caught decoder details for diagnostics.
+#
+
+
+def _expected_enabled_request():
+    return DQA.DdsQualityRequest(
+        "source.png",
+        "out.dds",
+        str(Path("tmp") / "out.dds.qa.png"),
+        35.5,
+        "out.dds",
+    )
+
 
 # DDS QA tests are split across files to keep each surface focused:
 # - this file covers pure image metrics and helper enablement;
@@ -82,13 +102,16 @@ class DdsQualityMetricTests(unittest.TestCase):
                     )
                 )
 
-        self.assertEqual(getattr(result, "disposition", None), "below_threshold")
+        self._assert_below_threshold(result, vprint)
+
+    def _assert_below_threshold(self, result, vprint):
+        self.assertEqual(result.disposition, "below_threshold")
         self.assertIsNotNone(result.metrics)
-        self.assertAlmostEqual(result.metrics.psnr, 0.0)
+        metrics = cast(DQA.DdsQualityMetrics, result.metrics)
+        self.assertAlmostEqual(metrics.psnr, 0.0)
         vprint.assert_called_once()
-        self.assertIn(
-            "below threshold", " ".join(str(arg) for arg in vprint.call_args.args)
-        )
+        message = " ".join(map(str, vprint.call_args.args))
+        self.assertIn("below threshold", message)
 
     def test_run_quality_check_returns_error_disposition_for_caught_failure(self):
         request = DQA.DdsQualityRequest(
@@ -140,7 +163,10 @@ class DdsQualityMetricTests(unittest.TestCase):
                     )
                 )
 
-        self.assertEqual(getattr(result, "disposition", None), "passed")
+        self._assert_quality_passed(result, vprint)
+
+    def _assert_quality_passed(self, result, vprint):
+        self.assertEqual(result.disposition, "passed")
         self.assertIsNotNone(result.metrics)
         vprint.assert_not_called()
 
@@ -163,15 +189,7 @@ class DdsQualityMetricTests(unittest.TestCase):
             quality_check.return_value = expected
             result = DQA.run_enabled_dds_quality_check(tile, encode_result)
 
-        quality_check.assert_called_once_with(
-            DQA.DdsQualityRequest(
-                "source.png",
-                "out.dds",
-                str(Path("tmp") / "out.dds.qa.png"),
-                35.5,
-                "out.dds",
-            )
-        )
+        quality_check.assert_called_once_with(_expected_enabled_request())
         self.assertIs(result, expected)
 
     def test_disabled_quality_check_does_not_build_decoded_png_request(self):
