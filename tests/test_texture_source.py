@@ -11,6 +11,19 @@ from O4_Texture_Source import TextureBuildResult, TextureSource
 
 
 class TextureSourceTests(unittest.TestCase):
+    def test_source_preserves_requested_identity_after_provider_resolution(self):
+        source = TextureSource(
+            object(),
+            (32, 48, 16, "Arc"),
+            Image.new("RGB", (4, 4)),
+        ).with_requested_attrs([32, 48, 16, "BI"])
+
+        self.assertEqual(source.provider_code, "Arc")
+        self.assertEqual(source.terrain_attrs, (32, 48, 16, "BI"))
+        self.assertIsInstance(source.requested_attrs, tuple)
+        self.assertEqual(source.output_name(), "48_32_Arc16.dds")
+        self.assertEqual(source.output_name("jpg"), "48_32_Arc16.jpg")
+
     def test_source_exposes_texture_attributes(self):
         tile = object()
         image = Image.new("RGB", (4, 4), (10, 20, 30))

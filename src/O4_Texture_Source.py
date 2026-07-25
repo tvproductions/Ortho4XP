@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from PIL import Image
+
+import O4_File_Names as FNAMES
 
 type TextureAttributes = tuple[int, int, int, str]
 
@@ -16,6 +18,20 @@ class TextureSource:
     image: Image.Image
     cache_path: str | None = None
     wrote_cache: bool = False
+    requested_attrs: TextureAttributes | None = None
+
+    @property
+    def terrain_attrs(self) -> TextureAttributes:
+        return self.requested_attrs or self.attrs
+
+    def with_requested_attrs(self, attrs: TextureAttributes) -> TextureSource:
+        return replace(self, requested_attrs=(*attrs[:3], attrs[3]))
+
+    def output_name(self, file_ext: str = "dds") -> str:
+        return FNAMES.dds_file_name_from_attributes(
+            *self.attrs,
+            file_ext=file_ext,
+        )
 
     @property
     def til_x_left(self) -> int:

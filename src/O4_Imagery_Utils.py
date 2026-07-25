@@ -18,6 +18,7 @@ from PIL import Image, ImageFilter, ImageOps
 from pydantic import ValidationError
 
 import O4_Async_HTTP as AHTTP
+import O4_Coastal_Artifact_Policy as CAP
 import O4_File_Names as FNAMES
 import O4_GDAL_Texture_Pipeline as GTP
 import O4_Geo_Utils as GEO
@@ -134,6 +135,14 @@ combined_providers_dict: dict[str, Any] = {}
 local_combined_providers_dict: dict[str, Any] = {}
 extents_dict: dict[str, dict[str, Any]] = {"global": {"dir": None, "code": "global"}}
 color_filters_dict: dict[str, Any] = {"none": []}
+
+
+def provider_uses_explicit_extent(provider_code):
+    return CAP.provider_uses_explicit_extent(
+        provider_code,
+        providers_dict,
+        local_combined_providers_dict,
+    )
 
 
 ################################################################################
@@ -2311,8 +2320,8 @@ def convert_texture_source(texture_source, type=DDS_OUTPUT_TYPE):
     tile = texture_source.tile
     texture_attrs = texture_source.attrs
     provider_code = texture_source.provider_code
-    out_file_name = FNAMES.dds_file_name_from_attributes(*texture_attrs)
-    png_file_name = out_file_name.replace(DDS_OUTPUT_TYPE, "png")
+    out_file_name = texture_source.output_name()
+    png_file_name = texture_source.output_name("png")
     UI.vprint(1, "   Converting orthophoto(s) to build texture " + out_file_name + ".")
 
     big_image = _prepare_texture_source_image(texture_source)

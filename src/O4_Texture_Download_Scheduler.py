@@ -29,6 +29,24 @@ class DownloadTextureState:
     interrupted: bool = False
 
 
+@dataclass(frozen=True)
+class TextureDownloadRequest:
+    requested_attrs: tuple
+    active_attrs: tuple
+
+    def __post_init__(self):
+        object.__setattr__(self, "requested_attrs", tuple(self.requested_attrs))
+        object.__setattr__(self, "active_attrs", tuple(self.active_attrs))
+
+    @classmethod
+    def initial(cls, attrs):
+        attrs = tuple(attrs)
+        return cls(attrs, attrs)
+
+    def with_active_attrs(self, attrs):
+        return TextureDownloadRequest(self.requested_attrs, tuple(attrs))
+
+
 @dataclass
 class DownloadTextureRuntime:
     tile: Any
@@ -38,6 +56,7 @@ class DownloadTextureRuntime:
     state: DownloadTextureState
     max_attempts: int
     failover_registry: Any = FAILOVER.default_registry
+    provider_extent_resolver: Any = IMG.provider_uses_explicit_extent
 
 
 def _worker_count(options):
@@ -92,17 +111,17 @@ async def _mark_download_started(runtime):
         _update_progress(runtime)
 
 
-async def _record_download_result(runtime, attrs, result):
+async def _record_download_result(runtime, request, result):
     async with runtime.state.progress_lock:
         runtime.state.progress["pending"] -= 1
         if result.ok:
-            retry_attrs = TDF.record_successful_download(runtime, attrs, result)
+            retry_request = TDF.record_successful_download(runtime, request, result)
         else:
-            retry_attrs = TDF.record_failed_download(
-                runtime, attrs, IMG.providers_dict, _texture_failure_context
+            retry_request = TDF.record_failed_download(
+                runtime, request, IMG.providers_dict, _texture_failure_context
             )
         _update_progress(runtime)
-    return retry_attrs
+    return retry_request
 
 
 async def _build_texture(runtime, attrs):
@@ -113,37 +132,41 @@ async def _build_texture(runtime, attrs):
         return TextureBuildResult.failure(tuple(attrs), str(err))
 
 
-async def _download_task(runtime, attrs):
+async def _download_task(runtime, request):
     if UI.red_flag:
         runtime.state.interrupted = True
         return 0
-    attrs = tuple(attrs)
     async with runtime.semaphore:
         await _mark_download_started(runtime)
-        result = await _build_texture(runtime, attrs)
-        retry_attrs = await _record_download_result(runtime, attrs, result)
-        await _queue_download_result(runtime, attrs, result, retry_attrs)
+        result = await _build_texture(runtime, request.active_attrs)
+        retry_request = await _record_download_result(runtime, request, result)
+        await _queue_download_result(runtime, request, result, retry_request)
         if UI.red_flag:
             runtime.state.interrupted = True
         return 1 if result.ok else 0
 
 
-async def _queue_download_result(runtime, attrs, result, retry_attrs):
+async def _queue_download_result(runtime, request, result, retry_request):
     if result.ok and result.source is not None:
-        runtime.convert_queue.put((runtime.tile, result.source))
-    elif retry_attrs is not None:
-        runtime.download_queue.put(retry_attrs)
+        source = result.source.with_requested_attrs(request.requested_attrs)
+        runtime.convert_queue.put((runtime.tile, source))
+    elif retry_request is not None:
+        runtime.download_queue.put(retry_request)
         async with runtime.state.progress_lock:
             _update_progress(runtime)
 
 
 async def _run_ready_tasks(runtime, tasks):
     while not runtime.download_queue.empty() and not UI.red_flag:
-        attrs = runtime.download_queue.get()
-        if isinstance(attrs, str) and attrs == "quit":
+        queue_item = runtime.download_queue.get()
+        if isinstance(queue_item, str) and queue_item == "quit":
             continue
-        active_attrs = TDF.active_attrs(runtime, tuple(attrs), IMG.providers_dict)
-        tasks.add(asyncio.create_task(_download_task(runtime, active_attrs)))
+        if isinstance(queue_item, TextureDownloadRequest):
+            request = queue_item
+        else:
+            request = TextureDownloadRequest.initial(queue_item)
+        active_request = TDF.active_request(runtime, request, IMG.providers_dict)
+        tasks.add(asyncio.create_task(_download_task(runtime, active_request)))
     return tasks
 
 
