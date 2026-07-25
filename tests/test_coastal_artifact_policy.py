@@ -98,6 +98,17 @@ class CoastalArtifactPolicyTests(unittest.TestCase):
             (1.0, 0.4, 0.2, 0.3),
         )
 
+    def test_native_water_has_no_custom_water_coordinate_contract(self):
+        decision = CAP.decide_coastal_mask(
+            tri_type=2,
+            imprint_masks_to_dds=False,
+            mask_file_name=None,
+            mask_available=False,
+            explicit_provider_extent=False,
+        )
+        with self.assertRaises(ValueError):
+            CAP.water_texture_coordinates(decision, 0.2, 0.3, 1.0, 0.4)
+
 
 if __name__ == "__main__":
     unittest.main()
