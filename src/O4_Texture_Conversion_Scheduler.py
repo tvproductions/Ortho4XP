@@ -57,6 +57,7 @@ class TextureConversionBatchResult:
     failed: int
     interrupted: bool
     failures: tuple
+    results: tuple = ()
 
 
 @dataclass(frozen=True)

@@ -30,6 +30,7 @@ class TextureConversionQueueRunner:
     )
     completed: int = field(init=False, default=0)
     failures: list = field(init=False, default_factory=list)
+    results: list = field(init=False, default_factory=list)
     interrupted: bool = field(init=False, default=False)
     saw_quit: bool = field(init=False, default=False)
 
@@ -52,6 +53,7 @@ class TextureConversionQueueRunner:
             len(self.failures),
             self.interrupted or TCS.UI.red_flag,
             tuple(self.failures),
+            tuple(self.results),
         )
 
     def _stop_if_interrupted(self):
@@ -100,6 +102,7 @@ class TextureConversionQueueRunner:
         self.active.pop(future)
         result = future.result()
         self.completed += 1
+        self.results.append(result)
         if not result.ok:
             self.failures.append(result)
         _update_progress(

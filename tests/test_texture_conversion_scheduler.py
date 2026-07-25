@@ -94,6 +94,26 @@ class TextureConversionSchedulerFailureTests(unittest.TestCase):
         self.assertEqual(result.failures[0].provider_code, "BAD")
         self.assertEqual(result.failures[0].error_summary, "encoder failed")
 
+    def test_scheduler_exposes_every_completed_conversion_result(self):
+        ui = FakeUI()
+        successful = TEX.TextureConversionResult.success("ok.dds", "OK")
+        failed = TEX.TextureConversionResult.failure(
+            "bad.dds",
+            "BAD",
+            "encoder failed",
+        )
+        convert_texture = mock.Mock(side_effect=(successful, failed))
+
+        with mock.patch.object(TCS, "UI", ui):
+            result = TCS.run_texture_conversion_queue(
+                _queue("OK", "BAD"),
+                1,
+                convert_texture=convert_texture,
+                options=_fast_options(),
+            )
+
+        self.assertEqual(result.results, (successful, failed))
+
     def test_scheduler_coerces_false_conversion_result_to_failure(self):
         ui = FakeUI()
         convert_texture = mock.Mock(return_value=False)

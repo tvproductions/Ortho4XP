@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
+import O4_Texture_Artifact_Finalizer as TAF
 import O4_Texture_Conversion_Scheduler as TCS
 import O4_UI_Utils as UI
 
@@ -52,6 +53,21 @@ def handle_texture_conversion_scheduler_result(tile, result_holder):
         UI.red_flag = True
         return
     report_texture_conversion_result(tile, result)
+
+
+def finalize_texture_conversion(tile, result_holder):
+    if "exception" in result_holder:
+        return False
+    result = result_holder.get("result")
+    if result is None or result.interrupted or result.failed:
+        return False
+    try:
+        TAF.finalize_terrain_texture_references(tile, result.results)
+    except TAF.TextureFinalizationError as exc:
+        UI.vprint(1, "Texture artifact finalization failed:", str(exc))
+        UI.vprint(3, exc)
+        return False
+    return True
 
 
 def _texture_conversion_provider_counts(failures):

@@ -183,6 +183,88 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
             "RuntimeError: scheduler failed",
         )
 
+    def test_failed_conversion_aborts_before_dsf_activation(self):
+        tile = _tile()
+        replace = mock.Mock()
+        failure = TEX.TextureConversionResult.failure(
+            "48_32_BI16.dds",
+            "BI",
+            "encoder failed",
+        )
+        result = TCS.TextureConversionBatchResult(
+            completed=1,
+            failed=1,
+            interrupted=False,
+            failures=(failure,),
+            results=(failure,),
+        )
+
+        with (
+            _build_tile_patches(tile, replace=replace),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                return_value=result,
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 0)
+
+        replace.assert_not_called()
+
+    def test_missing_successful_dds_aborts_before_dsf_activation(self):
+        tile = _tile()
+        replace = mock.Mock()
+        success = TEX.TextureConversionResult.success(
+            "48_32_BI16.dds",
+            "BI",
+        )
+        result = TCS.TextureConversionBatchResult(
+            completed=1,
+            failed=0,
+            interrupted=False,
+            failures=(),
+            results=(success,),
+        )
+
+        with (
+            _build_tile_patches(tile, replace=replace),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                return_value=result,
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 0)
+
+        replace.assert_not_called()
+
+    def test_finalization_error_aborts_before_dsf_activation(self):
+        tile = _tile()
+        replace = mock.Mock()
+        result = TCS.TextureConversionBatchResult(
+            completed=0,
+            failed=0,
+            interrupted=False,
+            failures=(),
+        )
+
+        with (
+            _build_tile_patches(tile, replace=replace),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                return_value=result,
+            ),
+            mock.patch.object(
+                TTC.TAF,
+                "finalize_terrain_texture_references",
+                side_effect=TTC.TAF.TextureFinalizationError("rewrite failed"),
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 0)
+
+        replace.assert_not_called()
+
     def test_scheduler_exception_is_reported_without_key_error(self):
         original_error = RuntimeError("scheduler failed")
         result_holder = {}

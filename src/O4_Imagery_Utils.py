@@ -2345,11 +2345,15 @@ def convert_texture_source(texture_source, type=DDS_OUTPUT_TYPE):
         always_paths=(file_to_convert,),
         success_paths=(mask_input.path,) if mask_input is not None else (),
     )
-    return convert_dds_texture(
+    result = convert_dds_texture(
         tile,
         texture_attrs,
         (file_to_convert, out_file_name, dxt5),
         cleanup_plan,
+    )
+    return result.with_texture_resolution(
+        texture_source.terrain_attrs,
+        texture_source.attrs,
     )
 
 

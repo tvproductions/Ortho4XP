@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 # Texture model policy:
@@ -45,6 +45,15 @@ class TextureConversionResult:
     provider_code: str = ""
     error_summary: str = ""
     encode_result: TextureEncodeResult | None = None
+    requested_attrs: tuple[int, int, int, str] | None = None
+    resolved_attrs: tuple[int, int, int, str] | None = None
+
+    def with_texture_resolution(self, requested_attrs, resolved_attrs):
+        return replace(
+            self,
+            requested_attrs=tuple(requested_attrs),
+            resolved_attrs=tuple(resolved_attrs),
+        )
 
     @classmethod
     def success(

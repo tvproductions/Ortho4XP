@@ -13,6 +13,7 @@ except ModuleNotFoundError:
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
 import O4_Texture_Conversion_Utils as TCU
+from O4_Texture_Models import TextureConversionResult
 from O4_Texture_Source import TextureSource
 from tests._imagery_color_normalization_helpers import (
     ConvertTexturePatchMixin,
@@ -24,6 +25,37 @@ from tests._imagery_geotiff_conversion_helpers import (
 
 
 class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
+    def test_resolved_source_uses_canonical_dds_name_and_preserves_resolution(self):
+        tile = self._tile_for_conversion()
+        tile.default_website = "GO2"
+        source = TextureSource(
+            tile,
+            (32, 48, 16, "Arc"),
+            Image.new("RGB", (16, 16), (1, 2, 3)),
+        ).with_requested_attrs((32, 48, 16, "BI"))
+        conversion_result = TextureConversionResult.success(
+            "48_32_Arc16.dds",
+            "Arc",
+        )
+
+        with (
+            self._convert_texture_patches("Arc"),
+            mock.patch.object(
+                IMG,
+                "convert_dds_texture",
+                return_value=conversion_result,
+            ) as conversion,
+        ):
+            result = IMG.convert_texture_source(source)
+
+        self.assertEqual(
+            conversion.call_args.args[2][1],
+            "48_32_Arc16.dds",
+        )
+        self.assertEqual(result.display_name, "48_32_Arc16.dds")
+        self.assertEqual(result.requested_attrs, (32, 48, 16, "BI"))
+        self.assertEqual(result.resolved_attrs, (32, 48, 16, "Arc"))
+
     def test_convert_texture_uses_streaming_image_when_cached_jpeg_is_missing(self):
         tile = self._tile_for_conversion()
         source = TextureSource(
@@ -51,7 +83,12 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         with (
             self._convert_texture_patches("STREAM"),
             mock.patch.object(
-                IMG, "convert_dds_texture", return_value=object()
+                IMG,
+                "convert_dds_texture",
+                return_value=TextureConversionResult.success(
+                    "48_32_STREAM16.dds",
+                    "STREAM",
+                ),
             ) as conversion,
         ):
             IMG.convert_texture_source(source)

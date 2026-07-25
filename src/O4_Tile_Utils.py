@@ -182,6 +182,12 @@ def build_tile(tile, ctx=None):
     if ctx.red_flag:
         UI.exit_message_and_bottom_line()
         return 0
+    if convert_launched and not TTC.finalize_texture_conversion(
+        tile,
+        convert_result_holder,
+    ):
+        UI.vprint(1, "Tile activation stopped after texture conversion failure.")
+        return 0
     UI.vprint(1, " *Activating DSF file.")
     dsf_file_name = os.path.join(
         tile.build_dir,
