@@ -131,15 +131,31 @@ def _run_job(job: TCS.TextureConversionJob, convert_texture: TCS.ConvertTexture)
                 job.zoomlevel,
                 job.provider_code,
             )
-        return TEX.coerce_conversion_result(
+        result = TEX.coerce_conversion_result(
             result,
             job.display_name,
             job.provider_code,
         )
     except Exception as exc:
-        return TEX.TextureConversionResult.failure(
+        result = TEX.TextureConversionResult.failure(
             job.display_name, job.provider_code, str(exc)
         )
+    return _with_job_texture_resolution(job, result)
+
+
+def _with_job_texture_resolution(job, result):
+    if result.requested_attrs is not None or result.resolved_attrs is not None:
+        return result
+    resolved_attrs = (
+        job.til_x_left,
+        job.til_y_top,
+        job.zoomlevel,
+        job.provider_code,
+    )
+    requested_attrs = (
+        job.source.terrain_attrs if job.source is not None else resolved_attrs
+    )
+    return result.with_texture_resolution(requested_attrs, resolved_attrs)
 
 
 def _update_progress(progress_bar, completed, remaining):

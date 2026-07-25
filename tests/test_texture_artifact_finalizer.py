@@ -51,6 +51,71 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             terrain_file.read_text(),
         )
 
+    def test_chained_mappings_apply_once_to_each_original_directive(self):
+        terrain_file = self._write_terrain_text(
+            "chain.ter",
+            "BASE_TEX_NOWRAP ../textures/48_32_BI16.dds\n"
+            "BASE_TEX_NOWRAP ../textures/48_32_Arc16.dds\n",
+        )
+        self._write_texture("Arc")
+        self._write_texture("EOX")
+
+        TAF.finalize_terrain_texture_references(
+            self.tile,
+            (
+                resolved_result("BI", "Arc"),
+                resolved_result("Arc", "EOX"),
+            ),
+        )
+
+        self.assertEqual(
+            terrain_file.read_text(),
+            "BASE_TEX_NOWRAP ../textures/48_32_Arc16.dds\n"
+            "BASE_TEX_NOWRAP ../textures/48_32_EOX16.dds\n",
+        )
+
+    def test_chained_mappings_are_stable_in_reversed_result_order(self):
+        terrain_file = self._write_terrain_text(
+            "reversed.ter",
+            "BASE_TEX_NOWRAP ../textures/48_32_BI16.dds\n"
+            "BASE_TEX_NOWRAP ../textures/48_32_Arc16.dds\n",
+        )
+        self._write_texture("Arc")
+        self._write_texture("EOX")
+
+        TAF.finalize_terrain_texture_references(
+            self.tile,
+            (
+                resolved_result("Arc", "EOX"),
+                resolved_result("BI", "Arc"),
+            ),
+        )
+
+        self.assertEqual(
+            terrain_file.read_text(),
+            "BASE_TEX_NOWRAP ../textures/48_32_Arc16.dds\n"
+            "BASE_TEX_NOWRAP ../textures/48_32_EOX16.dds\n",
+        )
+
+    def test_only_exact_base_texture_targets_are_rewritten(self):
+        terrain_file = self._write_terrain_text(
+            "suffix.ter",
+            "BASE_TEX_NOWRAP ../textures/48_32_BI16.dds.backup\n",
+        )
+        original = terrain_file.read_text()
+        self._write_texture("Arc")
+
+        with self.assertRaisesRegex(
+            TAF.TextureFinalizationError,
+            "not referenced",
+        ):
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (resolved_result(),),
+            )
+
+        self.assertEqual(terrain_file.read_text(), original)
+
     def test_rejects_failed_conversion_without_rewriting(self):
         terrain_file = self._write_terrain("48_32_BI16.ter")
         original = terrain_file.read_text()
@@ -65,6 +130,141 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             )
 
         self.assertEqual(terrain_file.read_text(), original)
+
+    def test_rejects_completed_result_without_resolution_metadata(self):
+        self._write_terrain("48_32_BI16.ter")
+        self._write_texture("Arc")
+        result = TextureConversionResult.success("48_32_Arc16.dds", "Arc")
+
+        self._assert_finalization_error(
+            "missing texture resolution metadata",
+            result,
+        )
+
+    def test_rejects_malformed_attribute_tuple_as_finalization_error(self):
+        self._write_terrain("48_32_BI16.ter")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_32_Arc16.dds",
+            provider_code="Arc",
+            requested_attrs=(32, 48, 16),
+            resolved_attrs=(32, 48, 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "invalid requested texture attributes",
+            result,
+        )
+
+    def test_rejects_non_tuple_attribute_metadata(self):
+        self._write_terrain("48_32_BI16.ter")
+        self._write_texture("Arc")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_32_Arc16.dds",
+            provider_code="Arc",
+            requested_attrs=[32, 48, 16, "BI"],
+            resolved_attrs=(32, 48, 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "invalid requested texture attributes",
+            result,
+        )
+
+    def test_rejects_non_integer_attribute_coordinate(self):
+        self._write_terrain("48_32_BI16.ter")
+        self._write_texture("Arc")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_32_Arc16.dds",
+            provider_code="Arc",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, "48", 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "invalid resolved texture attributes",
+            result,
+        )
+
+    def test_rejects_requested_resolved_coordinate_mismatch(self):
+        self._write_terrain("48_32_BI16.ter")
+        self._write_texture_name("48_33_Arc16.dds")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_33_Arc16.dds",
+            provider_code="Arc",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(33, 48, 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "coordinates and zoom differ",
+            result,
+        )
+
+    def test_rejects_requested_resolved_zoom_mismatch(self):
+        self._write_terrain("48_32_BI16.ter")
+        self._write_texture_name("48_32_Arc17.dds")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_32_Arc17.dds",
+            provider_code="Arc",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, 48, 17, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "coordinates and zoom differ",
+            result,
+        )
+
+    def test_rejects_resolved_provider_mismatch(self):
+        self._write_terrain("48_32_BI16.ter")
+        self._write_texture("Arc")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_32_Arc16.dds",
+            provider_code="EOX",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, 48, 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "resolved provider mismatch",
+            result,
+        )
+
+    def test_rejects_resolved_display_name_mismatch(self):
+        self._write_terrain("48_32_BI16.ter")
+        result = TextureConversionResult(
+            ok=True,
+            display_name="48_32_EOX16.dds",
+            provider_code="Arc",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, 48, 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "display name mismatch",
+            result,
+        )
+
+    def test_rejects_non_string_display_name_as_finalization_error(self):
+        self._write_terrain("48_32_BI16.ter")
+        result = TextureConversionResult(
+            ok=True,
+            display_name=123,
+            provider_code="Arc",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, 48, 16, "Arc"),
+        )
+
+        self._assert_finalization_error(
+            "invalid texture display name",
+            result,
+        )
 
     def test_rejects_reported_success_when_resolved_dds_is_missing(self):
         terrain_file = self._write_terrain("48_32_BI16.ter")
@@ -139,6 +339,50 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
         )
         self.assertEqual(list(self.terrain.glob("*.finalizing*")), [])
 
+    def test_rollback_failure_retains_and_reports_recoverable_backup(self):
+        first = self._write_terrain("a.ter")
+        second = self._write_terrain("b.ter")
+        first_original = first.read_bytes()
+        second_original = second.read_bytes()
+        backup = first.with_name(first.name + ".finalizing-backup")
+        self._write_texture("Arc")
+        real_replace = os.replace
+        replace_count = 0
+
+        def fail_forward_and_rollback(source, target):
+            nonlocal replace_count
+            replace_count += 1
+            if replace_count == 2:
+                raise OSError("forward replace failed")
+            if replace_count == 3:
+                raise OSError("rollback replace failed")
+            return real_replace(source, target)
+
+        with (
+            mock.patch.object(
+                TAF.os,
+                "replace",
+                side_effect=fail_forward_and_rollback,
+            ),
+            self.assertRaisesRegex(
+                TAF.TextureFinalizationError,
+                "rollback failed",
+            ) as caught,
+        ):
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (resolved_result(),),
+            )
+
+        self.assertTrue(backup.is_file())
+        self.assertEqual(backup.read_bytes(), first_original)
+        self.assertIn(str(backup), str(caught.exception))
+        self.assertIn(b"48_32_Arc16.dds", first.read_bytes())
+        self.assertEqual(second.read_bytes(), second_original)
+        self.assertFalse(first.with_name(first.name + ".finalizing").exists())
+        self.assertFalse(second.with_name(second.name + ".finalizing").exists())
+        self.assertFalse(second.with_name(second.name + ".finalizing-backup").exists())
+
     def test_atomic_rewrite_preparation_failure_removes_staged_files(self):
         terrain_file = self._write_terrain("a.ter")
         original = terrain_file.read_text()
@@ -174,17 +418,38 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
         self.assertEqual(list(self.terrain.glob("*.finalizing*")), [])
 
     def _write_terrain(self, name):
+        return self._write_terrain_text(
+            name,
+            "A\n800\nTERRAIN\n\nBASE_TEX_NOWRAP ../textures/48_32_BI16.dds\n",
+        )
+
+    def _write_terrain_text(self, name, text):
         terrain_file = self.terrain / name
         terrain_file.write_text(
-            "A\n800\nTERRAIN\n\nBASE_TEX_NOWRAP ../textures/48_32_BI16.dds\n",
+            text,
             encoding="utf-8",
         )
         return terrain_file
 
     def _write_texture(self, provider):
-        texture = self.textures / f"48_32_{provider}16.dds"
+        return self._write_texture_name(f"48_32_{provider}16.dds")
+
+    def _write_texture_name(self, name):
+        texture = self.textures / name
         texture.write_bytes(b"dds")
         return texture
+
+    def _assert_finalization_error(self, pattern, result):
+        try:
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (result,),
+            )
+        except Exception as exc:
+            self.assertIsInstance(exc, TAF.TextureFinalizationError)
+            self.assertRegex(str(exc), pattern)
+        else:
+            self.fail("TextureFinalizationError not raised")
 
 
 if __name__ == "__main__":

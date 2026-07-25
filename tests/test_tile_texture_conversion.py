@@ -123,11 +123,19 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
     def test_build_tile_sends_one_quit_joins_scheduler_and_reports_result(self):
         tile = _tile()
         queues = [_RecordingQueue(), _RecordingQueue()]
+        success = TEX.TextureConversionResult(
+            ok=True,
+            display_name="48_32_BI16.dds",
+            provider_code="BI",
+            requested_attrs=(32, 48, 16, "BI"),
+            resolved_attrs=(32, 48, 16, "BI"),
+        )
         result = TCS.TextureConversionBatchResult(
             completed=1,
             failed=0,
             interrupted=False,
             failures=(),
+            results=(success,),
         )
         consumed_sentinels = []
         scheduler_queues = []
@@ -151,6 +159,11 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
                 TTC.TCS,
                 "run_texture_conversion_queue",
                 side_effect=run_scheduler,
+            ),
+            mock.patch.object(
+                TTC.TAF,
+                "finalize_terrain_texture_references",
+                return_value=0,
             ),
         ):
             self.assertEqual(TILE.build_tile(tile), 1)
@@ -210,6 +223,80 @@ class TileTextureConversionSchedulerIntegrationTests(unittest.TestCase):
             self.assertEqual(TILE.build_tile(tile), 0)
 
         replace.assert_not_called()
+
+    def test_positive_completed_count_with_default_results_blocks_activation(self):
+        tile = _tile()
+        replace = mock.Mock()
+        result = TCS.TextureConversionBatchResult(
+            completed=1,
+            failed=0,
+            interrupted=False,
+            failures=(),
+        )
+
+        with (
+            _build_tile_patches(tile, replace=replace),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                return_value=result,
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 0)
+
+        replace.assert_not_called()
+
+    def test_excess_aggregated_results_block_activation_before_finalizer(self):
+        tile = _tile()
+        replace = mock.Mock()
+        success = TEX.TextureConversionResult.success("48_32_BI16.dds", "BI")
+        result = TCS.TextureConversionBatchResult(
+            completed=0,
+            failed=0,
+            interrupted=False,
+            failures=(),
+            results=(success,),
+        )
+
+        with (
+            _build_tile_patches(tile, replace=replace),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                return_value=result,
+            ),
+            mock.patch.object(
+                TTC.TAF,
+                "finalize_terrain_texture_references",
+                return_value=0,
+            ) as finalizer,
+        ):
+            self.assertEqual(TILE.build_tile(tile), 0)
+
+        replace.assert_not_called()
+        finalizer.assert_not_called()
+
+    def test_zero_completion_with_empty_results_allows_activation(self):
+        tile = _tile()
+        replace = mock.Mock()
+        result = TCS.TextureConversionBatchResult(
+            completed=0,
+            failed=0,
+            interrupted=False,
+            failures=(),
+        )
+
+        with (
+            _build_tile_patches(tile, replace=replace),
+            mock.patch.object(
+                TTC.TCS,
+                "run_texture_conversion_queue",
+                return_value=result,
+            ),
+        ):
+            self.assertEqual(TILE.build_tile(tile), 1)
+
+        replace.assert_called_once()
 
     def test_missing_successful_dds_aborts_before_dsf_activation(self):
         tile = _tile()

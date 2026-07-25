@@ -96,11 +96,20 @@ class TextureConversionSchedulerFailureTests(unittest.TestCase):
 
     def test_scheduler_exposes_every_completed_conversion_result(self):
         ui = FakeUI()
-        successful = TEX.TextureConversionResult.success("ok.dds", "OK")
+        successful = TEX.TextureConversionResult.success(
+            "ok.dds",
+            "OK",
+        ).with_texture_resolution(
+            (32, 48, 16, "OK"),
+            (32, 48, 16, "OK"),
+        )
         failed = TEX.TextureConversionResult.failure(
             "bad.dds",
             "BAD",
             "encoder failed",
+        ).with_texture_resolution(
+            (48, 48, 16, "BAD"),
+            (48, 48, 16, "BAD"),
         )
         convert_texture = mock.Mock(side_effect=(successful, failed))
 
@@ -113,6 +122,57 @@ class TextureConversionSchedulerFailureTests(unittest.TestCase):
             )
 
         self.assertEqual(result.results, (successful, failed))
+
+    def test_scheduler_adds_resolution_metadata_to_legacy_result(self):
+        ui = FakeUI()
+        convert_texture = mock.Mock(
+            return_value=TEX.TextureConversionResult.success(
+                "48_32_BI16.dds",
+                "BI",
+            )
+        )
+
+        with mock.patch.object(TCS, "UI", ui):
+            result = TCS.run_texture_conversion_queue(
+                _queue("BI"),
+                1,
+                convert_texture=convert_texture,
+                options=_fast_options(),
+            )
+
+        conversion = result.results[0]
+        self.assertEqual(conversion.requested_attrs, (32, 48, 16, "BI"))
+        self.assertEqual(conversion.resolved_attrs, (32, 48, 16, "BI"))
+
+    def test_scheduler_adds_source_resolution_to_unannotated_streaming_result(self):
+        ui = FakeUI()
+        tile = _tile()
+        source = TextureSource(
+            tile,
+            (32, 48, 16, "Arc"),
+            Image.new("RGB", (4, 4)),
+        ).with_requested_attrs((32, 48, 16, "BI"))
+        items = queue.Queue()
+        items.put((tile, source))
+        items.put("quit")
+        convert_texture = mock.Mock(
+            return_value=TEX.TextureConversionResult.success(
+                "48_32_Arc16.dds",
+                "Arc",
+            )
+        )
+
+        with mock.patch.object(TCS, "UI", ui):
+            result = TCS.run_texture_conversion_queue(
+                items,
+                1,
+                convert_texture=convert_texture,
+                options=_fast_options(),
+            )
+
+        conversion = result.results[0]
+        self.assertEqual(conversion.requested_attrs, (32, 48, 16, "BI"))
+        self.assertEqual(conversion.resolved_attrs, (32, 48, 16, "Arc"))
 
     def test_scheduler_coerces_false_conversion_result_to_failure(self):
         ui = FakeUI()

@@ -3,6 +3,8 @@ from pathlib import Path
 
 import O4_File_Names as FNAMES
 
+_BASE_TEXTURE_PREFIX = "BASE_TEX_NOWRAP ../textures/"
+
 
 class TextureFinalizationError(RuntimeError):
     pass
@@ -19,15 +21,12 @@ def finalize_terrain_texture_references(tile, results):
     try:
         for terrain_file in terrain_files:
             original = terrain_file.read_bytes()
-            updated = original.decode("utf-8")
-            for requested_name, resolved_name in mappings.items():
-                old_line = f"BASE_TEX_NOWRAP ../textures/{requested_name}"
-                new_line = f"BASE_TEX_NOWRAP ../textures/{resolved_name}"
-                count = updated.count(old_line)
-                if count:
-                    matched[requested_name] += count
-                    updated = updated.replace(old_line, new_line)
-            updated_bytes = updated.encode("utf-8")
+            updated_bytes, file_matches = _rewrite_terrain_references(
+                original,
+                mappings,
+            )
+            for requested_name, count in file_matches.items():
+                matched[requested_name] += count
             if updated_bytes != original:
                 updated_files[terrain_file] = (original, updated_bytes)
     except (OSError, UnicodeError) as exc:
@@ -43,6 +42,23 @@ def finalize_terrain_texture_references(tile, results):
     return len(updated_files)
 
 
+def _rewrite_terrain_references(original, mappings):
+    matched = dict.fromkeys(mappings, 0)
+    updated_lines = []
+    for original_line in original.decode("utf-8").splitlines(keepends=True):
+        body = original_line.rstrip("\r\n")
+        line_ending = original_line[len(body) :]
+        if body.startswith(_BASE_TEXTURE_PREFIX):
+            requested_name = body[len(_BASE_TEXTURE_PREFIX) :]
+            if requested_name in mappings:
+                matched[requested_name] += 1
+                original_line = (
+                    _BASE_TEXTURE_PREFIX + mappings[requested_name] + line_ending
+                )
+        updated_lines.append(original_line)
+    return "".join(updated_lines).encode("utf-8"), matched
+
+
 def _validated_mappings(tile, results):
     mappings = {}
     output_names = set()
@@ -51,20 +67,46 @@ def _validated_mappings(tile, results):
             raise TextureFinalizationError(
                 f"texture conversion failed: {result.display_name}"
             )
+        if not isinstance(result.display_name, str) or not result.display_name:
+            raise TextureFinalizationError(
+                f"invalid texture display name: {result.display_name!r}"
+            )
         requested_attrs = result.requested_attrs
         resolved_attrs = result.resolved_attrs
-        if (requested_attrs is None) != (resolved_attrs is None):
+        if requested_attrs is None and resolved_attrs is None:
+            raise TextureFinalizationError(
+                f"missing texture resolution metadata: {result.display_name}"
+            )
+        if requested_attrs is None or resolved_attrs is None:
             raise TextureFinalizationError(
                 f"incomplete texture resolution metadata: {result.display_name}"
             )
-        if requested_attrs is None:
-            output_names.add(result.display_name)
-            continue
+        requested_attrs = _validated_texture_attrs(
+            "requested",
+            requested_attrs,
+            result.display_name,
+        )
+        resolved_attrs = _validated_texture_attrs(
+            "resolved",
+            resolved_attrs,
+            result.display_name,
+        )
+        if requested_attrs[:3] != resolved_attrs[:3]:
+            raise TextureFinalizationError(
+                "requested/resolved texture coordinates and zoom differ: "
+                f"{requested_attrs[:3]}, {resolved_attrs[:3]}"
+            )
+        if resolved_attrs[3] != result.provider_code:
+            raise TextureFinalizationError(
+                "resolved provider mismatch: "
+                f"{resolved_attrs[3]}, {result.provider_code}"
+            )
         requested_name = FNAMES.dds_file_name_from_attributes(*requested_attrs)
         resolved_name = FNAMES.dds_file_name_from_attributes(*resolved_attrs)
         if result.display_name != resolved_name:
             raise TextureFinalizationError(
-                f"resolved DDS name mismatch: {result.display_name}, {resolved_name}"
+                "resolved DDS display name mismatch: "
+                f"{result.display_name}, {resolved_name}"
             )
         output_names.add(resolved_name)
         if requested_name == resolved_name:
@@ -84,6 +126,23 @@ def _validated_mappings(tile, results):
             "missing DDS output: " + ", ".join(missing_outputs)
         )
     return mappings
+
+
+def _validated_texture_attrs(label, attrs, display_name):
+    if not isinstance(attrs, tuple) or len(attrs) != 4:
+        raise TextureFinalizationError(
+            f"invalid {label} texture attributes for {display_name}: {attrs!r}"
+        )
+    til_x_left, til_y_top, zoomlevel, provider_code = attrs
+    if any(type(value) is not int for value in (til_x_left, til_y_top, zoomlevel)):
+        raise TextureFinalizationError(
+            f"invalid {label} texture attributes for {display_name}: {attrs!r}"
+        )
+    if not isinstance(provider_code, str) or not provider_code:
+        raise TextureFinalizationError(
+            f"invalid {label} texture attributes for {display_name}: {attrs!r}"
+        )
+    return attrs
 
 
 def _replace_terrain_files_atomically(updated_files):
@@ -107,8 +166,8 @@ def _replace_terrain_files_atomically(updated_files):
             os.replace(candidate, terrain_file)
             replaced.append((terrain_file, backup))
     except OSError as exc:
-        rollback_errors = _rollback_replaced_files(replaced)
-        _cleanup_staged_files(staged)
+        rollback_errors, retained_backups = _rollback_replaced_files(replaced)
+        _cleanup_staged_files(staged, preserve=retained_backups)
         message = f"atomic terrain rewrite failed: {exc}"
         if rollback_errors:
             message += "; rollback failed: " + ", ".join(rollback_errors)
@@ -119,17 +178,24 @@ def _replace_terrain_files_atomically(updated_files):
 
 def _rollback_replaced_files(replaced):
     errors = []
+    retained_backups = set()
     for terrain_file, backup in reversed(replaced):
         try:
             os.replace(backup, terrain_file)
         except OSError as exc:
-            errors.append(f"{terrain_file}: {exc}")
-    return errors
+            retained_backups.add(backup)
+            errors.append(
+                f"{terrain_file}: {exc}; original backup retained at {backup}"
+            )
+    return errors, retained_backups
 
 
-def _cleanup_staged_files(staged):
+def _cleanup_staged_files(staged, preserve=()):
+    preserved_paths = set(preserve)
     for _terrain_file, candidate, backup in staged:
         for path in (candidate, backup):
+            if path in preserved_paths:
+                continue
             try:
                 path.unlink()
             except FileNotFoundError:

@@ -62,6 +62,11 @@ def finalize_texture_conversion(tile, result_holder):
     if result is None or result.interrupted or result.failed:
         return False
     try:
+        if len(result.results) != result.completed:
+            raise TAF.TextureFinalizationError(
+                "texture conversion result count mismatch: "
+                f"completed={result.completed}, results={len(result.results)}"
+            )
         TAF.finalize_terrain_texture_references(tile, result.results)
     except TAF.TextureFinalizationError as exc:
         UI.vprint(1, "Texture artifact finalization failed:", str(exc))
