@@ -25,3 +25,4 @@ Ortho4XP.cfg
 .coverage
 .codex/.coverage
 .worktrees/
+.upstream-watch/

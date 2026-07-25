@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "author": {
+    "repository": "Ypsos/ORTHO4XP_V3",
+    "branch": "ORTHO4XP_V3"
+  },
+  "passive_fork": {
+    "repository": "tvproductions/ORTHO4XP_V3",
+    "branch": "ORTHO4XP_V3"
+  },
+  "baseline": {
+    "reviewed_sha": "4ca0a8d404b078ad899979bafde84769a0fb235b",
+    "audit_id": "bootstrap-existing-baseline",
+    "audit_date": "2026-06-16",
+    "manifest_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "path_count": 0
+  }
+}

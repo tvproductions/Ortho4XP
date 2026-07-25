@@ -333,7 +333,21 @@ def validate_coverage(report: AuditReport, entry: LedgerEntry) -> CoverageResult
 def validate_state_transition(
     state: WatchState, report: AuditReport, entry: LedgerEntry
 ) -> CoverageResult:
-    """Validate immutable evidence before any accepted-baseline mutation."""
+    """Validate immutable evidence and reject unresolved investigations."""
+
+    coverage = validate_evidence(state, report, entry)
+    if coverage.blocking_findings:
+        raise LedgerValidationError(
+            "investigate findings block baseline advancement: "
+            + ", ".join(coverage.blocking_findings)
+        )
+    return coverage
+
+
+def validate_evidence(
+    state: WatchState, report: AuditReport, entry: LedgerEntry
+) -> CoverageResult:
+    """Validate a report and ledger while retaining investigate blockers as data."""
 
     if state.baseline.reviewed_sha != report.base_sha:
         raise LedgerValidationError("report base does not match accepted baseline")
@@ -346,13 +360,7 @@ def validate_state_transition(
         raise LedgerValidationError("ledger manifest digest does not match report")
     if audit.path_count != len(report.changes):
         raise LedgerValidationError("ledger path_count does not match report")
-    coverage = validate_coverage(report, entry)
-    if coverage.blocking_findings:
-        raise LedgerValidationError(
-            "investigate findings block baseline advancement: "
-            + ", ".join(coverage.blocking_findings)
-        )
-    return coverage
+    return validate_coverage(report, entry)
 
 
 def advance_baseline(

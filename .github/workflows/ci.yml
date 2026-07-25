@@ -58,10 +58,10 @@ jobs:
         run: uv run python -m unittest discover -s tests
 
       - name: Ruff lint
-        run: uv run ruff check --output-format=github Ortho4XP.py src
+        run: uv run ruff check --output-format=github Ortho4XP.py src scripts
 
       - name: Type check
-        run: uv run ty check tests src/O4_Geo_Utils.py src/O4_File_Names.py
+        run: uv run ty check tests scripts src/O4_Geo_Utils.py src/O4_File_Names.py
 
       - name: Build Triangle4XP with LLVM
         run: |
@@ -116,10 +116,10 @@ jobs:
         run: uv run python -m unittest discover -s tests
 
       - name: Ruff lint
-        run: uv run ruff check --output-format=github Ortho4XP.py src
+        run: uv run ruff check --output-format=github Ortho4XP.py src scripts
 
       - name: Type check
-        run: uv run ty check tests src/O4_Geo_Utils.py src/O4_File_Names.py
+        run: uv run ty check tests scripts src/O4_Geo_Utils.py src/O4_File_Names.py
 
       - name: Build Triangle4XP with LLVM
         run: |
@@ -174,10 +174,10 @@ jobs:
         run: uv run python -m unittest discover -s tests
 
       - name: Ruff lint
-        run: uv run ruff check --output-format=github Ortho4XP.py src
+        run: uv run ruff check --output-format=github Ortho4XP.py src scripts
 
       - name: Type check
-        run: uv run ty check tests src/O4_Geo_Utils.py src/O4_File_Names.py
+        run: uv run ty check tests scripts src/O4_Geo_Utils.py src/O4_File_Names.py
 
       - name: Build Triangle4XP with LLVM
         run: |

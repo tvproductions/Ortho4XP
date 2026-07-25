@@ -1,0 +1,60 @@
+name: Upstream Watch
+
+on:
+  schedule:
+    - cron: "17 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  detect:
+    name: Detect ORTHO4XP_V3 changes
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Detect and report upstream state
+        id: watch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          python scripts/upstream_watch.py check \
+            --state .github/upstream-watch.json \
+            --manage-issue \
+            --repository "$GITHUB_REPOSITORY" \
+            --json > upstream-watch-result.json
+          status=$?
+          set -e
+
+          cat upstream-watch-result.json
+          {
+            echo "## ORTHO4XP_V3 upstream watch"
+            echo
+            echo '```json'
+            cat upstream-watch-result.json
+            echo '```'
+            echo
+            echo "Process status: \`$status\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$status" -eq 1 ]; then
+            exit 1
+          fi
+          if [ "$status" -eq 0 ] || [ "$status" -eq 2 ] || \
+             [ "$status" -eq 3 ] || [ "$status" -eq 4 ]; then
+            exit 0
+          fi
+          echo "Unexpected upstream-watch status: $status" >&2
+          exit 1
