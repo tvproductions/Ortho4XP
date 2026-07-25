@@ -3,6 +3,7 @@
 import math
 import os
 from dataclasses import dataclass
+from typing import Literal
 
 import numpy
 from PIL import Image
@@ -24,6 +25,25 @@ class DdsQualityMetrics:
     psnr: float
     width: int
     height: int
+
+
+DdsQualityDisposition = Literal[
+    "skipped",
+    "passed",
+    "below_threshold",
+    "error",
+]
+
+
+@dataclass(frozen=True)
+class DdsQualityCheckResult:
+    disposition: DdsQualityDisposition
+    metrics: DdsQualityMetrics | None = None
+    error_summary: str = ""
+
+    @property
+    def allows_cleanup(self) -> bool:
+        return self.disposition in ("skipped", "passed")
 
 
 @dataclass(frozen=True)
@@ -64,11 +84,11 @@ def compute_quality_metrics(source_path: str, decoded_path: str) -> DdsQualityMe
     )
 
 
-def run_enabled_dds_quality_check(tile, encode_result) -> None:
+def run_enabled_dds_quality_check(tile, encode_result) -> DdsQualityCheckResult:
     if not encode_result.ok or not getattr(tile, "dds_qa_enabled", False):
-        return
+        return DdsQualityCheckResult("skipped")
     request = encode_result.request
-    run_dds_quality_check(
+    return run_dds_quality_check(
         DdsQualityRequest(
             request.source_path,
             request.output_path,
@@ -79,20 +99,21 @@ def run_enabled_dds_quality_check(tile, encode_result) -> None:
     )
 
 
-def run_dds_quality_check(request: DdsQualityRequest) -> DdsQualityMetrics | None:
+def run_dds_quality_check(request: DdsQualityRequest) -> DdsQualityCheckResult:
     try:
         decode_dds_to_png(request.dds_path, request.decoded_png_path)
         metrics = compute_quality_metrics(
             request.source_png_path, request.decoded_png_path
         )
     except Exception as exc:
+        error_summary = f"{type(exc).__name__}: {exc}"
         UI.vprint(
             1,
             "WARNING: DDS QA failed for",
             request.display_name,
-            f"{type(exc).__name__}: {exc}",
+            error_summary,
         )
-        return None
+        return DdsQualityCheckResult("error", error_summary=error_summary)
 
     if metrics.psnr < request.threshold:
         UI.vprint(
@@ -103,7 +124,8 @@ def run_dds_quality_check(request: DdsQualityRequest) -> DdsQualityMetrics | Non
             f"threshold={request.threshold:.2f} dB",
             f"MSE={metrics.mse:.2f}",
         )
-    return metrics
+        return DdsQualityCheckResult("below_threshold", metrics)
+    return DdsQualityCheckResult("passed", metrics)
 
 
 def _comparable_images(source_image, decoded_image):

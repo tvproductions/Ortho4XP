@@ -72,7 +72,7 @@ class DdsQualityMetricTests(unittest.TestCase):
                 mock.patch.object(DQA, "decode_dds_to_png", side_effect=decode),
                 mock.patch.object(DQA.UI, "vprint") as vprint,
             ):
-                metrics = DQA.run_dds_quality_check(
+                result = DQA.run_dds_quality_check(
                     DQA.DdsQualityRequest(
                         str(source),
                         "out.dds",
@@ -82,11 +82,37 @@ class DdsQualityMetricTests(unittest.TestCase):
                     )
                 )
 
-        self.assertIsNotNone(metrics)
+        self.assertEqual(getattr(result, "disposition", None), "below_threshold")
+        self.assertIsNotNone(result.metrics)
+        self.assertAlmostEqual(result.metrics.psnr, 0.0)
         vprint.assert_called_once()
         self.assertIn(
             "below threshold", " ".join(str(arg) for arg in vprint.call_args.args)
         )
+
+    def test_run_quality_check_returns_error_disposition_for_caught_failure(self):
+        request = DQA.DdsQualityRequest(
+            "source.png",
+            "out.dds",
+            "decoded.png",
+            30.0,
+            "out.dds",
+        )
+
+        with (
+            mock.patch.object(
+                DQA,
+                "decode_dds_to_png",
+                side_effect=OSError("decode failed"),
+            ),
+            mock.patch.object(DQA.UI, "vprint") as vprint,
+        ):
+            result = DQA.run_dds_quality_check(request)
+
+        self.assertEqual(getattr(result, "disposition", None), "error")
+        self.assertIsNone(result.metrics)
+        self.assertIn("OSError: decode failed", result.error_summary)
+        vprint.assert_called_once()
 
     def test_run_quality_check_does_not_warn_above_psnr_threshold(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -104,7 +130,7 @@ class DdsQualityMetricTests(unittest.TestCase):
                 mock.patch.object(DQA, "decode_dds_to_png", side_effect=decode),
                 mock.patch.object(DQA.UI, "vprint") as vprint,
             ):
-                metrics = DQA.run_dds_quality_check(
+                result = DQA.run_dds_quality_check(
                     DQA.DdsQualityRequest(
                         str(source),
                         "out.dds",
@@ -114,7 +140,8 @@ class DdsQualityMetricTests(unittest.TestCase):
                     )
                 )
 
-        self.assertIsNotNone(metrics)
+        self.assertEqual(getattr(result, "disposition", None), "passed")
+        self.assertIsNotNone(result.metrics)
         vprint.assert_not_called()
 
     def test_enabled_quality_check_builds_decoded_png_request(self):
@@ -132,7 +159,9 @@ class DdsQualityMetricTests(unittest.TestCase):
             mock.patch.object(DQA.FNAMES, "resource_path", return_value="tmp"),
             mock.patch.object(DQA, "run_dds_quality_check") as quality_check,
         ):
-            DQA.run_enabled_dds_quality_check(tile, encode_result)
+            expected = object()
+            quality_check.return_value = expected
+            result = DQA.run_enabled_dds_quality_check(tile, encode_result)
 
         quality_check.assert_called_once_with(
             DQA.DdsQualityRequest(
@@ -143,15 +172,18 @@ class DdsQualityMetricTests(unittest.TestCase):
                 "out.dds",
             )
         )
+        self.assertIs(result, expected)
 
     def test_disabled_quality_check_does_not_build_decoded_png_request(self):
         tile = SimpleNamespace(dds_qa_enabled=False)
         encode_result = SimpleNamespace(ok=True)
 
         with mock.patch.object(DQA, "run_dds_quality_check") as quality_check:
-            DQA.run_enabled_dds_quality_check(tile, encode_result)
+            result = DQA.run_enabled_dds_quality_check(tile, encode_result)
 
         quality_check.assert_not_called()
+        self.assertEqual(getattr(result, "disposition", None), "skipped")
+        self.assertTrue(result.allows_cleanup)
 
 
 if __name__ == "__main__":

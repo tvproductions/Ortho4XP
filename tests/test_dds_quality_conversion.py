@@ -56,7 +56,10 @@ class DdsQualityConversionIntegrationTests(unittest.TestCase):
                 mock.patch.object(
                     TCU.DQA,
                     "run_enabled_dds_quality_check",
-                    side_effect=lambda *_args: cleanup_events.append("qa"),
+                    side_effect=lambda *_args: (
+                        cleanup_events.append("qa"),
+                        SimpleNamespace(allows_cleanup=True),
+                    )[1],
                 ) as qa,
                 mock.patch.object(TCU, "cleanup_conversion_paths", side_effect=cleanup),
             ):
@@ -87,7 +90,11 @@ class DdsQualityConversionIntegrationTests(unittest.TestCase):
             mock.patch.object(
                 TCU.TEX, "encode_texture", return_value=_encode_result(ok=False)
             ),
-            mock.patch.object(TCU.DQA, "run_enabled_dds_quality_check") as qa,
+            mock.patch.object(
+                TCU.DQA,
+                "run_enabled_dds_quality_check",
+                return_value=SimpleNamespace(allows_cleanup=True),
+            ) as qa,
             mock.patch.object(TCU, "cleanup_conversion_paths") as cleanup,
         ):
             result = TCU.convert_dds_texture(
@@ -104,6 +111,53 @@ class DdsQualityConversionIntegrationTests(unittest.TestCase):
         qa.assert_called_once()
         self.assertFalse(qa.call_args.args[1].ok)
         cleanup.assert_called_once_with(("source.png",))
+
+    def test_caught_quality_error_retains_success_only_paths(self):
+        self._assert_failed_qa_retains_mask("error")
+
+    def test_below_threshold_quality_retains_success_only_paths(self):
+        self._assert_failed_qa_retains_mask("below_threshold")
+
+    def _assert_failed_qa_retains_mask(self, disposition):
+        with tempfile.TemporaryDirectory() as build_dir:
+            root = Path(build_dir)
+            source = root / "source.png"
+            mask = root / "mask.png"
+            output = root / "textures" / "out.dds"
+            source.write_bytes(b"temporary")
+            mask.write_bytes(b"mask")
+            output.parent.mkdir()
+            output.write_bytes(b"dds")
+            tile = SimpleNamespace(build_dir=build_dir)
+
+            with (
+                mock.patch.object(
+                    TCU.TEX,
+                    "encode_texture",
+                    return_value=_encode_result(),
+                ),
+                mock.patch.object(
+                    TCU.DQA,
+                    "run_enabled_dds_quality_check",
+                    return_value=SimpleNamespace(
+                        disposition=disposition,
+                        allows_cleanup=False,
+                    ),
+                ),
+            ):
+                result = TCU.convert_dds_texture(
+                    tile,
+                    (32, 48, 16, "BI"),
+                    (str(source), "out.dds", False),
+                    TextureCleanupPlan(
+                        always_paths=(str(source),),
+                        success_paths=(str(mask),),
+                    ),
+                )
+
+            self.assertTrue(result.ok)
+            self.assertFalse(source.exists())
+            self.assertTrue(mask.exists())
 
 
 if __name__ == "__main__":

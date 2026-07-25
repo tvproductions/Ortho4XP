@@ -46,6 +46,16 @@ def cleanup_conversion_paths(paths: tuple[str, ...]) -> None:
         _remove_conversion_temp(path)
 
 
+def save_conversion_temp(image, path: str) -> None:
+    saved = False
+    try:
+        image.save(path)
+        saved = True
+    finally:
+        if not saved:
+            cleanup_conversion_paths((path,))
+
+
 def convert_dds_texture(
     tile,
     texture_attrs,
@@ -56,9 +66,13 @@ def convert_dds_texture(
     try:
         encode_result = TEX.encode_texture(request)
         # Optional QA observes successful DDS output without changing conversion status.
-        DQA.run_enabled_dds_quality_check(tile, encode_result)
+        qa_result = DQA.run_enabled_dds_quality_check(tile, encode_result)
         result = TEX.TextureConversionResult.from_encode_result(encode_result)
-        if result.ok and os.path.isfile(request.output_path):
+        if (
+            result.ok
+            and os.path.isfile(request.output_path)
+            and qa_result.allows_cleanup
+        ):
             cleanup_conversion_paths(cleanup_plan.success_paths)
         return result
     finally:

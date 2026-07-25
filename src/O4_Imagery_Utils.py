@@ -42,6 +42,7 @@ from O4_Subprocess_Utils import resolve_tool
 from O4_Texture_Conversion_Utils import (
     convert_dds_texture,
     convert_geotiff_texture,
+    save_conversion_temp,
 )
 from O4_Texture_Models import TextureCleanupPlan
 from O4_Texture_Source import TextureBuildResult, TextureSource
@@ -2330,7 +2331,7 @@ def convert_texture_source(texture_source, type=DDS_OUTPUT_TYPE):
         dxt5 = True
 
     file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
-    big_image.save(file_to_convert)
+    save_conversion_temp(big_image, file_to_convert)
     cleanup_plan = TextureCleanupPlan(
         always_paths=(file_to_convert,),
         success_paths=(mask_input.path,) if mask_input is not None else (),
@@ -2489,7 +2490,7 @@ def convert_texture(
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
-        big_image.save(file_to_convert)
+        save_conversion_temp(big_image, file_to_convert)
         # If one wanted to distribute jpegs instead of dds, uncomment the
         # next line.
         # big_image.convert('RGB').save(os.path.join(tile.build_dir,
@@ -2508,7 +2509,7 @@ def convert_texture(
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
-        big_image.save(file_to_convert)
+        save_conversion_temp(big_image, file_to_convert)
     # finally if nothing needs to be done prior to the conversion
     else:
         file_to_convert, erase_tmp_png = TCN.normalized_conversion_input_path(

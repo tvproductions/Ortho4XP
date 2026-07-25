@@ -21,6 +21,7 @@ import O4_File_Names as FNAMES
 import O4_Imagery_Failures as IFAIL
 import O4_UI_Utils as UI
 from O4_Color_Normalization import normalize_image_with_neighbors
+from O4_Texture_Conversion_Utils import save_conversion_temp
 
 
 @dataclass(frozen=True)
@@ -75,7 +76,7 @@ def normalized_conversion_input_path(source_path, target_png_file_name, context)
     image = Image.open(source_path, "r").convert("RGB")
     image = normalize_texture_image_if_enabled(image, context)
     file_to_convert = os.path.join(FNAMES.resource_path("tmp"), target_png_file_name)
-    image.save(file_to_convert)
+    save_conversion_temp(image, file_to_convert)
     return file_to_convert, True
 
 
