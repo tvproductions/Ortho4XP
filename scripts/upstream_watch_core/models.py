@@ -149,6 +149,7 @@ def validate_repository(value: object, field: str) -> str:
         or REPOSITORY_RE.fullmatch(value) is None
         or "://" in value
         or "@" in value
+        or any(part in {"", ".", ".."} for part in value.split("/"))
     ):
         raise StateValidationError(f"{field} must use the owner/name form")
     return value

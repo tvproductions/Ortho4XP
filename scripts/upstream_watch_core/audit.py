@@ -176,10 +176,11 @@ def _run_targeted_ruff(
         return {"available": False, "findings": []}
     with tempfile.TemporaryDirectory(prefix="ortho4xp-upstream-ruff-") as temporary:
         root = Path(temporary)
-        for relative, blob in python_blobs.items():
-            target = root.joinpath(*PurePosixPath(relative).parts)
-            target.parent.mkdir(parents=True, exist_ok=True)
+        materialized: dict[Path, str] = {}
+        for index, (relative, blob) in enumerate(sorted(python_blobs.items())):
+            target = root / f"{index:04d}.py"
             target.write_bytes(blob)
+            materialized[target.resolve()] = relative
         try:
             result = subprocess.run(  # noqa: S603 - fixed Ruff argument contract.
                 [
@@ -217,12 +218,11 @@ def _run_targeted_ruff(
         filename = finding.get("filename")
         if isinstance(filename, str):
             try:
-                relative = Path(filename).resolve().relative_to(root.resolve())
                 finding = dict(finding)
-                finding["filename"] = relative.as_posix()
-            except ValueError as exc:
+                finding["filename"] = materialized[Path(filename).resolve()]
+            except KeyError as exc:
                 raise AuditGenerationError(
-                    "Targeted Ruff returned a path outside its temporary root"
+                    "Targeted Ruff returned an unknown materialized path"
                 ) from exc
         sanitized.append(finding)
     return {"available": True, "findings": sanitized}

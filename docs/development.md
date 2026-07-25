@@ -40,7 +40,12 @@ The weekly and manually dispatched
 and manages one issue labeled `upstream-watch`. Substantive engineering audits
 run locally. The audit parser reads Git blobs, parses Python with `ast`, and
 runs targeted static analysis; it never imports or executes upstream code,
-installers, hooks, scripts, or submodules.
+installers, hooks, scripts, or submodules. Git subprocesses ignore host global
+and system configuration, use an empty template and hook directory, and disable
+external diff and text-conversion helpers. Ruff receives blobs under generated
+temporary names, then its findings are mapped back to the original Git paths.
+Workflow concurrency serializes scheduled and manual runs; issue fingerprints,
+transition markers, and comment-completion state make retries idempotent.
 
 Check current remote heads without mutating GitHub:
 

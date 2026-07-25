@@ -52,23 +52,37 @@ class GitRunner:
     ) -> subprocess.CompletedProcess[str] | subprocess.CompletedProcess[bytes]:
         command = ["git", *args]
         environment = os.environ.copy()
-        environment["GIT_TERMINAL_PROMPT"] = "0"
         working_directory = cwd if cwd is not None else self.cwd
-        try:
-            result = subprocess.run(  # noqa: S603 - no shell; Git argv is constrained.
-                command,
-                cwd=working_directory,
-                check=False,
-                capture_output=True,
-                text=text,
-                encoding="utf-8" if text else None,
-                errors="strict" if text else None,
-                stdin=subprocess.DEVNULL,
-                env=environment,
+        with tempfile.TemporaryDirectory(
+            prefix="ortho4xp-upstream-git-config-"
+        ) as isolated:
+            environment.update(
+                {
+                    "GIT_TERMINAL_PROMPT": "0",
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_CONFIG_GLOBAL": os.devnull,
+                    "GIT_CONFIG_SYSTEM": os.devnull,
+                    "GIT_CONFIG_COUNT": "1",
+                    "GIT_CONFIG_KEY_0": "core.hooksPath",
+                    "GIT_CONFIG_VALUE_0": isolated,
+                    "GIT_TEMPLATE_DIR": isolated,
+                }
             )
-        except (OSError, UnicodeError) as exc:
-            rendered = " ".join(_redact(argument) for argument in command)
-            raise GitCommandError(f"Could not execute {rendered}") from exc
+            try:
+                result = subprocess.run(  # noqa: S603 - fixed Git argv contract.
+                    command,
+                    cwd=working_directory,
+                    check=False,
+                    capture_output=True,
+                    text=text,
+                    encoding="utf-8" if text else None,
+                    errors="strict" if text else None,
+                    stdin=subprocess.DEVNULL,
+                    env=environment,
+                )
+            except (OSError, UnicodeError) as exc:
+                rendered = " ".join(_redact(argument) for argument in command)
+                raise GitCommandError(f"Could not execute {rendered}") from exc
         if result.returncode != 0:
             stderr_value = result.stderr
             if isinstance(stderr_value, bytes):
@@ -93,6 +107,18 @@ def _is_ancestor(runner: GitRunner, ancestor: str, descendant: str) -> bool:
     return True
 
 
+def _object_exists(runner: GitRunner, sha: str) -> bool:
+    validate_sha(sha, "sha")
+    try:
+        runner.run(["cat-file", "-e", f"{sha}^{{commit}}"])
+    except GitCommandError as exc:
+        message = str(exc)
+        if "status 1:" in message or "status 128:" in message:
+            return False
+        raise
+    return True
+
+
 def classify_author_history(
     runner: GitRunner, baseline_sha: str, author_head: str
 ) -> WatchExit:
@@ -102,9 +128,26 @@ def classify_author_history(
     validate_sha(author_head, "author_head")
     if baseline_sha == author_head:
         return WatchExit.CURRENT
+    if not _object_exists(runner, baseline_sha):
+        return WatchExit.HISTORY_REWRITE
     if _is_ancestor(runner, baseline_sha, author_head):
         return WatchExit.REVIEW_REQUIRED
     return WatchExit.HISTORY_REWRITE
+
+
+def ensure_authoritative_candidate(
+    runner: GitRunner, candidate_sha: str, author_head: str
+) -> None:
+    """Require an audit candidate to belong to authoritative branch history."""
+
+    validate_sha(candidate_sha, "candidate_sha")
+    validate_sha(author_head, "author_head")
+    if not _object_exists(runner, candidate_sha) or not _is_ancestor(
+        runner, candidate_sha, author_head
+    ):
+        raise GitCommandError(
+            "Audit candidate is not part of the authoritative branch history"
+        )
 
 
 def classify_passive_fork(
@@ -196,6 +239,9 @@ def list_changes(
             "-z",
             "--find-renames",
             "--find-copies",
+            "--find-copies-harder",
+            "--no-ext-diff",
+            "--no-textconv",
             base_sha,
             head_sha,
         ]
@@ -207,6 +253,9 @@ def list_changes(
             "-z",
             "--find-renames",
             "--find-copies",
+            "--find-copies-harder",
+            "--no-ext-diff",
+            "--no-textconv",
             base_sha,
             head_sha,
         ]
@@ -369,9 +418,6 @@ def fetch_repositories(state: WatchState) -> FetchedRepositories:
                 passive_url,
                 f"{passive_head}:refs/upstream-watch/passive",
             ]
-        )
-        local_runner.run(
-            ["cat-file", "-e", f"{state.baseline.reviewed_sha}^{{commit}}"]
         )
     except Exception:
         temporary_directory.cleanup()

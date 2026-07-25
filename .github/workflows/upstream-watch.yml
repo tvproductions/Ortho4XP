@@ -9,6 +9,10 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  group: upstream-watch-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   detect:
     name: Detect ORTHO4XP_V3 changes

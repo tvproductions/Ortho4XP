@@ -17,7 +17,7 @@ explains the engineering decisions but cannot advance `.github/upstream-watch.js
 - Commits: 7
 - Changed paths: 48
 - Manifest SHA-256:
-  `8134be1ce57afa90f160268367301b901b15dea6ec2ef72df66f818f1b5284b3`
+  `204b30f3a175ed65d8495c0bc99a4ac6a6ddfc828d7ebdb8f9fa62bd198ece91`
 - Static evidence: all changed Python blobs parsed without execution; no syntax
   failures; targeted Ruff was available and recorded 731 upstream findings.
 - Compatibility signals: provider data, XP11, XP11+bathy, and XP12.
@@ -34,7 +34,7 @@ Reviewed commits:
 6. `c1edfafb690fd0f6265c688b626d6db2234b17c2` — altimetry workflow.
 7. `8a25af093af758292b4ef4c2caff93719cb1a54a` — integration update.
 
-<!-- upstream-watch:audit {"audit_id":"ypsos-4ca0a8d404b0-8a25af093af7","base_sha":"4ca0a8d404b078ad899979bafde84769a0fb235b","head_sha":"8a25af093af758292b4ef4c2caff93719cb1a54a","manifest_sha256":"8134be1ce57afa90f160268367301b901b15dea6ec2ef72df66f818f1b5284b3","path_count":48} -->
+<!-- upstream-watch:audit {"audit_id":"ypsos-4ca0a8d404b0-8a25af093af7","base_sha":"4ca0a8d404b078ad899979bafde84769a0fb235b","head_sha":"8a25af093af758292b4ef4c2caff93719cb1a54a","manifest_sha256":"204b30f3a175ed65d8495c0bc99a4ac6a6ddfc828d7ebdb8f9fa62bd198ece91","path_count":48} -->
 
 ### Provider definitions
 

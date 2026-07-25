@@ -28,8 +28,12 @@ class EventBusAPITests(unittest.TestCase):
     def test_subscribe_receives_events_in_order(self):
         received = []
 
-        EVENTS.subscribe(EVENTS.EventName.TILE_START, lambda event: received.append(("a", event)))
-        EVENTS.subscribe(EVENTS.EventName.TILE_START, lambda event: received.append(("b", event)))
+        EVENTS.subscribe(
+            EVENTS.EventName.TILE_START, lambda event: received.append(("a", event))
+        )
+        EVENTS.subscribe(
+            EVENTS.EventName.TILE_START, lambda event: received.append(("b", event))
+        )
 
         event = EVENTS.publish(EVENTS.EventName.TILE_START, lat=12)
 

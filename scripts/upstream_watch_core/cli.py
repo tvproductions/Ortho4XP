@@ -16,6 +16,7 @@ from .git_repo import (
     GitRunner,
     classify_author_history,
     classify_passive_fork,
+    ensure_authoritative_candidate,
     fetch_repositories,
     watch_exit_status,
 )
@@ -79,6 +80,9 @@ def create_audit_from_remotes(
     validate_sha(base_sha, "base_sha")
     validate_sha(head_sha, "head_sha")
     with fetch_repositories(state) as fetched:
+        ensure_authoritative_candidate(
+            GitRunner(fetched.repo), head_sha, fetched.author_head
+        )
         return build_audit_report(
             state,
             base_sha,

@@ -41,7 +41,11 @@ part of the accepted engineering baseline.
 `.github/workflows/upstream-watch.yml` runs weekly and through manual workflow
 dispatch. It has repository-contents read permission and issues write
 permission. It compares remote heads with the committed state and creates,
-reopens, updates, or resolves one issue labeled `upstream-watch`.
+reopens, updates, or resolves one issue labeled `upstream-watch`. Workflow
+concurrency serializes scheduled and manual dispatches. The issue body records
+both the observation fingerprint and comment-completion fingerprint, while
+transition comments carry a deterministic marker so retries do not duplicate
+history.
 
 The detector reports these states separately:
 
@@ -153,6 +157,10 @@ acceptance gates.
 Upstream repositories are untrusted data. The chore does not execute upstream
 Python, installers, shell scripts, Git hooks, or submodules. Syntax checks parse
 source files without importing them. Static-analysis tools inspect files only.
+Git ignores host global/system configuration, uses empty templates and hook
+directories, and disables external diff and text-conversion helpers. Python
+blobs are materialized under generated filesystem-safe names for Ruff, and
+findings are deterministically mapped back to their original repository paths.
 
 Remote API, authentication, pagination, rate-limit, malformed-state, clone, and
 Git failures are reported distinctly and return failure without changing the
@@ -177,8 +185,9 @@ Tests assert the status precedence as well as each individual status.
 
 ## Testing
 
-`tests/test_upstream_watch.py` uses standard-library `unittest`, temporary local
-Git repositories, and mocked GitHub responses. It performs no network access.
+The `tests/test_upstream_watch*.py` suite uses standard-library `unittest`,
+temporary local Git repositories, and mocked GitHub responses. It performs no
+network access.
 Coverage includes:
 
 - no-change and new-commit detection;

@@ -35,8 +35,8 @@
 - Create `.github/upstream-watch.json`: repository configuration and accepted author baseline.
 - Create `.github/workflows/upstream-watch.yml`: weekly and manual detector.
 - Create `docs/upstream/ORTHO4XP_V3-audit.md`: durable review ledger.
-- Create `tests/test_upstream_watch.py`: all network-independent behavioral coverage.
-- Modify `tests/_path.py`: add repository root for importing `scripts`.
+- Create `tests/_upstream_watch_helpers.py` and `tests/test_upstream_watch*.py`:
+  shared fixtures and all network-independent behavioral coverage.
 - Modify `.github/workflows/ci.yml`: lint and type-check maintained scripts.
 - Modify `.gitignore`: ignore local `.upstream-watch/` raw reports.
 - Modify `docs/development.md`: document check, audit, validate, and accept commands.
@@ -48,17 +48,18 @@
 - Create: `scripts/__init__.py`
 - Create: `scripts/upstream_watch_core/__init__.py`
 - Create: `scripts/upstream_watch_core/models.py`
-- Modify: `tests/_path.py`
-- Create: `tests/test_upstream_watch.py`
+- Create: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Produces: `WatchExit`, `RepositoryRef`, `AcceptedBaseline`, `WatchState`, `PathChange`, `CommitRecord`, `InspectionResult`, `ForkState`, `AuditReport`, `FindingRecord`, `ReviewedNoActionRecord`, `canonical_json_bytes()`, and `load_state()`.
 - `WatchExit` values are `CURRENT=0`, `ERROR=1`, `REVIEW_REQUIRED=2`, `FORK_ANOMALY=3`, and `HISTORY_REWRITE=4`.
 - All SHAs are lowercase 40-character hexadecimal strings; repository slugs are `owner/name` without schemes or credentials.
 
-- [ ] **Step 1: Add repository-root test imports and failing model tests**
+- [ ] **Step 1: Add failing model tests**
 
-Add `ROOT_DIR` to `sys.path` in `tests/_path.py`. In `tests/test_upstream_watch.py`, add tests that load a valid state, reject short SHAs, reject authenticated URLs in repository fields, reject an unknown schema version, and assert canonical JSON stability:
+In `tests/test_upstream_watch*.py`, add tests that load a valid state, reject
+short SHAs, reject authenticated URLs in repository fields, reject an unknown
+schema version, and assert canonical JSON stability:
 
 ```python
 from __future__ import annotations
@@ -171,9 +172,9 @@ Run:
 
 ```powershell
 uv run python -m unittest tests.test_upstream_watch.WatchStateTests -v
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py tests/_path.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 ```
 
 Expected: model tests pass and all three static checks exit `0`.
@@ -181,7 +182,7 @@ Expected: model tests pass and all three static checks exit `0`.
 - [ ] **Step 5: Commit the state contract**
 
 ```powershell
-git add scripts tests/_path.py tests/test_upstream_watch.py
+git add scripts tests/_upstream_watch_helpers.py tests/test_upstream_watch*.py
 git commit -m "feat: define upstream watch state contract"
 ```
 
@@ -189,7 +190,7 @@ git commit -m "feat: define upstream watch state contract"
 
 **Files:**
 - Create: `scripts/upstream_watch_core/git_repo.py`
-- Modify: `tests/test_upstream_watch.py`
+- Modify: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Consumes: validated `RepositoryRef`, `PathChange`, and `CommitRecord` models.
@@ -242,10 +243,10 @@ Reject absolute paths, `..` components, NULs, and paths that cannot be decoded. 
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_upstream_watch.GitRepositoryTests -v
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run python -m unittest tests.test_upstream_watch_git.GitRepositoryTests -v
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 ```
 
 Expected: all commands exit `0`.
@@ -253,7 +254,7 @@ Expected: all commands exit `0`.
 - [ ] **Step 5: Commit Git comparison support**
 
 ```powershell
-git add scripts/upstream_watch_core/git_repo.py tests/test_upstream_watch.py
+git add scripts/upstream_watch_core/git_repo.py tests/test_upstream_watch*.py
 git commit -m "feat: compare upstream Git histories safely"
 ```
 
@@ -261,7 +262,7 @@ git commit -m "feat: compare upstream Git histories safely"
 
 **Files:**
 - Create: `scripts/upstream_watch_core/audit.py`
-- Modify: `tests/test_upstream_watch.py`
+- Modify: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Consumes: explicit base/head SHAs and `git_repo` functions.
@@ -310,10 +311,10 @@ Record `available=false` when Ruff is absent and treat malformed Ruff JSON as an
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_upstream_watch.AuditReportTests -v
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run python -m unittest tests.test_upstream_watch_audit.AuditReportTests -v
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 ```
 
 Expected: all commands exit `0`.
@@ -321,7 +322,7 @@ Expected: all commands exit `0`.
 - [ ] **Step 5: Commit audit generation**
 
 ```powershell
-git add scripts/upstream_watch_core/audit.py tests/test_upstream_watch.py
+git add scripts/upstream_watch_core/audit.py tests/test_upstream_watch*.py
 git commit -m "feat: generate deterministic upstream audit reports"
 ```
 
@@ -329,7 +330,7 @@ git commit -m "feat: generate deterministic upstream audit reports"
 
 **Files:**
 - Create: `scripts/upstream_watch_core/ledger.py`
-- Modify: `tests/test_upstream_watch.py`
+- Modify: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Consumes: `AuditReport`, `WatchState`, `FindingRecord`, and `ReviewedNoActionRecord`.
@@ -364,10 +365,10 @@ Extract only single-line, exact-prefix HTML comments and parse their payloads wi
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_upstream_watch.LedgerTests -v
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run python -m unittest tests.test_upstream_watch_ledger.LedgerTests -v
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 ```
 
 Expected: all commands exit `0`.
@@ -375,7 +376,7 @@ Expected: all commands exit `0`.
 - [ ] **Step 5: Commit the acceptance gate**
 
 ```powershell
-git add scripts/upstream_watch_core/ledger.py tests/test_upstream_watch.py
+git add scripts/upstream_watch_core/ledger.py tests/test_upstream_watch*.py
 git commit -m "feat: gate upstream baseline advancement"
 ```
 
@@ -383,7 +384,7 @@ git commit -m "feat: gate upstream baseline advancement"
 
 **Files:**
 - Create: `scripts/upstream_watch_core/github_api.py`
-- Modify: `tests/test_upstream_watch.py`
+- Modify: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Consumes: `WatchExit`, author/fork observations, and `GITHUB_TOKEN` or `GH_TOKEN` supplied by the caller.
@@ -422,10 +423,10 @@ The reconciler upserts the label, finds all-state issues with the exact label an
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_upstream_watch.GitHubIssueTests -v
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run python -m unittest tests.test_upstream_watch_github.GitHubIssueTests -v
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 ```
 
 Expected: all commands exit `0`.
@@ -433,7 +434,7 @@ Expected: all commands exit `0`.
 - [ ] **Step 5: Commit issue management**
 
 ```powershell
-git add scripts/upstream_watch_core/github_api.py tests/test_upstream_watch.py
+git add scripts/upstream_watch_core/github_api.py tests/test_upstream_watch*.py
 git commit -m "feat: manage upstream watch tracking issue"
 ```
 
@@ -446,7 +447,7 @@ git commit -m "feat: manage upstream watch tracking issue"
 - Create: `.github/workflows/upstream-watch.yml`
 - Modify: `.github/workflows/ci.yml`
 - Modify: `.gitignore`
-- Modify: `tests/test_upstream_watch.py`
+- Modify: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Produces: `check`, `audit`, `validate`, and `accept` subcommands and `main(argv: Sequence[str] | None = None) -> int`.
@@ -505,11 +506,11 @@ Add `scripts` to all three CI Ruff commands and to all three ty commands. Add `.
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_upstream_watch.CliTests -v
+uv run python -m unittest tests.test_upstream_watch_cli.CliTests -v
 uv run python scripts/upstream_watch.py --help
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 ```
 
 Expected: tests pass, help lists all four subcommands, and static checks exit `0`.
@@ -517,7 +518,7 @@ Expected: tests pass, help lists all four subcommands, and static checks exit `0
 - [ ] **Step 7: Commit the executable chore**
 
 ```powershell
-git add .github .gitignore scripts tests/test_upstream_watch.py
+git add .github .gitignore scripts tests
 git commit -m "feat: add scheduled upstream watch chore"
 ```
 
@@ -527,7 +528,7 @@ git commit -m "feat: add scheduled upstream watch chore"
 - Create: `docs/upstream/ORTHO4XP_V3-audit.md`
 - Modify: `docs/development.md`
 - Modify: `TODO.md`
-- Modify: `tests/test_upstream_watch.py`
+- Modify: `tests/test_upstream_watch*.py`
 
 **Interfaces:**
 - Consumes: implemented `audit` and `validate` commands.
@@ -605,10 +606,10 @@ Add tests that load the committed state, parse the committed ledger, assert auth
 Run:
 
 ```powershell
-uv run python -m unittest tests.test_upstream_watch -v
-uv run ruff check scripts tests/test_upstream_watch.py
-uv run ruff format --check scripts tests/test_upstream_watch.py
-uv run ty check scripts tests/test_upstream_watch.py
+uv run python -m unittest discover -s tests -p "test_upstream_watch*.py" -v
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+uv run ty check scripts tests
 git diff --check
 ```
 
@@ -617,7 +618,7 @@ Expected: all tests and static checks pass; `validate` remains status `2` solely
 - [ ] **Step 8: Commit evidence and documentation**
 
 ```powershell
-git add docs TODO.md tests/test_upstream_watch.py
+git add docs TODO.md tests/test_upstream_watch*.py
 git commit -m "docs: record initial sister-project audit"
 ```
 

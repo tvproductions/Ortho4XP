@@ -1255,7 +1255,7 @@ atomic baseline gates, and single-issue GitHub reconciliation. The initial
 author audit observed 7 commits and 48 changed paths for
 `4ca0a8d404b078ad899979bafde84769a0fb235b..8a25af093af758292b4ef4c2caff93719cb1a54a`
 with manifest digest
-`8134be1ce57afa90f160268367301b901b15dea6ec2ef72df66f818f1b5284b3`.
+`204b30f3a175ed65d8495c0bc99a4ac6a6ddfc828d7ebdb8f9fa62bd198ece91`.
 All paths have ledger coverage; the provider finding deliberately remains
 `investigate`, so TODO-041-4 blocks baseline advancement without blocking
 completion of the watch infrastructure.

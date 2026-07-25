@@ -18,6 +18,10 @@ API_VERSION = "2022-11-28"
 TRACKING_TITLE = "[Upstream Watch] ORTHO4XP_V3 review status"
 TRACKING_LABEL = "upstream-watch"
 _FINGERPRINT_RE = re.compile(r"<!-- upstream-watch:fingerprint ([0-9a-f]{64}) -->")
+_COMMENTED_RE = re.compile(
+    r"<!-- upstream-watch:commented-fingerprint ([0-9a-f]{64}) -->"
+)
+_TRANSITION_RE = re.compile(r"<!-- upstream-watch:transition ([0-9a-f]{64}) -->")
 
 
 class GitHubApiError(RuntimeError):
@@ -31,32 +35,33 @@ class HttpResponse:
     body: bytes
 
 
+@dataclass(frozen=True, slots=True)
+class HttpRequest:
+    method: str
+    url: str
+    headers: dict[str, str]
+    body: bytes | None = None
+
+
 class HttpTransport(Protocol):
-    def request(
-        self,
-        method: str,
-        url: str,
-        headers: dict[str, str],
-        body: bytes | None = None,
-    ) -> HttpResponse: ...
+    def request(self, request: HttpRequest) -> HttpResponse: ...
 
 
 class UrllibTransport:
     """Network transport restricted to GitHub's HTTPS API origin."""
 
-    def request(
-        self,
-        method: str,
-        url: str,
-        headers: dict[str, str],
-        body: bytes | None = None,
-    ) -> HttpResponse:
-        _require_api_url(url)
-        request = urllib.request.Request(  # noqa: S310 - URL origin validated above.
-            url=url, data=body, headers=headers, method=method
+    def request(self, request: HttpRequest) -> HttpResponse:
+        _require_api_url(request.url)
+        url_request = urllib.request.Request(  # noqa: S310 - validated origin.
+            url=request.url,
+            data=request.body,
+            headers=request.headers,
+            method=request.method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
+            with urllib.request.urlopen(  # noqa: S310 - validated origin.
+                url_request, timeout=30
+            ) as response:
                 return HttpResponse(
                     status=response.status,
                     headers=dict(response.headers.items()),
@@ -233,6 +238,28 @@ class GitHubClient:
             expected={201},
         )
 
+    def list_comments(self, repository: str, number: int) -> tuple[str, ...]:
+        repository = validate_repository(repository, "repository")
+        url: str | None = (
+            f"{API_ORIGIN}/repos/{repository}/issues/{number}/comments?per_page=100"
+        )
+        comments: list[str] = []
+        while url is not None:
+            response = self._send("GET", url, expected={200})
+            payload = self._decode_json(response)
+            if not isinstance(payload, list):
+                raise GitHubApiError("GitHub returned a non-array comment list")
+            for value in payload:
+                if not isinstance(value, dict):
+                    raise GitHubApiError("GitHub returned a malformed issue comment")
+                comment = cast(dict[str, object], value)
+                body = comment.get("body")
+                if not isinstance(body, str):
+                    raise GitHubApiError("GitHub returned a malformed issue comment")
+                comments.append(body)
+            url = _next_link(response.headers)
+        return tuple(comments)
+
     def _request_json(
         self,
         method: str,
@@ -268,7 +295,9 @@ class GitHubClient:
         }
         if body is not None:
             headers["Content-Type"] = "application/json"
-        response = self.transport.request(method, url, headers, body)
+        response = self.transport.request(
+            HttpRequest(method=method, url=url, headers=headers, body=body)
+        )
         if response.status not in expected:
             if (
                 response.status in {403, 429}
@@ -373,7 +402,30 @@ def render_observation_body(observation: WatchObservation) -> str:
             "",
             "This issue is managed by `.github/workflows/upstream-watch.yml`.",
             f"<!-- upstream-watch:fingerprint {fingerprint} -->",
+            f"<!-- upstream-watch:commented-fingerprint {fingerprint} -->",
             "",
+        ]
+    )
+
+
+def _with_commented_fingerprint(body: str, fingerprint: str) -> str:
+    if _COMMENTED_RE.search(body) is None:
+        raise GitHubApiError("Rendered issue body omitted comment state")
+    return _COMMENTED_RE.sub(
+        f"<!-- upstream-watch:commented-fingerprint {fingerprint} -->",
+        body,
+        count=1,
+    )
+
+
+def _transition_comment(previous: str | None, current: str) -> str:
+    return "\n".join(
+        [
+            "Upstream-watch observation changed.",
+            "",
+            f"- Previous fingerprint: `{previous or 'missing'}`",
+            f"- Current fingerprint: `{current}`",
+            f"<!-- upstream-watch:transition {current} -->",
         ]
     )
 
@@ -415,31 +467,44 @@ def reconcile_tracking_issue(
     issue = candidates[0]
     existing_match = _FINGERPRINT_RE.search(issue.body)
     existing_fingerprint = existing_match.group(1) if existing_match else None
+    commented_match = _COMMENTED_RE.search(issue.body)
+    commented_fingerprint = (
+        commented_match.group(1) if commented_match else existing_fingerprint
+    )
     state_changed = issue.state != desired_state
     fingerprint_changed = existing_fingerprint != fingerprint
-    if not state_changed and not fingerprint_changed:
+    comment_pending = commented_fingerprint != fingerprint
+    if not state_changed and not fingerprint_changed and not comment_pending:
         return ReconcileResult(
             action="unchanged", issue_number=issue.number, fingerprint=fingerprint
         )
-    if fingerprint_changed:
-        client.add_comment(
+    if state_changed or fingerprint_changed:
+        pending_body = _with_commented_fingerprint(
+            desired_body, commented_fingerprint or fingerprint
+        )
+        client.update_issue(
             repository,
             issue.number,
-            "\n".join(
-                [
-                    "Upstream-watch observation changed.",
-                    "",
-                    f"- Previous fingerprint: `{existing_fingerprint or 'missing'}`",
-                    f"- Current fingerprint: `{fingerprint}`",
-                ]
-            ),
+            body=pending_body,
+            state=desired_state,
         )
-    client.update_issue(
-        repository,
-        issue.number,
-        body=desired_body,
-        state=desired_state,
-    )
+    if fingerprint_changed or comment_pending:
+        marker = f"<!-- upstream-watch:transition {fingerprint} -->"
+        if not any(
+            _TRANSITION_RE.search(comment) and marker in comment
+            for comment in client.list_comments(repository, issue.number)
+        ):
+            client.add_comment(
+                repository,
+                issue.number,
+                _transition_comment(existing_fingerprint, fingerprint),
+            )
+        client.update_issue(
+            repository,
+            issue.number,
+            body=desired_body,
+            state=desired_state,
+        )
     if issue.state == "closed" and desired_state == "open":
         action = "reopened"
     elif issue.state == "open" and desired_state == "closed":
