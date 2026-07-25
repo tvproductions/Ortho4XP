@@ -9,6 +9,12 @@ TextureCodec = Literal["bc1", "bc3"]
 
 
 @dataclass(frozen=True)
+class TextureCleanupPlan:
+    always_paths: tuple[str, ...] = ()
+    success_paths: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class TextureEncodeRequest:
     source_path: str
     output_path: str

@@ -9,6 +9,7 @@ import O4_Geo_Utils as GEO
 import O4_Geotiff_Options as GTO
 import O4_Texture_Encoder as TEX
 import O4_UI_Utils as UI
+from O4_Texture_Models import TextureCleanupPlan
 
 gdal.UseExceptions()
 
@@ -40,15 +41,28 @@ def cleanup_conversion_temps(erase_tmp_png, png_file_name, tmp_tif_file_name=Non
         _remove_conversion_temp(tmp_tif_file_name)
 
 
-def convert_dds_texture(tile, texture_attrs, conversion_input, cleanup_input):
+def cleanup_conversion_paths(paths: tuple[str, ...]) -> None:
+    for path in paths:
+        _remove_conversion_temp(path)
+
+
+def convert_dds_texture(
+    tile,
+    texture_attrs,
+    conversion_input,
+    cleanup_plan: TextureCleanupPlan,
+):
     request = texture_encode_request(tile, texture_attrs, conversion_input)
     try:
         encode_result = TEX.encode_texture(request)
         # Optional QA observes successful DDS output without changing conversion status.
         DQA.run_enabled_dds_quality_check(tile, encode_result)
-        return TEX.TextureConversionResult.from_encode_result(encode_result)
+        result = TEX.TextureConversionResult.from_encode_result(encode_result)
+        if result.ok and os.path.isfile(request.output_path):
+            cleanup_conversion_paths(cleanup_plan.success_paths)
+        return result
     finally:
-        cleanup_conversion_temps(*cleanup_input)
+        cleanup_conversion_paths(cleanup_plan.always_paths)
 
 
 def convert_geotiff_texture(tile, texture_attrs, conversion_input):

@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest import mock
 
 from PIL import Image
 
@@ -10,6 +11,7 @@ except ModuleNotFoundError:
 
 import O4_File_Names as FNAMES
 import O4_Imagery_Utils as IMG
+import O4_Texture_Conversion_Utils as TCU
 from O4_Texture_Source import TextureSource
 from tests._imagery_color_normalization_helpers import (
     ConvertTexturePatchMixin,
@@ -36,6 +38,100 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         self.assertTrue(result.ok)
         self.assertTrue(conversion.encode_request.source_path.endswith(".png"))
         self.assertFalse(os.path.exists(conversion.encode_request.source_path))
+
+    def test_external_border_mask_is_not_conversion_cleanup(self):
+        tile = self._tile_for_conversion()
+        tile.imprint_masks_to_dds = False
+        source = TextureSource(
+            tile,
+            (32, 48, 16, "STREAM"),
+            Image.new("RGB", (16, 16), (1, 2, 3)),
+        )
+        with (
+            self._convert_texture_patches("STREAM"),
+            mock.patch.object(
+                IMG, "convert_dds_texture", return_value=object()
+            ) as conversion,
+        ):
+            IMG.convert_texture_source(source)
+        cleanup_plan = conversion.call_args.args[3]
+        self.assertEqual(cleanup_plan.success_paths, ())
+
+    def test_streaming_imprinted_mask_exists_until_successful_encode(self):
+        tile = self._tile_for_conversion()
+        tile.imprint_masks_to_dds = True
+        texture_attrs = (32, 48, 16, "STREAM")
+        mask_path = self._write_dds_mask(tile, texture_attrs)
+        source = TextureSource(
+            tile,
+            texture_attrs,
+            Image.new("RGB", (16, 16), (1, 2, 3)),
+        )
+
+        with (
+            self._convert_texture_patches("STREAM") as conversion,
+            mock.patch.object(
+                IMG.RP,
+                "tile_resize_image",
+                return_value=Image.new("L", (16, 16), 255),
+            ),
+        ):
+            success = conversion.encode_texture.return_value
+
+            def encode(request):
+                self.assertTrue(os.path.exists(mask_path))
+                with open(request.output_path, "wb") as output_file:
+                    output_file.write(b"dds")
+                return TCU.TEX.TextureEncodeResult(
+                    request=request,
+                    ok=True,
+                    attempts=success.attempts,
+                    backend_name=success.backend_name,
+                    tool_name=success.tool_name,
+                    returncode=success.returncode,
+                    error_summary=success.error_summary,
+                )
+
+            conversion.encode_texture.side_effect = encode
+            result = IMG.convert_texture_source(source)
+
+        self.assertTrue(result.ok)
+        self.assertFalse(os.path.exists(mask_path))
+
+    def test_legacy_imprinted_mask_is_retained_after_encode_failure(self):
+        self._write_cached_jpeg("MASKFAIL")
+        tile = self._tile_for_conversion()
+        tile.imprint_masks_to_dds = True
+        texture_attrs = (32, 48, 16, "MASKFAIL")
+        mask_path = self._write_dds_mask(tile, texture_attrs)
+
+        with (
+            self._convert_texture_patches("MASKFAIL") as conversion,
+            mock.patch.object(
+                IMG.RP,
+                "tile_resize_image",
+                return_value=Image.new("L", (16, 16), 255),
+            ),
+        ):
+            failure = conversion.encode_texture.return_value
+
+            def encode(request):
+                self.assertTrue(os.path.exists(mask_path))
+                return TCU.TEX.TextureEncodeResult(
+                    request=request,
+                    ok=False,
+                    attempts=failure.attempts,
+                    backend_name=failure.backend_name,
+                    tool_name=failure.tool_name,
+                    returncode=7,
+                    error_summary="failed",
+                )
+
+            conversion.encode_texture.side_effect = encode
+            result = IMG.convert_texture(tile, *texture_attrs)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(os.path.exists(mask_path))
 
     def test_streaming_conversion_normalizes_before_color_filter(self):
         tile = self._tile_for_conversion()
@@ -196,6 +292,15 @@ class ConvertTextureColorNormalizationTests(ConvertTexturePatchMixin):
         remove.assert_any_call(
             os.path.join(tmp_dir, expected_name.replace("4326", "3857"))
         )
+
+    def _write_dds_mask(self, tile, texture_attrs):
+        mask_path = os.path.join(
+            tile.build_dir,
+            "textures",
+            FNAMES.mask_file(*texture_attrs),
+        )
+        Image.new("L", (16, 16), 255).save(mask_path)
+        return mask_path
 
 
 def _dds_tmp_png_path(provider_code, tmp_dir):

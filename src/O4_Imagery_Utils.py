@@ -43,10 +43,18 @@ from O4_Texture_Conversion_Utils import (
     convert_dds_texture,
     convert_geotiff_texture,
 )
+from O4_Texture_Models import TextureCleanupPlan
 from O4_Texture_Source import TextureBuildResult, TextureSource
 
 Image.MAX_IMAGE_PIXELS = 1000000000  # Not a decompression bomb attack!
 gdal.UseExceptions()
+
+
+@dataclass(frozen=True)
+class DdsMaskInput:
+    image: Image.Image
+    path: str
+
 
 has_URL = False
 URL: Any = None
@@ -2307,23 +2315,31 @@ def convert_texture_source(texture_source, type=DDS_OUTPUT_TYPE):
     UI.vprint(1, "   Converting orthophoto(s) to build texture " + out_file_name + ".")
 
     big_image = _prepare_texture_source_image(texture_source)
-    masked_texture, mask_im = _dds_texture_mask(tile, texture_attrs)
+    mask_input = _dds_texture_mask(tile, texture_attrs)
     dxt5 = False
-    if masked_texture:
+    if mask_input is not None:
         UI.vprint(2, "      Applying alpha mask directly to orthophoto.")
         big_image.putalpha(
-            RP.tile_resize_image(tile, "mask_resize_resampling", mask_im, (4096, 4096))
+            RP.tile_resize_image(
+                tile,
+                "mask_resize_resampling",
+                mask_input.image,
+                (4096, 4096),
+            )
         )
-        _remove_dds_mask_file(tile, texture_attrs)
         dxt5 = True
 
     file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
     big_image.save(file_to_convert)
+    cleanup_plan = TextureCleanupPlan(
+        always_paths=(file_to_convert,),
+        success_paths=(mask_input.path,) if mask_input is not None else (),
+    )
     return convert_dds_texture(
         tile,
         texture_attrs,
         (file_to_convert, out_file_name, dxt5),
-        (True, png_file_name),
+        cleanup_plan,
     )
 
 
@@ -2347,13 +2363,14 @@ def _texture_source_cache_dir(texture_source):
     return os.path.dirname(texture_source.cache_path)
 
 
-def _dds_texture_mask(tile, texture_attrs):
+def _dds_texture_mask(tile, texture_attrs) -> DdsMaskInput | None:
     if not tile.imprint_masks_to_dds:
-        return False, None
+        return None
     mask_path = _dds_mask_path(tile, texture_attrs)
     if not os.path.exists(mask_path):
-        return False, None
-    return True, Image.open(mask_path).convert("L")
+        return None
+    with Image.open(mask_path) as mask_image:
+        return DdsMaskInput(mask_image.convert("L"), mask_path)
 
 
 def _dds_mask_path(tile, texture_attrs):
@@ -2362,21 +2379,6 @@ def _dds_mask_path(tile, texture_attrs):
         "textures",
         FNAMES.mask_file(*texture_attrs),
     )
-
-
-def _remove_dds_mask_file(tile, texture_attrs):
-    try:
-        os.remove(_dds_mask_path(tile, texture_attrs))
-    except OSError as exc:
-        UI.vprint(3, exc)
-
-
-def _legacy_texture_mask(tile, texture_attrs, output_type):
-    if not tile.imprint_masks_to_dds:
-        return False, None
-    if output_type == DDS_OUTPUT_TYPE:
-        return _dds_texture_mask(tile, texture_attrs)
-    return _legacy_tif_texture_mask(tile, texture_attrs)
 
 
 def _legacy_tif_texture_mask(tile, texture_attrs):
@@ -2447,7 +2449,16 @@ def convert_texture(
     erase_tmp_png = False
 
     dxt5 = False
-    masked_texture, mask_im = _legacy_texture_mask(tile, texture_attrs, type)
+    mask_input = (
+        _dds_texture_mask(tile, texture_attrs) if type == DDS_OUTPUT_TYPE else None
+    )
+    if type == DDS_OUTPUT_TYPE:
+        masked_texture = mask_input is not None
+        mask_im = mask_input.image if mask_input is not None else None
+    elif not tile.imprint_masks_to_dds:
+        masked_texture, mask_im = False, None
+    else:
+        masked_texture, mask_im = _legacy_tif_texture_mask(tile, texture_attrs)
 
     file_dir = cached_texture_path = ""
     if provider_code in providers_dict:
@@ -2475,8 +2486,6 @@ def convert_texture(
         )
         if masked_texture:
             _apply_texture_alpha_mask(tile, big_image, mask_im)
-            if type == DDS_OUTPUT_TYPE:
-                _remove_dds_mask_file(tile, texture_attrs)
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
@@ -2496,8 +2505,6 @@ def convert_texture(
             )
         if masked_texture:
             _apply_texture_alpha_mask(tile, big_image, mask_im)
-            if type == DDS_OUTPUT_TYPE:
-                _remove_dds_mask_file(tile, texture_attrs)
             dxt5 = True
         file_to_convert = os.path.join(FNAMES.resource_path("tmp"), png_file_name)
         erase_tmp_png = True
@@ -2510,11 +2517,15 @@ def convert_texture(
             color_context,
         )
     if type == DDS_OUTPUT_TYPE:
+        cleanup_plan = TextureCleanupPlan(
+            always_paths=(file_to_convert,) if erase_tmp_png else (),
+            success_paths=(mask_input.path,) if mask_input is not None else (),
+        )
         return convert_dds_texture(
             tile,
             texture_attrs,
             (file_to_convert, out_file_name, dxt5),
-            (erase_tmp_png, png_file_name),
+            cleanup_plan,
         )
     return convert_geotiff_texture(
         tile,
