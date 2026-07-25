@@ -22,6 +22,15 @@ from scripts.upstream_watch_core.git_repo import (
     list_changes,
     read_blob,
 )
+from scripts.upstream_watch_core.github_api import (
+    GitHubApiError,
+    GitHubClient,
+    HttpResponse,
+    WatchObservation,
+    observation_fingerprint,
+    reconcile_tracking_issue,
+    render_observation_body,
+)
 from scripts.upstream_watch_core.ledger import (
     LedgerValidationError,
     advance_baseline,
@@ -612,3 +621,240 @@ class LedgerTests(unittest.TestCase):
                 self.state_path, self.report, entry, audit_date="2026-07-19"
             )
         self.assertEqual(self.state_path.read_bytes(), original)
+
+
+class FakeTransport:
+    def __init__(self, responses: list[HttpResponse]) -> None:
+        self.responses = responses
+        self.requests: list[dict[str, object]] = []
+
+    def request(
+        self,
+        method: str,
+        url: str,
+        headers: dict[str, str],
+        body: bytes | None = None,
+    ) -> HttpResponse:
+        safe_headers = dict(headers)
+        if "Authorization" in safe_headers:
+            safe_headers["Authorization"] = "Bearer ***"
+        self.requests.append(
+            {
+                "method": method,
+                "url": url,
+                "headers": safe_headers,
+                "body": body.decode("utf-8") if body else None,
+            }
+        )
+        if not self.responses:
+            raise AssertionError(f"Unexpected request: {method} {url}")
+        return self.responses.pop(0)
+
+
+class GitHubIssueTests(unittest.TestCase):
+    def _json_response(
+        self,
+        status: int,
+        payload: object,
+        headers: dict[str, str] | None = None,
+    ) -> HttpResponse:
+        return HttpResponse(
+            status=status,
+            headers=headers or {},
+            body=json.dumps(payload).encode("utf-8"),
+        )
+
+    def _observation(
+        self,
+        *,
+        status: WatchExit = WatchExit.REVIEW_REQUIRED,
+        fork_state: ForkState = ForkState.BEHIND,
+        author_head: str = "b" * 40,
+    ) -> WatchObservation:
+        return WatchObservation(
+            status=status,
+            author_repository="Ypsos/ORTHO4XP_V3",
+            author_branch="ORTHO4XP_V3",
+            baseline_sha="a" * 40,
+            author_head=author_head,
+            passive_repository="tvproductions/ORTHO4XP_V3",
+            passive_branch="ORTHO4XP_V3",
+            passive_head="a" * 40,
+            passive_state=fork_state,
+        )
+
+    def _issue(
+        self,
+        observation: WatchObservation,
+        *,
+        state: str = "open",
+        body: str | None = None,
+        number: int = 100,
+    ) -> dict[str, object]:
+        return {
+            "number": number,
+            "title": "[Upstream Watch] ORTHO4XP_V3 review status",
+            "body": body if body is not None else render_observation_body(observation),
+            "state": state,
+            "labels": [{"name": "upstream-watch"}],
+        }
+
+    def test_creates_label_and_single_tracking_issue(self) -> None:
+        observation = self._observation()
+        transport = FakeTransport(
+            [
+                self._json_response(404, {"message": "Not Found"}),
+                self._json_response(201, {"name": "upstream-watch"}),
+                self._json_response(200, []),
+                self._json_response(201, self._issue(observation)),
+            ]
+        )
+        client = GitHubClient("secret-token", transport=transport)
+        result = reconcile_tracking_issue(
+            client,
+            repository="tvproductions/Ortho4XP",
+            observation=observation,
+        )
+        self.assertEqual(result.action, "created")
+        self.assertEqual(result.issue_number, 100)
+        self.assertNotIn("secret-token", repr(transport.requests))
+        self.assertEqual(
+            [request["method"] for request in transport.requests],
+            ["GET", "POST", "GET", "POST"],
+        )
+
+    def test_unchanged_fingerprint_makes_no_issue_mutation(self) -> None:
+        observation = self._observation()
+        transport = FakeTransport(
+            [
+                self._json_response(200, {"name": "upstream-watch"}),
+                self._json_response(200, [self._issue(observation)]),
+            ]
+        )
+        result = reconcile_tracking_issue(
+            GitHubClient("token", transport=transport),
+            repository="tvproductions/Ortho4XP",
+            observation=observation,
+        )
+        self.assertEqual(result.action, "unchanged")
+        self.assertEqual(len(transport.requests), 2)
+
+    def test_changed_fingerprint_updates_and_comments_once(self) -> None:
+        previous = self._observation(author_head="c" * 40)
+        current = self._observation()
+        transport = FakeTransport(
+            [
+                self._json_response(200, {"name": "upstream-watch"}),
+                self._json_response(200, [self._issue(previous)]),
+                self._json_response(201, {"id": 1}),
+                self._json_response(200, self._issue(current)),
+            ]
+        )
+        result = reconcile_tracking_issue(
+            GitHubClient("token", transport=transport),
+            repository="tvproductions/Ortho4XP",
+            observation=current,
+        )
+        self.assertEqual(result.action, "updated")
+        self.assertEqual(
+            [request["method"] for request in transport.requests],
+            ["GET", "GET", "POST", "PATCH"],
+        )
+
+    def test_reopens_or_closes_existing_issue_from_status(self) -> None:
+        cases = (
+            (
+                self._observation(),
+                "closed",
+                "reopened",
+                "open",
+            ),
+            (
+                self._observation(status=WatchExit.CURRENT),
+                "open",
+                "closed",
+                "closed",
+            ),
+        )
+        for observation, initial_state, action, final_state in cases:
+            with self.subTest(action=action):
+                previous_body = render_observation_body(
+                    self._observation(author_head="c" * 40)
+                )
+                transport = FakeTransport(
+                    [
+                        self._json_response(200, {"name": "upstream-watch"}),
+                        self._json_response(
+                            200,
+                            [
+                                self._issue(
+                                    observation,
+                                    state=initial_state,
+                                    body=previous_body,
+                                )
+                            ],
+                        ),
+                        self._json_response(201, {"id": 1}),
+                        self._json_response(
+                            200, self._issue(observation, state=final_state)
+                        ),
+                    ]
+                )
+                result = reconcile_tracking_issue(
+                    GitHubClient("token", transport=transport),
+                    repository="tvproductions/Ortho4XP",
+                    observation=observation,
+                )
+                self.assertEqual(result.action, action)
+                patch_body = json.loads(cast(str, transport.requests[-1]["body"]))
+                self.assertEqual(patch_body["state"], final_state)
+
+    def test_paginates_only_same_origin_links(self) -> None:
+        observation = self._observation()
+        next_url = (
+            "https://api.github.com/repos/tvproductions/Ortho4XP/issues?"
+            "state=all&labels=upstream-watch&per_page=100&page=2"
+        )
+        transport = FakeTransport(
+            [
+                self._json_response(
+                    200,
+                    [],
+                    {"Link": f'<{next_url}>; rel="next"'},
+                ),
+                self._json_response(200, [self._issue(observation)]),
+            ]
+        )
+        issues = GitHubClient("token", transport=transport).list_issues(
+            "tvproductions/Ortho4XP", label="upstream-watch"
+        )
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(len(transport.requests), 2)
+
+    def test_reports_rate_limits_and_malformed_json_without_token(self) -> None:
+        cases = (
+            HttpResponse(
+                status=403,
+                headers={"X-RateLimit-Remaining": "0"},
+                body=b'{"message":"rate limit exceeded"}',
+            ),
+            HttpResponse(status=200, headers={}, body=b"not-json"),
+        )
+        for response in cases:
+            with self.subTest(status=response.status):
+                transport = FakeTransport([response])
+                client = GitHubClient("secret-token", transport=transport)
+                with self.assertRaises(GitHubApiError) as context:
+                    client.ensure_label("tvproductions/Ortho4XP")
+                self.assertNotIn("secret-token", str(context.exception))
+
+    def test_fingerprint_is_canonical_and_fork_lag_is_informational(self) -> None:
+        observation = self._observation()
+        self.assertEqual(
+            observation_fingerprint(observation),
+            observation_fingerprint(self._observation()),
+        )
+        body = render_observation_body(observation)
+        self.assertIn("informational", body.casefold())
+        self.assertIn("Ypsos/ORTHO4XP_V3", body)
+        self.assertIn("tvproductions/ORTHO4XP_V3", body)
