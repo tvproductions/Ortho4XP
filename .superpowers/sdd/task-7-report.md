@@ -2,12 +2,14 @@
 
 ## Scope and state
 
-- Review range: `63fb1b5..HEAD`; Task 7 completion is recorded by the
-  `docs: complete TODO-041-2 coastal hardening` commit.
+- Review range: `63fb1b5..2991dbb`; Task 7 completion is recorded by the
+  `docs: complete TODO-041-2 coastal hardening` commit and the subsequent
+  review-hardening commits.
 - Scope remains XP12 coastal artifact lifecycle only.
 - No XP11 branch, sister sea-texture subsystem, provider/network call, GDAL or
   encoder process, X-Plane installation, or sample tile was added to evidence.
-- GitHub Issue #39 remains open and has not been commented on during Task 7.
+- GitHub Issue #39 is the closeout target; its evidence comment and closure
+  follow this committed report.
 
 ## Quality-condition traceability
 
@@ -157,5 +159,38 @@ extraction removed that last regression, and the final complexity rerun exited
 | `uv run python .codex/skills/quality-check/scripts/quality_check.py` | Exit 0; unittest, Ruff, ty, format, whitespace, code quality, complexity, Clang-Tidy, CMake, and native build passed. |
 
 The full quality run reported 19 nonblocking legacy/size warnings and 0
-blocks. No review-fix verification stage was skipped. GitHub Issue #39 remains
-open and uncommented for whole-branch review.
+blocks. No review-fix verification stage was skipped.
+
+## Windows read-only transaction follow-up
+
+The whole-branch follow-up reproduced one remaining Windows-specific failure
+class: `os.replace` cannot replace a read-only destination on Windows, and
+failed cleanup could leave read-only staging files behind. Commit `2991dbb`
+temporarily makes the destination writable for forward and rollback
+replacement, restores its exact original mode, retries read-only staging
+cleanup after making the file writable, and preserves failed-rollback backups
+for recovery.
+
+Deterministic coverage now exercises:
+
+- successful replacement of a read-only terrain artifact;
+- injected forward replacement failure;
+- injected rollback replacement failure;
+- exact destination-mode restoration on success and failure; and
+- cleanup retry for read-only staged files.
+
+Final post-follow-up verification:
+
+| Command | Result |
+| --- | --- |
+| `uv run python -m unittest tests.test_terrain_artifact_transaction tests.test_texture_artifact_finalizer -v` | 31 tests passed. |
+| `uv run ruff check src/O4_Terrain_Artifact_Transaction.py tests/test_terrain_artifact_transaction.py` | Exit 0. |
+| `uv run ruff format --check src/O4_Terrain_Artifact_Transaction.py tests/test_terrain_artifact_transaction.py` | Exit 0. |
+| `uv run ty check src/O4_Terrain_Artifact_Transaction.py tests/test_terrain_artifact_transaction.py` | Exit 0. |
+| `uv run python -m unittest discover -s tests` | 507 tests passed. |
+| `uv run python .codex/skills/quality-check/scripts/quality_check.py` | Exit 0; unittest, Ruff, ty, format, whitespace, code quality, complexity, Clang-Tidy, CMake, and native build passed. |
+| `git diff --check` | Exit 0 with no output. |
+
+The final quality run reported the same 19 nonblocking legacy/size warnings and
+0 blocks. All TODO-041-2 acceptance criteria and the reproduced Windows
+transaction failure class are covered by committed tests.

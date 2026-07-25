@@ -1241,7 +1241,7 @@ Completion evidence:
 - Deterministic `unittest` coverage includes missing-mask, ocean, extent,
   cleanup success/failure, sand validation, and provider-naming cases.
 - Full repository quality verification passed; command evidence is recorded in
-  the Task 7 closeout report pending the GitHub Issue #39 closeout review.
+  the Task 7 closeout report and GitHub Issue #39.
 
 ### TODO-041-3: Add Sister-Project Upstream-Watch Chore
 
