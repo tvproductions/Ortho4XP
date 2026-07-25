@@ -14,6 +14,11 @@ def finalize_terrain_texture_references(tile, results):
     mappings = _validated_mappings(tile, results)
     if not mappings:
         return 0
+    changed_mappings = {
+        requested: resolved
+        for requested, resolved in mappings.items()
+        if requested != resolved
+    }
     terrain_dir = Path(tile.build_dir) / "terrain"
     terrain_files = sorted(terrain_dir.glob("*.ter"))
     updated_files = {}
@@ -24,6 +29,7 @@ def finalize_terrain_texture_references(tile, results):
             updated_bytes, file_matches = _rewrite_terrain_references(
                 original,
                 mappings,
+                changed_mappings,
             )
             for requested_name, count in file_matches.items():
                 matched[requested_name] += count
@@ -42,7 +48,7 @@ def finalize_terrain_texture_references(tile, results):
     return len(updated_files)
 
 
-def _rewrite_terrain_references(original, mappings):
+def _rewrite_terrain_references(original, mappings, changed_mappings):
     matched = dict.fromkeys(mappings, 0)
     updated_lines = []
     for original_line in original.decode("utf-8").splitlines(keepends=True):
@@ -52,9 +58,12 @@ def _rewrite_terrain_references(original, mappings):
             requested_name = body[len(_BASE_TEXTURE_PREFIX) :]
             if requested_name in mappings:
                 matched[requested_name] += 1
-                original_line = (
-                    _BASE_TEXTURE_PREFIX + mappings[requested_name] + line_ending
-                )
+                if requested_name in changed_mappings:
+                    original_line = (
+                        _BASE_TEXTURE_PREFIX
+                        + changed_mappings[requested_name]
+                        + line_ending
+                    )
         updated_lines.append(original_line)
     return "".join(updated_lines).encode("utf-8"), matched
 
@@ -109,8 +118,6 @@ def _validated_mappings(tile, results):
                 f"{result.display_name}, {resolved_name}"
             )
         output_names.add(resolved_name)
-        if requested_name == resolved_name:
-            continue
         previous = mappings.setdefault(requested_name, resolved_name)
         if previous != resolved_name:
             raise TextureFinalizationError(

@@ -97,6 +97,91 @@ class TextureArtifactFinalizerTests(unittest.TestCase):
             "BASE_TEX_NOWRAP ../textures/48_32_EOX16.dds\n",
         )
 
+    def test_identity_then_changed_resolution_is_conflicting(self):
+        terrain_file = self._write_terrain("identity-first.ter")
+        original = terrain_file.read_text()
+        self._write_texture("BI")
+        self._write_texture("Arc")
+
+        with self.assertRaisesRegex(
+            TAF.TextureFinalizationError,
+            "conflicting",
+        ):
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (
+                    resolved_result("BI", "BI"),
+                    resolved_result("BI", "Arc"),
+                ),
+            )
+
+        self.assertEqual(terrain_file.read_text(), original)
+
+    def test_changed_then_identity_resolution_is_conflicting(self):
+        terrain_file = self._write_terrain("changed-first.ter")
+        original = terrain_file.read_text()
+        self._write_texture("BI")
+        self._write_texture("Arc")
+
+        with self.assertRaisesRegex(
+            TAF.TextureFinalizationError,
+            "conflicting",
+        ):
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (
+                    resolved_result("BI", "Arc"),
+                    resolved_result("BI", "BI"),
+                ),
+            )
+
+        self.assertEqual(terrain_file.read_text(), original)
+
+    def test_unchanged_resolution_requires_matching_terrain_reference(self):
+        self._write_texture("BI")
+
+        with self.assertRaisesRegex(
+            TAF.TextureFinalizationError,
+            "not referenced",
+        ):
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (resolved_result("BI", "BI"),),
+            )
+
+    def test_unchanged_resolution_with_exact_reference_performs_no_rewrite(self):
+        terrain_file = self._write_terrain("unchanged.ter")
+        original = terrain_file.read_bytes()
+        self._write_texture("BI")
+
+        updated = TAF.finalize_terrain_texture_references(
+            self.tile,
+            (resolved_result("BI", "BI"),),
+        )
+
+        self.assertEqual(updated, 0)
+        self.assertEqual(terrain_file.read_bytes(), original)
+        self.assertEqual(list(self.terrain.glob("*.finalizing*")), [])
+
+    def test_unchanged_resolution_rejects_lookalike_terrain_target(self):
+        terrain_file = self._write_terrain_text(
+            "unchanged-lookalike.ter",
+            "BASE_TEX_NOWRAP ../textures/48_32_BI16.dds.backup\n",
+        )
+        original = terrain_file.read_text()
+        self._write_texture("BI")
+
+        with self.assertRaisesRegex(
+            TAF.TextureFinalizationError,
+            "not referenced",
+        ):
+            TAF.finalize_terrain_texture_references(
+                self.tile,
+                (resolved_result("BI", "BI"),),
+            )
+
+        self.assertEqual(terrain_file.read_text(), original)
+
     def test_only_exact_base_texture_targets_are_rewritten(self):
         terrain_file = self._write_terrain_text(
             "suffix.ter",
