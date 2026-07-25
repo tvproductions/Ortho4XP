@@ -16,6 +16,7 @@ import O4_File_Names as FNAMES
 import O4_Geo_Utils as GEO
 import O4_Imagery_Utils as IMG
 import O4_Mask_Alpha as MA
+import O4_Mask_Validation as MV
 import O4_Mesh_Utils as MESH
 import O4_OSM_Utils as OSM
 import O4_UI_Utils as UI
@@ -105,6 +106,19 @@ def build_masks(tile, for_imagery=False, ctx=None):
         )
         UI.exit_message_and_bottom_line("")
         return 0
+
+    if tile.masking_mode == "sand":
+        pixel_size = GEO.webmercator_pixel_size(tile.lat + 0.5, tile.mask_zl)
+        try:
+            MV.validate_sand_mask(
+                tile.masks_width,
+                pixel_size,
+                (4096 + 2 * 1024, 4096 + 2 * 1024),
+            )
+        except ValueError as exc:
+            UI.lvprint(0, f"ERROR: Invalid sand mask configuration: {exc}")
+            UI.exit_message_and_bottom_line("")
+            return 0
 
     # Check or create dest dir
     dest_dir = (
@@ -670,7 +684,8 @@ def blur_mask(img_array, tile, sea_level):
     ##########################################
     pxscal = GEO.webmercator_pixel_size(tile.lat + 0.5, tile.mask_zl)
     if tile.masking_mode == "sand":
-        blur_width = int(tile.masks_width / pxscal)
+        geometry = MV.validate_sand_mask(tile.masks_width, pxscal, img_array.shape)
+        blur_width = geometry.width_pixels
         if blur_width:
             # convolution with a hat function
             b_img_array = numpy.array(img_array)
