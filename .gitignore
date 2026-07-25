@@ -24,3 +24,4 @@ Ortho4XP.cfg
 .DS_Store
 .coverage
 .codex/.coverage
+.worktrees/
