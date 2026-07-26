@@ -60,3 +60,15 @@ class RepositorySurfaceTests(unittest.TestCase):
         self.assertIn("concurrency:", workflow)
         self.assertIn("cancel-in-progress: false", workflow)
         self.assertNotIn("contents: write", workflow)
+
+    def test_workflows_use_current_node24_action_releases(self) -> None:
+        # Node 20 action releases emit deprecation annotations on hosted runners.
+        for name in ("ci.yml", "upstream-watch.yml"):
+            with self.subTest(workflow=name):
+                workflow = (ROOT_DIR / ".github" / "workflows" / name).read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn("actions/checkout@v7", workflow)
+                self.assertIn("actions/setup-python@v7", workflow)
+                self.assertNotIn("actions/checkout@v4", workflow)
+                self.assertNotIn("actions/setup-python@v5", workflow)
