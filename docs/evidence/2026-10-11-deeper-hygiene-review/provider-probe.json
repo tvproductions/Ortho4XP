@@ -1,0 +1,30 @@
+[
+  {
+    "function": "get_DK_ticket",
+    "state_after_connection_failure": "loading",
+    "next_call_wait_seconds": [
+      3
+    ]
+  },
+  {
+    "function": "get_DOP40_cookie",
+    "state_after_connection_failure": "loading",
+    "next_call_wait_seconds": [
+      3
+    ]
+  },
+  {
+    "function": "get_NIB_token",
+    "state_after_connection_failure": "loading",
+    "next_call_wait_seconds": [
+      3
+    ]
+  },
+  {
+    "function": "get_Here_value",
+    "state_after_connection_failure": "loading",
+    "next_call_wait_seconds": [
+      3
+    ]
+  }
+]

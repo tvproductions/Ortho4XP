@@ -1,0 +1,224 @@
+[
+  {
+    "cell": null,
+    "code": "B010",
+    "end_location": {
+      "column": 71,
+      "row": 92
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "urllib3_ssl.DEFAULT_CIPHERS = \"HIGH:!DH:!aNULL\"",
+          "end_location": {
+            "column": 71,
+            "row": 92
+          },
+          "location": {
+            "column": 13,
+            "row": 92
+          }
+        }
+      ],
+      "message": "Replace `setattr` with assignment"
+    },
+    "location": {
+      "column": 13,
+      "row": 92
+    },
+    "message": "Do not call `setattr` with a constant attribute value. It is not any safer than normal property access.",
+    "name": "set-attr-with-constant",
+    "noqa_row": 92,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/set-attr-with-constant"
+  },
+  {
+    "cell": null,
+    "code": "S113",
+    "end_location": {
+      "column": 29,
+      "row": 95
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 95
+    },
+    "message": "Probable use of `requests` call without timeout",
+    "name": "request-without-timeout",
+    "noqa_row": 95,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/request-without-timeout"
+  },
+  {
+    "cell": null,
+    "code": "B010",
+    "end_location": {
+      "column": 61,
+      "row": 102
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "urllib3_ssl.DEFAULT_CIPHERS = tmp",
+          "end_location": {
+            "column": 61,
+            "row": 102
+          },
+          "location": {
+            "column": 17,
+            "row": 102
+          }
+        }
+      ],
+      "message": "Replace `setattr` with assignment"
+    },
+    "location": {
+      "column": 17,
+      "row": 102
+    },
+    "message": "Do not call `setattr` with a constant attribute value. It is not any safer than normal property access.",
+    "name": "set-attr-with-constant",
+    "noqa_row": 102,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/set-attr-with-constant"
+  },
+  {
+    "cell": null,
+    "code": "S105",
+    "end_location": {
+      "column": 33,
+      "row": 138
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": null,
+    "location": {
+      "column": 24,
+      "row": 138
+    },
+    "message": "Possible hardcoded password assigned to: \"NIB_token\"",
+    "name": "hardcoded-password-string",
+    "noqa_row": 138,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/hardcoded-password-string"
+  },
+  {
+    "cell": null,
+    "code": "S105",
+    "end_location": {
+      "column": 30,
+      "row": 142
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 142
+    },
+    "message": "Possible hardcoded password assigned to: \"NIB_token\"",
+    "name": "hardcoded-password-string",
+    "noqa_row": 142,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/hardcoded-password-string"
+  },
+  {
+    "cell": null,
+    "code": "S113",
+    "end_location": {
+      "column": 29,
+      "row": 144
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 144
+    },
+    "message": "Probable use of `requests` call without timeout",
+    "name": "request-without-timeout",
+    "noqa_row": 144,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/request-without-timeout"
+  },
+  {
+    "cell": null,
+    "code": "S113",
+    "end_location": {
+      "column": 29,
+      "row": 165
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 165
+    },
+    "message": "Probable use of `requests` call without timeout",
+    "name": "request-without-timeout",
+    "noqa_row": 165,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/request-without-timeout"
+  },
+  {
+    "cell": null,
+    "code": "S113",
+    "end_location": {
+      "column": 29,
+      "row": 171
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Providers\\O4_Custom_URL.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 171
+    },
+    "message": "Probable use of `requests` call without timeout",
+    "name": "request-without-timeout",
+    "noqa_row": 171,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/request-without-timeout"
+  },
+  {
+    "cell": null,
+    "code": "S603",
+    "end_location": {
+      "column": 23,
+      "row": 28
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Utils\\run\\build.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 28
+    },
+    "message": "`subprocess` call: check for execution of untrusted input",
+    "name": "subprocess-without-shell-equals-true",
+    "noqa_row": 28,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true"
+  },
+  {
+    "cell": null,
+    "code": "S603",
+    "end_location": {
+      "column": 23,
+      "row": 74
+    },
+    "filename": "U:\\repos\\xp\\Ortho4XP\\Utils\\run\\configure.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 74
+    },
+    "message": "`subprocess` call: check for execution of untrusted input",
+    "name": "subprocess-without-shell-equals-true",
+    "noqa_row": 74,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true"
+  }
+]

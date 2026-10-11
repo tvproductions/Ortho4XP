@@ -1,0 +1,10 @@
+{
+  "baseline_returncode": 0,
+  "baseline_seconds": 0.03343930000119144,
+  "baseline_stderr_bytes": 1000000,
+  "streamed_returncode": 77,
+  "streamed_seconds": 2.03787839999859,
+  "streamed_stdout": "",
+  "streamed_stderr_bytes": 0,
+  "watchdog_exit": 77
+}

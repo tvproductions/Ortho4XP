@@ -1,0 +1,33 @@
+import importlib.util
+import json
+from pathlib import Path
+from unittest import mock
+
+path = Path('Providers/O4_Custom_URL.py')
+spec = importlib.util.spec_from_file_location('provider_review', path)
+provider = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(provider)
+cases = []
+for function, field in [(provider.get_DK_ticket, 'DK_ticket'), (provider.get_DOP40_cookie, 'DOP40_cookie'), (provider.get_NIB_token, 'NIB_token'), (provider.get_Here_value, 'Here_value')]:
+    def fail(*args, **kwargs):
+        raise provider.requests.ConnectionError('offline review fixture')
+    with mock.patch.object(provider.requests, 'get', side_effect=fail), mock.patch.object(provider.requests.Session, 'get', side_effect=fail):
+        try:
+            function()
+        except provider.requests.ConnectionError:
+            pass
+    state = getattr(provider, field)
+    assert state == 'loading'
+    waits = []
+    def stop_wait(seconds):
+        waits.append(seconds)
+        raise RuntimeError('bounded wait witness')
+    with mock.patch.object(provider.time, 'sleep', side_effect=stop_wait):
+        try:
+            function()
+        except RuntimeError as error:
+            assert str(error) == 'bounded wait witness'
+    assert waits == [3]
+    cases.append({'function': function.__name__, 'state_after_connection_failure': state, 'next_call_wait_seconds': waits})
+Path('tmp/hygiene-provider-probe.json').write_text(json.dumps(cases, indent=2))
+print(json.dumps(cases, indent=2))

@@ -1,0 +1,8 @@
+Command: ['uv', 'run', '--group', 'hygiene', 'vulture', 'src', 'U:\\repos\\xp\\Ortho4XP\\.codex\\skills\\maintenance-qa\\vulture.whitelist.py', '--exclude', 'src/Unused', '--min-confidence', '80']
+Exit: 3
+src\O4_DEM_Utils.py:678: unreachable code after 'return' (100% confidence)
+src\O4_Imagery_Utils.py:852: unused variable 'is_sharp_resize' (100% confidence)
+src\O4_Package_Metadata.py:3: unused import 'timezone' (90% confidence)
+src\O4_Package_Upgrader.py:4: unused import 'timezone' (90% confidence)
+src\O4_Vector_Map.py:320: unsatisfiable 'if' condition (100% confidence)
+src\O4_Vector_Utils.py:817: unused variable 'idx_pol1' (100% confidence)

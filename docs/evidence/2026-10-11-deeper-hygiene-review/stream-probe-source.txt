@@ -1,0 +1,35 @@
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path.cwd() / 'src'))
+import O4_Subprocess_Runtime as runtime
+
+child = (
+    "import os,sys,threading; "
+    "timer=threading.Timer(2,lambda:os._exit(77)); timer.start(); "
+    "sys.stderr.write('x'*1000000); sys.stderr.flush(); "
+    "print('done',flush=True); timer.cancel()"
+)
+command = [sys.executable, '-c', child]
+start = time.monotonic()
+baseline = subprocess.run(command, capture_output=True, text=True, timeout=5)
+baseline_time = time.monotonic() - start
+start = time.monotonic()
+code, stdout, stderr = runtime.run_streamed(command, lambda line: None)
+result = {
+    'baseline_returncode': baseline.returncode,
+    'baseline_seconds': baseline_time,
+    'baseline_stderr_bytes': len(baseline.stderr),
+    'streamed_returncode': code,
+    'streamed_seconds': time.monotonic() - start,
+    'streamed_stdout': stdout,
+    'streamed_stderr_bytes': len(stderr),
+    'watchdog_exit': 77,
+}
+Path('tmp/hygiene-stream-probe.json').write_text(json.dumps(result, indent=2))
+print(json.dumps(result, indent=2))
+assert baseline.returncode == 0
+assert code == 77 and not stdout, 'Expected bounded stderr-pressure deadlock witness'
