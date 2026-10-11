@@ -1,0 +1,174 @@
+[
+  {
+    "code": "1 import pickle\n2 from math import ceil, floor\n3 \n",
+    "col_offset": 0,
+    "end_col_offset": 13,
+    "filename": "src\\O4_Airport_Geometry.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 502,
+      "link": "https://cwe.mitre.org/data/definitions/502.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Consider possible security implications associated with pickle module.",
+    "line_number": 1,
+    "line_range": [
+      1
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
+    "test_id": "B403",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "3 import os\n4 import pickle\n5 import shutil\n",
+    "col_offset": 0,
+    "end_col_offset": 13,
+    "filename": "src\\O4_DSF_Utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 502,
+      "link": "https://cwe.mitre.org/data/definitions/502.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Consider possible security implications associated with pickle module.",
+    "line_number": 4,
+    "line_range": [
+      4
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
+    "test_id": "B403",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "143             with open(FNAMES.apt_file(tile), \"rb\") as f:\n144                 dico_airports = pickle.load(f)  # noqa: S301\n145         except (OSError, EOFError, pickle.UnpicklingError):\n",
+    "col_offset": 32,
+    "end_col_offset": 46,
+    "filename": "src\\O4_DSF_Utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 502,
+      "link": "https://cwe.mitre.org/data/definitions/502.html"
+    },
+    "issue_severity": "MEDIUM",
+    "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
+    "line_number": 144,
+    "line_range": [
+      144
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
+    "test_id": "B301",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "1 import os\n2 import pickle\n3 import sys\n",
+    "col_offset": 0,
+    "end_col_offset": 13,
+    "filename": "src\\O4_Mesh_Utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 502,
+      "link": "https://cwe.mitre.org/data/definitions/502.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Consider possible security implications associated with pickle module.",
+    "line_number": 2,
+    "line_range": [
+      2
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
+    "test_id": "B403",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "131             with open(FNAMES.apt_file(tile), \"rb\") as f:\n132                 dico_airports = pickle.load(f)  # noqa: S301\n133         except (OSError, EOFError, pickle.UnpicklingError):\n",
+    "col_offset": 32,
+    "end_col_offset": 46,
+    "filename": "src\\O4_Mesh_Utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 502,
+      "link": "https://cwe.mitre.org/data/definitions/502.html"
+    },
+    "issue_severity": "MEDIUM",
+    "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
+    "line_number": 132,
+    "line_range": [
+      132
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
+    "test_id": "B301",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "1 import subprocess\n2 from collections.abc import Callable\n3 \n",
+    "col_offset": 0,
+    "end_col_offset": 17,
+    "filename": "src\\O4_Subprocess_Runtime.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 78,
+      "link": "https://cwe.mitre.org/data/definitions/78.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Consider possible security implications associated with the subprocess module.",
+    "line_number": 1,
+    "line_range": [
+      1
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
+    "test_id": "B404",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "10 def run_captured(command: list[str]) -> CommandOutcome:\n11     completed = subprocess.run(  # noqa: S603\n12         command,\n13         check=False,\n14         capture_output=True,\n15         text=True,\n16         env=UI.subprocess_env(),\n17     )\n18     return (completed.returncode, completed.stdout, completed.stderr)\n",
+    "col_offset": 16,
+    "end_col_offset": 5,
+    "filename": "src\\O4_Subprocess_Runtime.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 78,
+      "link": "https://cwe.mitre.org/data/definitions/78.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "subprocess call - check for execution of untrusted input.",
+    "line_number": 11,
+    "line_range": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
+    "test_id": "B603",
+    "test_name": "subprocess_without_shell_equals_true"
+  },
+  {
+    "code": "24     stdout_chunks: list[str] = []\n25     with subprocess.Popen(  # noqa: S603\n26         command,\n27         stdout=subprocess.PIPE,\n28         stderr=subprocess.PIPE,\n29         bufsize=0,\n30         env=UI.subprocess_env(),\n31     ) as process:\n32         if process.stdout is None:\n",
+    "col_offset": 9,
+    "end_col_offset": 5,
+    "filename": "src\\O4_Subprocess_Runtime.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 78,
+      "link": "https://cwe.mitre.org/data/definitions/78.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "subprocess call - check for execution of untrusted input.",
+    "line_number": 25,
+    "line_range": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
+    "test_id": "B603",
+    "test_name": "subprocess_without_shell_equals_true"
+  }
+]

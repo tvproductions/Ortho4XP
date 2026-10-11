@@ -46,8 +46,13 @@
 
 ## Superpowers Workflow
 
-Superpowers skills are vendored under `.agents/skills/superpowers/skills/`.
-Use them as mandatory workflow guidance when their trigger conditions apply.
+Read [AGENTS.skills-first.md](AGENTS.skills-first.md) and the starter-owned
+`.agents/skills/skills-first-start/SKILL.md` entry for the development stack.
+Superpowers and gz-skills load through native plugins with immutable sources
+recorded in `.skills-first/bundle.lock.json`; do not vendor their skill trees.
+Project-owned operational skills remain under `.codex/skills/`. Use applicable
+Superpowers workflows and gz-skills engineering disciplines, preserving these
+project rules. See [stack ownership and adoption](docs/agents/skills.md).
 
 Core workflow:
 
@@ -85,7 +90,7 @@ claims. These reinforce this repo's PRIME DIRECTIVE and DO IT RIGHT rules.
 
 ## Modern Toolchain
 
-Windows 11 is the primary development environment for now. Keep choices portable to current Apple Silicon macOS and Ubuntu. Python 3.13.x is required; `.python-version` pins local `uv` environments to Python 3.13. `uv.lock` is committed and authoritative.
+Windows 11 is the primary development environment for now. Keep choices portable to current Apple Silicon macOS and Ubuntu. Python 3.14.x is required; `.python-version` pins the current supported patch release. `uv.lock` is committed and authoritative. Ortho4XP's scientific, imaging, geospatial, native, and packaging dependencies remain project-owned; the starter's dependency-free helper does not constrain them.
 
 Use:
 
@@ -97,9 +102,12 @@ Use:
 - `uv run python .codex/skills/quality-check/scripts/quality_check.py`
 
 Run `ty` on changed Python files and expand the checked baseline as files are modernized.
-Run the full quality check before commit or sync when practical; it includes
-unittest, Ruff, ty, whitespace checks, Radon/Lizard/Cohesion complexity checks,
-and native LLVM/CMake verification.
+Run the full routine quality check before commit or sync when practical; it
+includes unittest, Ruff, ty, whitespace and structural checks, stack-source
+coherence, and native LLVM/CMake verification. Pre-commit runs Ruff
+check/format, ty, and unittest only. Deeper hygiene is explicitly requested
+and stays outside hooks and CI; follow the project maintenance skill and
+[Python engineering binding](docs/agents/python-engineering.md).
 
 ## Native Builds
 

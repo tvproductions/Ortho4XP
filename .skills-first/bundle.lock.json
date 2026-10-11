@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "starter": {
+    "repository": "https://github.com/tvproductions/gz-skills-first-starter.git",
+    "version": "0.1.0",
+    "revision": "b3dd0e47095499bd07f33448b38166221c2c1eec"
+  },
+  "components": [
+    {
+      "name": "superpowers",
+      "repository": "https://github.com/obra/superpowers",
+      "release": "v7.0.0",
+      "revision": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
+      "status": "released; reviewed latest published release on 2026-10-11",
+      "enabled_by_default": true
+    },
+    {
+      "name": "superpowers-backplane",
+      "repository": "https://github.com/tvproductions/superpowers-backplane",
+      "release": null,
+      "revision": "d0eeee829c491da02351e793544aa16ad96461bf",
+      "status": "pre-release; published commit, host acceptance incomplete",
+      "enabled_by_default": false
+    },
+    {
+      "name": "gz-skills",
+      "repository": "https://github.com/tvproductions/gz-skills",
+      "release": "v0.6.0",
+      "revision": "e722e808647481c4c9d2feab61f1843aa8e0b19a",
+      "status": "released",
+      "enabled_by_default": true
+    }
+  ],
+  "catalog": {
+    "name": "ortho4xp-skills-first",
+    "reason": "Current published Superpowers ahead of shared starter baseline; upstream skills remain native-manager-owned.",
+    "source": "project-local"
+  }
+}

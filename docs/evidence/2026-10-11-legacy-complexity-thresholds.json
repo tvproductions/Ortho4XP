@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "description": "Ortho4XP complexity thresholds for quality-check. Values follow the gzkit metric set and trigger vocabulary, with baseline comparison used to avoid allowing regressions in legacy code.",
+  "metrics": {
+    "radon_cc": {
+      "polarity": "high",
+      "advise": 4.0,
+      "warn": 7.0,
+      "block": 11.0
+    },
+    "radon_mi": {
+      "polarity": "low",
+      "advise": 85.0,
+      "warn": 70.0,
+      "block": 50.0
+    },
+    "radon_hal_volume": {
+      "polarity": "high",
+      "advise": 946.89,
+      "warn": 2740.93,
+      "block": 5549.8
+    },
+    "radon_hal_difficulty": {
+      "polarity": "high",
+      "advise": 8.13,
+      "warn": 11.54,
+      "block": 12.46
+    },
+    "radon_hal_effort": {
+      "polarity": "high",
+      "advise": 7975.79,
+      "warn": 30805.01,
+      "block": 74805.4
+    },
+    "radon_raw_nloc": {
+      "polarity": "high",
+      "advise": 311.75,
+      "warn": 733.2,
+      "block": 1031.9
+    },
+    "radon_raw_lloc": {
+      "polarity": "high",
+      "advise": 238.25,
+      "warn": 518.0,
+      "block": 811.7
+    },
+    "lizard_nloc": {
+      "polarity": "high",
+      "advise": 13.0,
+      "warn": 25.0,
+      "block": 37.0
+    },
+    "lizard_param_count": {
+      "polarity": "high",
+      "advise": 3.0,
+      "warn": 4.0,
+      "block": 5.0
+    },
+    "lizard_nesting_depth": {
+      "polarity": "high",
+      "advise": 2.0,
+      "warn": 3.0,
+      "block": 4.0
+    },
+    "lizard_ccn": {
+      "polarity": "high",
+      "advise": 4.0,
+      "warn": 8.0,
+      "block": 11.0
+    },
+    "cohesion_lcom4": {
+      "polarity": "high",
+      "advise": 2.0,
+      "warn": 4.0,
+      "block": 8.0
+    }
+  }
+}

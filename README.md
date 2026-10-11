@@ -127,7 +127,7 @@ Create and sync the development environment with:
 uv sync --dev
 ```
 
-The repository supports Python 3.13.x and pins local development through `.python-version`.
+The repository supports Python 3.14.x and pins local development to 3.14.8 through `.python-version`. GDAL bindings and the native library must both be 3.13.3. Windows uses bundled CPython 3.14 wheels; macOS uses Homebrew, and Ubuntu uses the checksum-verified native source bootstrap documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Run the deterministic unit test suite with:
 

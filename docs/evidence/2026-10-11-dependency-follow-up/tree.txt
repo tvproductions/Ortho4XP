@@ -1,0 +1,133 @@
+ortho4xp v1.4
+├── aiohttp v3.14.5
+│   ├── aiohappyeyeballs v2.7.1
+│   ├── aiosignal v1.4.0
+│   │   └── frozenlist v1.8.0
+│   ├── attrs v26.1.0
+│   ├── frozenlist v1.8.0
+│   ├── multidict v7.1.0
+│   ├── propcache v0.5.4
+│   └── yarl v1.25.1
+│       ├── idna v3.20
+│       ├── multidict v7.1.0
+│       └── propcache v0.5.4
+├── gdal v3.13.3
+├── numpy v2.5.4
+├── pillow v12.3.0
+├── pydantic v2.14.1
+│   ├── annotated-types v0.8.0
+│   ├── pydantic-core v2.50.1
+│   │   └── typing-extensions v4.16.0
+│   ├── typing-extensions v4.16.0
+│   └── typing-inspection v0.4.4
+│       └── typing-extensions v4.16.0
+├── pyproj v3.8.0
+│   └── certifi v2026.7.22
+├── requests v2.34.2
+│   ├── certifi v2026.7.22
+│   ├── charset-normalizer v3.5.2
+│   ├── idna v3.20
+│   └── urllib3 v2.8.0
+├── rtree v1.4.1
+├── scikit-fmm v2025.6.23
+├── shapely v2.2.0
+│   └── numpy v2.5.4
+├── packaging v26.3 (group: dev)
+├── pre-commit v4.6.2 (group: dev)
+│   ├── cfgv v3.5.0
+│   ├── identify v2.6.20
+│   ├── nodeenv v1.11.0
+│   ├── pyyaml v6.0.3
+│   └── virtualenv v21.14.6
+│       ├── distlib v0.4.3
+│       ├── filelock v4.1.1
+│       ├── packaging v26.3
+│       ├── platformdirs v4.13.0
+│       └── python-discovery v1.6.2
+│           └── filelock v4.1.1
+├── ruff v0.17.0 (group: dev)
+├── ty v0.0.86 (group: dev)
+├── bandit v1.9.4 (group: hygiene)
+│   ├── colorama v0.4.6
+│   ├── pyyaml v6.0.3
+│   ├── rich v15.0.0
+│   │   ├── markdown-it-py v4.2.0
+│   │   │   └── mdurl v0.1.2
+│   │   └── pygments v2.21.0
+│   └── stevedore v5.9.1
+├── cohesion v1.2.0 (group: hygiene)
+├── complexipy v8.0.1 (group: hygiene)
+├── cosmic-ray v8.7.0 (group: hygiene)
+│   ├── aiohttp v3.14.5 (*)
+│   ├── anybadge v1.16.0
+│   │   └── packaging v26.3
+│   ├── attrs v26.1.0
+│   ├── click v8.5.0
+│   ├── decorator v5.3.1
+│   ├── exit-codes v1.3.0
+│   ├── gitpython v3.2.0
+│   │   └── gitdb v4.0.12
+│   │       └── smmap v5.0.3
+│   ├── parso v0.8.7
+│   ├── rich v15.0.0 (*)
+│   ├── sqlalchemy v2.1.4
+│   │   └── typing-extensions v4.16.0
+│   ├── stevedore v5.9.1
+│   ├── toml v0.10.2
+│   └── yattag v1.16.1
+├── coverage v7.16.2 (group: hygiene)
+├── deptry v0.25.1 (group: hygiene)
+│   ├── click v8.5.0
+│   ├── colorama v0.4.6
+│   ├── packaging v26.3
+│   ├── requirements-parser v0.13.1
+│   │   └── packaging v26.3
+│   └── tomli v2.5.0
+├── grimp v3.17 (group: hygiene)
+├── import-linter v2.15 (group: hygiene)
+│   ├── click v8.5.0
+│   ├── grimp v3.17
+│   ├── rich v15.0.0 (*)
+│   └── typing-extensions v4.16.0
+├── interrogate v1.7.0 (group: hygiene)
+│   ├── attrs v26.1.0
+│   ├── click v8.5.0
+│   ├── colorama v0.4.6
+│   ├── py v1.11.0
+│   └── tabulate v0.10.0
+├── lizard v1.24.1 (group: hygiene)
+│   ├── pathspec v1.1.1
+│   └── pygments v2.21.0
+├── pip-audit v2.10.1 (group: hygiene)
+│   ├── cachecontrol[filecache] v0.14.4
+│   │   ├── msgpack v1.2.3
+│   │   ├── requests v2.34.2 (*)
+│   │   └── filelock v4.1.1 (extra: filecache)
+│   ├── cyclonedx-python-lib v11.12.0
+│   │   ├── license-expression v30.4.4
+│   │   │   └── boolean-py v5.0
+│   │   ├── packageurl-python v0.17.6
+│   │   ├── py-serializable v2.1.0
+│   │   │   └── defusedxml v0.7.1
+│   │   └── sortedcontainers v2.4.0
+│   ├── packaging v26.3
+│   ├── pip-api v0.0.35
+│   │   └── pip v26.2.1
+│   ├── pip-requirements-parser v32.0.1
+│   │   ├── packaging v26.3
+│   │   └── pyparsing v3.3.3
+│   ├── platformdirs v4.13.0
+│   ├── requests v2.34.2 (*)
+│   ├── rich v15.0.0 (*)
+│   ├── tomli v2.5.0
+│   └── tomli-w v1.2.0
+├── vulture v2.16 (group: hygiene)
+└── pyinstaller v6.22.3 (group: release)
+    ├── altgraph v0.17.5
+    ├── packaging v26.3
+    ├── pefile v2024.8.26
+    ├── pyinstaller-hooks-contrib v2026.8
+    │   └── packaging v26.3
+    ├── pywin32-ctypes v0.2.3
+    └── setuptools v84.0.0
+(*) Package tree already displayed

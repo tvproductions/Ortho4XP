@@ -1,95 +1,67 @@
 ---
 name: maintenance-qa
-description: Use when reviewing code quality, security, test coverage, dead code, or docstring coverage. Run before merging, before releases, or when auditing repository health.
+description: Run explicitly requested deeper quality, security, dependency, coverage, dead-code, docstring, complexity, import-boundary or mutation assessments.
 ---
 
 # Maintenance QA
 
-## Overview
+Deep hygiene is an explicit maintenance action. Never add these tools to
+pre-commit, manual hooks, CI, or automatically invoke them after routine edits.
 
-Maintenance QA is a unified code quality audit that runs six complementary tools and produces a single pass/fail report. It complements the existing `quality-check` skill (which covers tests, lint, format, type checks, complexity, and native builds) by adding security, dead code, coverage, and docstring analysis.
-
-**Core principle:** Every code quality dimension has a tool. Run them together. Fail fast on regressions.
-
-## When to Use
-
-- Before merging a feature branch
-- Before creating a release
-- When auditing repository health
-- When investigating "why is this code here?"
-- When asked "what's our test coverage?"
-
-## Tools
-
-| Tool | Purpose | Command |
-|------|---------|---------|
-| `uv audit` | Dependency CVE scan | `uv audit` |
-| `ruff check --select S` | Security lint (bandit rules) | `uv run ruff check --select S src/` |
-| `vulture` | Dead code detection | `uv run vulture src/ --min-confidence 80` |
-| `coverage` | Test coverage | `uv run coverage run -m unittest discover -s tests && uv run coverage report` |
-| `interrogate` | Docstring coverage | `uv run interrogate src/ --fail-under 0` |
-| `mutmut` | Mutation testing | `uv run mutmut run --paths-to-mutate src/` |
-
-## Workflow
-
-### 1. Run the maintenance-qa script
-
-```bash
-uv run python .codex/skills/maintenance-qa/scripts/maintenance_qa.py
+```powershell
+uv run --group hygiene python .codex/skills/maintenance-qa/scripts/maintenance_qa.py
 ```
 
-The script runs all six tools, parses their output, and produces a unified report with pass/fail status for each dimension.
+The command independently assesses complexity, pip-audit, deptry, Import Linter,
+Bandit, Vulture, Coverage.py and Interrogate. It saves command receipts and a
+summary in a new `tmp/maintenance-hygiene-*` directory. Failed tools and invalid
+measurements remain FAIL; other independent dimensions still run. Legacy
+absolute complexity findings and unresolved dependency/security/dead-code
+findings remain failed hygiene and need precise tracking evidence.
 
-### 2. Review findings
+- Ruff C901 ceiling 20 and complexipy ceiling 15 are independent metrics.
+  Lizard's function, module arithmetic mean, and function-weighted overall mean
+  ceilings are 20 under `lizard-functions-v1`. Preserve the project's stricter
+  Lizard ratchet and actual Cohesion percentage receipts. The historical LCOM4
+  policy is unverified and remains a failed measurement-policy gap.
+  No baseline can waive absolute failures.
+- Bandit reports severity/confidence/context. Never blanket-suppress results.
+- Vulture retains reviewed public-consumer whitelist entries. Investigate
+  external and dynamic consumers before deleting a candidate.
+- Coverage measures source statements and branches through unittest. Preserve
+  `coverage-baseline.json`; assess changed measurement semantics explicitly.
+- Interrogate measures presence; review docstrings for correctness/usefulness.
+  Preserve `interrogate-baseline.json`; never add filler to raise a score.
+- deptry inspects `src` with actual project metadata and explicit package/module
+  mappings. Findings do not authorize removing domain dependencies.
+- pip-audit audits the host-selected complete runtime/dev/hygiene lock export
+  with hashes, `--no-deps --disable-pip`, without a second resolver. Local-wheel
+  exact identities and byte hashes are appended to the derived requirements
+  receipt; any skipped identity or advisory is FAIL. This is a known-advisory
+  assessment, not a claim that vulnerabilities are absent.
+- Import Linter's standard forbidden contract checks a source-only graph of the
+  actual flat O4 modules, including conditional and indirect edges. The adapter
+  avoids the CLI's package-only limitation without repackaging application code.
+  All active O4 modules must match the explicit roots in `importlinter.ini`.
+  The reviewed pure configuration/source definition boundary prohibits UI,
+  orchestration, HTTP and GDAL adapter imports. Dynamic imports require separate
+  consumer review.
 
-The script outputs a summary table:
+Cosmic Ray 8.7.0 is selected after an actual Python 3.14.8 synthetic unittest
+probe: clean baseline; 13 mutants killed; zero tool errors. Mutation is bounded
+and additionally requested:
 
+```powershell
+uv run --group hygiene python .codex/skills/maintenance-qa/scripts/maintenance_qa.py --mutation-config tmp/ASSESSMENT/cosmic-ray.toml --mutation-workdir tmp/ASSESSMENT
 ```
-Dimension          Status   Details
-─────────────────  ───────  ─────────────────────────────────────────
-Dependency CVEs    WARN     4 known CVEs in GDAL (assessed, see SECURITY.md)
-Security lint      PASS     0 findings
-Dead code          PASS     0 findings
-Test coverage      PASS     44% (baseline: 40%)
-Docstring coverage WARN     12% (baseline: 10%)
-Mutation testing   SKIP     Not yet configured
-```
 
-### 3. Address failures
+Prepare an unused disposable directory with copied selected code/tests and a
+config for one file, unittest, and per-test timeout at most 60 seconds. At most
+200 jobs and 600 seconds per analyzer execution are allowed. Source and
+operational data are never mutation targets. Retain baseline/session databases
+and outcome counts. Classify survivors, equivalent mutants, timeouts and worker
+errors separately; a broken baseline or missing result is a failure.
 
-- **Dependency CVEs**: Review `SECURITY.md` for assessed risks. If new CVEs appear, assess impact and document.
-- **Security lint**: Fix or add `# noqa: SXXX` with justification.
-- **Dead code**: Remove or add to `.vulture_whitelist.py` with justification.
-- **Test coverage**: Add tests for uncovered paths. Update baseline in `coverage-baseline.json`.
-- **Docstring coverage**: Add docstrings to public APIs. Update baseline in `interrogate-baseline.json`.
-- **Mutation testing**: Configure `mutmut` and establish baseline.
-
-## Baselines
-
-Baselines are stored in `.codex/skills/maintenance-qa/`:
-
-- `coverage-baseline.json` — Minimum acceptable test coverage (currently 40%)
-- `interrogate-baseline.json` — Minimum acceptable docstring coverage (currently 10%)
-- `vulture.whitelist.py` — Known dead code that is intentional (e.g., `Unused/` directory)
-
-## Integration with quality-check
-
-The `maintenance-qa` skill is called by `quality-check` as part of the full repository audit. It can also be run standalone for focused code quality reviews.
-
-## Common Mistakes
-
-- **Ignoring `uv audit` warnings**: Even if CVEs are assessed, new ones may appear. Always check `SECURITY.md` for current assessment.
-- **Whitelisting too much dead code**: Vulture finds real dead code. Only whitelist intentional cases (e.g., `Unused/` directory, future features).
-- **Lowering coverage baseline**: Coverage should trend up, not down. If it drops, add tests or justify the drop.
-- **Skipping mutation testing**: Mutation testing is expensive but valuable. Run it on critical paths (e.g., config parsing, geometry calculations).
-
-## Quick Reference
-
-| Question | Command |
-|----------|---------|
-| What CVEs affect our dependencies? | `uv audit` |
-| Are there security issues in our code? | `uv run ruff check --select S src/` |
-| Is there dead code? | `uv run vulture src/ --min-confidence 80` |
-| What's our test coverage? | `uv run coverage run -m unittest discover -s tests && uv run coverage report` |
-| What's our docstring coverage? | `uv run interrogate src/ --fail-under 0` |
-| Are our tests effective? | `uv run mutmut run --paths-to-mutate src/` |
+See [project Python engineering](../../../docs/agents/python-engineering.md)
+for exact semantics and migration evidence. No application-wide mutation scope
+or transplanted upstream percentage threshold is authorized.

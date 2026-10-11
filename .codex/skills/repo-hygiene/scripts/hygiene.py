@@ -31,7 +31,6 @@ LLVM_TOOL_DIRS = [
 FORBIDDEN_PATTERNS = [
     "pytest",
     "py.test",
-    "requirements.txt",
     "python -m pip",
     "pip install",
     "python -m venv",
@@ -298,7 +297,6 @@ def main() -> int:
     run(["uv", "run", "ruff", "format", "--check", *format_check_targets(changed)])
     if changed:
         run(["uv", "run", "ty", "check", *changed])
-    run_complexity_quality("all" if full else "changed")
 
     if full:
         native = changed_native_files()

@@ -1,6 +1,6 @@
 # TODO
 
-Each TODO below is intended to become one GitHub Issue (GHI). Numbers are execution-priority order and may be renumbered when dependencies change. Keep issue bodies scoped, actionable, independently mergeable, and aligned with the current repo policy: Python 3.13.x, `uv`, `ruff`, `ty`, `unittest`, and LLVM/Clang.
+Each TODO below is intended to become one GitHub Issue (GHI). Numbers are execution-priority order and may be renumbered when dependencies change. Keep issue bodies scoped, actionable, independently mergeable, and aligned with the current repo policy: Python 3.14.x, `uv`, `ruff`, `ty`, `unittest`, and LLVM/Clang.
 
 GitHub issue numbers are references only; they are not expected to match TODO
 numbers. Some completed TODOs were captured retroactively after the work was

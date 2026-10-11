@@ -1,0 +1,26 @@
+Running Complexity...
+Running Dependency CVEs...
+Running Dependency usage...
+Running Import boundaries...
+Running Bandit security...
+Running Dead code...
+Running Test coverage...
+Running Docstring coverage...
+
+Maintenance QA Report
+Complexity: FAIL tream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py
+Cohesion percentage policy unverified: 295 class measurements retained.
+Complexity measurement error: measure_lizard: Lizard CSV function population mismatch: missing={('scripts/upstream_watch_core/github_api.py', 47): 1, ('src/O4_Texture_Conversion_Scheduler.py', 16): 1, ('src/O4_Texture_Conversion_Scheduler.py', 18): 1, ('src/O4_Texture_Conversion_Scheduler.py', 20): 1}, extra={}
+Complexity assessment incomplete: 3 measurement errors; baseline cannot pass.
+Detailed complexity receipts: tmp/complexity-hygiene-3a8y7n32
+
+Dependency CVEs: PASS Host-selected 92 identities; 0 advisories; 0 skipped; receipt tmp\dependency-hygiene-97_8ydq3
+Dependency usage: PASS No dependency usage findings
+Import boundaries: PASS Configuration and source definitions stay independent of I/O adapters: PASS (166 graph nodes)
+
+Bandit security: FAIL 8 Bandit findings
+Dead code: FAIL 6 dead code findings; investigate external consumers before deletion
+Test coverage: FAIL 38.52% statement/branch coverage; 4098 branches; minimum 40%; receipt tmp\coverage-hygiene-4lpqflxe
+Docstring coverage: PASS 16.2% (baseline: 10.0%)
+Mutation testing: NOT_REQUESTED Requires explicit disposable scope and config
+Result: FAIL; receipts tmp\maintenance-hygiene-5n_vatrp

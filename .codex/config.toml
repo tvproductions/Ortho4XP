@@ -1,0 +1,19 @@
+# Register this checkout's catalog through the native marketplace manager.
+# Project overrides enable the pair without changing other projects' selections.
+[plugins."superpowers@ortho4xp-skills-first"]
+enabled = true
+
+[plugins."gz-skills@ortho4xp-skills-first"]
+enabled = true
+
+[plugins."superpowers-backplane@ortho4xp-skills-first"]
+enabled = false
+
+[plugins."gz-skills@gz-skills"]
+enabled = false
+
+[plugins."superpowers@xplane-health-skills-first"]
+enabled = false
+
+[plugins."gz-skills@xplane-health-skills-first"]
+enabled = false

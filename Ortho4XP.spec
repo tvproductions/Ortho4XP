@@ -8,8 +8,8 @@ from PyInstaller.utils.hooks import collect_submodules
 
 
 # ---------------------------------------------------------------------------
-# Resolve the correct proj.db from the system PROJ installation (version 5+)
-# rather than letting PyInstaller pick up the outdated one bundled with pyproj.
+# Prefer the native installation's proj.db when available, and fall back to
+# the current database bundled with pyproj.
 # Supports macOS, Linux, and Windows.
 # ---------------------------------------------------------------------------
 def get_system_proj_db():
@@ -54,7 +54,7 @@ def get_system_proj_db():
         if candidate and os.path.isfile(os.path.join(candidate, "proj.db")):
             return candidate
 
-    # Last resort: use pyproj's own data dir (may be version 4)
+    # Last resort: use pyproj's own data directory.
     print(
         "WARNING: Could not find system proj.db — falling back to pyproj's bundled version."
     )
@@ -82,8 +82,7 @@ a = Analysis(
         ("./Providers", "./Ortho4XP_Data/Providers"),
         ("community_server.txt", "./Ortho4XP_Data/"),
         ("overpass_servers.txt", "./Ortho4XP_Data/"),
-        # Explicitly bundle the system proj.db (version 5+) so the bundled
-        # app doesn't fall back to pyproj's outdated version 4 copy.
+        # Bundle the selected native or pyproj database at the runtime path.
         (os.path.join(system_proj_dir, "proj.db"), proj_dest),
     ],
     hiddenimports=collect_submodules("PIL") + collect_submodules("osgeo"),

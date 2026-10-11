@@ -1,0 +1,47 @@
+[
+  {
+    "dimension": "Complexity",
+    "status": "FAIL",
+    "details": "tream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py\nCohesion percentage policy unverified: 295 class measurements retained.\nComplexity measurement error: measure_lizard: Lizard CSV function population mismatch: missing={('scripts/upstream_watch_core/github_api.py', 47): 1, ('src/O4_Texture_Conversion_Scheduler.py', 16): 1, ('src/O4_Texture_Conversion_Scheduler.py', 18): 1, ('src/O4_Texture_Conversion_Scheduler.py', 20): 1}, extra={}\nComplexity assessment incomplete: 3 measurement errors; baseline cannot pass.\nDetailed complexity receipts: tmp/complexity-hygiene-3a8y7n32\n"
+  },
+  {
+    "dimension": "Dependency CVEs",
+    "status": "PASS",
+    "details": "Host-selected 92 identities; 0 advisories; 0 skipped; receipt tmp\\dependency-hygiene-97_8ydq3"
+  },
+  {
+    "dimension": "Dependency usage",
+    "status": "PASS",
+    "details": "No dependency usage findings"
+  },
+  {
+    "dimension": "Import boundaries",
+    "status": "PASS",
+    "details": "Configuration and source definitions stay independent of I/O adapters: PASS (166 graph nodes)\n"
+  },
+  {
+    "dimension": "Bandit security",
+    "status": "FAIL",
+    "details": "8 Bandit findings"
+  },
+  {
+    "dimension": "Dead code",
+    "status": "FAIL",
+    "details": "6 dead code findings; investigate external consumers before deletion"
+  },
+  {
+    "dimension": "Test coverage",
+    "status": "FAIL",
+    "details": "38.52% statement/branch coverage; 4098 branches; minimum 40%; receipt tmp\\coverage-hygiene-4lpqflxe"
+  },
+  {
+    "dimension": "Docstring coverage",
+    "status": "PASS",
+    "details": "16.2% (baseline: 10.0%)"
+  },
+  {
+    "dimension": "Mutation testing",
+    "status": "NOT_REQUESTED",
+    "details": "Requires explicit disposable scope and config"
+  }
+]

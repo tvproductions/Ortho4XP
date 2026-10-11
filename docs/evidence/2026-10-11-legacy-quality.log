@@ -1,0 +1,358 @@
+## master...origin/master
+ M .github/workflows/ci.yml
+ M .python-version
+ M pyproject.toml
+ M tests/test_pyproject_build_backend.py
+ M uv.lock
+?? Utils/mac/numpy-2.5.4-cp313-cp313-macosx_11_0_arm64.whl
+?? Utils/win/gdal-3.13.3-cp313-cp313-win_amd64.whl
+?? docs/superpowers/plans/2026-10-11-dependency-refresh.md
+ .github/workflows/ci.yml              |  12 +-
+ .python-version                       |   2 +-
+ pyproject.toml                        |  18 +-
+ tests/test_pyproject_build_backend.py |  13 +-
+ uv.lock                               | 806 +++++++++++++++-------------------
+ 5 files changed, 385 insertions(+), 466 deletions(-)
+Resolved 62 packages in 4ms
+Checked 59 packages in 1ms
+...............................................................................................................................................................................................................................................................................................................................................................usage: scenery add [-h] target [lon]
+scenery add: error: the following arguments are required: target
+.usage: scenery [-h] {add,remove,list,reorder,validate} ...
+scenery: error: argument command: invalid choice: 'unknown' (choose from 'add', 'remove', 'list', 'reorder', 'validate')
+..usage: scenery remove [-h] target [lon]
+scenery remove: error: the following arguments are required: target
+......................................................................................................................................................................upstream-watch interrupted
+....................................
+----------------------------------------------------------------------
+Ran 556 tests in 11.775s
+
+OK
+-> No water triangles detected; skipping XP12 bathymetry input
+-> Reading mesh file
+-> Adapting water triangles to XP12 requirements
+-> Computing bathymetry depth ratio bounds based on distance masks
+CFG error: water_tech='XP11 + bathy' is no longer supported; set water_tech=XP12.
+usage: scenery [-h] {add,remove,list,reorder,validate} ...
+
+positional arguments:
+  {add,remove,list,reorder,validate}
+    add                 Add a tile or overlay to scenery
+    remove              Remove a tile or overlay from scenery
+    list                List Ortho4XP entries in scenery_packs.ini
+    reorder             Reorder Ortho4XP entries in scenery_packs.ini
+    validate            Validate scenery_packs.ini ordering
+
+options:
+  -h, --help            show this help message and exit
+Error: custom_scenery_dir is not set in config.
+Error: custom_scenery_dir is not set in config.
+Error: custom_scenery_dir is not set in config.
+Wrote ypsos-aaaaaaaaaaaa-bbbbbbbbbbbb: 0 commits, 0 changed paths, digest de904a9698520d5719dfd1dd6b149c3254c54e5ccd6f21527797f9501537ef33
+author=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa passive=9999999999999999999999999999999999999999 fork=behind status=0
+All checks passed!
+All checks passed!
+9 files already formatted
+All checks passed!
++ git status --short --branch
++ git diff --stat
++ git diff --cached --stat
++ uv sync --dev
++ uv run python -m unittest discover -s tests
++ uv run ruff check Ortho4XP.py src tests .codex/skills/quality-check/scripts .codex/skills/repo-hygiene/scripts/hygiene.py .codex/skills/git-sync/scripts/git_sync.py
++ uv run ty check tests src/O4_Geo_Utils.py src/O4_File_Names.py
++ git diff --name-only --diff-filter=ACMRTUXB HEAD -- *.py
++ git ls-files --others --exclude-standard -- *.py
++ uv run ruff format --check tests/test_pyproject_build_backend.py .codex/skills/quality-check/scripts .codex/skills/repo-hygiene/scripts/hygiene.py .codex/skills/git-sync/scripts/git_sync.py
++ uv run ty check tests/test_pyproject_build_backend.py
++ git diff --check
+Code quality findings: warnings=19 blocks=0 (module soft>600, hard>1000; class>300)
+  WARN module_size .codex/skills/quality-check/scripts/quality_check.py - Module spans 749 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Airport_Discovery.py - Module spans 663 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Config_Utils.py - Module spans 1632 lines (>1000) under waiver: Legacy config persistence and GUI bridge module; schema split tracked separately.
+  WARN module_size src/O4_DEM_Utils.py - Module spans 913 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_DSF_Utils.py - Module spans 1217 lines (>1000) under waiver: Legacy DSF writer module; phased extraction tracked separately.
+  WARN module_size src/O4_GUI_Utils.py - Module spans 2294 lines (>1000) under waiver: Legacy Tk GUI module; GUI modernization tracked separately.
+  WARN module_size src/O4_Imagery_Utils.py - Module spans 2580 lines (>1000) under waiver: Legacy imagery pipeline module; provider/imagery extraction tracked separately.
+  WARN module_size src/O4_Mask_Utils.py - Module spans 1016 lines (>1000) under waiver: Legacy mask-generation module; extraction tracked separately.
+  WARN module_size src/O4_Mesh_Utils.py - Module spans 868 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_OSM_Utils.py - Module spans 778 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Vector_Map.py - Module spans 909 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Vector_Utils.py - Module spans 1336 lines (>1000) under waiver: Legacy vector geometry module; extraction tracked separately.
+  WARN module_size tests/test_texture_artifact_finalizer.py - Module spans 642 lines (>600); watch for file-scale drift.
+  WARN class_size src/O4_Config_Utils.py:346 - Class `Ortho4XP_Config` spans 1266 lines (>300) under waiver: Legacy mutable config aggregate; schema/model migration is tracked separately.
+  WARN class_size src/O4_GUI_Utils.py:106 - Class `Ortho4XP_GUI` spans 667 lines (>300) under waiver: Legacy Tk application shell; GUI modernization is tracked separately.
+  WARN class_size src/O4_GUI_Utils.py:776 - Class `Ortho4XP_Custom_ZL` spans 585 lines (>300) under waiver: Legacy Tk custom-zoom editor; GUI modernization is tracked separately.
+  WARN class_size src/O4_GUI_Utils.py:1364 - Class `Ortho4XP_Earth_Preview` spans 931 lines (>300) under waiver: Legacy Tk preview controller; GUI modernization is tracked separately.
+  WARN class_size src/O4_OSM_Utils.py:43 - Class `OSM_layer` spans 354 lines (>300) under waiver: Legacy OSM layer accumulator; OSM pipeline split is tracked separately.
+  WARN class_size src/O4_Vector_Utils.py:45 - Class `Vector_Map` spans 568 lines (>300) under waiver: Legacy vector-map aggregate; vector pipeline split is tracked separately.
+Complexity scope: all (245 files)
++ uv run xenon --no-assert --max-absolute C --max-modules C --max-average C .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py src/O4_Config_Models.py src/O4_Source_Data_Models.py tests/test_config_models.py tests/test_provider_parsing.py tests/test_quality_check.py
++ uv run radon cc --json --no-assert .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/quality-check/scripts/code_quality_audits.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/code_quality_size_audits.py .codex/skills/quality-check/scripts/code_quality_targets.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py Ortho4XP.py src/O4_Airport_Discovery.py src/O4_Airport_Encoding.py src/O4_Airport_Geometry.py src/O4_Async_HTTP.py src/O4_Bathymetry.py src/O4_Bathymetry_DSF_Atoms.py src/O4_Bathymetry_DSF_Bytes.py src/O4_Bathymetry_Input.py src/O4_Bathymetry_Models.py src/O4_Bathymetry_Raster_Parser.py src/O4_Bathymetry_Source.py src/O4_Build_Cache.py src/O4_Build_Cache_IO.py src/O4_Build_Context.py src/O4_Build_Core.py src/O4_Build_Models.py src/O4_Build_Pipeline.py src/O4_CLI_Jobs.py src/O4_CLI_Packages.py src/O4_CLI_Run.py src/O4_CLI_Scenery.py src/O4_CLI_Scenery_Commands.py src/O4_CLI_Scenery_Runtime.py src/O4_CLI_Utils.py src/O4_Cfg_Vars.py src/O4_Coastal_Artifact_Policy.py src/O4_Color_Correction.py src/O4_Color_Filters.py src/O4_Color_Normalization.py src/O4_Config_Models.py src/O4_Config_Runtime.py src/O4_Config_Utils.py src/O4_DDS_Quality.py src/O4_DEM_Utils.py src/O4_DSF_Coastal_Artifacts.py src/O4_DSF_Header_Bridge.py src/O4_DSF_Header_Models.py src/O4_DSF_Header_Text.py src/O4_DSF_Utils.py src/O4_Event_Bus.py src/O4_External_Command_Result.py src/O4_External_Tool_Paths.py src/O4_File_Names.py src/O4_GDAL_Texture_Pipeline.py src/O4_GUI_Utils.py src/O4_Geo_Utils.py src/O4_Geotag.py src/O4_Geotiff_Options.py src/O4_Imagery_Failures.py src/O4_Imagery_Utils.py src/O4_Mask_Alpha.py src/O4_Mask_Build_Validation.py src/O4_Mask_Utils.py src/O4_Mask_Validation.py src/O4_Mesh_Utils.py src/O4_Native_Texture_Encoder.py src/O4_OSM_Utils.py src/O4_Overlay_Utils.py src/O4_Package_Metadata.py src/O4_Package_Upgrader.py src/O4_Package_Validator.py src/O4_Parallel_Utils.py src/O4_Pipeline.py src/O4_Provider_Failover.py src/O4_Provider_Failover_Logging.py src/O4_Provider_Failover_Models.py src/O4_Provider_Score_Artifacts.py src/O4_Provider_Score_Channel_Data.py src/O4_Provider_Score_Cloud_Data.py src/O4_Provider_Score_Clouds.py src/O4_Provider_Score_Color.py src/O4_Provider_Score_Compression.py src/O4_Provider_Score_Edge_Data.py src/O4_Provider_Score_Edges.py src/O4_Provider_Score_Metrics.py src/O4_Provider_Score_Models.py src/O4_Provider_Score_Sampling.py src/O4_Provider_Score_Seam_Stats.py src/O4_Provider_Score_Seams.py src/O4_Provider_Scoring.py src/O4_Recut_Water.py src/O4_Resampling_Policy.py src/O4_Scenery_INI.py src/O4_Scenery_Manager.py src/O4_Scenery_Utils.py src/O4_Source_Data_Models.py src/O4_Srgb_Color.py src/O4_Subprocess_Runtime.py src/O4_Subprocess_Utils.py src/O4_Terrain_Artifact_Transaction.py src/O4_Texture_Artifact_Activation.py src/O4_Texture_Artifact_Finalizer.py src/O4_Texture_Artifact_Validation.py src/O4_Texture_Color_Normalization.py src/O4_Texture_Conversion_Runner.py src/O4_Texture_Conversion_Scheduler.py src/O4_Texture_Conversion_Utils.py src/O4_Texture_Download_Failover.py src/O4_Texture_Download_Scheduler.py src/O4_Texture_Encoder.py src/O4_Texture_Finalization_Models.py src/O4_Texture_Mask_Lifecycle.py src/O4_Texture_Models.py src/O4_Texture_Resolution.py src/O4_Texture_Source.py src/O4_Tile_Texture_Conversion.py src/O4_Tile_Utils.py src/O4_UI_Utils.py src/O4_Vector_Map.py src/O4_Vector_Map_Inputs.py src/O4_Vector_Utils.py src/O4_Version.py src/Unused/C/setup.py src/Unused/Earth_Orbit_Textures.py src/Unused/O4_Copernicus.py src/Unused/O4_Forest.py src/Unused/O4_OverlayDSF_Utils.py src/Unused/O4_Rtree_Utils.py src/Unused/O4_Shapefile_Utils.py src/Unused/O4_buildings.py src/Unused/build_house.py tests/_dsf_header_bridge_helpers.py tests/_imagery_color_normalization_helpers.py tests/_imagery_geotiff_conversion_helpers.py tests/_path.py tests/_provider_scoring_helpers.py tests/_provider_scoring_images.py tests/_upstream_watch_helpers.py tests/_vector_map_airport_helpers.py tests/test_airport_modules.py tests/test_bathymetry_dsf_bytes.py tests/test_bathymetry_facade.py tests/test_bathymetry_gate.py tests/test_bathymetry_input.py tests/test_bathymetry_payload_errors.py tests/test_bathymetry_provider.py tests/test_bathymetry_provider_7z.py tests/test_bathymetry_source_lookup.py tests/test_build_cache.py tests/test_build_cache_events.py tests/test_build_context.py tests/test_build_core.py tests/test_build_core_cache.py tests/test_build_core_interrupts.py tests/test_build_core_wrapper.py tests/test_build_events.py tests/test_build_models.py tests/test_cli_jobs.py tests/test_cli_run.py tests/test_cli_utils.py tests/test_coastal_artifact_policy.py tests/test_cog_geotiff_export.py tests/test_color_filters.py tests/test_color_normalization.py tests/test_config_import_safety.py tests/test_config_loading.py tests/test_config_models.py tests/test_dds_quality.py tests/test_dds_quality_config.py tests/test_dds_quality_conversion.py tests/test_dem_utils.py tests/test_dsf_coastal_artifacts.py tests/test_dsf_header_bridge.py tests/test_dsf_header_text.py tests/test_event_bus.py tests/test_exception_handling.py tests/test_file_names.py tests/test_gdal_geotiff.py tests/test_gdal_texture_pipeline.py tests/test_gdal_warp.py tests/test_geo_utils.py tests/test_geotag.py tests/test_gui_batch_adapter.py tests/test_headless_launcher.py tests/test_imagery_async_downloads.py tests/test_imagery_color_normalization.py tests/test_imagery_convert_color_normalization.py tests/test_imagery_download_color_normalization.py tests/test_imagery_failures.py tests/test_imagery_incomplete_color_normalization.py tests/test_imagery_texture_source.py tests/test_launcher_core.py tests/test_mask_alpha.py tests/test_mask_validation.py tests/test_package_metadata.py tests/test_package_upgrader.py tests/test_package_validator.py tests/test_pipeline.py tests/test_provider_failover.py tests/test_provider_failover_scheduler.py tests/test_provider_parsing.py tests/test_provider_scoring.py tests/test_provider_scoring_integration.py tests/test_pyproject_build_backend.py tests/test_quality_check.py tests/test_quality_check_targets.py tests/test_quality_code_audits.py tests/test_repo_hygiene.py tests/test_resampling_policy.py tests/test_resampling_runtime.py tests/test_resampling_source_audit.py tests/test_scenery_cli.py tests/test_scenery_ini.py tests/test_scenery_manager.py tests/test_startup.py tests/test_subprocess_regression.py tests/test_subprocess_utils.py tests/test_terrain_artifact_transaction.py tests/test_texture_artifact_finalizer.py tests/test_texture_async_downloads.py tests/test_texture_conversion_scheduler.py tests/test_texture_conversion_scheduler_limits.py tests/test_texture_conversion_scheduler_live.py tests/test_texture_encoder.py tests/test_texture_mask_lifecycle.py tests/test_texture_models.py tests/test_texture_source.py tests/test_tile_texture_conversion.py tests/test_ui_logging.py tests/test_upstream_watch.py tests/test_upstream_watch_audit.py tests/test_upstream_watch_cli.py tests/test_upstream_watch_git.py tests/test_upstream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py
++ uv run radon mi --json .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/quality-check/scripts/code_quality_audits.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/code_quality_size_audits.py .codex/skills/quality-check/scripts/code_quality_targets.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py Ortho4XP.py src/O4_Airport_Discovery.py src/O4_Airport_Encoding.py src/O4_Airport_Geometry.py src/O4_Async_HTTP.py src/O4_Bathymetry.py src/O4_Bathymetry_DSF_Atoms.py src/O4_Bathymetry_DSF_Bytes.py src/O4_Bathymetry_Input.py src/O4_Bathymetry_Models.py src/O4_Bathymetry_Raster_Parser.py src/O4_Bathymetry_Source.py src/O4_Build_Cache.py src/O4_Build_Cache_IO.py src/O4_Build_Context.py src/O4_Build_Core.py src/O4_Build_Models.py src/O4_Build_Pipeline.py src/O4_CLI_Jobs.py src/O4_CLI_Packages.py src/O4_CLI_Run.py src/O4_CLI_Scenery.py src/O4_CLI_Scenery_Commands.py src/O4_CLI_Scenery_Runtime.py src/O4_CLI_Utils.py src/O4_Cfg_Vars.py src/O4_Coastal_Artifact_Policy.py src/O4_Color_Correction.py src/O4_Color_Filters.py src/O4_Color_Normalization.py src/O4_Config_Models.py src/O4_Config_Runtime.py src/O4_Config_Utils.py src/O4_DDS_Quality.py src/O4_DEM_Utils.py src/O4_DSF_Coastal_Artifacts.py src/O4_DSF_Header_Bridge.py src/O4_DSF_Header_Models.py src/O4_DSF_Header_Text.py src/O4_DSF_Utils.py src/O4_Event_Bus.py src/O4_External_Command_Result.py src/O4_External_Tool_Paths.py src/O4_File_Names.py src/O4_GDAL_Texture_Pipeline.py src/O4_GUI_Utils.py src/O4_Geo_Utils.py src/O4_Geotag.py src/O4_Geotiff_Options.py src/O4_Imagery_Failures.py src/O4_Imagery_Utils.py src/O4_Mask_Alpha.py src/O4_Mask_Build_Validation.py src/O4_Mask_Utils.py src/O4_Mask_Validation.py src/O4_Mesh_Utils.py src/O4_Native_Texture_Encoder.py src/O4_OSM_Utils.py src/O4_Overlay_Utils.py src/O4_Package_Metadata.py src/O4_Package_Upgrader.py src/O4_Package_Validator.py src/O4_Parallel_Utils.py src/O4_Pipeline.py src/O4_Provider_Failover.py src/O4_Provider_Failover_Logging.py src/O4_Provider_Failover_Models.py src/O4_Provider_Score_Artifacts.py src/O4_Provider_Score_Channel_Data.py src/O4_Provider_Score_Cloud_Data.py src/O4_Provider_Score_Clouds.py src/O4_Provider_Score_Color.py src/O4_Provider_Score_Compression.py src/O4_Provider_Score_Edge_Data.py src/O4_Provider_Score_Edges.py src/O4_Provider_Score_Metrics.py src/O4_Provider_Score_Models.py src/O4_Provider_Score_Sampling.py src/O4_Provider_Score_Seam_Stats.py src/O4_Provider_Score_Seams.py src/O4_Provider_Scoring.py src/O4_Recut_Water.py src/O4_Resampling_Policy.py src/O4_Scenery_INI.py src/O4_Scenery_Manager.py src/O4_Scenery_Utils.py src/O4_Source_Data_Models.py src/O4_Srgb_Color.py src/O4_Subprocess_Runtime.py src/O4_Subprocess_Utils.py src/O4_Terrain_Artifact_Transaction.py src/O4_Texture_Artifact_Activation.py src/O4_Texture_Artifact_Finalizer.py src/O4_Texture_Artifact_Validation.py src/O4_Texture_Color_Normalization.py src/O4_Texture_Conversion_Runner.py src/O4_Texture_Conversion_Scheduler.py src/O4_Texture_Conversion_Utils.py src/O4_Texture_Download_Failover.py src/O4_Texture_Download_Scheduler.py src/O4_Texture_Encoder.py src/O4_Texture_Finalization_Models.py src/O4_Texture_Mask_Lifecycle.py src/O4_Texture_Models.py src/O4_Texture_Resolution.py src/O4_Texture_Source.py src/O4_Tile_Texture_Conversion.py src/O4_Tile_Utils.py src/O4_UI_Utils.py src/O4_Vector_Map.py src/O4_Vector_Map_Inputs.py src/O4_Vector_Utils.py src/O4_Version.py src/Unused/C/setup.py src/Unused/Earth_Orbit_Textures.py src/Unused/O4_Copernicus.py src/Unused/O4_Forest.py src/Unused/O4_OverlayDSF_Utils.py src/Unused/O4_Rtree_Utils.py src/Unused/O4_Shapefile_Utils.py src/Unused/O4_buildings.py src/Unused/build_house.py tests/_dsf_header_bridge_helpers.py tests/_imagery_color_normalization_helpers.py tests/_imagery_geotiff_conversion_helpers.py tests/_path.py tests/_provider_scoring_helpers.py tests/_provider_scoring_images.py tests/_upstream_watch_helpers.py tests/_vector_map_airport_helpers.py tests/test_airport_modules.py tests/test_bathymetry_dsf_bytes.py tests/test_bathymetry_facade.py tests/test_bathymetry_gate.py tests/test_bathymetry_input.py tests/test_bathymetry_payload_errors.py tests/test_bathymetry_provider.py tests/test_bathymetry_provider_7z.py tests/test_bathymetry_source_lookup.py tests/test_build_cache.py tests/test_build_cache_events.py tests/test_build_context.py tests/test_build_core.py tests/test_build_core_cache.py tests/test_build_core_interrupts.py tests/test_build_core_wrapper.py tests/test_build_events.py tests/test_build_models.py tests/test_cli_jobs.py tests/test_cli_run.py tests/test_cli_utils.py tests/test_coastal_artifact_policy.py tests/test_cog_geotiff_export.py tests/test_color_filters.py tests/test_color_normalization.py tests/test_config_import_safety.py tests/test_config_loading.py tests/test_config_models.py tests/test_dds_quality.py tests/test_dds_quality_config.py tests/test_dds_quality_conversion.py tests/test_dem_utils.py tests/test_dsf_coastal_artifacts.py tests/test_dsf_header_bridge.py tests/test_dsf_header_text.py tests/test_event_bus.py tests/test_exception_handling.py tests/test_file_names.py tests/test_gdal_geotiff.py tests/test_gdal_texture_pipeline.py tests/test_gdal_warp.py tests/test_geo_utils.py tests/test_geotag.py tests/test_gui_batch_adapter.py tests/test_headless_launcher.py tests/test_imagery_async_downloads.py tests/test_imagery_color_normalization.py tests/test_imagery_convert_color_normalization.py tests/test_imagery_download_color_normalization.py tests/test_imagery_failures.py tests/test_imagery_incomplete_color_normalization.py tests/test_imagery_texture_source.py tests/test_launcher_core.py tests/test_mask_alpha.py tests/test_mask_validation.py tests/test_package_metadata.py tests/test_package_upgrader.py tests/test_package_validator.py tests/test_pipeline.py tests/test_provider_failover.py tests/test_provider_failover_scheduler.py tests/test_provider_parsing.py tests/test_provider_scoring.py tests/test_provider_scoring_integration.py tests/test_pyproject_build_backend.py tests/test_quality_check.py tests/test_quality_check_targets.py tests/test_quality_code_audits.py tests/test_repo_hygiene.py tests/test_resampling_policy.py tests/test_resampling_runtime.py tests/test_resampling_source_audit.py tests/test_scenery_cli.py tests/test_scenery_ini.py tests/test_scenery_manager.py tests/test_startup.py tests/test_subprocess_regression.py tests/test_subprocess_utils.py tests/test_terrain_artifact_transaction.py tests/test_texture_artifact_finalizer.py tests/test_texture_async_downloads.py tests/test_texture_conversion_scheduler.py tests/test_texture_conversion_scheduler_limits.py tests/test_texture_conversion_scheduler_live.py tests/test_texture_encoder.py tests/test_texture_mask_lifecycle.py tests/test_texture_models.py tests/test_texture_source.py tests/test_tile_texture_conversion.py tests/test_ui_logging.py tests/test_upstream_watch.py tests/test_upstream_watch_audit.py tests/test_upstream_watch_cli.py tests/test_upstream_watch_git.py tests/test_upstream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py
++ uv run radon hal --json .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/quality-check/scripts/code_quality_audits.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/code_quality_size_audits.py .codex/skills/quality-check/scripts/code_quality_targets.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py Ortho4XP.py src/O4_Airport_Discovery.py src/O4_Airport_Encoding.py src/O4_Airport_Geometry.py src/O4_Async_HTTP.py src/O4_Bathymetry.py src/O4_Bathymetry_DSF_Atoms.py src/O4_Bathymetry_DSF_Bytes.py src/O4_Bathymetry_Input.py src/O4_Bathymetry_Models.py src/O4_Bathymetry_Raster_Parser.py src/O4_Bathymetry_Source.py src/O4_Build_Cache.py src/O4_Build_Cache_IO.py src/O4_Build_Context.py src/O4_Build_Core.py src/O4_Build_Models.py src/O4_Build_Pipeline.py src/O4_CLI_Jobs.py src/O4_CLI_Packages.py src/O4_CLI_Run.py src/O4_CLI_Scenery.py src/O4_CLI_Scenery_Commands.py src/O4_CLI_Scenery_Runtime.py src/O4_CLI_Utils.py src/O4_Cfg_Vars.py src/O4_Coastal_Artifact_Policy.py src/O4_Color_Correction.py src/O4_Color_Filters.py src/O4_Color_Normalization.py src/O4_Config_Models.py src/O4_Config_Runtime.py src/O4_Config_Utils.py src/O4_DDS_Quality.py src/O4_DEM_Utils.py src/O4_DSF_Coastal_Artifacts.py src/O4_DSF_Header_Bridge.py src/O4_DSF_Header_Models.py src/O4_DSF_Header_Text.py src/O4_DSF_Utils.py src/O4_Event_Bus.py src/O4_External_Command_Result.py src/O4_External_Tool_Paths.py src/O4_File_Names.py src/O4_GDAL_Texture_Pipeline.py src/O4_GUI_Utils.py src/O4_Geo_Utils.py src/O4_Geotag.py src/O4_Geotiff_Options.py src/O4_Imagery_Failures.py src/O4_Imagery_Utils.py src/O4_Mask_Alpha.py src/O4_Mask_Build_Validation.py src/O4_Mask_Utils.py src/O4_Mask_Validation.py src/O4_Mesh_Utils.py src/O4_Native_Texture_Encoder.py src/O4_OSM_Utils.py src/O4_Overlay_Utils.py src/O4_Package_Metadata.py src/O4_Package_Upgrader.py src/O4_Package_Validator.py src/O4_Parallel_Utils.py src/O4_Pipeline.py src/O4_Provider_Failover.py src/O4_Provider_Failover_Logging.py src/O4_Provider_Failover_Models.py src/O4_Provider_Score_Artifacts.py src/O4_Provider_Score_Channel_Data.py src/O4_Provider_Score_Cloud_Data.py src/O4_Provider_Score_Clouds.py src/O4_Provider_Score_Color.py src/O4_Provider_Score_Compression.py src/O4_Provider_Score_Edge_Data.py src/O4_Provider_Score_Edges.py src/O4_Provider_Score_Metrics.py src/O4_Provider_Score_Models.py src/O4_Provider_Score_Sampling.py src/O4_Provider_Score_Seam_Stats.py src/O4_Provider_Score_Seams.py src/O4_Provider_Scoring.py src/O4_Recut_Water.py src/O4_Resampling_Policy.py src/O4_Scenery_INI.py src/O4_Scenery_Manager.py src/O4_Scenery_Utils.py src/O4_Source_Data_Models.py src/O4_Srgb_Color.py src/O4_Subprocess_Runtime.py src/O4_Subprocess_Utils.py src/O4_Terrain_Artifact_Transaction.py src/O4_Texture_Artifact_Activation.py src/O4_Texture_Artifact_Finalizer.py src/O4_Texture_Artifact_Validation.py src/O4_Texture_Color_Normalization.py src/O4_Texture_Conversion_Runner.py src/O4_Texture_Conversion_Scheduler.py src/O4_Texture_Conversion_Utils.py src/O4_Texture_Download_Failover.py src/O4_Texture_Download_Scheduler.py src/O4_Texture_Encoder.py src/O4_Texture_Finalization_Models.py src/O4_Texture_Mask_Lifecycle.py src/O4_Texture_Models.py src/O4_Texture_Resolution.py src/O4_Texture_Source.py src/O4_Tile_Texture_Conversion.py src/O4_Tile_Utils.py src/O4_UI_Utils.py src/O4_Vector_Map.py src/O4_Vector_Map_Inputs.py src/O4_Vector_Utils.py src/O4_Version.py src/Unused/C/setup.py src/Unused/Earth_Orbit_Textures.py src/Unused/O4_Copernicus.py src/Unused/O4_Forest.py src/Unused/O4_OverlayDSF_Utils.py src/Unused/O4_Rtree_Utils.py src/Unused/O4_Shapefile_Utils.py src/Unused/O4_buildings.py src/Unused/build_house.py tests/_dsf_header_bridge_helpers.py tests/_imagery_color_normalization_helpers.py tests/_imagery_geotiff_conversion_helpers.py tests/_path.py tests/_provider_scoring_helpers.py tests/_provider_scoring_images.py tests/_upstream_watch_helpers.py tests/_vector_map_airport_helpers.py tests/test_airport_modules.py tests/test_bathymetry_dsf_bytes.py tests/test_bathymetry_facade.py tests/test_bathymetry_gate.py tests/test_bathymetry_input.py tests/test_bathymetry_payload_errors.py tests/test_bathymetry_provider.py tests/test_bathymetry_provider_7z.py tests/test_bathymetry_source_lookup.py tests/test_build_cache.py tests/test_build_cache_events.py tests/test_build_context.py tests/test_build_core.py tests/test_build_core_cache.py tests/test_build_core_interrupts.py tests/test_build_core_wrapper.py tests/test_build_events.py tests/test_build_models.py tests/test_cli_jobs.py tests/test_cli_run.py tests/test_cli_utils.py tests/test_coastal_artifact_policy.py tests/test_cog_geotiff_export.py tests/test_color_filters.py tests/test_color_normalization.py tests/test_config_import_safety.py tests/test_config_loading.py tests/test_config_models.py tests/test_dds_quality.py tests/test_dds_quality_config.py tests/test_dds_quality_conversion.py tests/test_dem_utils.py tests/test_dsf_coastal_artifacts.py tests/test_dsf_header_bridge.py tests/test_dsf_header_text.py tests/test_event_bus.py tests/test_exception_handling.py tests/test_file_names.py tests/test_gdal_geotiff.py tests/test_gdal_texture_pipeline.py tests/test_gdal_warp.py tests/test_geo_utils.py tests/test_geotag.py tests/test_gui_batch_adapter.py tests/test_headless_launcher.py tests/test_imagery_async_downloads.py tests/test_imagery_color_normalization.py tests/test_imagery_convert_color_normalization.py tests/test_imagery_download_color_normalization.py tests/test_imagery_failures.py tests/test_imagery_incomplete_color_normalization.py tests/test_imagery_texture_source.py tests/test_launcher_core.py tests/test_mask_alpha.py tests/test_mask_validation.py tests/test_package_metadata.py tests/test_package_upgrader.py tests/test_package_validator.py tests/test_pipeline.py tests/test_provider_failover.py tests/test_provider_failover_scheduler.py tests/test_provider_parsing.py tests/test_provider_scoring.py tests/test_provider_scoring_integration.py tests/test_pyproject_build_backend.py tests/test_quality_check.py tests/test_quality_check_targets.py tests/test_quality_code_audits.py tests/test_repo_hygiene.py tests/test_resampling_policy.py tests/test_resampling_runtime.py tests/test_resampling_source_audit.py tests/test_scenery_cli.py tests/test_scenery_ini.py tests/test_scenery_manager.py tests/test_startup.py tests/test_subprocess_regression.py tests/test_subprocess_utils.py tests/test_terrain_artifact_transaction.py tests/test_texture_artifact_finalizer.py tests/test_texture_async_downloads.py tests/test_texture_conversion_scheduler.py tests/test_texture_conversion_scheduler_limits.py tests/test_texture_conversion_scheduler_live.py tests/test_texture_encoder.py tests/test_texture_mask_lifecycle.py tests/test_texture_models.py tests/test_texture_source.py tests/test_tile_texture_conversion.py tests/test_ui_logging.py tests/test_upstream_watch.py tests/test_upstream_watch_audit.py tests/test_upstream_watch_cli.py tests/test_upstream_watch_git.py tests/test_upstream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py
++ uv run radon raw --json .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/quality-check/scripts/code_quality_audits.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/code_quality_size_audits.py .codex/skills/quality-check/scripts/code_quality_targets.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py Ortho4XP.py src/O4_Airport_Discovery.py src/O4_Airport_Encoding.py src/O4_Airport_Geometry.py src/O4_Async_HTTP.py src/O4_Bathymetry.py src/O4_Bathymetry_DSF_Atoms.py src/O4_Bathymetry_DSF_Bytes.py src/O4_Bathymetry_Input.py src/O4_Bathymetry_Models.py src/O4_Bathymetry_Raster_Parser.py src/O4_Bathymetry_Source.py src/O4_Build_Cache.py src/O4_Build_Cache_IO.py src/O4_Build_Context.py src/O4_Build_Core.py src/O4_Build_Models.py src/O4_Build_Pipeline.py src/O4_CLI_Jobs.py src/O4_CLI_Packages.py src/O4_CLI_Run.py src/O4_CLI_Scenery.py src/O4_CLI_Scenery_Commands.py src/O4_CLI_Scenery_Runtime.py src/O4_CLI_Utils.py src/O4_Cfg_Vars.py src/O4_Coastal_Artifact_Policy.py src/O4_Color_Correction.py src/O4_Color_Filters.py src/O4_Color_Normalization.py src/O4_Config_Models.py src/O4_Config_Runtime.py src/O4_Config_Utils.py src/O4_DDS_Quality.py src/O4_DEM_Utils.py src/O4_DSF_Coastal_Artifacts.py src/O4_DSF_Header_Bridge.py src/O4_DSF_Header_Models.py src/O4_DSF_Header_Text.py src/O4_DSF_Utils.py src/O4_Event_Bus.py src/O4_External_Command_Result.py src/O4_External_Tool_Paths.py src/O4_File_Names.py src/O4_GDAL_Texture_Pipeline.py src/O4_GUI_Utils.py src/O4_Geo_Utils.py src/O4_Geotag.py src/O4_Geotiff_Options.py src/O4_Imagery_Failures.py src/O4_Imagery_Utils.py src/O4_Mask_Alpha.py src/O4_Mask_Build_Validation.py src/O4_Mask_Utils.py src/O4_Mask_Validation.py src/O4_Mesh_Utils.py src/O4_Native_Texture_Encoder.py src/O4_OSM_Utils.py src/O4_Overlay_Utils.py src/O4_Package_Metadata.py src/O4_Package_Upgrader.py src/O4_Package_Validator.py src/O4_Parallel_Utils.py src/O4_Pipeline.py src/O4_Provider_Failover.py src/O4_Provider_Failover_Logging.py src/O4_Provider_Failover_Models.py src/O4_Provider_Score_Artifacts.py src/O4_Provider_Score_Channel_Data.py src/O4_Provider_Score_Cloud_Data.py src/O4_Provider_Score_Clouds.py src/O4_Provider_Score_Color.py src/O4_Provider_Score_Compression.py src/O4_Provider_Score_Edge_Data.py src/O4_Provider_Score_Edges.py src/O4_Provider_Score_Metrics.py src/O4_Provider_Score_Models.py src/O4_Provider_Score_Sampling.py src/O4_Provider_Score_Seam_Stats.py src/O4_Provider_Score_Seams.py src/O4_Provider_Scoring.py src/O4_Recut_Water.py src/O4_Resampling_Policy.py src/O4_Scenery_INI.py src/O4_Scenery_Manager.py src/O4_Scenery_Utils.py src/O4_Source_Data_Models.py src/O4_Srgb_Color.py src/O4_Subprocess_Runtime.py src/O4_Subprocess_Utils.py src/O4_Terrain_Artifact_Transaction.py src/O4_Texture_Artifact_Activation.py src/O4_Texture_Artifact_Finalizer.py src/O4_Texture_Artifact_Validation.py src/O4_Texture_Color_Normalization.py src/O4_Texture_Conversion_Runner.py src/O4_Texture_Conversion_Scheduler.py src/O4_Texture_Conversion_Utils.py src/O4_Texture_Download_Failover.py src/O4_Texture_Download_Scheduler.py src/O4_Texture_Encoder.py src/O4_Texture_Finalization_Models.py src/O4_Texture_Mask_Lifecycle.py src/O4_Texture_Models.py src/O4_Texture_Resolution.py src/O4_Texture_Source.py src/O4_Tile_Texture_Conversion.py src/O4_Tile_Utils.py src/O4_UI_Utils.py src/O4_Vector_Map.py src/O4_Vector_Map_Inputs.py src/O4_Vector_Utils.py src/O4_Version.py src/Unused/C/setup.py src/Unused/Earth_Orbit_Textures.py src/Unused/O4_Copernicus.py src/Unused/O4_Forest.py src/Unused/O4_OverlayDSF_Utils.py src/Unused/O4_Rtree_Utils.py src/Unused/O4_Shapefile_Utils.py src/Unused/O4_buildings.py src/Unused/build_house.py tests/_dsf_header_bridge_helpers.py tests/_imagery_color_normalization_helpers.py tests/_imagery_geotiff_conversion_helpers.py tests/_path.py tests/_provider_scoring_helpers.py tests/_provider_scoring_images.py tests/_upstream_watch_helpers.py tests/_vector_map_airport_helpers.py tests/test_airport_modules.py tests/test_bathymetry_dsf_bytes.py tests/test_bathymetry_facade.py tests/test_bathymetry_gate.py tests/test_bathymetry_input.py tests/test_bathymetry_payload_errors.py tests/test_bathymetry_provider.py tests/test_bathymetry_provider_7z.py tests/test_bathymetry_source_lookup.py tests/test_build_cache.py tests/test_build_cache_events.py tests/test_build_context.py tests/test_build_core.py tests/test_build_core_cache.py tests/test_build_core_interrupts.py tests/test_build_core_wrapper.py tests/test_build_events.py tests/test_build_models.py tests/test_cli_jobs.py tests/test_cli_run.py tests/test_cli_utils.py tests/test_coastal_artifact_policy.py tests/test_cog_geotiff_export.py tests/test_color_filters.py tests/test_color_normalization.py tests/test_config_import_safety.py tests/test_config_loading.py tests/test_config_models.py tests/test_dds_quality.py tests/test_dds_quality_config.py tests/test_dds_quality_conversion.py tests/test_dem_utils.py tests/test_dsf_coastal_artifacts.py tests/test_dsf_header_bridge.py tests/test_dsf_header_text.py tests/test_event_bus.py tests/test_exception_handling.py tests/test_file_names.py tests/test_gdal_geotiff.py tests/test_gdal_texture_pipeline.py tests/test_gdal_warp.py tests/test_geo_utils.py tests/test_geotag.py tests/test_gui_batch_adapter.py tests/test_headless_launcher.py tests/test_imagery_async_downloads.py tests/test_imagery_color_normalization.py tests/test_imagery_convert_color_normalization.py tests/test_imagery_download_color_normalization.py tests/test_imagery_failures.py tests/test_imagery_incomplete_color_normalization.py tests/test_imagery_texture_source.py tests/test_launcher_core.py tests/test_mask_alpha.py tests/test_mask_validation.py tests/test_package_metadata.py tests/test_package_upgrader.py tests/test_package_validator.py tests/test_pipeline.py tests/test_provider_failover.py tests/test_provider_failover_scheduler.py tests/test_provider_parsing.py tests/test_provider_scoring.py tests/test_provider_scoring_integration.py tests/test_pyproject_build_backend.py tests/test_quality_check.py tests/test_quality_check_targets.py tests/test_quality_code_audits.py tests/test_repo_hygiene.py tests/test_resampling_policy.py tests/test_resampling_runtime.py tests/test_resampling_source_audit.py tests/test_scenery_cli.py tests/test_scenery_ini.py tests/test_scenery_manager.py tests/test_startup.py tests/test_subprocess_regression.py tests/test_subprocess_utils.py tests/test_terrain_artifact_transaction.py tests/test_texture_artifact_finalizer.py tests/test_texture_async_downloads.py tests/test_texture_conversion_scheduler.py tests/test_texture_conversion_scheduler_limits.py tests/test_texture_conversion_scheduler_live.py tests/test_texture_encoder.py tests/test_texture_mask_lifecycle.py tests/test_texture_models.py tests/test_texture_source.py tests/test_tile_texture_conversion.py tests/test_ui_logging.py tests/test_upstream_watch.py tests/test_upstream_watch_audit.py tests/test_upstream_watch_cli.py tests/test_upstream_watch_git.py tests/test_upstream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py
++ uv run lizard -End --csv .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/quality-check/scripts/code_quality_audits.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/code_quality_size_audits.py .codex/skills/quality-check/scripts/code_quality_targets.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py Ortho4XP.py src/O4_Airport_Discovery.py src/O4_Airport_Encoding.py src/O4_Airport_Geometry.py src/O4_Async_HTTP.py src/O4_Bathymetry.py src/O4_Bathymetry_DSF_Atoms.py src/O4_Bathymetry_DSF_Bytes.py src/O4_Bathymetry_Input.py src/O4_Bathymetry_Models.py src/O4_Bathymetry_Raster_Parser.py src/O4_Bathymetry_Source.py src/O4_Build_Cache.py src/O4_Build_Cache_IO.py src/O4_Build_Context.py src/O4_Build_Core.py src/O4_Build_Models.py src/O4_Build_Pipeline.py src/O4_CLI_Jobs.py src/O4_CLI_Packages.py src/O4_CLI_Run.py src/O4_CLI_Scenery.py src/O4_CLI_Scenery_Commands.py src/O4_CLI_Scenery_Runtime.py src/O4_CLI_Utils.py src/O4_Cfg_Vars.py src/O4_Coastal_Artifact_Policy.py src/O4_Color_Correction.py src/O4_Color_Filters.py src/O4_Color_Normalization.py src/O4_Config_Models.py src/O4_Config_Runtime.py src/O4_Config_Utils.py src/O4_DDS_Quality.py src/O4_DEM_Utils.py src/O4_DSF_Coastal_Artifacts.py src/O4_DSF_Header_Bridge.py src/O4_DSF_Header_Models.py src/O4_DSF_Header_Text.py src/O4_DSF_Utils.py src/O4_Event_Bus.py src/O4_External_Command_Result.py src/O4_External_Tool_Paths.py src/O4_File_Names.py src/O4_GDAL_Texture_Pipeline.py src/O4_GUI_Utils.py src/O4_Geo_Utils.py src/O4_Geotag.py src/O4_Geotiff_Options.py src/O4_Imagery_Failures.py src/O4_Imagery_Utils.py src/O4_Mask_Alpha.py src/O4_Mask_Build_Validation.py src/O4_Mask_Utils.py src/O4_Mask_Validation.py src/O4_Mesh_Utils.py src/O4_Native_Texture_Encoder.py src/O4_OSM_Utils.py src/O4_Overlay_Utils.py src/O4_Package_Metadata.py src/O4_Package_Upgrader.py src/O4_Package_Validator.py src/O4_Parallel_Utils.py src/O4_Pipeline.py src/O4_Provider_Failover.py src/O4_Provider_Failover_Logging.py src/O4_Provider_Failover_Models.py src/O4_Provider_Score_Artifacts.py src/O4_Provider_Score_Channel_Data.py src/O4_Provider_Score_Cloud_Data.py src/O4_Provider_Score_Clouds.py src/O4_Provider_Score_Color.py src/O4_Provider_Score_Compression.py src/O4_Provider_Score_Edge_Data.py src/O4_Provider_Score_Edges.py src/O4_Provider_Score_Metrics.py src/O4_Provider_Score_Models.py src/O4_Provider_Score_Sampling.py src/O4_Provider_Score_Seam_Stats.py src/O4_Provider_Score_Seams.py src/O4_Provider_Scoring.py src/O4_Recut_Water.py src/O4_Resampling_Policy.py src/O4_Scenery_INI.py src/O4_Scenery_Manager.py src/O4_Scenery_Utils.py src/O4_Source_Data_Models.py src/O4_Srgb_Color.py src/O4_Subprocess_Runtime.py src/O4_Subprocess_Utils.py src/O4_Terrain_Artifact_Transaction.py src/O4_Texture_Artifact_Activation.py src/O4_Texture_Artifact_Finalizer.py src/O4_Texture_Artifact_Validation.py src/O4_Texture_Color_Normalization.py src/O4_Texture_Conversion_Runner.py src/O4_Texture_Conversion_Scheduler.py src/O4_Texture_Conversion_Utils.py src/O4_Texture_Download_Failover.py src/O4_Texture_Download_Scheduler.py src/O4_Texture_Encoder.py src/O4_Texture_Finalization_Models.py src/O4_Texture_Mask_Lifecycle.py src/O4_Texture_Models.py src/O4_Texture_Resolution.py src/O4_Texture_Source.py src/O4_Tile_Texture_Conversion.py src/O4_Tile_Utils.py src/O4_UI_Utils.py src/O4_Vector_Map.py src/O4_Vector_Map_Inputs.py src/O4_Vector_Utils.py src/O4_Version.py src/Unused/C/setup.py src/Unused/Earth_Orbit_Textures.py src/Unused/O4_Copernicus.py src/Unused/O4_Forest.py src/Unused/O4_OverlayDSF_Utils.py src/Unused/O4_Rtree_Utils.py src/Unused/O4_Shapefile_Utils.py src/Unused/O4_buildings.py src/Unused/build_house.py tests/_dsf_header_bridge_helpers.py tests/_imagery_color_normalization_helpers.py tests/_imagery_geotiff_conversion_helpers.py tests/_path.py tests/_provider_scoring_helpers.py tests/_provider_scoring_images.py tests/_upstream_watch_helpers.py tests/_vector_map_airport_helpers.py tests/test_airport_modules.py tests/test_bathymetry_dsf_bytes.py tests/test_bathymetry_facade.py tests/test_bathymetry_gate.py tests/test_bathymetry_input.py tests/test_bathymetry_payload_errors.py tests/test_bathymetry_provider.py tests/test_bathymetry_provider_7z.py tests/test_bathymetry_source_lookup.py tests/test_build_cache.py tests/test_build_cache_events.py tests/test_build_context.py tests/test_build_core.py tests/test_build_core_cache.py tests/test_build_core_interrupts.py tests/test_build_core_wrapper.py tests/test_build_events.py tests/test_build_models.py tests/test_cli_jobs.py tests/test_cli_run.py tests/test_cli_utils.py tests/test_coastal_artifact_policy.py tests/test_cog_geotiff_export.py tests/test_color_filters.py tests/test_color_normalization.py tests/test_config_import_safety.py tests/test_config_loading.py tests/test_config_models.py tests/test_dds_quality.py tests/test_dds_quality_config.py tests/test_dds_quality_conversion.py tests/test_dem_utils.py tests/test_dsf_coastal_artifacts.py tests/test_dsf_header_bridge.py tests/test_dsf_header_text.py tests/test_event_bus.py tests/test_exception_handling.py tests/test_file_names.py tests/test_gdal_geotiff.py tests/test_gdal_texture_pipeline.py tests/test_gdal_warp.py tests/test_geo_utils.py tests/test_geotag.py tests/test_gui_batch_adapter.py tests/test_headless_launcher.py tests/test_imagery_async_downloads.py tests/test_imagery_color_normalization.py tests/test_imagery_convert_color_normalization.py tests/test_imagery_download_color_normalization.py tests/test_imagery_failures.py tests/test_imagery_incomplete_color_normalization.py tests/test_imagery_texture_source.py tests/test_launcher_core.py tests/test_mask_alpha.py tests/test_mask_validation.py tests/test_package_metadata.py tests/test_package_upgrader.py tests/test_package_validator.py tests/test_pipeline.py tests/test_provider_failover.py tests/test_provider_failover_scheduler.py tests/test_provider_parsing.py tests/test_provider_scoring.py tests/test_provider_scoring_integration.py tests/test_pyproject_build_backend.py tests/test_quality_check.py tests/test_quality_check_targets.py tests/test_quality_code_audits.py tests/test_repo_hygiene.py tests/test_resampling_policy.py tests/test_resampling_runtime.py tests/test_resampling_source_audit.py tests/test_scenery_cli.py tests/test_scenery_ini.py tests/test_scenery_manager.py tests/test_startup.py tests/test_subprocess_regression.py tests/test_subprocess_utils.py tests/test_terrain_artifact_transaction.py tests/test_texture_artifact_finalizer.py tests/test_texture_async_downloads.py tests/test_texture_conversion_scheduler.py tests/test_texture_conversion_scheduler_limits.py tests/test_texture_conversion_scheduler_live.py tests/test_texture_encoder.py tests/test_texture_mask_lifecycle.py tests/test_texture_models.py tests/test_texture_source.py tests/test_tile_texture_conversion.py tests/test_ui_logging.py tests/test_upstream_watch.py tests/test_upstream_watch_audit.py tests/test_upstream_watch_cli.py tests/test_upstream_watch_git.py tests/test_upstream_watch_github.py tests/test_upstream_watch_ledger.py tests/test_upstream_watch_surfaces.py tests/test_vector_map_airport_failure.py tests/test_vector_map_dem_ordering.py
++ uv run cohesion -f .codex/skills/git-sync/scripts/git_sync.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_common.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_dependency.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_mutation.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_qa.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_security.py
++ uv run cohesion -f .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py
++ uv run cohesion -f .codex/skills/quality-check/scripts/code_quality_audits.py
++ uv run cohesion -f .codex/skills/quality-check/scripts/code_quality_models.py
++ uv run cohesion -f .codex/skills/quality-check/scripts/code_quality_policy_audits.py
++ uv run cohesion -f .codex/skills/quality-check/scripts/code_quality_size_audits.py
++ uv run cohesion -f .codex/skills/quality-check/scripts/code_quality_targets.py
++ uv run cohesion -f .codex/skills/quality-check/scripts/quality_check.py
++ uv run cohesion -f .codex/skills/repo-hygiene/scripts/hygiene.py
++ uv run cohesion -f Ortho4XP.py
++ uv run cohesion -f src/O4_Airport_Discovery.py
++ uv run cohesion -f src/O4_Airport_Encoding.py
++ uv run cohesion -f src/O4_Airport_Geometry.py
++ uv run cohesion -f src/O4_Async_HTTP.py
++ uv run cohesion -f src/O4_Bathymetry.py
++ uv run cohesion -f src/O4_Bathymetry_DSF_Atoms.py
++ uv run cohesion -f src/O4_Bathymetry_DSF_Bytes.py
++ uv run cohesion -f src/O4_Bathymetry_Input.py
++ uv run cohesion -f src/O4_Bathymetry_Models.py
++ uv run cohesion -f src/O4_Bathymetry_Raster_Parser.py
++ uv run cohesion -f src/O4_Bathymetry_Source.py
++ uv run cohesion -f src/O4_Build_Cache.py
++ uv run cohesion -f src/O4_Build_Cache_IO.py
++ uv run cohesion -f src/O4_Build_Context.py
++ uv run cohesion -f src/O4_Build_Core.py
++ uv run cohesion -f src/O4_Build_Models.py
++ uv run cohesion -f src/O4_Build_Pipeline.py
++ uv run cohesion -f src/O4_CLI_Jobs.py
++ uv run cohesion -f src/O4_CLI_Packages.py
++ uv run cohesion -f src/O4_CLI_Run.py
++ uv run cohesion -f src/O4_CLI_Scenery.py
++ uv run cohesion -f src/O4_CLI_Scenery_Commands.py
++ uv run cohesion -f src/O4_CLI_Scenery_Runtime.py
++ uv run cohesion -f src/O4_CLI_Utils.py
++ uv run cohesion -f src/O4_Cfg_Vars.py
++ uv run cohesion -f src/O4_Coastal_Artifact_Policy.py
++ uv run cohesion -f src/O4_Color_Correction.py
++ uv run cohesion -f src/O4_Color_Filters.py
++ uv run cohesion -f src/O4_Color_Normalization.py
++ uv run cohesion -f src/O4_Config_Models.py
++ uv run cohesion -f src/O4_Config_Runtime.py
++ uv run cohesion -f src/O4_Config_Utils.py
++ uv run cohesion -f src/O4_DDS_Quality.py
++ uv run cohesion -f src/O4_DEM_Utils.py
++ uv run cohesion -f src/O4_DSF_Coastal_Artifacts.py
++ uv run cohesion -f src/O4_DSF_Header_Bridge.py
++ uv run cohesion -f src/O4_DSF_Header_Models.py
++ uv run cohesion -f src/O4_DSF_Header_Text.py
++ uv run cohesion -f src/O4_DSF_Utils.py
++ uv run cohesion -f src/O4_Event_Bus.py
++ uv run cohesion -f src/O4_External_Command_Result.py
++ uv run cohesion -f src/O4_External_Tool_Paths.py
++ uv run cohesion -f src/O4_File_Names.py
++ uv run cohesion -f src/O4_GDAL_Texture_Pipeline.py
++ uv run cohesion -f src/O4_GUI_Utils.py
++ uv run cohesion -f src/O4_Geo_Utils.py
++ uv run cohesion -f src/O4_Geotag.py
++ uv run cohesion -f src/O4_Geotiff_Options.py
++ uv run cohesion -f src/O4_Imagery_Failures.py
++ uv run cohesion -f src/O4_Imagery_Utils.py
++ uv run cohesion -f src/O4_Mask_Alpha.py
++ uv run cohesion -f src/O4_Mask_Build_Validation.py
++ uv run cohesion -f src/O4_Mask_Utils.py
++ uv run cohesion -f src/O4_Mask_Validation.py
++ uv run cohesion -f src/O4_Mesh_Utils.py
++ uv run cohesion -f src/O4_Native_Texture_Encoder.py
++ uv run cohesion -f src/O4_OSM_Utils.py
++ uv run cohesion -f src/O4_Overlay_Utils.py
++ uv run cohesion -f src/O4_Package_Metadata.py
++ uv run cohesion -f src/O4_Package_Upgrader.py
++ uv run cohesion -f src/O4_Package_Validator.py
++ uv run cohesion -f src/O4_Parallel_Utils.py
++ uv run cohesion -f src/O4_Pipeline.py
++ uv run cohesion -f src/O4_Provider_Failover.py
++ uv run cohesion -f src/O4_Provider_Failover_Logging.py
++ uv run cohesion -f src/O4_Provider_Failover_Models.py
++ uv run cohesion -f src/O4_Provider_Score_Artifacts.py
++ uv run cohesion -f src/O4_Provider_Score_Channel_Data.py
++ uv run cohesion -f src/O4_Provider_Score_Cloud_Data.py
++ uv run cohesion -f src/O4_Provider_Score_Clouds.py
++ uv run cohesion -f src/O4_Provider_Score_Color.py
++ uv run cohesion -f src/O4_Provider_Score_Compression.py
++ uv run cohesion -f src/O4_Provider_Score_Edge_Data.py
++ uv run cohesion -f src/O4_Provider_Score_Edges.py
++ uv run cohesion -f src/O4_Provider_Score_Metrics.py
++ uv run cohesion -f src/O4_Provider_Score_Models.py
++ uv run cohesion -f src/O4_Provider_Score_Sampling.py
++ uv run cohesion -f src/O4_Provider_Score_Seam_Stats.py
++ uv run cohesion -f src/O4_Provider_Score_Seams.py
++ uv run cohesion -f src/O4_Provider_Scoring.py
++ uv run cohesion -f src/O4_Recut_Water.py
++ uv run cohesion -f src/O4_Resampling_Policy.py
++ uv run cohesion -f src/O4_Scenery_INI.py
++ uv run cohesion -f src/O4_Scenery_Manager.py
++ uv run cohesion -f src/O4_Scenery_Utils.py
++ uv run cohesion -f src/O4_Source_Data_Models.py
++ uv run cohesion -f src/O4_Srgb_Color.py
++ uv run cohesion -f src/O4_Subprocess_Runtime.py
++ uv run cohesion -f src/O4_Subprocess_Utils.py
++ uv run cohesion -f src/O4_Terrain_Artifact_Transaction.py
++ uv run cohesion -f src/O4_Texture_Artifact_Activation.py
++ uv run cohesion -f src/O4_Texture_Artifact_Finalizer.py
++ uv run cohesion -f src/O4_Texture_Artifact_Validation.py
++ uv run cohesion -f src/O4_Texture_Color_Normalization.py
++ uv run cohesion -f src/O4_Texture_Conversion_Runner.py
++ uv run cohesion -f src/O4_Texture_Conversion_Scheduler.py
++ uv run cohesion -f src/O4_Texture_Conversion_Utils.py
++ uv run cohesion -f src/O4_Texture_Download_Failover.py
++ uv run cohesion -f src/O4_Texture_Download_Scheduler.py
++ uv run cohesion -f src/O4_Texture_Encoder.py
++ uv run cohesion -f src/O4_Texture_Finalization_Models.py
++ uv run cohesion -f src/O4_Texture_Mask_Lifecycle.py
++ uv run cohesion -f src/O4_Texture_Models.py
++ uv run cohesion -f src/O4_Texture_Resolution.py
++ uv run cohesion -f src/O4_Texture_Source.py
++ uv run cohesion -f src/O4_Tile_Texture_Conversion.py
++ uv run cohesion -f src/O4_Tile_Utils.py
++ uv run cohesion -f src/O4_UI_Utils.py
++ uv run cohesion -f src/O4_Vector_Map.py
++ uv run cohesion -f src/O4_Vector_Map_Inputs.py
++ uv run cohesion -f src/O4_Vector_Utils.py
++ uv run cohesion -f src/O4_Version.py
++ uv run cohesion -f src/Unused/C/setup.py
++ uv run cohesion -f src/Unused/Earth_Orbit_Textures.py
++ uv run cohesion -f src/Unused/O4_Copernicus.py
++ uv run cohesion -f src/Unused/O4_Forest.py
++ uv run cohesion -f src/Unused/O4_OverlayDSF_Utils.py
++ uv run cohesion -f src/Unused/O4_Rtree_Utils.py
++ uv run cohesion -f src/Unused/O4_Shapefile_Utils.py
++ uv run cohesion -f src/Unused/O4_buildings.py
++ uv run cohesion -f src/Unused/build_house.py
++ uv run cohesion -f tests/_dsf_header_bridge_helpers.py
++ uv run cohesion -f tests/_imagery_color_normalization_helpers.py
++ uv run cohesion -f tests/_imagery_geotiff_conversion_helpers.py
++ uv run cohesion -f tests/_path.py
++ uv run cohesion -f tests/_provider_scoring_helpers.py
++ uv run cohesion -f tests/_provider_scoring_images.py
++ uv run cohesion -f tests/_upstream_watch_helpers.py
++ uv run cohesion -f tests/_vector_map_airport_helpers.py
++ uv run cohesion -f tests/test_airport_modules.py
++ uv run cohesion -f tests/test_bathymetry_dsf_bytes.py
++ uv run cohesion -f tests/test_bathymetry_facade.py
++ uv run cohesion -f tests/test_bathymetry_gate.py
++ uv run cohesion -f tests/test_bathymetry_input.py
++ uv run cohesion -f tests/test_bathymetry_payload_errors.py
++ uv run cohesion -f tests/test_bathymetry_provider.py
++ uv run cohesion -f tests/test_bathymetry_provider_7z.py M .github/workflows/ci.yml
+ M .python-version
+ M Utils/mac/7zz
+ M Utils/win/7z.dll
+ M Utils/win/7z.exe
+ M pyproject.toml
+ M tests/test_pyproject_build_backend.py
+ M uv.lock
+?? Utils/mac/numpy-2.5.4-cp313-cp313-macosx_11_0_arm64.whl
+?? Utils/win/gdal-3.13.3-cp313-cp313-win_amd64.whl
+?? docs/superpowers/plans/2026-10-11-dependency-refresh.md
+
++ uv run cohesion -f tests/test_bathymetry_source_lookup.py
++ uv run cohesion -f tests/test_build_cache.py
++ uv run cohesion -f tests/test_build_cache_events.py
++ uv run cohesion -f tests/test_build_context.py
++ uv run cohesion -f tests/test_build_core.py
++ uv run cohesion -f tests/test_build_core_cache.py
++ uv run cohesion -f tests/test_build_core_interrupts.py
++ uv run cohesion -f tests/test_build_core_wrapper.py
++ uv run cohesion -f tests/test_build_events.py
++ uv run cohesion -f tests/test_build_models.py
++ uv run cohesion -f tests/test_cli_jobs.py
++ uv run cohesion -f tests/test_cli_run.py
++ uv run cohesion -f tests/test_cli_utils.py
++ uv run cohesion -f tests/test_coastal_artifact_policy.py
++ uv run cohesion -f tests/test_cog_geotiff_export.py
++ uv run cohesion -f tests/test_color_filters.py
++ uv run cohesion -f tests/test_color_normalization.py
++ uv run cohesion -f tests/test_config_import_safety.py
++ uv run cohesion -f tests/test_config_loading.py
++ uv run cohesion -f tests/test_config_models.py
++ uv run cohesion -f tests/test_dds_quality.py
++ uv run cohesion -f tests/test_dds_quality_config.py
++ uv run cohesion -f tests/test_dds_quality_conversion.py
++ uv run cohesion -f tests/test_dem_utils.py
++ uv run cohesion -f tests/test_dsf_coastal_artifacts.py
++ uv run cohesion -f tests/test_dsf_header_bridge.py
++ uv run cohesion -f tests/test_dsf_header_text.py
++ uv run cohesion -f tests/test_event_bus.py
++ uv run cohesion -f tests/test_exception_handling.py
++ uv run cohesion -f tests/test_file_names.py
++ uv run cohesion -f tests/test_gdal_geotiff.py
++ uv run cohesion -f tests/test_gdal_texture_pipeline.py
++ uv run cohesion -f tests/test_gdal_warp.py
++ uv run cohesion -f tests/test_geo_utils.py
++ uv run cohesion -f tests/test_geotag.py
++ uv run cohesion -f tests/test_gui_batch_adapter.py
++ uv run cohesion -f tests/test_headless_launcher.py
++ uv run cohesion -f tests/test_imagery_async_downloads.py
++ uv run cohesion -f tests/test_imagery_color_normalization.py
++ uv run cohesion -f tests/test_imagery_convert_color_normalization.py
++ uv run cohesion -f tests/test_imagery_download_color_normalization.py
++ uv run cohesion -f tests/test_imagery_failures.py
++ uv run cohesion -f tests/test_imagery_incomplete_color_normalization.py
++ uv run cohesion -f tests/test_imagery_texture_source.py
++ uv run cohesion -f tests/test_launcher_core.py
++ uv run cohesion -f tests/test_mask_alpha.py
++ uv run cohesion -f tests/test_mask_validation.py
++ uv run cohesion -f tests/test_package_metadata.py
++ uv run cohesion -f tests/test_package_upgrader.py
++ uv run cohesion -f tests/test_package_validator.py
++ uv run cohesion -f tests/test_pipeline.py
++ uv run cohesion -f tests/test_provider_failover.py
++ uv run cohesion -f tests/test_provider_failover_scheduler.py
++ uv run cohesion -f tests/test_provider_parsing.py
++ uv run cohesion -f tests/test_provider_scoring.py
++ uv run cohesion -f tests/test_provider_scoring_integration.py
++ uv run cohesion -f tests/test_pyproject_build_backend.py
++ uv run cohesion -f tests/test_quality_check.py
++ uv run cohesion -f tests/test_quality_check_targets.py
++ uv run cohesion -f tests/test_quality_code_audits.py
++ uv run cohesion -f tests/test_repo_hygiene.py
++ uv run cohesion -f tests/test_resampling_policy.py
++ uv run cohesion -f tests/test_resampling_runtime.py
++ uv run cohesion -f tests/test_resampling_source_audit.py
++ uv run cohesion -f tests/test_scenery_cli.py
++ uv run cohesion -f tests/test_scenery_ini.py
++ uv run cohesion -f tests/test_scenery_manager.py
++ uv run cohesion -f tests/test_startup.py
++ uv run cohesion -f tests/test_subprocess_regression.py
++ uv run cohesion -f tests/test_subprocess_utils.py
++ uv run cohesion -f tests/test_terrain_artifact_transaction.py
++ uv run cohesion -f tests/test_texture_artifact_finalizer.py
++ uv run cohesion -f tests/test_texture_async_downloads.py
++ uv run cohesion -f tests/test_texture_conversion_scheduler.py
++ uv run cohesion -f tests/test_texture_conversion_scheduler_limits.py
++ uv run cohesion -f tests/test_texture_conversion_scheduler_live.py
++ uv run cohesion -f tests/test_texture_encoder.py
++ uv run cohesion -f tests/test_texture_mask_lifecycle.py
++ uv run cohesion -f tests/test_texture_models.py
++ uv run cohesion -f tests/test_texture_source.py
++ uv run cohesion -f tests/test_tile_texture_conversion.py
++ uv run cohesion -f tests/test_ui_logging.py
++ uv run cohesion -f tests/test_upstream_watch.py
++ uv run cohesion -f tests/test_upstream_watch_audit.py
++ uv run cohesion -f tests/test_upstream_watch_cli.py
++ uv run cohesion -f tests/test_upstream_watch_git.py
++ uv run cohesion -f tests/test_upstream_watch_github.py
++ uv run cohesion -f tests/test_upstream_watch_ledger.py
++ uv run cohesion -f tests/test_upstream_watch_surfaces.py
++ uv run cohesion -f tests/test_vector_map_airport_failure.py
++ uv run cohesion -f tests/test_vector_map_dem_ordering.py
+Complexity findings: advise=1530 warn=689 block=563
+Complexity baseline check passed.
++ C:\Program Files\LLVM\bin\clang-tidy.EXE --verify-config
++ cmake --fresh --preset llvm-release -S Utils
++ C:\Program Files\LLVM\bin\clang-tidy.EXE -p U:\repos\xp\Ortho4XP\Utils\build\llvm-release --quiet Utils/src/Triangle4XP.c
++ C:\Program Files\LLVM\bin\clang-tidy.EXE -p U:\repos\xp\Ortho4XP\Utils\build\llvm-release --quiet Utils/src/triangle.c
++ cmake --build Utils/build/llvm-release
++ git status --short

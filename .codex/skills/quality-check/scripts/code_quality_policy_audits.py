@@ -31,7 +31,7 @@ def _comment_tokens(path: Path) -> list[tokenize.TokenInfo]:
                 for token in tokenize.tokenize(handle.readline)
                 if token.type == tokenize.COMMENT
             ]
-    except (OSError, SyntaxError, tokenize.TokenError):
+    except OSError, SyntaxError, tokenize.TokenError:
         return []
 
 

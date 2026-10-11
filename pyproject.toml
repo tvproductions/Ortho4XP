@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.11.21,<0.12"]
+requires = ["uv_build>=0.13.0,<0.14"]
 build-backend = "uv_build"
 
 [project]
@@ -7,35 +7,42 @@ name = "ortho4xp"
 version = "1.4"
 description = "Scenery generation tool for X-Plane."
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.14,<3.15"
 dependencies = [
   "aiohttp>=3.13,<4",
-  "numpy==2.4.4",
-  "pillow==12.2.0",
+  "numpy==2.5.4",
+  "pillow==12.3.0",
   "pydantic>=2,<3",
-  "pyproj==3.7.2",
-  "requests==2.33.1",
+  "pyproj==3.8.0",
+  "requests==2.34.2",
   "Rtree==1.4.1",
-  "shapely==2.1.2",
+  "shapely==2.2.0",
   "scikit-fmm==2025.6.23",
-  "gdal==3.12.3; platform_system == 'Darwin'",
-  "gdal==3.12.2; platform_system == 'Windows'",
-  "gdal==3.9.0; platform_system == 'Linux'",
+  "gdal==3.13.3",
 ]
 
 [dependency-groups]
 dev = [
-  "cohesion>=1.0,<2.0",
-  "coverage>=7.0,<8.0",
-  "interrogate>=1.7,<2.0",
-  "lizard>=1.17,<2.0",
-  "mutmut>=3.0,<4.0",
-  "radon>=6.0,<7.0",
-  "ruff",
-  "ty",
-  "vulture>=2.11,<3.0",
-  "xenon>=0.9,<1.0",
+  "packaging==26.3",
+  "pre-commit==4.6.2",
+  "ruff==0.17.0",
+  "ty==0.0.86",
 ]
+hygiene = [
+  "bandit==1.9.4",
+  "cohesion==1.2.0",
+  "complexipy==8.0.1",
+  "cosmic-ray==8.7.0",
+  "coverage==7.16.2",
+  "deptry==0.25.1",
+  "grimp==3.17",
+  "import-linter==2.15",
+  "interrogate==1.7.0",
+  "lizard==1.24.1",
+  "pip-audit==2.10.1",
+  "vulture==2.16",
+]
+release = ["pyinstaller==6.22.3"]
 
 [tool.uv.build-backend]
 module-root = ""
@@ -45,7 +52,7 @@ source-include = ["Ortho4XP.py"]
 source-exclude = ["src/Unused/**"]
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py314"
 extend-exclude = [".codex/skills/maintenance-qa/vulture.whitelist.py"]
 
 [tool.ruff.lint]
@@ -55,10 +62,22 @@ select = ["E722", "E9", "F63", "F7", "F82", "I", "UP", "B", "SIM", "C4", "S"]
 quote-style = "double"
 indent-style = "space"
 
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.ty.environment]
+python-version = "3.14"
+
+[tool.complexipy]
+max-complexity-allowed = 15
+check-script = true
+no-ignore = true
+snapshot-ignore = true
+
 [tool.uv.sources]
 gdal = [
-  { path = "Utils/win/gdal-3.12.2-cp313-cp313-win_amd64.whl", marker = "platform_system == 'Windows'" },
+  { path = "Utils/win/gdal-3.13.3-cp314-cp314-win_amd64.whl", marker = "platform_system == 'Windows'" },
 ]
 scikit-fmm = [
-  { path = "Utils/win/scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl", marker = "platform_system == 'Windows'" },
+  { path = "Utils/win/scikit_fmm-2025.6.23-cp314-cp314-win_amd64.whl", marker = "platform_system == 'Windows'" },
 ]

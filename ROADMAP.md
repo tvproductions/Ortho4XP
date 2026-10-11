@@ -50,7 +50,7 @@ Good first test targets:
 
 Add modern Python project tooling configuration for:
 
-- Supported Python 3.13+ version range.
+- Supported Python 3.14.x version range.
 - `uv` dependency and environment management.
 - Ruff linting/formatting.
 - `ty` type checking.

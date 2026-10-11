@@ -1,10 +1,10 @@
 # Contributing
 
-This fork is being modernized around Python 3.13.x, `uv`, `unittest`, Ruff, ty, and LLVM/Clang for native utilities. Keep changes portable across Windows, current Apple Silicon macOS, and Ubuntu unless a platform-specific limitation is documented.
+This fork uses Python 3.14.8, `uv`, `unittest`, Ruff, ty, and LLVM/Clang for native utilities. Keep changes portable across Windows, current Apple Silicon macOS, and Ubuntu unless a platform-specific limitation is documented.
 
 ## Development Environment
 
-Install Python 3.13.x and `uv`, then sync the project environment from the repository root:
+Install Python 3.14.8 and `uv`, then sync the project environment from the repository root:
 
 ```bash
 uv sync --dev
@@ -14,15 +14,37 @@ The committed `.python-version`, `pyproject.toml`, and `uv.lock` are the source 
 
 ## Platform Notes
 
-Windows 11 is the primary development environment for this fork. The repository includes Windows Python wheels for GDAL and scikit-fmm in `Utils/win`, and `uv sync --dev` uses those local wheels on Windows. The current GitHub Actions Windows job runs on an x64 runner because the hosted Windows 11 runner is arm64 while these wheels are `win_amd64`.
+Windows 11 is the primary development environment for this fork. The repository includes CPython 3.14 Windows wheels for GDAL and scikit-fmm in `Utils/win`, and `uv sync --dev` uses those local wheels on Windows. The scikit-fmm wheel was built from the released 2025.6.23 source with Visual Studio C++ on Python 3.14.8 and passed all 374 upstream tests. The current GitHub Actions Windows job runs on an x64 runner because the hosted Windows 11 runner is arm64 while these wheels are `win_amd64`.
 
-On Apple Silicon macOS, install Homebrew first. The setup script installs Python 3.13, Tk, SpatialIndex, p7zip, PROJ, GDAL, and `uv`:
+On Apple Silicon macOS, install Homebrew first. The setup script installs Python 3.14, Tk, SpatialIndex, p7zip, PROJ, GDAL, and `uv`. It uses Homebrew Python so Tk is available and checks that the native GDAL version matches the 3.13.3 Python bindings:
 
 ```bash
 ./install_mac.sh
 ```
 
-On Ubuntu, install system packages for Tk, GDAL, SpatialIndex, CMake, Ninja, LLVM/Clang, clang-tidy, clang-format, and lld before running `uv sync --dev`. The CI workflow is the reference for package names on Ubuntu 24.04.
+On Ubuntu, the GDAL Python bindings require native GDAL 3.13.3. Ubuntu 24.04's default library does not match this pin. Install the development prerequisites below, then build the checksum-verified GDAL release into a user-owned prefix before syncing. The bootstrap keeps the default GDAL drivers whose development dependencies are available; it does not install Python bindings itself.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y clang clang-format clang-tidy cmake curl g++ lld \
+  libcurl4-openssl-dev libexpat1-dev libgeos-dev libjpeg-dev libjson-c-dev \
+  liblerc-dev liblzma-dev libpng-dev libproj-dev libspatialindex-dev \
+  libsqlite3-dev libtiff-dev libwebp-dev libzstd-dev ninja-build python3-tk zlib1g-dev
+bash scripts/install_linux_gdal.sh "$HOME/.local/ortho4xp-gdal"
+export PATH="$HOME/.local/ortho4xp-gdal/bin:$PATH"
+export LD_LIBRARY_PATH="$HOME/.local/ortho4xp-gdal/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+uv sync --dev
+```
+
+Use an interpreter with Tk support for the GUI. A uv-managed Python provides the headless CLI; distribution Tk packages alone do not add Tk to an unrelated interpreter. CI checks the matching source-build path on Ubuntu 24.04. Linux and macOS execution evidence must come from those platforms; a Windows pass does not verify them.
+
+The macOS NumPy 2.5.4 CPython 3.14 Apple Silicon wheel is retained in `Utils/mac` as a source asset. Normal `uv` resolution uses the matching PyPI release.
+
+Deeper maintenance tools are installed only when needed:
+
+```bash
+uv sync --dev --group hygiene
+```
 
 ## Validation
 

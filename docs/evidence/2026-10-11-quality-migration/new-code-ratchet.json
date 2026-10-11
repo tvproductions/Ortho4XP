@@ -1,0 +1,903 @@
+{
+  "lizard": "1.24.1",
+  "measured_functions": 194,
+  "introduced_functions": [
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "source_files",
+      "nloc": 7,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "validate_scope",
+      "nloc": 11,
+      "ccn": 5,
+      "parameters": 2,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "excluded_scope",
+      "nloc": 2,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "check_ancestors",
+      "nloc": 6,
+      "ccn": 4,
+      "parameters": 3,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "source_children",
+      "nloc": 6,
+      "ccn": 4,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "visit",
+      "nloc": 8,
+      "ccn": 5,
+      "parameters": 2,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "measure",
+      "nloc": 15,
+      "ccn": 3,
+      "parameters": 3,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "require_discovery",
+      "nloc": 7,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "function_locations",
+      "nloc": 6,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "measured_functions",
+      "nloc": 9,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "findings",
+      "nloc": 21,
+      "ccn": 10,
+      "parameters": 1,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "assess",
+      "nloc": 32,
+      "ccn": 6,
+      "parameters": 2,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "retain_measurement",
+      "nloc": 7,
+      "ccn": 2,
+      "parameters": 4,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/complexity_check.py",
+      "name": "main",
+      "nloc": 17,
+      "ccn": 3,
+      "parameters": 0,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "python_paths",
+      "nloc": 7,
+      "ccn": 4,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "source_candidate",
+      "nloc": 3,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "lizard_data_row",
+      "nloc": 2,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "parse_lizard_row",
+      "nloc": 12,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "lizard_row_findings",
+      "nloc": 15,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "function_line",
+      "nloc": 4,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "expected_functions",
+      "nloc": 5,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "path_function_counter",
+      "nloc": 4,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "cohesion_percentage",
+      "nloc": 7,
+      "ccn": 2,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "cohesion_record",
+      "nloc": 9,
+      "ccn": 4,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "__init__",
+      "nloc": 3,
+      "ccn": 1,
+      "parameters": 3,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "analyzer_findings",
+      "nloc": 9,
+      "ccn": 3,
+      "parameters": 3,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "complexity_report_directory",
+      "nloc": 5,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "ceiling_commands",
+      "nloc": 14,
+      "ccn": 1,
+      "parameters": 2,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "record_ceiling_command",
+      "nloc": 5,
+      "ccn": 1,
+      "parameters": 2,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "absolute_complexity",
+      "nloc": 13,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "ratchet_findings",
+      "nloc": 8,
+      "ccn": 2,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "record_ratchet",
+      "nloc": 14,
+      "ccn": 1,
+      "parameters": 4,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "ratchet_assessment",
+      "nloc": 8,
+      "ccn": 1,
+      "parameters": 2,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "refresh_complexity_baseline",
+      "nloc": 16,
+      "ccn": 7,
+      "parameters": 4,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "print_assessment",
+      "nloc": 10,
+      "ccn": 2,
+      "parameters": 4,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "run_typecheck",
+      "nloc": 5,
+      "ccn": 2,
+      "parameters": 0,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "run_format_check",
+      "nloc": 11,
+      "ccn": 1,
+      "parameters": 0,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "configure_console",
+      "nloc": 5,
+      "ccn": 3,
+      "parameters": 0,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "add_complexity_options",
+      "nloc": 17,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "quality_parser",
+      "nloc": 22,
+      "ccn": 1,
+      "parameters": 0,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "run_requested_adapter",
+      "nloc": 11,
+      "ccn": 4,
+      "parameters": 1,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/quality-check/scripts/quality_check.py",
+      "name": "requested_complexity",
+      "nloc": 2,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "audit_directory",
+      "nloc": 3,
+      "ccn": 1,
+      "parameters": 0,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "export_lock",
+      "nloc": 11,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "local_requirement",
+      "nloc": 7,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "append_local_wheels",
+      "nloc": 5,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "exported_requirement",
+      "nloc": 5,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "host_identity",
+      "nloc": 9,
+      "ccn": 6,
+      "parameters": 1,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "exported_identities",
+      "nloc": 5,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "audit_population",
+      "nloc": 10,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "classify_audit",
+      "nloc": 13,
+      "ccn": 3,
+      "parameters": 4,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "assessed_population",
+      "nloc": 12,
+      "ccn": 4,
+      "parameters": 4,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "audit_failed",
+      "nloc": 2,
+      "ccn": 3,
+      "parameters": 3,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "audit_export",
+      "nloc": 8,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "check_dependency_usage",
+      "nloc": 17,
+      "ccn": 3,
+      "parameters": 0,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_dependency.py",
+      "name": "check_import_boundaries",
+      "nloc": 4,
+      "ccn": 2,
+      "parameters": 0,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_docstrings.py",
+      "name": "docstring_result",
+      "nloc": 11,
+      "ccn": 4,
+      "parameters": 3,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "imported_names",
+      "nloc": 6,
+      "ccn": 4,
+      "parameters": 1,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "from_import_names",
+      "nloc": 4,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "import_edges",
+      "nloc": 6,
+      "ccn": 2,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "node_edges",
+      "nloc": 7,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "add_source_edges",
+      "nloc": 8,
+      "ccn": 2,
+      "parameters": 3,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "build",
+      "nloc": 11,
+      "ccn": 5,
+      "parameters": 2,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "check_contract",
+      "nloc": 16,
+      "ccn": 4,
+      "parameters": 3,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_import_graph.py",
+      "name": "main",
+      "nloc": 16,
+      "ccn": 3,
+      "parameters": 0,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "mutation_status",
+      "nloc": 4,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "incomplete_mutations",
+      "nloc": 6,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "invalid_outcome",
+      "nloc": 2,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "mutation_settings",
+      "nloc": 14,
+      "ccn": 7,
+      "parameters": 2,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "require_unittest",
+      "nloc": 5,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "cosmic_command",
+      "nloc": 10,
+      "ccn": 3,
+      "parameters": 3,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "clean_mutation_baseline",
+      "nloc": 9,
+      "ccn": 2,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "mutation_population",
+      "nloc": 7,
+      "ccn": 2,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "mutation_receipt",
+      "nloc": 13,
+      "ccn": 1,
+      "parameters": 2,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "execute_mutations",
+      "nloc": 7,
+      "ccn": 1,
+      "parameters": 2,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_mutation.py",
+      "name": "configured_mutations",
+      "nloc": 5,
+      "ccn": 4,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "check_complexity",
+      "nloc": 13,
+      "ccn": 2,
+      "parameters": 0,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "maintenance_arguments",
+      "nloc": 8,
+      "ccn": 2,
+      "parameters": 0,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "configure_reports",
+      "nloc": 7,
+      "ccn": 2,
+      "parameters": 0,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "configure_stream",
+      "nloc": 4,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "run_check",
+      "nloc": 9,
+      "ccn": 2,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "mutation_result",
+      "nloc": 11,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_qa.py",
+      "name": "report_results",
+      "nloc": 12,
+      "ccn": 4,
+      "parameters": 2,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_security.py",
+      "name": "bandit_result",
+      "nloc": 11,
+      "ccn": 4,
+      "parameters": 3,
+      "nesting": 3
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_security.py",
+      "name": "security_status",
+      "nloc": 6,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py",
+      "name": "coverage_directory",
+      "nloc": 3,
+      "ccn": 1,
+      "parameters": 0,
+      "nesting": 0
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py",
+      "name": "collect_coverage",
+      "nloc": 25,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": ".codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py",
+      "name": "coverage_summary",
+      "nloc": 15,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "audit_report",
+      "nloc": 7,
+      "ccn": 3,
+      "parameters": 2,
+      "nesting": 1
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "audit_cases",
+      "nloc": 8,
+      "ccn": 1,
+      "parameters": 0,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_dead_code_receipt_counts_unreachable_and_unsatisfiable_findings",
+      "nloc": 10,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "assert_audit_case.command",
+      "nloc": 6,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "assert_audit_case",
+      "nloc": 15,
+      "ccn": 1,
+      "parameters": 4,
+      "nesting": 1
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_pip_audit_must_account_for_every_exported_identity",
+      "nloc": 4,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_incomplete_mutation_results_cannot_pass",
+      "nloc": 20,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_flat_import_adapter_keeps_conditional_and_indirect_edges",
+      "nloc": 15,
+      "ccn": 4,
+      "parameters": 1,
+      "nesting": 2
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_missing_executable_is_a_failing_measurement",
+      "nloc": 6,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_auditor_failure_cannot_report_clean",
+      "nloc": 8,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_known_vulnerabilities_remain_failed_hygiene",
+      "nloc": 8,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_mutation_is_explicitly_bounded_and_unconfigured_scope_fails",
+      "nloc": 4,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_security_tool_failure_cannot_report_clean",
+      "nloc": 6,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_dead_code_tool_failure_cannot_report_clean",
+      "nloc": 6,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_lizard_absolute_failure_is_not_a_baseline_waiver",
+      "nloc": 19,
+      "ccn": 3,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": "tests/test_explicit_hygiene.py",
+      "name": "test_explicit_lizard_missing_scope_fails_closed",
+      "nloc": 17,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_lint_hook_uses_the_routine_project_scope",
+      "nloc": 19,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_partial_measurement_never_rewrites_baseline",
+      "nloc": 25,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_baseline_refresh_cannot_add_new_advice",
+      "nloc": 23,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_percentage_cohesion_cannot_satisfy_legacy_lcom4_policy",
+      "nloc": 13,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_lizard_malformed_measurement_is_not_clean",
+      "nloc": 9,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_lizard_cannot_omit_a_real_function_or_nesting_column",
+      "nloc": 15,
+      "ccn": 2,
+      "parameters": 1,
+      "nesting": 1
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_source_universe_includes_project_stack_checker",
+      "nloc": 2,
+      "ccn": 1,
+      "parameters": 1,
+      "nesting": 0
+    },
+    {
+      "path": "tests/test_quality_check.py",
+      "name": "test_routine_gate_keeps_native_without_deep_analysis",
+      "nloc": 19,
+      "ccn": 4,
+      "parameters": 1,
+      "nesting": 3
+    }
+  ],
+  "introduced_or_increased_ratchet_failures": []
+}

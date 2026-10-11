@@ -1,0 +1,140 @@
+C901 `discover_airport_names` is too complex (21 > 20)
+  --> src\O4_Airport_Discovery.py:11:5
+   |
+11 | def discover_airport_names(airport_layer, dico_airports):
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+12 |     for osmtype in ("r", "w", "n"):
+13 |         for osmid in (
+   |
+
+C901 `sort_and_reconstruct_runways` is too complex (30 > 20)
+   --> src\O4_Airport_Discovery.py:307:5
+    |
+307 | def sort_and_reconstruct_runways(tile, airport_layer, dico_airports):
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+308 |     for airport in dico_airports:
+309 |         runways_as_area = []
+    |
+
+C901 `encode_runways_taxiways_and_aprons` is too complex (29 > 20)
+  --> src\O4_Airport_Encoding.py:16:5
+   |
+16 | def encode_runways_taxiways_and_aprons(
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 |     tile, airport_layer, dico_airports, vector_map, patches_list
+18 | ):
+   |
+
+C901 `check_unsaved_changes` is too complex (28 > 20)
+    --> src\O4_Config_Utils.py:1346:9
+     |
+1344 |                 self.popup("ERROR", error_text)
+1345 |
+1346 |     def check_unsaved_changes(self, select_tile=False) -> str | None:
+     |         ^^^^^^^^^^^^^^^^^^^^^
+1347 |         """
+1348 |         Check for unsaved changes and prompt user to save.
+     |
+
+C901 `ensure_elevation` is too complex (32 > 20)
+   --> src\O4_DEM_Utils.py:553:5
+    |
+552 | ##############################################################################
+553 | def ensure_elevation(source, lat, lon, verbose=True):
+    |     ^^^^^^^^^^^^^^^^
+554 |     if source == "View":
+555 |         # Viewfinderpanorama grouping of files and resolutions is a
+    |
+
+C901 `build_dsf` is too complex (88 > 20)
+   --> src\O4_DSF_Utils.py:393:5
+    |
+392 | ################################################################################
+393 | def build_dsf(tile, download_queue):
+    |     ^^^^^^^^^
+394 |
+395 |     dico_customzl = zone_list_to_ortho_dico(tile)
+    |
+
+C901 `_preview_existing_tiles_inner` is too complex (39 > 20)
+    --> src\O4_GUI_Utils.py:1730:9
+     |
+1728 |             self._preview_existing_tiles_inner(dico_color)
+1729 |
+1730 |     def _preview_existing_tiles_inner(self, dico_color):
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1731 |         if self.dico_tiles_done:
+1732 |             for tile in self.dico_tiles_done:
+     |
+
+C901 `initialize_local_combined_providers_dict` is too complex (23 > 20)
+   --> src\O4_Imagery_Utils.py:628:5
+    |
+627 | ################################################################################
+628 | def initialize_local_combined_providers_dict(tile):
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+629 |     # This function will select from list of providers the only
+630 |     # ones whose coverage intersect the given tile.
+    |
+
+C901 `record_water_tris` is too complex (43 > 20)
+   --> src\O4_Mask_Utils.py:434:5
+    |
+433 | ################################################################################
+434 | def record_water_tris(tile):
+    |     ^^^^^^^^^^^^^^^^^
+435 |     mesh_list = []
+436 |     for close_lat in range(tile.lat - 1, tile.lat + 2):
+    |
+
+C901 `build_mesh` is too complex (28 > 20)
+   --> src\O4_Mesh_Utils.py:501:5
+    |
+500 | ################################################################################
+501 | def build_mesh(tile, ctx=None):
+    |     ^^^^^^^^^^
+502 |     if ctx is None:
+503 |         ctx = BC.BuildContext()
+    |
+
+C901 `update_dicosm` is too complex (54 > 20)
+  --> src\O4_OSM_Utils.py:69:9
+   |
+67 |         ]
+68 |
+69 |     def update_dicosm(self, osm_input, input_tags=None, target_tags=None):
+   |         ^^^^^^^^^^^^^
+70 |         # input_tags (dict or None) are the input query tags (per osm type)
+71 |         # target_tags (dict or None) are the the tags which should be kept
+   |
+
+C901 `build_tile` is too complex (30 > 20)
+  --> src\O4_Tile_Utils.py:76:5
+   |
+75 | ################################################################################
+76 | def build_tile(tile, ctx=None):
+   |     ^^^^^^^^^^
+77 |     if ctx is None:
+78 |         ctx = BC.BuildContext()
+   |
+
+C901 `include_patches` is too complex (42 > 20)
+   --> src\O4_Vector_Map.py:596:5
+    |
+595 | ################################################################################
+596 | def include_patches(vector_map, tile):
+    |     ^^^^^^^^^^^^^^^
+597 |     def tanh_profile(alpha, x):
+598 |         return (numpy.tanh((x - 0.5) * alpha) / numpy.tanh(0.5 * alpha) + 1) / 2
+    |
+
+C901 `write_text_dsf` is too complex (25 > 20)
+  --> src\Unused\O4_OverlayDSF_Utils.py:10:5
+   |
+10 | def write_text_dsf(
+   |     ^^^^^^^^^^^^^^
+11 |     lat, lon, dsf_txt_filename, dico_overlay, shift_latlon=True, exclusions=None
+12 | ):
+   |
+
+Found 14 errors.

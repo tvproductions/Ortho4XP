@@ -1,4 +1,5 @@
-#! /bin/bash
+#!/bin/bash
+set -euo pipefail
 if [ ! -f "Ortho4XP.py" ]; then
     echo " "
     echo "Error!"
@@ -21,10 +22,16 @@ echo "Setting up Ortho4XP...."
 echo " "
 
 # Install software dependencies from brew
-brew install python@3.13 python-tk@3.13 spatialindex p7zip proj gdal uv
+brew install python@3.14 python-tk@3.14 spatialindex p7zip proj gdal uv
+
+# Bindings in uv.lock must match the native Homebrew library.
+if [ "$(gdal-config --version)" != "3.13.3" ]; then
+    echo "Expected native GDAL 3.13.3; update the project binding pin with Homebrew GDAL."
+    exit 1
+fi
 
 # Create and sync the Python environment
-uv sync --dev
+uv sync --dev --python "$(brew --prefix python@3.14)/bin/python3.14"
 
 # Allow macOS to run required tools
 xattr -dr com.apple.quarantine ./Utils/mac/*

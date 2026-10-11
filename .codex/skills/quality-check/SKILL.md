@@ -1,52 +1,49 @@
 ---
 name: quality-check
-description: Run Ortho4XP's full repository quality verification. Use when the user asks to check, validate, verify, run quality checks, pre-merge, pre-push, prepare to commit, or confirm quality for current changes.
+description: Run Ortho4XP routine repository verification for validation, pre-merge, pre-push, or commit preparation. Deep hygiene requires an explicit request.
 ---
 
 # Quality Check
 
-## Overview
+Run the routine repository command:
 
-Run one coherent quality gate for Ortho4XP changes. Collect deterministic evidence from tests, lint, formatting, type checks, and native build checks where relevant.
+```powershell
+uv run python .codex/skills/quality-check/scripts/quality_check.py
+```
 
-## Workflow
+It runs unittest, project-locked Ruff check, Ruff format checks on changed Python
+files and maintained skill scripts, ty on the reviewed baseline and changed files,
+whitespace and structural audits, and LLVM/CMake verification. Native checks
+cover source represented in the compile database and retain failure output.
+Use `--skip-native` for a Python-only iteration and report that omission.
 
-1. Run the full quality check:
+Structural audits retain the existing module/class size policy, ty-ignore rules
+and unittest-only test policy. Never weaken these policies to make a gate pass.
+Build artifacts remain in `Utils/build`; copying release binaries is a separate
+authorized operation.
 
-   ```powershell
-   uv run python .codex/skills/quality-check/scripts/quality_check.py
-   ```
+Deep analyzers do not run through this command, hooks, or CI. When explicitly
+requested, use:
 
-2. Refresh the complexity baseline only after intentionally accepting the current legacy envelope:
+```powershell
+uv run --group hygiene python .codex/skills/quality-check/scripts/quality_check.py --complexity-only --scope all
+```
 
-   ```powershell
-   uv run python .codex/skills/quality-check/scripts/quality_check.py --complexity-only --scope all --write-complexity-baseline
-   ```
+This runs independent Ruff C901 (20), complexipy cognitive/script (15), and
+Lizard `lizard-functions-v1` (function/module/overall ceilings 20), then the
+existing stricter Lizard regression ratchet and retained Cohesion measurements.
+Cohesion's historical LCOM4 policy is unverified and fails explicitly; its actual
+percentages cannot be interpreted as LCOM4. All absolute failures
+remain failures even when unchanged from the baseline. A missing analyzer,
+invalid source, or AST/Lizard function-discovery mismatch fails measurement.
+Receipts go to a new `tmp/complexity-hygiene-*` directory.
 
-3. For Python-only iteration, run:
+The active `complexity-baseline.json` retains old Lizard identities and
+scores. `--write-complexity-baseline` requires complete full-scope measurements,
+no errors, no new finding identities and no increased scores; it can only shrink
+the existing baseline and cannot turn absolute ceiling failures into success.
+Preserve historical comparisons in `docs/evidence/2026-10-11-legacy-*`.
 
-   ```powershell
-   uv run python .codex/skills/quality-check/scripts/quality_check.py --skip-native
-   ```
-
-## Rules
-
-- Use `uv`, Ruff, ty, and `unittest`; do not introduce alternate test runners or dependency managers.
-- The full quality check runs repo-wide Ruff lint, Ruff format checks for changed Python files and skill scripts, ty baseline, changed-file ty, unittest, whitespace checks, gzkit-parity code-quality audits, Xenon/Radon/Lizard/Cohesion complexity checks, and LLVM/CMake native checks.
-- Code-quality audits enforce ty-ignore syntax, forbid alternate test tiers, block unwaived modules over 1000 lines, warn on modules over 600 lines, and block unwaived classes over 300 lines.
-- Complexity thresholds live in `complexity-thresholds.json`; accepted legacy findings live in `complexity-baseline.json`.
-- Xenon uses the gzkit-style `C/C/C` gate on the modern quality target set; legacy Ortho4XP modules remain governed by the Radon/Lizard/Cohesion baseline comparison.
-- Complexity regressions fail the quality check when a finding becomes worse than baseline or a new block-level finding appears.
-- Native clang-tidy runs against repo native files represented in the CMake compile database, not changed-file scope.
-- Native compiler and clang-tidy output is captured on successful runs to keep legacy Triangle warnings from burying actionable results; captured output is printed when a native command fails.
-- Do not copy build outputs into bundled platform tool directories unless the user is intentionally refreshing release tools.
-- Report skipped checks clearly with the reason.
-
-## Evidence
-
-In the final response, list:
-
-- Commands run.
-- Pass/fail result.
-- Any warnings that remain.
-- Any checks not run and why.
+See [project Python engineering](../../../docs/agents/python-engineering.md)
+for tool interpretation, archived metrics, explicit hygiene, and mutation proof.
+Report actual commands, results, debt evidence and unverified checks.

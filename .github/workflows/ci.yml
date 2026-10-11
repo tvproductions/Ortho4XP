@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14.8"
 
       - name: Install system dependencies
         run: |
@@ -26,18 +26,43 @@ jobs:
             clang-format \
             clang-tidy \
             cmake \
-            gdal-bin \
+            curl \
+            g++ \
             lld \
-            libgdal-dev \
+            libcurl4-openssl-dev \
+            libexpat1-dev \
+            libgeos-dev \
+            libjpeg-dev \
+            libjson-c-dev \
+            liblerc-dev \
+            liblzma-dev \
+            libpng-dev \
+            libproj-dev \
             libspatialindex-dev \
+            libsqlite3-dev \
+            libtiff-dev \
+            libwebp-dev \
+            libzstd-dev \
             ninja-build \
-            python3-tk
+            python3-tk \
+            zlib1g-dev
+
+      - name: Build matching native GDAL
+        run: |
+          bash scripts/install_linux_gdal.sh "$RUNNER_TEMP/ortho4xp-gdal"
+          echo "$RUNNER_TEMP/ortho4xp-gdal/bin" >> "$GITHUB_PATH"
+          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/ortho4xp-gdal/lib" >> "$GITHUB_ENV"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v10.3.0
+        with:
+          version: "0.13.0"
 
       - name: Install Python dependencies
         run: uv sync --dev
+
+      - name: Verify skills stack sources
+        run: uv run python scripts/check_skills_stack.py
 
       - name: Python syntax smoke test
         run: uv run python -m compileall -q Ortho4XP.py src
@@ -59,6 +84,9 @@ jobs:
 
       - name: Ruff lint
         run: uv run ruff check --output-format=github Ortho4XP.py src scripts
+
+      - name: Ruff format
+        run: uv run python .codex/skills/quality-check/scripts/quality_check.py --format-only
 
       - name: Type check
         run: uv run ty check tests scripts src/O4_Geo_Utils.py src/O4_File_Names.py
@@ -83,7 +111,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14.8"
 
       - name: Install system dependencies
         run: choco install llvm ninja cmake --no-progress --yes
@@ -92,10 +120,15 @@ jobs:
         run: echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v10.3.0
+        with:
+          version: "0.13.0"
 
       - name: Install Python dependencies
         run: uv sync --dev
+
+      - name: Verify skills stack sources
+        run: uv run python scripts/check_skills_stack.py
 
       - name: Python syntax smoke test
         run: uv run python -m compileall -q Ortho4XP.py src
@@ -117,6 +150,9 @@ jobs:
 
       - name: Ruff lint
         run: uv run ruff check --output-format=github Ortho4XP.py src scripts
+
+      - name: Ruff format
+        run: uv run python .codex/skills/quality-check/scripts/quality_check.py --format-only
 
       - name: Type check
         run: uv run ty check tests scripts src/O4_Geo_Utils.py src/O4_File_Names.py
@@ -141,19 +177,26 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14.8"
 
       - name: Install system dependencies
-        run: brew install gdal llvm ninja spatialindex
+        run: |
+          brew install gdal llvm ninja spatialindex
+          test "$(gdal-config --version)" = "3.13.3"
 
       - name: Add LLVM to PATH
         run: echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v10.3.0
+        with:
+          version: "0.13.0"
 
       - name: Install Python dependencies
         run: uv sync --dev
+
+      - name: Verify skills stack sources
+        run: uv run python scripts/check_skills_stack.py
 
       - name: Python syntax smoke test
         run: uv run python -m compileall -q Ortho4XP.py src
@@ -175,6 +218,9 @@ jobs:
 
       - name: Ruff lint
         run: uv run ruff check --output-format=github Ortho4XP.py src scripts
+
+      - name: Ruff format
+        run: uv run python .codex/skills/quality-check/scripts/quality_check.py --format-only
 
       - name: Type check
         run: uv run ty check tests scripts src/O4_Geo_Utils.py src/O4_File_Names.py

@@ -24,7 +24,7 @@ class ColorCorrection:
     strength: float
 
     @classmethod
-    def identity(cls) -> "ColorCorrection":
+    def identity(cls) -> ColorCorrection:
         return cls(
             exposure_scale=1.0,
             channel_scales=(1.0, 1.0, 1.0),

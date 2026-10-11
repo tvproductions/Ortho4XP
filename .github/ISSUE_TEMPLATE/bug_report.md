@@ -27,7 +27,7 @@ What actually happened. Include error messages or console output if available.
 ## Environment
 
 - **OS:** (e.g., Windows 11, macOS 15, Ubuntu 24.04)
-- **Python version:** (e.g., 3.13.x)
+- **Python version:** (e.g., 3.14.8)
 - **Ortho4XP version/commit:**
 - **Tile coordinates:** (e.g., +43-079)
 - **Imagery provider:** (e.g., BI, EOX)

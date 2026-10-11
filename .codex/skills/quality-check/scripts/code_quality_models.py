@@ -51,7 +51,7 @@ class CodeQualityFinding(BaseModel):
 def relative_project_path(path: Path, project_root: Path) -> str:
     try:
         return path.resolve().relative_to(project_root.resolve()).as_posix()
-    except (OSError, ValueError):
+    except OSError, ValueError:
         return path.as_posix()
 
 

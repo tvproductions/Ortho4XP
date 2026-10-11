@@ -12,21 +12,35 @@ Reports are reviewed as soon as possible. You will receive a response within 7 d
 
 ## Known Dependency Risks
 
-### GDAL CVEs (assessed 2026-06-13)
+### GDAL CVEs (assessed 2026-10-11)
 
-The following GDAL CVEs are flagged by `uv audit` for the pinned versions
-(3.9.0 Linux, 3.12.2 Windows, 3.12.3 macOS). All four target HDF4 EOS or
-NetCDF format drivers that Ortho4XP does not use. Ortho4XP uses GDAL only for
-GeoTIFF warp/translate and Web Mercator projection via `gdal_translate` and
-`gdalwarp`. No HDF4 or NetCDF processing occurs in any workflow.
+All platforms now select GDAL 3.13.3. The final universal `uv audit --locked`
+checked 93 third-party packages and reported zero vulnerabilities or adverse
+statuses on 2026-10-11. The earlier Linux GDAL 3.9.0 pin produced ten advisory
+records representing the seven distinct CVEs below; that pin has been removed.
 
-| CVE | Component | CVSS | Exposure |
-|-----|-----------|------|----------|
-| CVE-2026-8212 | `hdf-eos/SWapi.c` | 5.5 | None |
-| CVE-2026-8088 | `hdf-eos/GDapi.c` | 5.5 | None |
-| CVE-2026-8087 | `hdf-eos/GDapi.c` | 7.8 | None |
-| PYSEC-2026-193 | `netcdf/netcdfsg.cpp` | 7.8 | None |
+The affected components are HDF4 EOS and NetCDF drivers. Ortho4XP's raster
+pipeline uses `osgeo.gdal` Python bindings for GeoTIFF, PNG, VRT and in-memory
+raster operations; the old GDAL CLI subprocess path has been retired. No
+intentional HDF4 or NetCDF processing occurs in these workflows. This usage
+assessment does not remove the advisories or establish safety for arbitrary
+untrusted files passed to GDAL's format autodetection.
 
-GDAL 3.13.1 fixes all four but has no binary wheels on PyPI for any platform.
-This assessment will be revisited when `uv audit` is integrated into the
-maintenance-qa pipeline and GDAL wheels become available.
+| CVE | Advisory |
+|-----|----------|
+| CVE-2026-8084 | PYSEC-2026-2153 |
+| CVE-2026-8086 | PYSEC-2026-2154 |
+| CVE-2026-8087 | PYSEC-2026-2155 / GHSA-h9rh-5ffh-h669 |
+| CVE-2026-8088 | PYSEC-2026-2156 / GHSA-j3f5-rw74-g4rv |
+| CVE-2026-8212 | PYSEC-2026-4 / GHSA-r5m4-5vww-w9f5 |
+| CVE-2026-8213 | PYSEC-2026-2157 |
+| CVE-2026-49014 | PYSEC-2026-193 / GHSA-wphc-7cm7-8mf7 |
+
+The reported fixes are available in GDAL 3.13.3. Windows wheels are supplied
+by [the existing geospatial wheel vendor](https://github.com/cgohlke/geospatial-wheels/releases/tag/v2026.8.20),
+and Homebrew supplies the same native version on macOS. Linux setup now builds
+the checksum-verified native GDAL release through the project bootstrap before
+installing its matching Python bindings. Windows runtime probes passed; native
+Linux compilation and macOS execution remain verification gaps recorded in
+[the alignment design](docs/superpowers/specs/2026-10-11-skills-first-alignment-design.md).
+An advisory scan does not establish execution compatibility on those platforms.

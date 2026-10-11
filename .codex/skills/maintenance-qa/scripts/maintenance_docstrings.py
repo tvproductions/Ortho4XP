@@ -1,4 +1,4 @@
-from __future__ import annotations
+"""Measure docstring presence without replacing usefulness review."""
 
 import json
 import re
@@ -8,31 +8,37 @@ from maintenance_common import SKILL_DIR, run_command
 INTERROGATE_BASELINE_PATH = SKILL_DIR / "interrogate-baseline.json"
 
 
-def check_docstring_coverage() -> tuple[str, str]:
-    """Run interrogate and compare to baseline."""
-    returncode, stdout, stderr = run_command(
-        ["uv", "run", "interrogate", "src/", "--fail-under", "0"]
-    )
-
+def docstring_result(code: int, stdout: str, stderr: str) -> tuple[str, str]:
+    """Preserve execution errors and compare native coverage to the project minimum."""
     output = stdout + stderr
-    if not output.strip():
-        return "FAIL", f"No output captured (rc={returncode})"
-
+    if code != 0:
+        return "FAIL", f"Interrogate execution error: {output[:200]}"
     match = re.search(r"actual:\s*(\d+\.\d+)%", output)
     if not match:
-        return "FAIL", f"Could not parse docstring coverage from: {output[:200]}"
+        return "FAIL", f"Invalid docstring measurement: {output[:200]}"
+    percentage = float(match.group(1))
+    minimum = load_docstring_baseline()
+    status = "PASS" if percentage >= minimum else "FAIL"
+    return status, f"{percentage:.1f}% (baseline: {minimum:.1f}%)"
 
-    coverage_pct = float(match.group(1))
-    baseline = load_docstring_baseline()
 
-    if coverage_pct >= baseline:
-        return "PASS", f"{coverage_pct:.1f}% (baseline: {baseline:.1f}%)"
-
-    return "FAIL", f"{coverage_pct:.1f}% (baseline: {baseline:.1f}%)"
+def check_docstring_coverage() -> tuple[str, str]:
+    """Run Interrogate against source without adding meaningless docstrings."""
+    command = [
+        "uv",
+        "run",
+        "--group",
+        "hygiene",
+        "interrogate",
+        "src/",
+        "--fail-under",
+        "0",
+    ]
+    return docstring_result(*run_command(command))
 
 
 def load_docstring_baseline() -> float:
-    if not INTERROGATE_BASELINE_PATH.exists():
-        return 10.0
-    with open(INTERROGATE_BASELINE_PATH) as f:
-        return json.load(f).get("minimum_coverage", 10.0)
+    """Retain the existing project-owned minimum."""
+    return json.loads(INTERROGATE_BASELINE_PATH.read_text(encoding="utf-8"))[
+        "minimum_coverage"
+    ]

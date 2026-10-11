@@ -1,0 +1,36 @@
+{
+  "name": "ortho4xp-skills-first",
+  "owner": {
+    "name": "tvproductions"
+  },
+  "description": "Pinned, separately owned SP + SP-BP + gz-skills components.",
+  "plugins": [
+    {
+      "name": "superpowers",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/obra/superpowers.git",
+        "sha": "bb92a77741419a4ab5f06e711a283343f1ada0c3"
+      },
+      "description": "released; Backplane compatibility baseline"
+    },
+    {
+      "name": "superpowers-backplane",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/tvproductions/superpowers-backplane.git",
+        "sha": "d0eeee829c491da02351e793544aa16ad96461bf"
+      },
+      "description": "pre-release; published commit, host acceptance incomplete"
+    },
+    {
+      "name": "gz-skills",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/tvproductions/gz-skills.git",
+        "sha": "e722e808647481c4c9d2feab61f1843aa8e0b19a"
+      },
+      "description": "released"
+    }
+  ]
+}

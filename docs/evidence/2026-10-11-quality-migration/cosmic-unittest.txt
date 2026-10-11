@@ -1,0 +1,10 @@
+import unittest
+from probe import increment
+
+class IncrementTests(unittest.TestCase):
+    def test_positive_zero_and_negative(self):
+        for value in (-4, 0, 5):
+            self.assertEqual(increment(value), value + 1)
+
+if __name__ == '__main__':
+    unittest.main()

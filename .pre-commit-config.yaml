@@ -1,0 +1,28 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Project-locked Ruff check
+        entry: uv run python .codex/skills/quality-check/scripts/quality_check.py --lint-only
+        language: system
+        pass_filenames: false
+        always_run: true
+        types: [python]
+      - id: ruff-format
+        name: Project-locked Ruff format check
+        entry: uv run python .codex/skills/quality-check/scripts/quality_check.py --format-only
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: ty
+        name: Project-locked ty baseline and changed files
+        entry: uv run python .codex/skills/quality-check/scripts/quality_check.py --typecheck-only
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: unittest
+        name: Standard-library unittest suite
+        entry: uv run python -m unittest discover -s tests
+        language: system
+        pass_filenames: false
+        always_run: true

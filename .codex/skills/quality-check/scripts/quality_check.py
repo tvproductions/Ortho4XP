@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import csv
 import json
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
+from collections import Counter
 from dataclasses import asdict, dataclass
 from io import StringIO
 from pathlib import Path
@@ -27,6 +30,7 @@ from code_quality_audits import (  # noqa: E402
     collect_code_quality_findings,
 )
 from code_quality_targets import filter_changed_complexity_targets  # noqa: E402
+from complexity_check import assess  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[4]
 SKILL_DIR = Path(__file__).resolve().parents[1]
@@ -40,23 +44,15 @@ RUFF_LINT_PATHS = [
     ".codex/skills/quality-check/scripts",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
+    ".codex/skills/maintenance-qa/scripts",
+    "scripts/check_skills_stack.py",
 ]
 FORMAT_BASELINE = [
     ".codex/skills/quality-check/scripts",
     ".codex/skills/repo-hygiene/scripts/hygiene.py",
     ".codex/skills/git-sync/scripts/git_sync.py",
-]
-XENON_MAX_ABSOLUTE = "C"
-XENON_MAX_MODULES = "C"
-XENON_MAX_AVERAGE = "C"
-XENON_QUALITY_TARGETS = [
-    ".codex/skills/quality-check/scripts/quality_check.py",
-    ".codex/skills/repo-hygiene/scripts/hygiene.py",
-    "src/O4_Config_Models.py",
-    "src/O4_Source_Data_Models.py",
-    "tests/test_config_models.py",
-    "tests/test_provider_parsing.py",
-    "tests/test_quality_check.py",
+    ".codex/skills/maintenance-qa/scripts",
+    "scripts/check_skills_stack.py",
 ]
 NATIVE_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
 NATIVE_PATHS = ["Utils/src"]
@@ -106,6 +102,7 @@ def run(
         check=check,
         capture_output=capture,
         text=True,
+        encoding="utf-8",
     )
 
 
@@ -143,20 +140,29 @@ def changed_python_files() -> list[str]:
     return existing_paths(list(dict.fromkeys([*changed, *untracked])))
 
 
+def python_paths(base: Path) -> list[str]:
+    """Discover sources beneath one explicit repository scope."""
+    candidates = [base] if base.is_file() else base.rglob("*.py")
+    return [
+        item.relative_to(ROOT).as_posix()
+        for item in candidates
+        if source_candidate(item)
+    ]
+
+
+def source_candidate(path: Path) -> bool:
+    """Exclude cache files and the reviewed analyzer whitelist."""
+    relative = path.relative_to(ROOT).as_posix()
+    return "__pycache__" not in path.parts and relative not in NON_SOURCE_PYTHON_PATHS
+
+
 def all_python_files() -> list[str]:
-    paths: list[str] = []
-    for base in existing_paths(["Ortho4XP.py", "src", "tests", ".codex/skills"]):
-        base_path = ROOT / base
-        if base_path.is_file() and base_path.suffix == ".py":
-            if base not in NON_SOURCE_PYTHON_PATHS:
-                paths.append(base)
-        elif base_path.is_dir():
-            for item in base_path.rglob("*.py"):
-                if "__pycache__" not in item.parts:
-                    path = item.relative_to(ROOT).as_posix()
-                    if path not in NON_SOURCE_PYTHON_PATHS:
-                        paths.append(path)
-    return sorted(dict.fromkeys(paths))
+    """Include application, tests, project and maintained workflow sources."""
+    scopes = existing_paths(["Ortho4XP.py", "src", "tests", "scripts", ".codex/skills"])
+    paths = []
+    for scope in scopes:
+        paths.extend(python_paths(ROOT / scope))
+    return sorted(set(paths))
 
 
 def complexity_targets(scope: str) -> list[str]:
@@ -173,10 +179,6 @@ def complexity_targets(scope: str) -> list[str]:
 
 def format_check_targets(changed: list[str]) -> list[str]:
     return existing_paths(list(dict.fromkeys([*changed, *FORMAT_BASELINE])))
-
-
-def xenon_quality_targets() -> list[str]:
-    return existing_paths(XENON_QUALITY_TARGETS)
 
 
 def load_thresholds(path: Path = THRESHOLDS_PATH) -> dict[str, dict[str, float | str]]:
@@ -240,174 +242,160 @@ def make_finding(
 def normalize_path(path: str) -> str:
     try:
         return Path(path).resolve().relative_to(ROOT).as_posix()
-    except (OSError, ValueError):
+    except OSError, ValueError:
         return path.replace("\\", "/")
 
 
 def uv_tool(args: list[str]) -> subprocess.CompletedProcess[str]:
-    return run(["uv", "run", *args], check=True, capture=True)
+    return run(["uv", "run", "--group", "hygiene", *args], check=True, capture=True)
 
 
-def measure_radon_cc(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    proc = uv_tool(["radon", "cc", "--json", "--no-assert", *paths])
-    raw = json.loads(proc.stdout or "{}")
-    findings: list[Finding] = []
-    for path, entries in raw.items():
-        if not isinstance(entries, list):
-            continue
-        for entry in entries:
-            if not isinstance(entry, dict) or "complexity" not in entry:
-                continue
-            name = str(entry.get("fullname") or entry.get("name") or "<unknown>")
-            line = entry.get("lineno")
-            finding = make_finding(
-                thresholds,
-                "radon_cc",
-                path,
-                name,
-                float(entry["complexity"]),
-                int(line) if isinstance(line, int) else None,
-            )
-            if finding:
-                findings.append(finding)
-    return findings
+def lizard_data_row(row: list[str]) -> bool:
+    """Ignore empty/header rows, never malformed data rows."""
+    return bool(row) and row[0].strip().lower() != "nloc"
 
 
-def measure_radon_mi(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    proc = uv_tool(["radon", "mi", "--json", *paths])
-    raw = json.loads(proc.stdout or "{}")
-    findings: list[Finding] = []
-    for path, entry in raw.items():
-        if not isinstance(entry, dict) or "mi" not in entry:
-            continue
+def parse_lizard_row(row: list[str]) -> dict[str, Any]:
+    """Require every native CSV column, including the nesting extension."""
+    if len(row) != 12:
+        raise ValueError(f"Invalid Lizard CSV row: {row}")
+    return {
+        "path": normalize_path(row[6]),
+        "name": row[8] or row[7],
+        "line": int(row[9]),
+        "nloc": float(row[0]),
+        "ccn": float(row[1]),
+        "params": float(row[3]),
+        "nesting": float(row[11]),
+    }
+
+
+def lizard_row_findings(row: dict[str, Any], thresholds: dict) -> list[Finding]:
+    """Apply the existing stricter thresholds to one complete function record."""
+    values = (
+        ("lizard_nloc", row["nloc"]),
+        ("lizard_ccn", row["ccn"]),
+        ("lizard_param_count", row["params"]),
+        ("lizard_nesting_depth", row["nesting"]),
+    )
+    result = []
+    for metric, value in values:
         finding = make_finding(
-            thresholds, "radon_mi", path, "<module>", float(entry["mi"])
+            thresholds, metric, row["path"], row["name"], value, row["line"]
         )
         if finding:
-            findings.append(finding)
-    return findings
+            result.append(finding)
+    return result
 
 
-def measure_radon_hal(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    proc = uv_tool(["radon", "hal", "--json", *paths])
-    raw = json.loads(proc.stdout or "{}")
-    findings: list[Finding] = []
-    for path, entry in raw.items():
-        total = entry.get("total") if isinstance(entry, dict) else None
-        if not isinstance(total, dict):
-            total = entry if isinstance(entry, dict) else {}
-        for source_key, metric in (
-            ("volume", "radon_hal_volume"),
-            ("difficulty", "radon_hal_difficulty"),
-            ("effort", "radon_hal_effort"),
-        ):
-            if source_key not in total:
-                continue
-            finding = make_finding(
-                thresholds, metric, path, "<module>", float(total[source_key])
-            )
-            if finding:
-                findings.append(finding)
-    return findings
+def function_line(node: ast.AST) -> int | None:
+    """Select exactly the AST function population, including nested/async definitions."""
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return node.lineno
+    return None
 
 
-def measure_radon_raw(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    proc = uv_tool(["radon", "raw", "--json", *paths])
-    raw = json.loads(proc.stdout or "{}")
-    findings: list[Finding] = []
-    for path, entry in raw.items():
-        if not isinstance(entry, dict):
-            continue
-        for source_key, metric in (
-            ("nloc", "radon_raw_nloc"),
-            ("lloc", "radon_raw_lloc"),
-        ):
-            if source_key not in entry:
-                continue
-            finding = make_finding(
-                thresholds, metric, path, "<module>", float(entry[source_key])
-            )
-            if finding:
-                findings.append(finding)
-    return findings
-
-
-def measure_lizard(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    proc = uv_tool(["lizard", "-End", "--csv", *paths])
-    reader = csv.reader(StringIO(proc.stdout))
-    findings: list[Finding] = []
-    for row in reader:
-        if len(row) < 11 or row[0].lower() in {"nloc", "nloc "}:
-            continue
-        try:
-            nloc = float(row[0])
-            ccn = float(row[1])
-            params = float(row[3])
-            path = row[6]
-            name = row[8] or row[7] or "<function>"
-            line = int(row[9]) if row[9].isdigit() else None
-            nesting = float(row[-1]) if len(row) > 11 and row[-1] else 0.0
-        except (ValueError, IndexError):
-            continue
-        for metric, value in (
-            ("lizard_nloc", nloc),
-            ("lizard_param_count", params),
-            ("lizard_nesting_depth", nesting),
-            ("lizard_ccn", ccn),
-        ):
-            finding = make_finding(thresholds, metric, path, name, value, line)
-            if finding:
-                findings.append(finding)
-    return findings
-
-
-_LCOM4_PATTERN = re.compile(r"\bLCOM4\b[^0-9]*(\d+(?:\.\d+)?)", re.IGNORECASE)
-
-
-def measure_cohesion(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    findings: list[Finding] = []
+def expected_functions(paths: list[str]) -> Counter:
+    """Retain stable file/line identities for every source definition."""
+    expected = Counter()
     for path in paths:
-        proc = uv_tool(["cohesion", "-f", path])
-        for line in proc.stdout.splitlines():
-            match = _LCOM4_PATTERN.search(line)
-            if not match:
-                continue
-            finding = make_finding(
-                thresholds,
-                "cohesion_lcom4",
-                path,
-                line.strip().split()[0] if line.strip() else "<class>",
-                float(match.group(1)),
-            )
-            if finding:
-                findings.append(finding)
+        expected.update(path_function_counter(path))
+    return expected
+
+
+def path_function_counter(path: str) -> Counter:
+    """Count one original source's function locations without a synthetic denominator."""
+    tree = ast.parse((ROOT / path).read_text(encoding="utf-8"), filename=path)
+    lines = filter(None, map(function_line, ast.walk(tree)))
+    return Counter((normalize_path(path), line) for line in lines)
+
+
+def measure_lizard(paths: list[str], thresholds: dict) -> list[Finding]:
+    """Refuse missing functions or nesting columns; retain partial evidence on errors."""
+    proc = uv_tool(["lizard", "-End", "--csv", *paths])
+    rows = list(
+        map(
+            parse_lizard_row, filter(lizard_data_row, csv.reader(StringIO(proc.stdout)))
+        )
+    )
+    findings = []
+    for row in rows:
+        findings.extend(lizard_row_findings(row, thresholds))
+    actual = Counter((row["path"], row["line"]) for row in rows)
+    expected = expected_functions(paths)
+    if actual != expected:
+        message = f"Lizard CSV function population mismatch: missing={dict(expected - actual)}, extra={dict(actual - expected)}"
+        raise MeasurementError(message, findings)
     return findings
 
 
-def measure_complexity(
-    paths: list[str], thresholds: dict[str, dict[str, float | str]]
-) -> list[Finding]:
-    if not paths:
-        return []
-    findings: list[Finding] = []
-    findings.extend(measure_radon_cc(paths, thresholds))
-    findings.extend(measure_radon_mi(paths, thresholds))
-    findings.extend(measure_radon_hal(paths, thresholds))
-    findings.extend(measure_radon_raw(paths, thresholds))
-    findings.extend(measure_lizard(paths, thresholds))
-    findings.extend(measure_cohesion(paths, thresholds))
+def cohesion_percentage(line: str, identity: dict[str, str]) -> Finding:
+    """Keep the analyzer's native percentage without clipping or translating it."""
+    if not {"path", "name"} <= identity.keys():
+        raise ValueError("Cohesion percentage without file/class identity")
+    value = float(line.removeprefix("Total: ").removesuffix("%"))
+    return Finding(
+        "cohesion_policy_unverified", identity["path"], identity["name"], value, "block"
+    )
+
+
+def cohesion_record(line: str, identity: dict[str, str]) -> Finding | None:
+    """Parse one line without losing original file/class identities."""
+    line = line.strip()
+    if line.startswith("File: "):
+        identity["path"] = normalize_path(line.removeprefix("File: "))
+    elif line.startswith("Class: "):
+        identity["name"] = line.removeprefix("Class: ").rsplit(" (", 1)[0]
+    elif line.startswith("Total: "):
+        return cohesion_percentage(line, identity)
+    return None
+
+
+def measure_cohesion(paths: list[str], thresholds: dict) -> list[Finding]:
+    """Preserve real percentages; unsupported historical LCOM4 policy stays blocked."""
+    proc = uv_tool(["cohesion", "-f", *paths])
+    findings = []
+    identity = {}
+    for line in proc.stdout.splitlines():
+        record = cohesion_record(line, identity)
+        if record is not None:
+            findings.append(record)
+    print(
+        f"Cohesion percentage policy unverified: {len(findings)} class measurements retained."
+    )
+    return findings
+
+
+class MeasurementError(ValueError):
+    """Retain partial measurements while preventing an analyzer error from passing."""
+
+    def __init__(self, message: str, findings: list[Finding]) -> None:
+        super().__init__(message)
+        self.findings = findings
+
+
+def analyzer_findings(
+    analyzer, paths: list[str], thresholds: dict
+) -> tuple[list[Finding], str | None]:
+    """Preserve partial evidence when discovery or tool execution fails."""
+    try:
+        return analyzer(paths, thresholds), None
+    except MeasurementError as error:
+        return error.findings, f"{analyzer.__name__}: {error}"
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        return [], f"{analyzer.__name__}: {error}"
+
+
+def measure_complexity(paths: list[str], thresholds: dict) -> list[Finding]:
+    """Run both retained analyzers independently without waiving partial failures."""
+    findings, errors = [], []
+    for analyzer in (measure_lizard, measure_cohesion):
+        items, message = analyzer_findings(analyzer, paths, thresholds)
+        findings.extend(items)
+        errors.append(message)
+    errors = list(filter(None, errors))
+    if errors:
+        raise MeasurementError("; ".join(errors), findings)
     return sorted(findings, key=lambda item: (item.path, item.metric, item.name))
 
 
@@ -529,20 +517,138 @@ def print_complexity_summary(
         print(f"  ... {len(regressions) - 50} more")
 
 
-def run_complexity_gate(scope: str, *, write: bool = False) -> None:
-    targets = complexity_targets(scope)
-    print(f"Complexity scope: {scope} ({len(targets)} files)")
-    run_xenon_gate(xenon_quality_targets())
+def complexity_report_directory(targets: list[str]) -> Path:
+    """Reject empty measurement scope and allocate a retained receipt."""
+    if not targets:
+        raise SystemExit("No Python sources selected for complexity measurement")
+    (ROOT / "tmp").mkdir(exist_ok=True)
+    return Path(tempfile.mkdtemp(prefix="complexity-hygiene-", dir=ROOT / "tmp"))
+
+
+def ceiling_commands(targets: list[str], report: Path) -> list[list[str]]:
+    """Keep the independent cyclomatic and cognitive ceilings explicit."""
+    ruff = [
+        "ruff",
+        "check",
+        "--select",
+        "C901",
+        "--ignore-noqa",
+        "--config",
+        "lint.mccabe.max-complexity=20",
+        *targets,
+    ]
+    cognitive = ["complexipy", *targets, "--cache-dir", str(report / "cache")]
+    cognitive += ["--output-format", "json", "--output", str(report / "cognitive.json")]
+    return [ruff, cognitive]
+
+
+def record_ceiling_command(command: list[str], path: Path) -> bool:
+    """Retain analyzer output and return its actual failure state."""
+    proc = run(["uv", "run", "--group", "hygiene", *command], check=False, capture=True)
+    path.write_text(proc.stdout + proc.stderr, encoding="utf-8")
+    print_completed_output(proc)
+    return proc.returncode != 0
+
+
+def absolute_complexity(targets: list[str], report: Path) -> tuple[bool, list[str]]:
+    """Run all three tools even when an independent measurement fails."""
+    results = [
+        record_ceiling_command(command, report / f"analyzer-{index}.txt")
+        for index, command in enumerate(ceiling_commands(targets, report))
+    ]
+    receipt = assess(ROOT, targets)
+    (report / "lizard.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        f"Lizard contract: {receipt['status']}; aggregate={receipt['aggregate']}; errors={receipt['errors']}"
+    )
+    return any(results) or receipt["status"] != "passed", receipt["errors"]
+
+
+def ratchet_findings(
+    targets: list[str], thresholds: dict
+) -> tuple[list[Finding], list[str]]:
+    """Return partial measurements distinctly from valid legacy findings."""
+    try:
+        return measure_complexity(targets, thresholds), []
+    except MeasurementError as error:
+        print(f"Complexity measurement error: {error}")
+        return error.findings, [str(error)]
+
+
+def record_ratchet(
+    report: Path,
+    findings: list[Finding],
+    regressions: list[Regression],
+    errors: list[str],
+) -> None:
+    """Retain all identities, scores, regressions and measurement errors."""
+    payload = {
+        "errors": errors,
+        "findings": list(map(asdict, findings)),
+        "regressions": list(map(asdict, regressions)),
+    }
+    (report / "ratchet.json").write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+def ratchet_assessment(
+    targets: list[str], report: Path
+) -> tuple[list[Finding], list[Regression], list[str]]:
+    """Apply the unchanged project ratchet to every retained native measurement."""
     thresholds = load_thresholds()
-    findings = measure_complexity(targets, thresholds)
-    if write:
-        write_baseline(findings, targets)
-        print_complexity_summary(findings, [])
-        return
+    findings, errors = ratchet_findings(targets, thresholds)
     regressions = compare_to_baseline(findings, load_baseline(), thresholds)
-    print_complexity_summary(findings, regressions)
-    if regressions:
+    record_ratchet(report, findings, regressions, errors)
+    return findings, regressions, errors
+
+
+def refresh_complexity_baseline(
+    scope_targets: tuple[str, list[str]],
+    findings: list[Finding],
+    regressions: list[Regression],
+    errors: list,
+) -> None:
+    """Allow only full, complete assessments whose baseline identities shrink."""
+    scope, targets = scope_targets
+    prior = baseline_by_stable_key(load_baseline())
+    added = [
+        finding for finding in findings if stable_finding_key(finding) not in prior
+    ]
+    if scope != "all" or regressions or added or errors:
+        raise SystemExit(
+            "Baseline may only shrink after a complete full-scope regression check"
+        )
+    write_baseline(findings, targets)
+
+
+def run_complexity_gate(scope: str, *, write: bool = False) -> None:
+    """Run every independent analyzer; snapshots never waive absolute failures."""
+    targets = complexity_targets(scope)
+    report = complexity_report_directory(targets)
+    failed, errors = absolute_complexity(targets, report)
+    findings, regressions, measurement_errors = ratchet_assessment(targets, report)
+    errors.extend(measurement_errors)
+    if write:
+        refresh_complexity_baseline((scope, targets), findings, regressions, errors)
+    print_assessment(findings, regressions, errors, report)
+    if failed or regressions or errors:
         raise SystemExit(1)
+
+
+def print_assessment(
+    findings: list, regressions: list, errors: list, report: Path
+) -> None:
+    """Do not report baseline success when any analyzer lacks complete evidence."""
+    if errors:
+        print(
+            f"Complexity assessment incomplete: {len(errors)} measurement errors; baseline cannot pass."
+        )
+    else:
+        print_complexity_summary(findings, regressions)
+    print(f"Detailed complexity receipts: {report.relative_to(ROOT).as_posix()}")
 
 
 def run_code_quality_audits() -> None:
@@ -563,28 +669,6 @@ def run_code_quality_audits() -> None:
         print(f"  ... {len(findings) - 80} more")
     if blocks:
         raise SystemExit(1)
-
-
-def run_xenon_gate(paths: list[str]) -> None:
-    targets = existing_paths(paths)
-    if not targets:
-        print("No Python files for Xenon.")
-        return
-    run(
-        [
-            "uv",
-            "run",
-            "xenon",
-            "--no-assert",
-            "--max-absolute",
-            XENON_MAX_ABSOLUTE,
-            "--max-modules",
-            XENON_MAX_MODULES,
-            "--max-average",
-            XENON_MAX_AVERAGE,
-            *targets,
-        ]
-    )
 
 
 def resolve_tool(name: str) -> str:
@@ -676,6 +760,7 @@ def run_full_quality(*, skip_native: bool = False) -> None:
     run(["git", "diff", "--stat"], check=False)
     run(["git", "diff", "--cached", "--stat"], check=False)
     run(["uv", "sync", "--dev"])
+    run(["uv", "run", "python", "scripts/check_skills_stack.py"])
     run(["uv", "run", "python", "-m", "unittest", "discover", "-s", "tests"])
     run(["uv", "run", "ruff", "check", *existing_paths(RUFF_LINT_PATHS)])
     run(["uv", "run", "ty", "check", *TY_BASELINE])
@@ -685,42 +770,116 @@ def run_full_quality(*, skip_native: bool = False) -> None:
         run(["uv", "run", "ty", "check", *changed])
     run(["git", "diff", "--check"])
     run_code_quality_audits()
-    run_complexity_gate("all")
     if not skip_native:
         run_native_checks()
     run(["git", "status", "--short"], check=False)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Run the Ortho4XP quality check.")
+def run_typecheck() -> None:
+    """Check the reviewed baseline and every changed Python source."""
+    run(["uv", "run", "ty", "check", *TY_BASELINE])
+    changed = changed_python_files()
+    if changed:
+        run(["uv", "run", "ty", "check", *changed])
+
+
+def run_format_check() -> None:
+    """Verify changed sources and maintained skill scripts without mass formatting."""
+    run(
+        [
+            "uv",
+            "run",
+            "ruff",
+            "format",
+            "--check",
+            *format_check_targets(changed_python_files()),
+        ]
+    )
+
+
+def configure_console() -> None:
+    """Use UTF-8 for tool receipts and captured Windows console output."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
+def add_complexity_options(parser: argparse.ArgumentParser) -> None:
+    """Expose deep analysis only through explicit command flags."""
     parser.add_argument(
-        "--complexity-only", action="store_true", help="Run only complexity checks."
+        "--complexity-only",
+        action="store_true",
+        help="Run only explicit complexity checks.",
     )
     parser.add_argument(
         "--scope",
         choices=("changed", "all"),
         default="all",
-        help="Python file scope for complexity checks.",
+        help="Python source scope for complexity.",
     )
     parser.add_argument(
         "--write-complexity-baseline",
         action="store_true",
-        help="Refresh the checked-in complexity baseline for the selected scope.",
+        help="Shrink the existing complexity baseline after complete assessment.",
+    )
+
+
+def quality_parser() -> argparse.ArgumentParser:
+    """Describe routine checks and pre-commit adapters separately from deep analysis."""
+    parser = argparse.ArgumentParser(description="Run the Ortho4XP quality check.")
+    parser.add_argument(
+        "--lint-only",
+        action="store_true",
+        help="Run the reviewed routine Ruff scope for pre-commit.",
+    )
+    parser.add_argument(
+        "--typecheck-only",
+        action="store_true",
+        help="Run baseline and changed-file ty for pre-commit.",
+    )
+    parser.add_argument(
+        "--format-only",
+        action="store_true",
+        help="Run changed-file and script formatting for pre-commit.",
     )
     parser.add_argument(
         "--skip-native", action="store_true", help="Skip LLVM/CMake native checks."
     )
-    args = parser.parse_args()
+    add_complexity_options(parser)
+    return parser
 
-    if args.complexity_only:
+
+def main() -> int:
+    """Run explicit requested checks with UTF-8 output on every platform."""
+    configure_console()
+    args = quality_parser().parse_args()
+    if run_requested_adapter(args):
+        return 0
+    if requested_complexity(args):
         run_complexity_gate(args.scope, write=args.write_complexity_baseline)
         return 0
-    if args.write_complexity_baseline:
-        run_complexity_gate(args.scope, write=True)
-        return 0
-
     run_full_quality(skip_native=args.skip_native)
     return 0
+
+
+def run_requested_adapter(args: argparse.Namespace) -> bool:
+    """Run one explicitly requested routine hook adapter."""
+    if args.lint_only:
+        run(["uv", "run", "ruff", "check", *existing_paths(RUFF_LINT_PATHS)])
+        return True
+    if args.typecheck_only:
+        run_typecheck()
+        return True
+    if args.format_only:
+        run_format_check()
+        return True
+    return False
+
+
+def requested_complexity(args: argparse.Namespace) -> bool:
+    """Keep explicit analysis selection independent of routine orchestration."""
+    return args.complexity_only or args.write_complexity_baseline
 
 
 def print_completed_output(proc: subprocess.CompletedProcess[str]) -> None:

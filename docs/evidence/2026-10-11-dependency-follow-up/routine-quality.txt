@@ -1,0 +1,793 @@
+## master...origin/master
+ D .agents/skills/superpowers/.claude-plugin/marketplace.json
+ D .agents/skills/superpowers/.claude-plugin/plugin.json
+ D .agents/skills/superpowers/.codex-plugin/plugin.json
+ D .agents/skills/superpowers/.cursor-plugin/plugin.json
+ D .agents/skills/superpowers/.gitattributes
+ D .agents/skills/superpowers/.github/FUNDING.yml
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/bug_report.md
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/config.yml
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/feature_request.md
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/platform_support.md
+ D .agents/skills/superpowers/.github/PULL_REQUEST_TEMPLATE.md
+ D .agents/skills/superpowers/.gitignore
+ D .agents/skills/superpowers/.kimi-plugin/plugin.json
+ D .agents/skills/superpowers/.opencode/INSTALL.md
+ D .agents/skills/superpowers/.opencode/plugins/superpowers.js
+ D .agents/skills/superpowers/.pi/extensions/superpowers.ts
+ D .agents/skills/superpowers/.pre-commit-config.yaml
+ D .agents/skills/superpowers/.version-bump.json
+ D .agents/skills/superpowers/AGENTS.md
+ D .agents/skills/superpowers/CLAUDE.md
+ D .agents/skills/superpowers/CODE_OF_CONDUCT.md
+ D .agents/skills/superpowers/GEMINI.md
+ D .agents/skills/superpowers/LICENSE
+ D .agents/skills/superpowers/README.md
+ D .agents/skills/superpowers/RELEASE-NOTES.md
+ D .agents/skills/superpowers/SOURCE.md
+ D .agents/skills/superpowers/assets/app-icon.png
+ D .agents/skills/superpowers/assets/superpowers-small.svg
+ D .agents/skills/superpowers/docs/README.kimi.md
+ D .agents/skills/superpowers/docs/README.opencode.md
+ D .agents/skills/superpowers/docs/plans/2025-11-22-opencode-support-design.md
+ D .agents/skills/superpowers/docs/plans/2025-11-22-opencode-support-implementation.md
+ D .agents/skills/superpowers/docs/plans/2025-11-28-skills-improvements-from-user-feedback.md
+ D .agents/skills/superpowers/docs/plans/2026-01-17-visual-brainstorming.md
+ D .agents/skills/superpowers/docs/porting-to-a-new-harness.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-01-22-document-review-system.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-02-19-visual-brainstorming-refactor.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-03-11-zero-dep-brainstorm-server.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-03-23-codex-app-compatibility.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-04-06-worktree-rototill.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-05-06-lift-drill-into-evals.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-05-07-pi-extension-and-evals.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-09-sdd-task-scoped-review-dispatch.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-09-visual-companion-issues.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-10-visual-companion-auth-hardening.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-11-visual-companion-final-hardening-fixup.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-01-22-document-review-system-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-02-19-visual-brainstorming-refactor-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-03-11-zero-dep-brainstorm-server-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-03-23-codex-app-compatibility-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-04-06-worktree-rototill-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-05-platform-neutral-config-refs-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-05-platform-neutral-prose-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-05-platform-neutral-readme-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-06-lift-drill-into-evals-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-09-sdd-task-scoped-review-dispatch-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-10-positive-instruction-redesign-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-10-strict-cost-sdd-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-10-visual-companion-auth-hardening-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-11-visual-companion-final-hardening-fixup-design.md
+ D .agents/skills/superpowers/docs/testing.md
+ D .agents/skills/superpowers/docs/windows/polyglot-hooks.md
+ D .agents/skills/superpowers/gemini-extension.json
+ D .agents/skills/superpowers/hooks/hooks-codex.json
+ D .agents/skills/superpowers/hooks/hooks-cursor.json
+ D .agents/skills/superpowers/hooks/hooks.json
+ D .agents/skills/superpowers/hooks/run-hook.cmd
+ D .agents/skills/superpowers/hooks/session-start
+ D .agents/skills/superpowers/hooks/session-start-codex
+ D .agents/skills/superpowers/package.json
+ D .agents/skills/superpowers/scripts/bump-version.sh
+ D .agents/skills/superpowers/scripts/lint-shell.sh
+ D .agents/skills/superpowers/scripts/sync-to-codex-plugin.sh
+ D .agents/skills/superpowers/skills/brainstorming/SKILL.md
+ D .agents/skills/superpowers/skills/brainstorming/scripts/frame-template.html
+ D .agents/skills/superpowers/skills/brainstorming/scripts/helper.js
+ D .agents/skills/superpowers/skills/brainstorming/scripts/server.cjs
+ D .agents/skills/superpowers/skills/brainstorming/scripts/start-server.sh
+ D .agents/skills/superpowers/skills/brainstorming/scripts/stop-server.sh
+ D .agents/skills/superpowers/skills/brainstorming/spec-document-reviewer-prompt.md
+ D .agents/skills/superpowers/skills/brainstorming/visual-companion.md
+ D .agents/skills/superpowers/skills/dispatching-parallel-agents/SKILL.md
+ D .agents/skills/superpowers/skills/executing-plans/SKILL.md
+ D .agents/skills/superpowers/skills/finishing-a-development-branch/SKILL.md
+ D .agents/skills/superpowers/skills/receiving-code-review/SKILL.md
+ D .agents/skills/superpowers/skills/requesting-code-review/SKILL.md
+ D .agents/skills/superpowers/skills/requesting-code-review/code-reviewer.md
+ D .agents/skills/superpowers/skills/subagent-driven-development/SKILL.md
+ D .agents/skills/superpowers/skills/subagent-driven-development/implementer-prompt.md
+ D .agents/skills/superpowers/skills/subagent-driven-development/scripts/review-package
+ D .agents/skills/superpowers/skills/subagent-driven-development/scripts/sdd-workspace
+ D .agents/skills/superpowers/skills/subagent-driven-development/scripts/task-brief
+ D .agents/skills/superpowers/skills/subagent-driven-development/task-reviewer-prompt.md
+ D .agents/skills/superpowers/skills/systematic-debugging/CREATION-LOG.md
+ D .agents/skills/superpowers/skills/systematic-debugging/SKILL.md
+ D .agents/skills/superpowers/skills/systematic-debugging/condition-based-waiting-example.ts
+ D .agents/skills/superpowers/skills/systematic-debugging/condition-based-waiting.md
+ D .agents/skills/superpowers/skills/systematic-debugging/defense-in-depth.md
+ D .agents/skills/superpowers/skills/systematic-debugging/find-polluter.sh
+ D .agents/skills/superpowers/skills/systematic-debugging/root-cause-tracing.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-academic.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-pressure-1.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-pressure-2.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-pressure-3.md
+ D .agents/skills/superpowers/skills/test-driven-development/SKILL.md
+ D .agents/skills/superpowers/skills/test-driven-development/testing-anti-patterns.md
+ D .agents/skills/superpowers/skills/using-git-worktrees/SKILL.md
+ D .agents/skills/superpowers/skills/using-superpowers/SKILL.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/antigravity-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/claude-code-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/codex-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/copilot-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/gemini-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/pi-tools.md
+ D .agents/skills/superpowers/skills/verification-before-completion/SKILL.md
+ D .agents/skills/superpowers/skills/writing-plans/SKILL.md
+ D .agents/skills/superpowers/skills/writing-plans/plan-document-reviewer-prompt.md
+ D .agents/skills/superpowers/skills/writing-skills/SKILL.md
+ D .agents/skills/superpowers/skills/writing-skills/anthropic-best-practices.md
+ D .agents/skills/superpowers/skills/writing-skills/examples/CLAUDE_MD_TESTING.md
+ D .agents/skills/superpowers/skills/writing-skills/graphviz-conventions.dot
+ D .agents/skills/superpowers/skills/writing-skills/persuasion-principles.md
+ D .agents/skills/superpowers/skills/writing-skills/render-graphs.js
+ D .agents/skills/superpowers/skills/writing-skills/testing-skills-with-subagents.md
+ D .agents/skills/superpowers/tests/antigravity/run-tests.sh
+ D .agents/skills/superpowers/tests/antigravity/test-antigravity-tools.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/auth.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/branding.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/browser-launcher.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/helper.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/lifecycle.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/package-lock.json
+ D .agents/skills/superpowers/tests/brainstorm-server/package.json
+ D .agents/skills/superpowers/tests/brainstorm-server/server.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/start-server.test.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/stop-server.test.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/windows-lifecycle.test.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/ws-protocol.test.js
+ D .agents/skills/superpowers/tests/claude-code/README.md
+ D .agents/skills/superpowers/tests/claude-code/analyze-token-usage.py
+ D .agents/skills/superpowers/tests/claude-code/run-skill-tests.sh
+ D .agents/skills/superpowers/tests/claude-code/test-helpers.sh
+ D .agents/skills/superpowers/tests/claude-code/test-sdd-workspace.sh
+ D .agents/skills/superpowers/tests/claude-code/test-subagent-driven-development-integration.sh
+ D .agents/skills/superpowers/tests/claude-code/test-subagent-driven-development.sh
+ D .agents/skills/superpowers/tests/claude-code/test-worktree-native-preference.sh
+ D .agents/skills/superpowers/tests/claude-code/test-worktree-path-policy.sh
+ D .agents/skills/superpowers/tests/codex-plugin-sync/test-sync-to-codex-plugin.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/action-oriented.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/after-planning-flow.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/claude-suggested-it.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/i-know-what-sdd-means.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/mid-conversation-execute-plan.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/please-use-brainstorming.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/skip-formalities.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/subagent-driven-development-please.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/use-systematic-debugging.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-all.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-extended-multiturn-test.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-haiku-test.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-multiturn-test.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-test.sh
+ D .agents/skills/superpowers/tests/hooks/test-session-start.sh
+ D .agents/skills/superpowers/tests/kimi/run-tests.sh
+ D .agents/skills/superpowers/tests/kimi/test-plugin-manifest.sh
+ D .agents/skills/superpowers/tests/opencode/run-tests.sh
+ D .agents/skills/superpowers/tests/opencode/setup.sh
+ D .agents/skills/superpowers/tests/opencode/test-bootstrap-caching.mjs
+ D .agents/skills/superpowers/tests/opencode/test-bootstrap-caching.sh
+ D .agents/skills/superpowers/tests/opencode/test-plugin-loading.sh
+ D .agents/skills/superpowers/tests/opencode/test-priority.sh
+ D .agents/skills/superpowers/tests/opencode/test-tools.sh
+ D .agents/skills/superpowers/tests/pi/test-pi-extension.mjs
+ D .agents/skills/superpowers/tests/shell-lint/test-lint-shell.sh
+ M .codex/skills/maintenance-qa/SKILL.md
+ M .codex/skills/maintenance-qa/scripts/maintenance_common.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_dependency.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_mutation.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_qa.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_security.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py
+ M .codex/skills/maintenance-qa/vulture.whitelist.py
+ M .codex/skills/quality-check/SKILL.md
+ M .codex/skills/quality-check/complexity-baseline.json
+ M .codex/skills/quality-check/complexity-thresholds.json
+ M .codex/skills/quality-check/scripts/code_quality_models.py
+ M .codex/skills/quality-check/scripts/code_quality_policy_audits.py
+ M .codex/skills/quality-check/scripts/quality_check.py
+ M .codex/skills/repo-hygiene/SKILL.md
+ M .codex/skills/repo-hygiene/scripts/hygiene.py
+ M .github/ISSUE_TEMPLATE/bug_report.md
+ M .github/workflows/ci.yml
+ M .github/workflows/upstream-watch.yml
+ M .python-version
+ M AGENTS.md
+ M CONTRIBUTING.md
+ M Ortho4XP.spec
+ M README.md
+ M RELEASE.md
+ M ROADMAP.md
+ M SECURITY.md
+ M TODO.md
+ M Utils/mac/7zz
+ D Utils/mac/numpy-2.4.4-cp313-cp313-macosx_11_0_arm64.whl
+ M Utils/win/7-zip.dll
+ M Utils/win/7z.dll
+ M Utils/win/7z.exe
+ D Utils/win/gdal-3.12.2-cp313-cp313-win_amd64.whl
+ D Utils/win/scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl
+ M install_mac.sh
+ M pyproject.toml
+ M src/O4_Color_Correction.py
+ M src/O4_Texture_Models.py
+ M tests/test_pyproject_build_backend.py
+ M tests/test_quality_check.py
+ M uv.lock
+?? .agents/plugins/
+?? .agents/skills/skills-first-start/
+?? .claude-plugin/
+?? .codex/config.toml
+?? .codex/skills/maintenance-qa/importlinter.ini
+?? .codex/skills/maintenance-qa/scripts/maintenance_import_graph.py
+?? .codex/skills/quality-check/scripts/complexity_check.py
+?? .pre-commit-config.yaml
+?? .skills-first/
+?? AGENTS.skills-first.md
+?? Utils/mac/numpy-2.5.4-cp314-cp314-macosx_11_0_arm64.whl
+?? Utils/win/gdal-3.13.3-cp314-cp314-win_amd64.whl
+?? Utils/win/scikit_fmm-2025.6.23-cp314-cp314-win_amd64.whl
+?? docs/agents/
+?? docs/dependency-refresh-2026-10-11.md
+?? docs/evidence/
+?? docs/superpowers/plans/2026-10-11-dependency-refresh.md
+?? docs/superpowers/plans/2026-10-11-skills-first-alignment.md
+?? docs/superpowers/specs/2026-10-11-skills-first-alignment-design.md
+?? scripts/check_skills_stack.py
+?? scripts/install_linux_gdal.sh
+?? tests/test_explicit_hygiene.py
+?? tests/test_runtime_metadata.py
+?? tests/test_skills_stack.py
+warning: in the working copy of '.codex/skills/quality-check/complexity-baseline.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of '.codex/skills/quality-check/complexity-thresholds.json', CRLF will be replaced by LF the next time Git touches it
+ .../superpowers/.claude-plugin/marketplace.json    |   20 -
+ .../skills/superpowers/.claude-plugin/plugin.json  |   20 -
+ .../skills/superpowers/.codex-plugin/plugin.json   |   48 -
+ .../skills/superpowers/.cursor-plugin/plugin.json  |   23 -
+ .agents/skills/superpowers/.gitattributes          |   18 -
+ .agents/skills/superpowers/.github/FUNDING.yml     |    3 -
+ .../.github/ISSUE_TEMPLATE/bug_report.md           |   55 -
+ .../superpowers/.github/ISSUE_TEMPLATE/config.yml  |    5 -
+ .../.github/ISSUE_TEMPLATE/feature_request.md      |   47 -
+ .../.github/ISSUE_TEMPLATE/platform_support.md     |   34 -
+ .../superpowers/.github/PULL_REQUEST_TEMPLATE.md   |  143 -
+ .agents/skills/superpowers/.gitignore              |   13 -
+ .../skills/superpowers/.kimi-plugin/plugin.json    |   38 -
+ .agents/skills/superpowers/.opencode/INSTALL.md    |  115 -
+ .../superpowers/.opencode/plugins/superpowers.js   |  139 -
+ .../superpowers/.pi/extensions/superpowers.ts      |  121 -
+ .agents/skills/superpowers/.pre-commit-config.yaml |   21 -
+ .agents/skills/superpowers/.version-bump.json      |   21 -
+ .agents/skills/superpowers/AGENTS.md               |    1 -
+ .agents/skills/superpowers/CLAUDE.md               |  115 -
+ .agents/skills/superpowers/CODE_OF_CONDUCT.md      |  128 -
+ .agents/skills/superpowers/GEMINI.md               |    2 -
+ .agents/skills/superpowers/LICENSE                 |   21 -
+ .agents/skills/superpowers/README.md               |  287 --
+ .agents/skills/superpowers/RELEASE-NOTES.md        | 1299 ------
+ .agents/skills/superpowers/SOURCE.md               |   19 -
+ .agents/skills/superpowers/assets/app-icon.png     |  Bin 48231 -> 0 bytes
+ .../superpowers/assets/superpowers-small.svg       |    1 -
+ .agents/skills/superpowers/docs/README.kimi.md     |   88 -
+ .agents/skills/superpowers/docs/README.opencode.md |  163 -
+ .../plans/2025-11-22-opencode-support-design.md    |  294 --
+ .../2025-11-22-opencode-support-implementation.md  | 1095 -----
+ ...11-28-skills-improvements-from-user-feedback.md |  711 ---
+ .../docs/plans/2026-01-17-visual-brainstorming.md  |  571 ---
+ .../superpowers/docs/porting-to-a-new-harness.md   |  826 ----
+ .../plans/2026-01-22-document-review-system.md     |  301 --
+ .../2026-02-19-visual-brainstorming-refactor.md    |  523 ---
+ .../plans/2026-03-11-zero-dep-brainstorm-server.md |  479 --
+ .../plans/2026-03-23-codex-app-compatibility.md    |  566 ---
+ .../plans/2026-04-06-worktree-rototill.md          |  866 ----
+ .../plans/2026-05-06-lift-drill-into-evals.md      | 1374 ------
+ .../plans/2026-05-07-pi-extension-and-evals.md     |  143 -
+ .../2026-06-09-sdd-task-scoped-review-dispatch.md  |  774 ---
+ .../plans/2026-06-09-visual-companion-issues.md    |  352 --
+ .../2026-06-10-visual-companion-auth-hardening.md  |  785 ----
+ ...06-11-visual-companion-final-hardening-fixup.md | 1126 -----
+ .../2026-01-22-document-review-system-design.md    |  136 -
+ ...6-02-19-visual-brainstorming-refactor-design.md |  162 -
+ ...2026-03-11-zero-dep-brainstorm-server-design.md |  118 -
+ .../2026-03-23-codex-app-compatibility-design.md   |  244 -
+ .../specs/2026-04-06-worktree-rototill-design.md   |  341 --
+ ...26-05-05-platform-neutral-config-refs-design.md |   77 -
+ .../2026-05-05-platform-neutral-prose-design.md    |   94 -
+ .../2026-05-05-platform-neutral-readme-design.md   |   47 -
+ .../2026-05-06-lift-drill-into-evals-design.md     |  247 -
+ ...06-09-sdd-task-scoped-review-dispatch-design.md |  160 -
+ ...6-06-10-positive-instruction-redesign-design.md |  178 -
+ .../specs/2026-06-10-strict-cost-sdd-design.md     |  265 --
+ ...06-10-visual-companion-auth-hardening-design.md |  225 -
+ ...isual-companion-final-hardening-fixup-design.md |  254 -
+ .agents/skills/superpowers/docs/testing.md         |   35 -
+ .../superpowers/docs/windows/polyglot-hooks.md     |  148 -
+ .agents/skills/superpowers/gemini-extension.json   |    6 -
+ .agents/skills/superpowers/hooks/hooks-codex.json  |   16 -
+ .agents/skills/superpowers/hooks/hooks-cursor.json |   10 -
+ .agents/skills/superpowers/hooks/hooks.json        |   16 -
+ .agents/skills/superpowers/hooks/run-hook.cmd      |   46 -
+ .agents/skills/superpowers/hooks/session-start     |   49 -
+ .../skills/superpowers/hooks/session-start-codex   |   26 -
+ .agents/skills/superpowers/package.json            |   23 -
+ .agents/skills/superpowers/scripts/bump-version.sh |  220 -
+ .agents/skills/superpowers/scripts/lint-shell.sh   |  211 -
+ .../superpowers/scripts/sync-to-codex-plugin.sh    |  466 --
+ .../superpowers/skills/brainstorming/SKILL.md      |  159 -
+ .../brainstorming/scripts/frame-template.html      |  213 -
+ .../skills/brainstorming/scripts/helper.js         |  167 -
+ .../skills/brainstorming/scripts/server.cjs        |  723 ---
+ .../skills/brainstorming/scripts/start-server.sh   |  209 -
+ .../skills/brainstorming/scripts/stop-server.sh    |  120 -
+ .../brainstorming/spec-document-reviewer-prompt.md |   49 -
+ .../skills/brainstorming/visual-companion.md       |  298 --
+ .../skills/dispatching-parallel-agents/SKILL.md    |  185 -
+ .../superpowers/skills/executing-plans/SKILL.md    |   70 -
+ .../skills/finishing-a-development-branch/SKILL.md |  241 -
+ .../skills/receiving-code-review/SKILL.md          |  213 -
+ .../skills/requesting-code-review/SKILL.md         |  103 -
+ .../skills/requesting-code-review/code-reviewer.md |  172 -
+ .../skills/subagent-driven-development/SKILL.md    |  418 --
+ .../implementer-prompt.md                          |  139 -
+ .../scripts/review-package                         |   44 -
+ .../scripts/sdd-workspace                          |   22 -
+ .../subagent-driven-development/scripts/task-brief |   40 -
+ .../task-reviewer-prompt.md                        |  188 -
+ .../skills/systematic-debugging/CREATION-LOG.md    |  119 -
+ .../skills/systematic-debugging/SKILL.md           |  296 --
+ .../condition-based-waiting-example.ts             |  158 -
+ .../condition-based-waiting.md                     |  115 -
+ .../systematic-debugging/defense-in-depth.md       |  122 -
+ .../skills/systematic-debugging/find-polluter.sh   |   63 -
+ .../systematic-debugging/root-cause-tracing.md     |  169 -
+ .../skills/systematic-debugging/test-academic.md   |   14 -
+ .../skills/systematic-debugging/test-pressure-1.md |   58 -
+ .../skills/systematic-debugging/test-pressure-2.md |   68 -
+ .../skills/systematic-debugging/test-pressure-3.md |   69 -
+ .../skills/test-driven-development/SKILL.md        |  371 --
+ .../testing-anti-patterns.md                       |  299 --
+ .../skills/using-git-worktrees/SKILL.md            |  202 -
+ .../superpowers/skills/using-superpowers/SKILL.md  |  121 -
+ .../references/antigravity-tools.md                |   96 -
+ .../references/claude-code-tools.md                |   50 -
+ .../using-superpowers/references/codex-tools.md    |   72 -
+ .../using-superpowers/references/copilot-tools.md  |   49 -
+ .../using-superpowers/references/gemini-tools.md   |   63 -
+ .../using-superpowers/references/pi-tools.md       |   28 -
+ .../skills/verification-before-completion/SKILL.md |  139 -
+ .../superpowers/skills/writing-plans/SKILL.md      |  174 -
+ .../writing-plans/plan-document-reviewer-prompt.md |   49 -
+ .../superpowers/skills/writing-skills/SKILL.md     |  689 ---
+ .../writing-skills/anthropic-best-practices.md     | 1150 -----
+ .../writing-skills/examples/CLAUDE_MD_TESTING.md   |  189 -
+ .../skills/writing-skills/graphviz-conventions.dot |  172 -
+ .../skills/writing-skills/persuasion-principles.md |  187 -
+ .../skills/writing-skills/render-graphs.js         |  168 -
+ .../testing-skills-with-subagents.md               |  384 --
+ .../superpowers/tests/antigravity/run-tests.sh     |   16 -
+ .../tests/antigravity/test-antigravity-tools.sh    |   53 -
+ .../tests/brainstorm-server/auth.test.js           |  312 --
+ .../tests/brainstorm-server/branding.test.js       |  344 --
+ .../brainstorm-server/browser-launcher.test.js     |   66 -
+ .../tests/brainstorm-server/helper.test.js         |  197 -
+ .../tests/brainstorm-server/lifecycle.test.js      |  515 --
+ .../tests/brainstorm-server/package-lock.json      |   36 -
+ .../tests/brainstorm-server/package.json           |   10 -
+ .../tests/brainstorm-server/server.test.js         |  592 ---
+ .../tests/brainstorm-server/start-server.test.sh   |  115 -
+ .../tests/brainstorm-server/stop-server.test.sh    |  182 -
+ .../brainstorm-server/windows-lifecycle.test.sh    |  394 --
+ .../tests/brainstorm-server/ws-protocol.test.js    |  407 --
+ .../skills/superpowers/tests/claude-code/README.md |  165 -
+ .../tests/claude-code/analyze-token-usage.py       |  216 -
+ .../tests/claude-code/run-skill-tests.sh           |  189 -
+ .../superpowers/tests/claude-code/test-helpers.sh  |  202 -
+ .../tests/claude-code/test-sdd-workspace.sh        |  142 -
+ ...test-subagent-driven-development-integration.sh |  333 --
+ .../test-subagent-driven-development.sh            |  179 -
+ .../claude-code/test-worktree-native-preference.sh |  181 -
+ .../tests/claude-code/test-worktree-path-policy.sh |   69 -
+ .../codex-plugin-sync/test-sync-to-codex-plugin.sh |  738 ---
+ .../prompts/action-oriented.txt                    |    3 -
+ .../prompts/after-planning-flow.txt                |   17 -
+ .../prompts/claude-suggested-it.txt                |   11 -
+ .../prompts/i-know-what-sdd-means.txt              |    8 -
+ .../prompts/mid-conversation-execute-plan.txt      |    3 -
+ .../prompts/please-use-brainstorming.txt           |    1 -
+ .../prompts/skip-formalities.txt                   |    3 -
+ .../prompts/subagent-driven-development-please.txt |    1 -
+ .../prompts/use-systematic-debugging.txt           |    1 -
+ .../tests/explicit-skill-requests/run-all.sh       |   70 -
+ .../run-extended-multiturn-test.sh                 |  113 -
+ .../explicit-skill-requests/run-haiku-test.sh      |  144 -
+ .../explicit-skill-requests/run-multiturn-test.sh  |  143 -
+ .../tests/explicit-skill-requests/run-test.sh      |  136 -
+ .../superpowers/tests/hooks/test-session-start.sh  |  240 -
+ .agents/skills/superpowers/tests/kimi/run-tests.sh |    6 -
+ .../superpowers/tests/kimi/test-plugin-manifest.sh |   86 -
+ .../skills/superpowers/tests/opencode/run-tests.sh |  165 -
+ .agents/skills/superpowers/tests/opencode/setup.sh |   88 -
+ .../tests/opencode/test-bootstrap-caching.mjs      |  146 -
+ .../tests/opencode/test-bootstrap-caching.sh       |   32 -
+ .../tests/opencode/test-plugin-loading.sh          |   82 -
+ .../superpowers/tests/opencode/test-priority.sh    |  217 -
+ .../superpowers/tests/opencode/test-tools.sh       |   95 -
+ .../superpowers/tests/pi/test-pi-extension.mjs     |  128 -
+ .../tests/shell-lint/test-lint-shell.sh            |  179 -
+ .codex/skills/maintenance-qa/SKILL.md              |  138 +-
+ .../maintenance-qa/scripts/maintenance_common.py   |   41 +-
+ .../scripts/maintenance_dead_code.py               |   29 +-
+ .../scripts/maintenance_dependency.py              |  184 +-
+ .../scripts/maintenance_docstrings.py              |   48 +-
+ .../maintenance-qa/scripts/maintenance_mutation.py |  140 +-
+ .../maintenance-qa/scripts/maintenance_qa.py       |  154 +-
+ .../maintenance-qa/scripts/maintenance_security.py |   52 +-
+ .../scripts/maintenance_test_coverage.py           |   86 +-
+ .codex/skills/maintenance-qa/vulture.whitelist.py  |   30 +-
+ .codex/skills/quality-check/SKILL.md               |   89 +-
+ .../skills/quality-check/complexity-baseline.json  | 4928 --------------------
+ .../quality-check/complexity-thresholds.json       |   46 +-
+ .../quality-check/scripts/code_quality_models.py   |    2 +-
+ .../scripts/code_quality_policy_audits.py          |    2 +-
+ .../skills/quality-check/scripts/quality_check.py  |  593 ++-
+ .codex/skills/repo-hygiene/SKILL.md                |   78 +-
+ .codex/skills/repo-hygiene/scripts/hygiene.py      |    2 -
+ .github/ISSUE_TEMPLATE/bug_report.md               |    2 +-
+ .github/workflows/ci.yml                           |   66 +-
+ .github/workflows/upstream-watch.yml               |    2 +-
+ .python-version                                    |    2 +-
+ AGENTS.md                                          |   20 +-
+ CONTRIBUTING.md                                    |   32 +-
+ Ortho4XP.spec                                      |    9 +-
+ README.md                                          |    2 +-
+ RELEASE.md                                         |   42 +-
+ ROADMAP.md                                         |    2 +-
+ SECURITY.md                                        |   50 +-
+ TODO.md                                            |    2 +-
+ Utils/mac/7zz                                      |  Bin 5648032 -> 6051824 bytes
+ .../numpy-2.4.4-cp313-cp313-macosx_11_0_arm64.whl  |  Bin 14694532 -> 0 bytes
+ Utils/win/7-zip.dll                                |  Bin 101888 -> 101888 bytes
+ Utils/win/7z.dll                                   |  Bin 1908736 -> 1907712 bytes
+ Utils/win/7z.exe                                   |  Bin 576512 -> 577536 bytes
+ Utils/win/gdal-3.12.2-cp313-cp313-win_amd64.whl    |  Bin 47861371 -> 0 bytes
+ .../scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl |  Bin 68454 -> 0 bytes
+ install_mac.sh                                     |   13 +-
+ pyproject.toml                                     |   65 +-
+ src/O4_Color_Correction.py                         |    2 +-
+ src/O4_Texture_Models.py                           |    6 +-
+ tests/test_pyproject_build_backend.py              |   13 +-
+ tests/test_quality_check.py                        |  134 +
+ uv.lock                                            | 1835 +++++---
+ 218 files changed, 2640 insertions(+), 41362 deletions(-)
+Resolved 96 packages in 3ms
+Checked 39 packages in 1ms
+Skills stack sources and project configuration are coherent.
+Native installation and fresh-session discovery require separate evidence.
+-> No water triangles detected; skipping XP12 bathymetry input
+-> Reading mesh file
+-> Adapting water triangles to XP12 requirements
+-> Computing bathymetry depth ratio bounds based on distance masks
+CFG error: water_tech='XP11 + bathy' is no longer supported; set water_tech=XP12.
+Lizard contract: passed; aggregate={}; errors=[]
+........................................................................................................................................................................................................................................................................................................................................................................................usage: scenery add [-h] target [lon]
+scenery add: error: the following arguments are required: target
+.usage: scenery [-h] {add,remove,list,reorder,validate} ...
+scenery: error: argument command: invalid choice: 'unknown' (choose from 'add', 'remove', 'list', 'reorder', 'validate')
+..usage: scenery remove [-h] target [lon]
+scenery remove: error: the following arguments are required: target
+...............................................................................................................................................................................upstream-watch interrupted
+....................................
+----------------------------------------------------------------------
+Ran 590 tests in 16.296s
+
+OK
+Lizard contract: error; aggregate={}; errors=['unsupported fixture']
+Complexity measurement error: unsupported fixture
+Cohesion percentage policy unverified: 1 class measurements retained.
+usage: scenery [-h] {add,remove,list,reorder,validate} ...
+
+positional arguments:
+  {add,remove,list,reorder,validate}
+    add                 Add a tile or overlay to scenery
+    remove              Remove a tile or overlay from scenery
+    list                List Ortho4XP entries in scenery_packs.ini
+    reorder             Reorder Ortho4XP entries in scenery_packs.ini
+    validate            Validate scenery_packs.ini ordering
+
+options:
+  -h, --help            show this help message and exit
+Error: custom_scenery_dir is not set in config.
+Error: custom_scenery_dir is not set in config.
+Error: custom_scenery_dir is not set in config.
+Wrote ypsos-aaaaaaaaaaaa-bbbbbbbbbbbb: 0 commits, 0 changed paths, digest de904a9698520d5719dfd1dd6b149c3254c54e5ccd6f21527797f9501537ef33
+author=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa passive=9999999999999999999999999999999999999999 fork=behind status=0
+All checks passed!
+All checks passed!
+40 files already formatted
+All checks passed!
+warning: in the working copy of '.codex/skills/quality-check/complexity-baseline.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of '.codex/skills/quality-check/complexity-thresholds.json', CRLF will be replaced by LF the next time Git touches it
+ D .agents/skills/superpowers/.claude-plugin/marketplace.json
+ D .agents/skills/superpowers/.claude-plugin/plugin.json
+ D .agents/skills/superpowers/.codex-plugin/plugin.json
+ D .agents/skills/superpowers/.cursor-plugin/plugin.json
+ D .agents/skills/superpowers/.gitattributes
+ D .agents/skills/superpowers/.github/FUNDING.yml
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/bug_report.md
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/config.yml
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/feature_request.md
+ D .agents/skills/superpowers/.github/ISSUE_TEMPLATE/platform_support.md
+ D .agents/skills/superpowers/.github/PULL_REQUEST_TEMPLATE.md
+ D .agents/skills/superpowers/.gitignore
+ D .agents/skills/superpowers/.kimi-plugin/plugin.json
+ D .agents/skills/superpowers/.opencode/INSTALL.md
+ D .agents/skills/superpowers/.opencode/plugins/superpowers.js
+ D .agents/skills/superpowers/.pi/extensions/superpowers.ts
+ D .agents/skills/superpowers/.pre-commit-config.yaml
+ D .agents/skills/superpowers/.version-bump.json
+ D .agents/skills/superpowers/AGENTS.md
+ D .agents/skills/superpowers/CLAUDE.md
+ D .agents/skills/superpowers/CODE_OF_CONDUCT.md
+ D .agents/skills/superpowers/GEMINI.md
+ D .agents/skills/superpowers/LICENSE
+ D .agents/skills/superpowers/README.md
+ D .agents/skills/superpowers/RELEASE-NOTES.md
+ D .agents/skills/superpowers/SOURCE.md
+ D .agents/skills/superpowers/assets/app-icon.png
+ D .agents/skills/superpowers/assets/superpowers-small.svg
+ D .agents/skills/superpowers/docs/README.kimi.md
+ D .agents/skills/superpowers/docs/README.opencode.md
+ D .agents/skills/superpowers/docs/plans/2025-11-22-opencode-support-design.md
+ D .agents/skills/superpowers/docs/plans/2025-11-22-opencode-support-implementation.md
+ D .agents/skills/superpowers/docs/plans/2025-11-28-skills-improvements-from-user-feedback.md
+ D .agents/skills/superpowers/docs/plans/2026-01-17-visual-brainstorming.md
+ D .agents/skills/superpowers/docs/porting-to-a-new-harness.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-01-22-document-review-system.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-02-19-visual-brainstorming-refactor.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-03-11-zero-dep-brainstorm-server.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-03-23-codex-app-compatibility.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-04-06-worktree-rototill.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-05-06-lift-drill-into-evals.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-05-07-pi-extension-and-evals.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-09-sdd-task-scoped-review-dispatch.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-09-visual-companion-issues.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-10-visual-companion-auth-hardening.md
+ D .agents/skills/superpowers/docs/superpowers/plans/2026-06-11-visual-companion-final-hardening-fixup.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-01-22-document-review-system-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-02-19-visual-brainstorming-refactor-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-03-11-zero-dep-brainstorm-server-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-03-23-codex-app-compatibility-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-04-06-worktree-rototill-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-05-platform-neutral-config-refs-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-05-platform-neutral-prose-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-05-platform-neutral-readme-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-05-06-lift-drill-into-evals-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-09-sdd-task-scoped-review-dispatch-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-10-positive-instruction-redesign-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-10-strict-cost-sdd-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-10-visual-companion-auth-hardening-design.md
+ D .agents/skills/superpowers/docs/superpowers/specs/2026-06-11-visual-companion-final-hardening-fixup-design.md
+ D .agents/skills/superpowers/docs/testing.md
+ D .agents/skills/superpowers/docs/windows/polyglot-hooks.md
+ D .agents/skills/superpowers/gemini-extension.json
+ D .agents/skills/superpowers/hooks/hooks-codex.json
+ D .agents/skills/superpowers/hooks/hooks-cursor.json
+ D .agents/skills/superpowers/hooks/hooks.json
+ D .agents/skills/superpowers/hooks/run-hook.cmd
+ D .agents/skills/superpowers/hooks/session-start
+ D .agents/skills/superpowers/hooks/session-start-codex
+ D .agents/skills/superpowers/package.json
+ D .agents/skills/superpowers/scripts/bump-version.sh
+ D .agents/skills/superpowers/scripts/lint-shell.sh
+ D .agents/skills/superpowers/scripts/sync-to-codex-plugin.sh
+ D .agents/skills/superpowers/skills/brainstorming/SKILL.md
+ D .agents/skills/superpowers/skills/brainstorming/scripts/frame-template.html
+ D .agents/skills/superpowers/skills/brainstorming/scripts/helper.js
+ D .agents/skills/superpowers/skills/brainstorming/scripts/server.cjs
+ D .agents/skills/superpowers/skills/brainstorming/scripts/start-server.sh
+ D .agents/skills/superpowers/skills/brainstorming/scripts/stop-server.sh
+ D .agents/skills/superpowers/skills/brainstorming/spec-document-reviewer-prompt.md
+ D .agents/skills/superpowers/skills/brainstorming/visual-companion.md
+ D .agents/skills/superpowers/skills/dispatching-parallel-agents/SKILL.md
+ D .agents/skills/superpowers/skills/executing-plans/SKILL.md
+ D .agents/skills/superpowers/skills/finishing-a-development-branch/SKILL.md
+ D .agents/skills/superpowers/skills/receiving-code-review/SKILL.md
+ D .agents/skills/superpowers/skills/requesting-code-review/SKILL.md
+ D .agents/skills/superpowers/skills/requesting-code-review/code-reviewer.md
+ D .agents/skills/superpowers/skills/subagent-driven-development/SKILL.md
+ D .agents/skills/superpowers/skills/subagent-driven-development/implementer-prompt.md
+ D .agents/skills/superpowers/skills/subagent-driven-development/scripts/review-package
+ D .agents/skills/superpowers/skills/subagent-driven-development/scripts/sdd-workspace
+ D .agents/skills/superpowers/skills/subagent-driven-development/scripts/task-brief
+ D .agents/skills/superpowers/skills/subagent-driven-development/task-reviewer-prompt.md
+ D .agents/skills/superpowers/skills/systematic-debugging/CREATION-LOG.md
+ D .agents/skills/superpowers/skills/systematic-debugging/SKILL.md
+ D .agents/skills/superpowers/skills/systematic-debugging/condition-based-waiting-example.ts
+ D .agents/skills/superpowers/skills/systematic-debugging/condition-based-waiting.md
+ D .agents/skills/superpowers/skills/systematic-debugging/defense-in-depth.md
+ D .agents/skills/superpowers/skills/systematic-debugging/find-polluter.sh
+ D .agents/skills/superpowers/skills/systematic-debugging/root-cause-tracing.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-academic.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-pressure-1.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-pressure-2.md
+ D .agents/skills/superpowers/skills/systematic-debugging/test-pressure-3.md
+ D .agents/skills/superpowers/skills/test-driven-development/SKILL.md
+ D .agents/skills/superpowers/skills/test-driven-development/testing-anti-patterns.md
+ D .agents/skills/superpowers/skills/using-git-worktrees/SKILL.md
+ D .agents/skills/superpowers/skills/using-superpowers/SKILL.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/antigravity-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/claude-code-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/codex-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/copilot-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/gemini-tools.md
+ D .agents/skills/superpowers/skills/using-superpowers/references/pi-tools.md
+ D .agents/skills/superpowers/skills/verification-before-completion/SKILL.md
+ D .agents/skills/superpowers/skills/writing-plans/SKILL.md
+ D .agents/skills/superpowers/skills/writing-plans/plan-document-reviewer-prompt.md
+ D .agents/skills/superpowers/skills/writing-skills/SKILL.md
+ D .agents/skills/superpowers/skills/writing-skills/anthropic-best-practices.md
+ D .agents/skills/superpowers/skills/writing-skills/examples/CLAUDE_MD_TESTING.md
+ D .agents/skills/superpowers/skills/writing-skills/graphviz-conventions.dot
+ D .agents/skills/superpowers/skills/writing-skills/persuasion-principles.md
+ D .agents/skills/superpowers/skills/writing-skills/render-graphs.js
+ D .agents/skills/superpowers/skills/writing-skills/testing-skills-with-subagents.md
+ D .agents/skills/superpowers/tests/antigravity/run-tests.sh
+ D .agents/skills/superpowers/tests/antigravity/test-antigravity-tools.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/auth.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/branding.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/browser-launcher.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/helper.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/lifecycle.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/package-lock.json
+ D .agents/skills/superpowers/tests/brainstorm-server/package.json
+ D .agents/skills/superpowers/tests/brainstorm-server/server.test.js
+ D .agents/skills/superpowers/tests/brainstorm-server/start-server.test.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/stop-server.test.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/windows-lifecycle.test.sh
+ D .agents/skills/superpowers/tests/brainstorm-server/ws-protocol.test.js
+ D .agents/skills/superpowers/tests/claude-code/README.md
+ D .agents/skills/superpowers/tests/claude-code/analyze-token-usage.py
+ D .agents/skills/superpowers/tests/claude-code/run-skill-tests.sh
+ D .agents/skills/superpowers/tests/claude-code/test-helpers.sh
+ D .agents/skills/superpowers/tests/claude-code/test-sdd-workspace.sh
+ D .agents/skills/superpowers/tests/claude-code/test-subagent-driven-development-integration.sh
+ D .agents/skills/superpowers/tests/claude-code/test-subagent-driven-development.sh
+ D .agents/skills/superpowers/tests/claude-code/test-worktree-native-preference.sh
+ D .agents/skills/superpowers/tests/claude-code/test-worktree-path-policy.sh
+ D .agents/skills/superpowers/tests/codex-plugin-sync/test-sync-to-codex-plugin.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/action-oriented.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/after-planning-flow.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/claude-suggested-it.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/i-know-what-sdd-means.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/mid-conversation-execute-plan.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/please-use-brainstorming.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/skip-formalities.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/subagent-driven-development-please.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/prompts/use-systematic-debugging.txt
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-all.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-extended-multiturn-test.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-haiku-test.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-multiturn-test.sh
+ D .agents/skills/superpowers/tests/explicit-skill-requests/run-test.sh
+ D .agents/skills/superpowers/tests/hooks/test-session-start.sh
+ D .agents/skills/superpowers/tests/kimi/run-tests.sh
+ D .agents/skills/superpowers/tests/kimi/test-plugin-manifest.sh
+ D .agents/skills/superpowers/tests/opencode/run-tests.sh
+ D .agents/skills/superpowers/tests/opencode/setup.sh
+ D .agents/skills/superpowers/tests/opencode/test-bootstrap-caching.mjs
+ D .agents/skills/superpowers/tests/opencode/test-bootstrap-caching.sh
+ D .agents/skills/superpowers/tests/opencode/test-plugin-loading.sh
+ D .agents/skills/superpowers/tests/opencode/test-priority.sh
+ D .agents/skills/superpowers/tests/opencode/test-tools.sh
+ D .agents/skills/superpowers/tests/pi/test-pi-extension.mjs
+ D .agents/skills/superpowers/tests/shell-lint/test-lint-shell.sh
+ M .codex/skills/maintenance-qa/SKILL.md
+ M .codex/skills/maintenance-qa/scripts/maintenance_common.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_dependency.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_mutation.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_qa.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_security.py
+ M .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py
+ M .codex/skills/maintenance-qa/vulture.whitelist.py
+ M .codex/skills/quality-check/SKILL.md
+ M .codex/skills/quality-check/complexity-baseline.json
+ M .codex/skills/quality-check/complexity-thresholds.json
+ M .codex/skills/quality-check/scripts/code_quality_models.py
+ M .codex/skills/quality-check/scripts/code_quality_policy_audits.py
+ M .codex/skills/quality-check/scripts/quality_check.py
+ M .codex/skills/repo-hygiene/SKILL.md
+ M .codex/skills/repo-hygiene/scripts/hygiene.py
+ M .github/ISSUE_TEMPLATE/bug_report.md
+ M .github/workflows/ci.yml
+ M .github/workflows/upstream-watch.yml
+ M .python-version
+ M AGENTS.md
+ M CONTRIBUTING.md
+ M Ortho4XP.spec
+ M README.md
+ M RELEASE.md
+ M ROADMAP.md
+ M SECURITY.md
+ M TODO.md
+ M Utils/mac/7zz
+ D Utils/mac/numpy-2.4.4-cp313-cp313-macosx_11_0_arm64.whl
+ M Utils/win/7-zip.dll
+ M Utils/win/7z.dll
+ M Utils/win/7z.exe
+ D Utils/win/gdal-3.12.2-cp313-cp313-win_amd64.whl
+ D Utils/win/scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl
+ M install_mac.sh
+ M pyproject.toml
+ M src/O4_Color_Correction.py
+ M src/O4_Texture_Models.py
+ M tests/test_pyproject_build_backend.py
+ M tests/test_quality_check.py
+ M uv.lock
+?? .agents/plugins/
+?? .agents/skills/skills-first-start/
+?? .claude-plugin/
+?? .codex/config.toml
+?? .codex/skills/maintenance-qa/importlinter.ini
+?? .codex/skills/maintenance-qa/scripts/maintenance_import_graph.py
+?? .codex/skills/quality-check/scripts/complexity_check.py
+?? .pre-commit-config.yaml
+?? .skills-first/
+?? AGENTS.skills-first.md
+?? Utils/mac/numpy-2.5.4-cp314-cp314-macosx_11_0_arm64.whl
+?? Utils/win/gdal-3.13.3-cp314-cp314-win_amd64.whl
+?? Utils/win/scikit_fmm-2025.6.23-cp314-cp314-win_amd64.whl
+?? docs/agents/
+?? docs/dependency-refresh-2026-10-11.md
+?? docs/evidence/
+?? docs/superpowers/plans/2026-10-11-dependency-refresh.md
+?? docs/superpowers/plans/2026-10-11-skills-first-alignment.md
+?? docs/superpowers/specs/2026-10-11-skills-first-alignment-design.md
+?? scripts/check_skills_stack.py
+?? scripts/install_linux_gdal.sh
+?? tests/test_explicit_hygiene.py
+?? tests/test_runtime_metadata.py
+?? tests/test_skills_stack.py
++ git status --short --branch
++ git diff --stat
++ git diff --cached --stat
++ uv sync --dev
++ uv run python scripts/check_skills_stack.py
++ uv run python -m unittest discover -s tests
++ uv run ruff check Ortho4XP.py src tests .codex/skills/quality-check/scripts .codex/skills/repo-hygiene/scripts/hygiene.py .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts scripts/check_skills_stack.py
++ uv run ty check tests src/O4_Geo_Utils.py src/O4_File_Names.py
++ git diff --name-only --diff-filter=ACMRTUXB HEAD -- *.py
++ git ls-files --others --exclude-standard -- *.py
++ uv run ruff format --check .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/maintenance-qa/vulture.whitelist.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py src/O4_Color_Correction.py src/O4_Texture_Models.py tests/test_pyproject_build_backend.py tests/test_quality_check.py .codex/skills/maintenance-qa/scripts/maintenance_import_graph.py .codex/skills/quality-check/scripts/complexity_check.py scripts/check_skills_stack.py tests/test_explicit_hygiene.py tests/test_runtime_metadata.py tests/test_skills_stack.py .codex/skills/quality-check/scripts .codex/skills/git-sync/scripts/git_sync.py .codex/skills/maintenance-qa/scripts
++ uv run ty check .codex/skills/maintenance-qa/scripts/maintenance_common.py .codex/skills/maintenance-qa/scripts/maintenance_dead_code.py .codex/skills/maintenance-qa/scripts/maintenance_dependency.py .codex/skills/maintenance-qa/scripts/maintenance_docstrings.py .codex/skills/maintenance-qa/scripts/maintenance_mutation.py .codex/skills/maintenance-qa/scripts/maintenance_qa.py .codex/skills/maintenance-qa/scripts/maintenance_security.py .codex/skills/maintenance-qa/scripts/maintenance_test_coverage.py .codex/skills/maintenance-qa/vulture.whitelist.py .codex/skills/quality-check/scripts/code_quality_models.py .codex/skills/quality-check/scripts/code_quality_policy_audits.py .codex/skills/quality-check/scripts/quality_check.py .codex/skills/repo-hygiene/scripts/hygiene.py src/O4_Color_Correction.py src/O4_Texture_Models.py tests/test_pyproject_build_backend.py tests/test_quality_check.py .codex/skills/maintenance-qa/scripts/maintenance_import_graph.py .codex/skills/quality-check/scripts/complexity_check.py scripts/check_skills_stack.py tests/test_explicit_hygiene.py tests/test_runtime_metadata.py tests/test_skills_stack.py
++ git diff --check
+Code quality findings: warnings=19 blocks=0 (module soft>600, hard>1000; class>300)
+  WARN module_size .codex/skills/quality-check/scripts/quality_check.py - Module spans 908 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Airport_Discovery.py - Module spans 663 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Config_Utils.py - Module spans 1632 lines (>1000) under waiver: Legacy config persistence and GUI bridge module; schema split tracked separately.
+  WARN module_size src/O4_DEM_Utils.py - Module spans 913 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_DSF_Utils.py - Module spans 1217 lines (>1000) under waiver: Legacy DSF writer module; phased extraction tracked separately.
+  WARN module_size src/O4_GUI_Utils.py - Module spans 2294 lines (>1000) under waiver: Legacy Tk GUI module; GUI modernization tracked separately.
+  WARN module_size src/O4_Imagery_Utils.py - Module spans 2580 lines (>1000) under waiver: Legacy imagery pipeline module; provider/imagery extraction tracked separately.
+  WARN module_size src/O4_Mask_Utils.py - Module spans 1016 lines (>1000) under waiver: Legacy mask-generation module; extraction tracked separately.
+  WARN module_size src/O4_Mesh_Utils.py - Module spans 868 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_OSM_Utils.py - Module spans 778 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Vector_Map.py - Module spans 909 lines (>600); watch for file-scale drift.
+  WARN module_size src/O4_Vector_Utils.py - Module spans 1336 lines (>1000) under waiver: Legacy vector geometry module; extraction tracked separately.
+  WARN module_size tests/test_texture_artifact_finalizer.py - Module spans 642 lines (>600); watch for file-scale drift.
+  WARN class_size src/O4_Config_Utils.py:346 - Class `Ortho4XP_Config` spans 1266 lines (>300) under waiver: Legacy mutable config aggregate; schema/model migration is tracked separately.
+  WARN class_size src/O4_GUI_Utils.py:106 - Class `Ortho4XP_GUI` spans 667 lines (>300) under waiver: Legacy Tk application shell; GUI modernization is tracked separately.
+  WARN class_size src/O4_GUI_Utils.py:776 - Class `Ortho4XP_Custom_ZL` spans 585 lines (>300) under waiver: Legacy Tk custom-zoom editor; GUI modernization is tracked separately.
+  WARN class_size src/O4_GUI_Utils.py:1364 - Class `Ortho4XP_Earth_Preview` spans 931 lines (>300) under waiver: Legacy Tk preview controller; GUI modernization is tracked separately.
+  WARN class_size src/O4_OSM_Utils.py:43 - Class `OSM_layer` spans 354 lines (>300) under waiver: Legacy OSM layer accumulator; OSM pipeline split is tracked separately.
+  WARN class_size src/O4_Vector_Utils.py:45 - Class `Vector_Map` spans 568 lines (>300) under waiver: Legacy vector-map aggregate; vector pipeline split is tracked separately.
++ C:\Program Files\LLVM\bin\clang-tidy.EXE --verify-config
++ cmake --fresh --preset llvm-release -S Utils
++ C:\Program Files\LLVM\bin\clang-tidy.EXE -p U:\repos\xp\Ortho4XP\Utils\build\llvm-release --quiet Utils/src/Triangle4XP.c
++ C:\Program Files\LLVM\bin\clang-tidy.EXE -p U:\repos\xp\Ortho4XP\Utils\build\llvm-release --quiet Utils/src/triangle.c
++ cmake --build Utils/build/llvm-release
++ git status --short

@@ -1,0 +1,47 @@
+{
+  "name": "ortho4xp-skills-first",
+  "interface": {
+    "displayName": "Skills-first development stack"
+  },
+  "plugins": [
+    {
+      "name": "superpowers",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/obra/superpowers.git",
+        "ref": "bb92a77741419a4ab5f06e711a283343f1ada0c3"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "superpowers-backplane",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/tvproductions/superpowers-backplane.git",
+        "ref": "d0eeee829c491da02351e793544aa16ad96461bf"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "gz-skills",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/tvproductions/gz-skills.git",
+        "ref": "e722e808647481c4c9d2feab61f1843aa8e0b19a"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

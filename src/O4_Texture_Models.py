@@ -66,7 +66,7 @@ class TextureConversionResult:
     @classmethod
     def success(
         cls, display_name: str, provider_code: str = ""
-    ) -> "TextureConversionResult":
+    ) -> TextureConversionResult:
         return cls(True, display_name, provider_code)
 
     @classmethod
@@ -75,13 +75,13 @@ class TextureConversionResult:
         display_name: str,
         provider_code: str = "",
         error_summary: str = "",
-    ) -> "TextureConversionResult":
+    ) -> TextureConversionResult:
         return cls(False, display_name, provider_code, error_summary)
 
     @classmethod
     def from_encode_result(
         cls, encode_result: TextureEncodeResult
-    ) -> "TextureConversionResult":
+    ) -> TextureConversionResult:
         request = encode_result.request
         return cls(
             encode_result.ok,

@@ -32,9 +32,9 @@ Update all three locations together when bumping versions. For SemVer:
 
 ### All Platforms
 
-- Python 3.13+
+- Python 3.14.x (the current patch is pinned in `.python-version`)
 - `uv` for dependency management
-- PyInstaller: `uv pip install pyinstaller` (dev dependency or ad hoc install)
+- Project-locked PyInstaller: `uv sync --group release`
 
 ### Windows
 
@@ -49,7 +49,9 @@ Update all three locations together when bumping versions. For SemVer:
 
 ### Ubuntu
 
-- System packages: `sudo apt-get install clang clang-format clang-tidy cmake gdal-bin lld libgdal-dev libspatialindex-dev ninja-build python3-tk`
+- Install the native prerequisites and checksum-verified GDAL 3.13.3 source
+  bootstrap described in [CONTRIBUTING.md](CONTRIBUTING.md). The native GDAL
+  library must match the Python bindings before synchronizing the environment.
 
 ## Native Tool Production
 
@@ -94,13 +96,13 @@ Each platform directory contains pre-built or third-party executables:
 - `DSFTool.exe` (X-Plane SDK)
 - `7z.exe`, `7z.dll`, `7-zip.dll` (7-Zip)
 - `moulinette.exe`, `medit-2.3-win.exe` (mesh tools)
-- `gdal-3.12.2-cp313-cp313-win_amd64.whl`, `scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl`
+- `gdal-3.13.3-cp314-cp314-win_amd64.whl`, `scikit_fmm-2025.6.23-cp314-cp314-win_amd64.whl`
 
 **`Utils/mac/`:**
 - `Triangle4XP`, `triangle` (CMake-built, Universal or arm64)
 - `DSFTool`, `DDSTool`, `nvcompress` (texture/mesh tools)
 - `7zz` (7-Zip)
-- `numpy-2.4.4-cp313-cp313-macosx_11_0_arm64.whl`
+- `numpy-2.5.4-cp314-cp314-macosx_11_0_arm64.whl`
 
 **`Utils/lin/`:**
 - `Triangle4XP`, `triangle` (CMake-built)
@@ -114,9 +116,8 @@ Refresh these only when updating tool versions or fixing platform-specific bugs.
 ### Windows
 
 ```powershell
-uv sync --dev
-uv pip install pyinstaller
-uv run pyinstaller Ortho4XP.spec
+uv sync --group release
+uv run --group release pyinstaller Ortho4XP.spec
 ```
 
 Output: `dist/Ortho4XP/`
@@ -124,9 +125,8 @@ Output: `dist/Ortho4XP/`
 ### macOS
 
 ```bash
-uv sync --dev
-uv pip install pyinstaller
-uv run pyinstaller Ortho4XP.spec
+uv sync --group release
+uv run --group release pyinstaller Ortho4XP.spec
 ```
 
 Output: `dist/Ortho4XP/`
@@ -134,9 +134,8 @@ Output: `dist/Ortho4XP/`
 ### Ubuntu
 
 ```bash
-uv sync --dev
-uv pip install pyinstaller
-uv run pyinstaller Ortho4XP.spec
+uv sync --group release
+uv run --group release pyinstaller Ortho4XP.spec
 ```
 
 Output: `dist/Ortho4XP/`
@@ -191,7 +190,12 @@ rm -rf dist/Ortho4XP/Ortho4XP_Data/Utils/mac
 
 ### PROJ Database
 
-The spec file resolves the system `proj.db` (version 5+) from OSGeo4W, Homebrew, or system packages and bundles it explicitly at `pyproj/proj_dir/share/proj/proj.db`. This prevents fallback to pyproj's outdated version 4 copy.
+The spec file selects the native installation's `proj.db` from OSGeo4W,
+Homebrew, or system packages when available, and otherwise uses pyproj's
+bundled database. It bundles the selected database at
+`pyproj/proj_dir/share/proj/proj.db`. Verify the packaged projection operations
+against the actual linked PROJ libraries; current pyproj wheels already ship
+a current database.
 
 ## Packaged vs. Source Dependencies
 
@@ -202,10 +206,10 @@ The spec file resolves the system `proj.db` (version 5+) from OSGeo4W, Homebrew,
 ```toml
 [tool.uv.sources]
 gdal = [
-  { path = "Utils/win/gdal-3.12.2-cp313-cp313-win_amd64.whl", marker = "platform_system == 'Windows'" },
+  { path = "Utils/win/gdal-3.13.3-cp314-cp314-win_amd64.whl", marker = "platform_system == 'Windows'" },
 ]
 scikit-fmm = [
-  { path = "Utils/win/scikit_fmm-2025.6.23-cp313-cp313-win_amd64.whl", marker = "platform_system == 'Windows'" },
+  { path = "Utils/win/scikit_fmm-2025.6.23-cp314-cp314-win_amd64.whl", marker = "platform_system == 'Windows'" },
 ]
 ```
 
@@ -213,7 +217,9 @@ scikit-fmm = [
 
 PyInstaller bundles the Python interpreter, all dependencies from the active `uv` environment, and the application code into a self-contained directory. Users do not need Python, `uv`, or system packages installed. Bundled dependencies match the source `uv.lock` at build time.
 
-Platform-specific GDAL wheels ensure the bundled GDAL version matches the system GDAL assumptions (3.12.2 on Windows, 3.12.3 on macOS, 3.9.0 on Linux).
+The GDAL binding and native library both select 3.13.3 on every platform;
+Windows uses its bundled CP314 wheel, while macOS and Linux use the matching
+native installation described above.
 
 ## Release Verification
 
